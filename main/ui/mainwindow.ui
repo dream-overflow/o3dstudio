@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Objective-3D Studio</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../rc/mainresources.qrc">
+    <normaloff>:/icons/media/ico/logo32.png</normaloff>:/icons/media/ico/logo32.png</iconset>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::ForceTabbedDocks|QMainWindow::GroupedDragging|QMainWindow::VerticalTabs</set>
+  </property>
+  <property name="unifiedTitleAndToolBarOnMac">
+   <bool>false</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout"/>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <widget class="QMenu" name="menu_Workspaces">
+     <property name="title">
+      <string>&amp;Workspaces</string>
+     </property>
+     <property name="icon">
+      <iconset theme="user-home">
+       <normaloff>.</normaloff>.</iconset>
+     </property>
+     <addaction name="actionWorkspaceManage"/>
+     <addaction name="separator"/>
+    </widget>
+    <widget class="QMenu" name="menuRecents_resources">
+     <property name="title">
+      <string>Recents resources</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="action_Clear_all"/>
+    </widget>
+    <widget class="QMenu" name="menuRecents_projects">
+     <property name="title">
+      <string>Recents projects</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="action_Clear_all_2"/>
+    </widget>
+    <addaction name="separator"/>
+    <addaction name="actionNewProject"/>
+    <addaction name="actionNewResource"/>
+    <addaction name="actionOpenProject"/>
+    <addaction name="menuRecents_resources"/>
+    <addaction name="menuRecents_projects"/>
+    <addaction name="menu_Workspaces"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
+    <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
+    <addaction name="actionHelpIndex"/>
+    <addaction name="separator"/>
+    <addaction name="actionSystemInfo"/>
+    <addaction name="actionSupport"/>
+    <addaction name="actionSignal_a_bug"/>
+    <addaction name="separator"/>
+    <addaction name="actionAboutPlugins"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <widget class="QMenu" name="menu_Window">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <widget class="QMenu" name="menu_Views">
+     <property name="title">
+      <string>&amp;Views</string>
+     </property>
+     <property name="icon">
+      <iconset theme="preferences-system-windows"/>
+     </property>
+     <addaction name="actionViewHomePage"/>
+     <addaction name="separator"/>
+     <addaction name="actionMain_console"/>
+    </widget>
+    <addaction name="actionWindowFullscreen"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_main_toolbar"/>
+    <addaction name="actionShow_left_tree"/>
+    <addaction name="actionShow_bottom_panel"/>
+    <addaction name="actionShow_Bottom_Panel"/>
+    <addaction name="menu_Views"/>
+   </widget>
+   <widget class="QMenu" name="menu_Tools">
+    <property name="title">
+     <string>&amp;Tools</string>
+    </property>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menu_Edit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="action_Undo"/>
+    <addaction name="action_Redo"/>
+    <addaction name="separator"/>
+    <addaction name="actionCut"/>
+    <addaction name="action_Copy"/>
+    <addaction name="action_Paste"/>
+    <addaction name="actionDelete"/>
+    <addaction name="actionSelect_all"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuCompile">
+    <property name="title">
+     <string>&amp;Build</string>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menu_Edit"/>
+   <addaction name="menuCompile"/>
+   <addaction name="menu_Tools"/>
+   <addaction name="menu_Window"/>
+   <addaction name="menu_Help"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionPreferences">
+   <property name="icon">
+    <iconset resource="../rc/mainresources.qrc">
+     <normaloff>:/icons/media/ico/preferences16.png</normaloff>:/icons/media/ico/preferences16.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Preferences...</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="icon">
+    <iconset theme="exit">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Exit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="icon">
+    <iconset theme="window-close">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionNewProject">
+   <property name="icon">
+    <iconset theme="document-new">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;project...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset theme="document-save">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="icon">
+    <iconset theme="document-save-as">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>S&amp;ave as...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionNewResource">
+   <property name="icon">
+    <iconset theme="folder-new">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>New &amp;resource...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="icon">
+    <iconset resource="../rc/mainresources.qrc">
+     <normaloff>:/icons/media/ico/logo32.ico</normaloff>:/icons/media/ico/logo32.ico</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;About Objective-3D Studio</string>
+   </property>
+  </action>
+  <action name="actionAboutPlugins">
+   <property name="icon">
+    <iconset theme="tools-check-spelling">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>About plu&amp;gins...</string>
+   </property>
+  </action>
+  <action name="actionSystemInfo">
+   <property name="icon">
+    <iconset theme="computer">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>System &amp;information</string>
+   </property>
+  </action>
+  <action name="actionHelpIndex">
+   <property name="icon">
+    <iconset theme="help">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Index</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="actionSupport">
+   <property name="icon">
+    <iconset theme="dialog-information">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Support</string>
+   </property>
+  </action>
+  <action name="actionSignal_a_bug">
+   <property name="icon">
+    <iconset theme="mail-send">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Signal a &amp;bug</string>
+   </property>
+  </action>
+  <action name="actionWindowFullscreen">
+   <property name="icon">
+    <iconset theme="view-fullscreen">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Fullscreen</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+F11</string>
+   </property>
+  </action>
+  <action name="action_Options">
+   <property name="text">
+    <string>&amp;Options</string>
+   </property>
+  </action>
+  <action name="action_Undo">
+   <property name="icon">
+    <iconset theme="edit-undo">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="action_Redo">
+   <property name="icon">
+    <iconset theme="edit-redo">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="actionCut">
+   <property name="icon">
+    <iconset theme="edit-cut">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>C&amp;ut</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="action_Copy">
+   <property name="icon">
+    <iconset theme="edit-copy">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="action_Paste">
+   <property name="icon">
+    <iconset theme="edit-paste">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset theme="edit-delete">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Delete...</string>
+   </property>
+  </action>
+  <action name="actionSelect_all">
+   <property name="icon">
+    <iconset theme="edit-select-all">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>Select all</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionShow_main_toolbar">
+   <property name="icon">
+    <iconset theme="tab-new"/>
+   </property>
+   <property name="text">
+    <string>Show Main &amp;Toolbar</string>
+   </property>
+  </action>
+  <action name="actionShow_left_tree">
+   <property name="text">
+    <string>Show &amp;Left Sidebar</string>
+   </property>
+  </action>
+  <action name="actionShow_bottom_panel">
+   <property name="text">
+    <string>Show &amp;Right Sidebar</string>
+   </property>
+  </action>
+  <action name="actionShow_Bottom_Panel">
+   <property name="text">
+    <string>Show &amp;Bottom Panel</string>
+   </property>
+  </action>
+  <action name="actionMain_console">
+   <property name="text">
+    <string>Main console</string>
+   </property>
+  </action>
+  <action name="actionWorkspaceManage">
+   <property name="text">
+    <string>&amp;Manage...</string>
+   </property>
+  </action>
+  <action name="actionOpenProject">
+   <property name="icon">
+    <iconset theme="document-open">
+     <normaloff>.</normaloff>.</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Open project...</string>
+   </property>
+  </action>
+  <action name="action_Clear_all">
+   <property name="text">
+    <string>&amp;Clear all</string>
+   </property>
+  </action>
+  <action name="action_Clear_all_2">
+   <property name="text">
+    <string>&amp;Clear all</string>
+   </property>
+  </action>
+  <action name="actionViewHomePage">
+   <property name="icon">
+    <iconset theme="go-home"/>
+   </property>
+   <property name="text">
+    <string>Home page</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../rc/mainresources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
