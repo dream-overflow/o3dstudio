@@ -7,6 +7,7 @@
  */
 
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QApplication>
 
 #include "displaysection.h"
 
@@ -51,6 +52,7 @@ QString DisplaySection::label()
 bool DisplaySection::setupSection(QWidget *parent)
 {
     parent->layout()->addWidget(this);
+    show();
 
     // languages
     int index = ui.language->findData(QVariant(m_properties["language"]));
@@ -61,6 +63,14 @@ bool DisplaySection::setupSection(QWidget *parent)
     ui.themeColor->setCurrentIndex(index);
 
     return true;
+}
+
+bool DisplaySection::cleanupSection(QWidget *parent)
+{
+    parent->layout()->removeWidget(this);
+    this->setParent(nullptr);
+
+    hide();
 }
 
 void DisplaySection::commit()

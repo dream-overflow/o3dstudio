@@ -2,334 +2,585 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="fr_FR">
 <context>
+    <name>AboutDialog</name>
+    <message>
+        <location filename="../ui/aboutdialog.ui" line="35"/>
+        <source>About Objective-3D Studio</source>
+        <translation>A propos d&apos;Objective-3D Studio</translation>
+    </message>
+    <message>
+        <location filename="../ui/aboutdialog.ui" line="112"/>
+        <source>Objective-3D Studio 1.0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/aboutdialog.ui" line="125"/>
+        <source>Based on Objective3D 1.2.</source>
+        <translation>Basé sur Objective-3D 1.2.</translation>
+    </message>
+    <message>
+        <location filename="../ui/aboutdialog.ui" line="132"/>
+        <source>Copyright (c) 2017 Dream Overflow.
+All rights reserved.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/aboutdialog.ui" line="146"/>
+        <source>...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DisplaySection</name>
+    <message>
+        <location filename="../ui/displaysection.ui" line="14"/>
+        <source>General &gt; Display</source>
+        <translation>Général &gt; Affichage</translation>
+    </message>
+    <message>
+        <location filename="../ui/displaysection.ui" line="37"/>
+        <source>Theme color</source>
+        <translation>Couleur du thème</translation>
+    </message>
+    <message>
+        <location filename="../ui/displaysection.ui" line="47"/>
+        <source>Language</source>
+        <translation>Language</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
-        <location filename="../mainwindow.ui" line="14"/>
+        <location filename="../ui/mainwindow.ui" line="14"/>
         <source>Objective-3D Studio</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="44"/>
+        <location filename="../ui/mainwindow.ui" line="43"/>
         <source>&amp;File</source>
-        <translation type="unfinished">&amp;Fichier</translation>
+        <translation>&amp;Fichier</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="48"/>
+        <location filename="../ui/mainwindow.ui" line="47"/>
         <source>&amp;Workspaces</source>
-        <translation type="unfinished">Esp&amp;aces</translation>
+        <translation>Esp&amp;aces</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="59"/>
+        <location filename="../ui/mainwindow.ui" line="58"/>
         <source>Recents resources</source>
-        <translation type="unfinished">Ressources récentes</translation>
+        <translation>Ressources récentes</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="66"/>
+        <location filename="../ui/mainwindow.ui" line="65"/>
         <source>Recents projects</source>
-        <translation type="unfinished">Projets récents</translation>
+        <translation>Projets récents</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="90"/>
+        <location filename="../ui/mainwindow.ui" line="89"/>
         <source>&amp;Help</source>
-        <translation type="unfinished">&amp;Aide</translation>
+        <translation>&amp;Aide</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="103"/>
+        <location filename="../ui/mainwindow.ui" line="102"/>
         <source>&amp;Window</source>
-        <translation type="unfinished">Fe&amp;nêtres</translation>
+        <translation>Fe&amp;nêtres</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="107"/>
+        <location filename="../ui/mainwindow.ui" line="106"/>
         <source>&amp;Views</source>
-        <translation type="unfinished">&amp;Vues</translation>
+        <translation>&amp;Vues</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="121"/>
+        <location filename="../ui/mainwindow.ui" line="125"/>
         <source>&amp;Tools</source>
-        <translation type="unfinished">&amp;Outils</translation>
+        <translation>&amp;Outils</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="127"/>
+        <location filename="../ui/mainwindow.ui" line="131"/>
         <source>&amp;Edit</source>
-        <translation type="unfinished">&amp;Edition</translation>
+        <translation>&amp;Edition</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="141"/>
         <source>Compile</source>
-        <translation type="unfinished">Compilation</translation>
+        <translation type="obsolete">Compilation</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="158"/>
+        <location filename="../ui/mainwindow.ui" line="145"/>
+        <source>&amp;Build</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="162"/>
         <source>&amp;Preferences...</source>
-        <translation type="unfinished">&amp;Préférences...</translation>
+        <translation>&amp;Préférences...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="167"/>
+        <location filename="../ui/mainwindow.ui" line="171"/>
         <source>&amp;Exit</source>
-        <translation type="unfinished">S&amp;ortie</translation>
+        <translation>S&amp;ortie</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="170"/>
+        <location filename="../ui/mainwindow.ui" line="174"/>
         <source>Ctrl+Q</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="179"/>
+        <location filename="../ui/mainwindow.ui" line="183"/>
         <source>&amp;Close</source>
-        <translation type="unfinished">&amp;Fermer</translation>
+        <translation>&amp;Fermer</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="182"/>
+        <location filename="../ui/mainwindow.ui" line="186"/>
         <source>Ctrl+W</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="191"/>
+        <location filename="../ui/mainwindow.ui" line="195"/>
         <source>New &amp;project...</source>
-        <translation type="unfinished">Nouveau &amp;projet...</translation>
+        <translation>Nouveau &amp;projet...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="194"/>
+        <location filename="../ui/mainwindow.ui" line="198"/>
         <source>Ctrl+N</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="203"/>
+        <location filename="../ui/mainwindow.ui" line="207"/>
         <source>&amp;Save</source>
-        <translation type="unfinished">&amp;Enregistrer</translation>
+        <translation>&amp;Enregistrer</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="206"/>
+        <location filename="../ui/mainwindow.ui" line="210"/>
         <source>Ctrl+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="215"/>
+        <location filename="../ui/mainwindow.ui" line="219"/>
         <source>S&amp;ave as...</source>
-        <translation type="unfinished">Enregisrer &amp;sous...</translation>
+        <translation>Enregisrer &amp;sous...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="218"/>
+        <location filename="../ui/mainwindow.ui" line="222"/>
         <source>Ctrl+Shift+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="227"/>
+        <location filename="../ui/mainwindow.ui" line="231"/>
         <source>New &amp;resource...</source>
-        <translation type="unfinished"></translation>
+        <translation>Nouvelle &amp;ressource...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="230"/>
+        <location filename="../ui/mainwindow.ui" line="234"/>
         <source>Ctrl+R</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="239"/>
+        <location filename="../ui/mainwindow.ui" line="243"/>
         <source>&amp;About Objective-3D Studio</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;A propos d&apos;Objective-3D Studio</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="248"/>
+        <location filename="../ui/mainwindow.ui" line="252"/>
         <source>About plu&amp;gins...</source>
-        <translation type="unfinished"></translation>
+        <translation>A propos des &amp;extensions...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="257"/>
+        <location filename="../ui/mainwindow.ui" line="261"/>
         <source>System &amp;information</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Informations systèmes</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="266"/>
+        <location filename="../ui/mainwindow.ui" line="270"/>
         <source>&amp;Index</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Indexe</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="269"/>
+        <location filename="../ui/mainwindow.ui" line="273"/>
         <source>F1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="278"/>
+        <location filename="../ui/mainwindow.ui" line="282"/>
         <source>&amp;Support</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Support</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="287"/>
+        <location filename="../ui/mainwindow.ui" line="291"/>
         <source>Signal a &amp;bug</source>
-        <translation type="unfinished"></translation>
+        <translation>Signaler un &amp;bogue</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="296"/>
+        <location filename="../ui/mainwindow.ui" line="300"/>
         <source>Fullscreen</source>
-        <translation type="unfinished"></translation>
+        <translation>Plein écran</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="299"/>
+        <location filename="../ui/mainwindow.ui" line="303"/>
         <source>Ctrl+Shift+F11</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="304"/>
+        <location filename="../ui/mainwindow.ui" line="308"/>
         <source>&amp;Options</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Options</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="313"/>
+        <location filename="../ui/mainwindow.ui" line="317"/>
         <source>&amp;Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Annuler</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="316"/>
+        <location filename="../ui/mainwindow.ui" line="320"/>
         <source>Ctrl+Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="325"/>
+        <location filename="../ui/mainwindow.ui" line="329"/>
         <source>&amp;Redo</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Rétablir</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="328"/>
+        <location filename="../ui/mainwindow.ui" line="332"/>
         <source>Ctrl+Shift+Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="337"/>
+        <location filename="../ui/mainwindow.ui" line="341"/>
         <source>C&amp;ut</source>
-        <translation type="unfinished"></translation>
+        <translation>C&amp;ouper</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="340"/>
+        <location filename="../ui/mainwindow.ui" line="344"/>
         <source>Ctrl+X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="349"/>
+        <location filename="../ui/mainwindow.ui" line="353"/>
         <source>&amp;Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Copier</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="352"/>
+        <location filename="../ui/mainwindow.ui" line="356"/>
         <source>Ctrl+C</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="361"/>
+        <location filename="../ui/mainwindow.ui" line="365"/>
         <source>&amp;Paste</source>
-        <translation type="unfinished"></translation>
+        <translation>Co&amp;ller</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="364"/>
+        <location filename="../ui/mainwindow.ui" line="368"/>
         <source>Ctrl+V</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="373"/>
+        <location filename="../ui/mainwindow.ui" line="377"/>
         <source>Delete...</source>
-        <translation type="unfinished"></translation>
+        <translation>Supprimer...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="382"/>
+        <location filename="../ui/mainwindow.ui" line="386"/>
         <source>Select all</source>
-        <translation type="unfinished"></translation>
+        <translation>Tout selectionner</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="385"/>
+        <location filename="../ui/mainwindow.ui" line="389"/>
         <source>Ctrl+A</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="394"/>
+        <location filename="../ui/mainwindow.ui" line="397"/>
         <source>Show Main &amp;Toolbar</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher la barre d&apos;&amp;outil principale</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="403"/>
+        <location filename="../ui/mainwindow.ui" line="402"/>
         <source>Show &amp;Left Sidebar</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher la barre latérale &amp;gauche</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="412"/>
+        <location filename="../ui/mainwindow.ui" line="407"/>
         <source>Show &amp;Right Sidebar</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher la barre latérale &amp;droite</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="421"/>
+        <location filename="../ui/mainwindow.ui" line="412"/>
         <source>Show &amp;Bottom Panel</source>
-        <translation type="unfinished"></translation>
+        <translation>Afficher le panel &amp;inférieur</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="426"/>
+        <location filename="../ui/mainwindow.ui" line="417"/>
         <source>Main console</source>
-        <translation type="unfinished"></translation>
+        <translation>Console principale</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="431"/>
+        <location filename="../ui/mainwindow.ui" line="422"/>
         <source>&amp;Manage...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Gérer...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="440"/>
+        <location filename="../ui/mainwindow.ui" line="431"/>
         <source>&amp;Open project...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ouvrir un projet...</translation>
     </message>
     <message>
-        <location filename="../mainwindow.ui" line="445"/>
-        <location filename="../mainwindow.ui" line="450"/>
+        <location filename="../ui/mainwindow.ui" line="436"/>
+        <location filename="../ui/mainwindow.ui" line="441"/>
         <source>&amp;Clear all</source>
+        <translation>&amp;Tout effacer</translation>
+    </message>
+    <message>
+        <location filename="../ui/mainwindow.ui" line="449"/>
+        <source>Home page</source>
         <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ManageWorkspacesDialog</name>
+    <message>
+        <location filename="../ui/manageworkspacesdialog.ui" line="17"/>
+        <source>Manage workspaces</source>
+        <translation>Gérer les espaces de travail</translation>
+    </message>
+    <message>
+        <location filename="../ui/manageworkspacesdialog.ui" line="59"/>
+        <source>Create...</source>
+        <translation>Créer...</translation>
+    </message>
+    <message>
+        <location filename="../ui/manageworkspacesdialog.ui" line="66"/>
+        <source>Delete</source>
+        <translation>Supprimer</translation>
+    </message>
+    <message>
+        <location filename="../ui/manageworkspacesdialog.ui" line="73"/>
+        <source>Set as current</source>
+        <translation>Définir</translation>
+    </message>
+</context>
+<context>
+    <name>NewProjectDialog</name>
+    <message>
+        <location filename="../ui/newprojectdialog.ui" line="17"/>
+        <source>New project</source>
+        <translation>Nouveau projet</translation>
+    </message>
+</context>
+<context>
+    <name>PluginsInformationsDialog</name>
+    <message>
+        <location filename="../ui/pluginsinformationsdialog.ui" line="20"/>
+        <source>Plugins informations</source>
+        <translation>Information des extensions</translation>
+    </message>
+    <message>
+        <location filename="../ui/pluginsinformationsdialog.ui" line="40"/>
+        <source>Filter...</source>
+        <translation>Filtre...</translation>
+    </message>
+    <message>
+        <location filename="../ui/pluginsinformationsdialog.ui" line="47"/>
+        <source>Show all</source>
+        <translation>Afficher tous</translation>
+    </message>
+    <message>
+        <location filename="../ui/pluginsinformationsdialog.ui" line="63"/>
+        <source>Details</source>
+        <translation>Détails</translation>
+    </message>
+    <message>
+        <location filename="../ui/pluginsinformationsdialog.ui" line="70"/>
+        <source>Error details</source>
+        <translation>Erreur détaillées</translation>
+    </message>
+    <message>
+        <location filename="../ui/pluginsinformationsdialog.ui" line="90"/>
+        <source>Close</source>
+        <translation>Fermer</translation>
     </message>
 </context>
 <context>
     <name>PreferencesDialog</name>
     <message>
-        <location filename="../preferencesdialog.ui" line="32"/>
+        <location filename="../ui/preferencesdialog.ui" line="32"/>
         <source>Preferences</source>
-        <translation type="unfinished"></translation>
+        <translation>Préférences</translation>
     </message>
     <message>
-        <location filename="../preferencesdialog.ui" line="61"/>
+        <location filename="../ui/preferencesdialog.ui" line="58"/>
+        <source>Filter...</source>
+        <translation>Filtre...</translation>
+    </message>
+    <message>
+        <location filename="../ui/preferencesdialog.ui" line="78"/>
         <source>TextLabel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>SystemInfoDialog</name>
     <message>
-        <location filename="../src/property/propertyitem.cpp" line="62"/>
-        <source>Count</source>
-        <translation type="unfinished"></translation>
+        <location filename="../ui/systeminfodialog.ui" line="17"/>
+        <source>System informations</source>
+        <translation>Informations système</translation>
     </message>
 </context>
 <context>
-    <name>o3d::studio::MainWindow</name>
+    <name>o3d::studio::main::DisplaySection</name>
+    <message>
+        <location filename="../src/property/displaysection.cpp" line="29"/>
+        <source>Default system</source>
+        <translation>Par défaut du système</translation>
+    </message>
+    <message>
+        <location filename="../src/property/displaysection.cpp" line="30"/>
+        <source>English</source>
+        <translation>Anglais</translation>
+    </message>
+    <message>
+        <location filename="../src/property/displaysection.cpp" line="31"/>
+        <source>French</source>
+        <translation>Français</translation>
+    </message>
+    <message>
+        <location filename="../src/property/displaysection.cpp" line="34"/>
+        <source>Light theme</source>
+        <translation>Thème clair</translation>
+    </message>
+    <message>
+        <location filename="../src/property/displaysection.cpp" line="35"/>
+        <source>Dark theme</source>
+        <translation>Thème sombre</translation>
+    </message>
+    <message>
+        <location filename="../src/property/displaysection.cpp" line="49"/>
+        <source>Display</source>
+        <translation>Affichage</translation>
+    </message>
+</context>
+<context>
+    <name>o3d::studio::main::MainToolBar</name>
+    <message>
+        <location filename="../src/maintoolbar.cpp" line="16"/>
+        <source>Main toolbar</source>
+        <translation>Barre d&apos;outil principale</translation>
+    </message>
+</context>
+<context>
+    <name>o3d::studio::main::MainWindow</name>
     <message>
         <location filename="../src/mainwindow.cpp" line="48"/>
-        <source>Main toolbar</source>
-        <translation type="unfinished"></translation>
+        <source>Objective-3D Studio starting...</source>
+        <translation type="unfinished">Démarrage d&apos;Objective-3D Studio...</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="54"/>
+        <location filename="../src/mainwindow.cpp" line="84"/>
+        <source>Workspace</source>
+        <translation>Espace de travail</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="87"/>
+        <source>Property</source>
+        <translation>Propriété</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="90"/>
+        <source>Console</source>
+        <translation>Console</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="104"/>
         <source>Objective-3D Studio successfully started !</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Objective-3D Studio démarré avec succès !</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="267"/>
+        <location filename="../src/mainwindow.cpp" line="562"/>
         <source>Objective-3D Studio saving current workspace...</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Sauvegarde l&apos;espace de travail actuel...</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="269"/>
+        <location filename="../src/mainwindow.cpp" line="564"/>
         <source>Objective-3D Studio current workspace saved !</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Espace de travail courant sauvegardé !</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="554"/>
+        <source>Current language changed to %1</source>
+        <translation>Language courant changé vers %1</translation>
     </message>
 </context>
 <context>
-    <name>o3d::studio::PropertyModel</name>
+    <name>o3d::studio::main::PluginsInformationsDialog</name>
     <message>
-        <location filename="../src/property/propertymodel.cpp" line="20"/>
-        <source>Properties</source>
+        <location filename="../src/pluginsinformationsdialog.cpp" line="213"/>
+        <source>Objective-3D Studio</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/pluginsinformationsdialog.cpp" line="214"/>
+        <source>Externals tools</source>
+        <translation>Outils externes</translation>
+    </message>
+    <message>
+        <location filename="../src/pluginsinformationsdialog.cpp" line="215"/>
+        <source>Importers</source>
+        <translation>Importeurs</translation>
+    </message>
+    <message>
+        <location filename="../src/pluginsinformationsdialog.cpp" line="216"/>
+        <source>Exporters</source>
+        <translation>Exporteurs</translation>
+    </message>
+    <message>
+        <location filename="../src/pluginsinformationsdialog.cpp" line="217"/>
+        <source>Builders</source>
+        <translation>Constructeurs</translation>
+    </message>
+</context>
+<context>
+    <name>o3d::studio::main::PreferencesDialog</name>
+    <message>
+        <source>Global</source>
+        <translation type="vanished">Global</translation>
+    </message>
+    <message>
+        <location filename="../src/preferencesdialog.cpp" line="169"/>
+        <source>General</source>
+        <translation>Général</translation>
+    </message>
+    <message>
+        <location filename="../src/preferencesdialog.cpp" line="172"/>
+        <source>Workspace</source>
+        <translation>Espace de travail</translation>
+    </message>
+    <message>
+        <location filename="../src/preferencesdialog.cpp" line="173"/>
+        <source>Projects</source>
+        <translation>Projets</translation>
+    </message>
+    <message>
+        <location filename="../src/preferencesdialog.cpp" line="174"/>
+        <source>Plugins</source>
+        <translation>Extensions</translation>
+    </message>
+    <message>
+        <location filename="../src/preferencesdialog.cpp" line="175"/>
+        <source>Tools</source>
+        <translation>Outils</translation>
+    </message>
+</context>
+<context>
+    <name>o3d::studio::main::QuickToolBar</name>
+    <message>
+        <location filename="../src/quicktoolbar.cpp" line="15"/>
+        <source>Quick toolbar</source>
+        <translation>Barre d&apos;outil d&apos;accès rapides</translation>
+    </message>
+    <message>
+        <location filename="../src/quicktoolbar.cpp" line="40"/>
+        <source>Home</source>
+        <translation>Accueil</translation>
     </message>
 </context>
 </TS>

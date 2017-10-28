@@ -9,6 +9,7 @@
 #include<QtCore/QDir>
 #include<QtCore/QUrl>
 #include<QtCore/QCoreApplication>
+#include<QtCore/QLibraryInfo>
 
 #include "common/application.h"
 #include "common/modulemanager.h"
@@ -92,7 +93,10 @@ bool Application::start()
     ModuleManager::instance()->searchModules();
 
     // alway load o3sdummy for testing
-    ModuleManager::instance()->load("o3sdummy");
+    Module *o3sdummy = ModuleManager::instance()->load("o3sdummy");
+    if (o3sdummy != nullptr) {
+        o3sdummy->start();
+    }
 
     m_started = true;
     return true;
@@ -107,4 +111,44 @@ bool Application::stop()
 
     m_started = false;
     return true;
+}
+
+void switchTranslator(QTranslator& translator, const QString& filename, QString path = QString())
+{
+    // remove the old translator
+    qApp->removeTranslator(&translator);
+
+    // load the new translator
+    if (path.isEmpty()) {
+        path = QDir::currentPath() + QDir::separator() + QString(LANGUAGES_PATH);
+    }
+
+    if (translator.load(filename, path, QString(), QString())) {
+        qApp->installTranslator(&translator);
+    }
+}
+
+void Application::loadLanguage(const QString &language)
+{
+    if (m_currentLanguage != language) {
+        QLocale locale = QLocale::system();
+        QString languageCode = language;
+
+        if (language != "default") {
+            locale = QLocale(language);
+        } else {
+            languageCode = locale.name().split("_").at(0);
+        }
+
+        QLocale::setDefault(locale);
+        QString languageName = QLocale::languageToString(locale.language());
+
+        switchTranslator(m_translator, QString("o3scommon_%1.qm").arg(languageCode));
+        switchTranslator(
+                    m_translatorQt,
+                    QString("qt_%1.qm").arg(languageCode),
+                    QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+
+        m_currentLanguage = language;
+    }
 }

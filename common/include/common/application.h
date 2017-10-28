@@ -10,6 +10,8 @@
 #define _O3DS_COMMON_APPLICATION_H
 
 #include <QtCore/QString>
+#include <QtCore/QTranslator>
+
 #include "settings.h"
 
 namespace o3d {
@@ -42,6 +44,9 @@ public:
     bool start();
     bool stop();
 
+    // loads a language by the given language shortcurt (e.g. de, en)
+    void loadLanguage(const QString& language);
+
 private:
 
     QString m_appDir;             //!< Absolute application base directory
@@ -52,6 +57,11 @@ private:
     WorkspaceManager *m_workspaceManager;
 
     bool m_started{false};        //!< Started application
+
+    QTranslator m_translator;     //!< contains the translations for o3scommon
+    QTranslator m_translatorQt;   //!< contains the translations for qt
+
+    QString m_currentLanguage;
 
 private:  // singleton
 

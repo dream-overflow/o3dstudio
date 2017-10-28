@@ -88,6 +88,12 @@ public:
      */
     void unloadAll();
 
+    /**
+     * @brief loadLanguage
+     * @param language
+     */
+    // void loadLanguage(const QString &language);
+
 private:
 
     QString m_path;

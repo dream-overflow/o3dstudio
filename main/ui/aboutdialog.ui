@@ -32,11 +32,14 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>About Objective-3D Studio</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../rc/mainresources.qrc">
     <normaloff>:/icons/media/ico/logo32.png</normaloff>:/icons/media/ico/logo32.png</iconset>
+  </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="1" column="0">

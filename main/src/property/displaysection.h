@@ -22,7 +22,7 @@ namespace o3d {
 namespace studio {
 namespace main {
 
-class DisplaySection : public QWidget , public common::PropertySection
+class DisplaySection : public QWidget, public common::PropertySection
 {
     Q_OBJECT
 
@@ -35,6 +35,7 @@ public:
     virtual QString label() override;
 
     virtual bool setupSection(QWidget *parent) override;
+    virtual bool cleanupSection(QWidget *parent) override;
 
     virtual void commit() override;
     virtual bool save() override;

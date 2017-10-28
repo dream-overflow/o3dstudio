@@ -22,10 +22,13 @@ class PropertySection
 {
 public:
 
+    virtual ~PropertySection() = 0;
+
     virtual QString name() = 0;
     virtual QString label() = 0;
 
     virtual bool setupSection(QWidget *parent) = 0;
+    virtual bool cleanupSection(QWidget *parent) = 0;
 
     virtual void commit() = 0;
     virtual bool save() = 0;

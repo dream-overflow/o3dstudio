@@ -68,7 +68,7 @@ void ModuleManager::destroy()
 
 QStringList ModuleManager::getModuleList() const
 {
-    return m_foundModules.values();
+    return m_foundModules.keys();
 }
 
 void ModuleManager::setPluginsPath(const QString &path)
@@ -177,3 +177,30 @@ void ModuleManager::unloadAll()
 
     m_loadedModules.clear();
 }
+/*
+void ModuleManager::loadLanguage(const QString &language)
+{
+    if (m_currentLanguage != language) {
+        QLocale locale = QLocale::system();
+        QString languageCode = language;
+
+        if (language != "default") {
+            locale = QLocale(language);
+        } else {
+            languageCode = locale.name().split("_").at(0);
+        }
+
+        QLocale::setDefault(locale);
+        QString languageName = QLocale::languageToString(locale.language());
+
+        switchTranslator(m_translator, QString("o3smain_%1.qm").arg(languageCode));
+        switchTranslator(m_translator, QString("o3scommon_%1.qm").arg(languageCode));
+        switchTranslator(m_translatorQt, QString("qt_%1.qm").arg(languageCode));
+
+        // @todo and logger status bar message at certain levels
+        statusBar()->showMessage(tr("Current language changed to %1").arg(languageName));
+
+        m_currentLanguage = language;
+    }
+}
+*/

@@ -15,7 +15,6 @@ namespace main {
 
 static const char SETTINGS_FILE[] = "o3dstudiosettings.ini";
 static const char MAIN_LOG_FILE[] = "o3dstudio.log";
-static const char LANGUAGES_PATH[] = "languages";
 
 } // namespace main
 } // namespace o3d

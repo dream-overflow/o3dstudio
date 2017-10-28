@@ -14,7 +14,8 @@
 using namespace o3d::studio::common;
 
 
-Settings::Settings()
+Settings::Settings() :
+    QObject()
 {
 
 }
@@ -77,17 +78,33 @@ void Settings::saveAll()
     saveGroup("Misc");
 }
 
-void Settings::set(const QString &key, const QVariant &value)
+void Settings::set(const QString &key, const QVariant &value, bool force)
 {
-    m_settings[key] = value;
+    auto it = m_settings.find(key);
+    if (it != m_settings.end()) {
+        if (force || it.value() != value) {
+            m_settings[key] = value;
+
+            // emit
+            emit settingChanged(key, value);
+        }
+    } else {
+        m_settings[key] = value;
+
+        // emit
+        emit settingChanged(key, value);
+    }
 }
 
-QVariant Settings::get(const QString &key, const QVariant& _default) const
+QVariant Settings::get(const QString &key, const QVariant& _default)
 {
     auto cit = m_settings.find(key);
     if (cit != m_settings.cend()) {
+        // get current
         return cit.value();
     } else {
+        // set to default and returns
+        m_settings[key] = _default;
         return _default;
     }
 }

@@ -24,6 +24,9 @@ o3d::studio::common::Module* o3dstudioPlugin(const QString &name, QLibrary *libr
 Dummy::Dummy(const QString &name, QLibrary *library) :
     DynamicModule(name, library)
 {
+    m_properties["section"] = QString("o3s::plugin::o3dstudio");
+    m_properties["verbose"] = QString("Dummy");
+
     m_properties["vendor"] = QString("Dream Overflow");
     m_properties["group"] = QString("Build system");
     m_properties["url"] = QString("http://o3d.dreamoverflow.com");

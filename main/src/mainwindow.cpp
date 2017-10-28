@@ -9,6 +9,8 @@
 #include "mainwindow.h"
 #include "settings.h"
 
+#include "common/settings.h"
+
 #include <QtCore/QCoreApplication>
 #include <QtCore/QPluginLoader>
 #include <QtCore/QDir>
@@ -62,11 +64,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui.actionAboutPlugins, SIGNAL(triggered(bool)), SLOT(onAboutPlugin()));
     connect(ui.actionAbout, SIGNAL(triggered(bool)), SLOT(onAbout()));
 
+    connect(&common::Application::instance()->settings(),
+            SIGNAL(settingChanged(const QString &, const QVariant &)),
+            SLOT(onSettingChanged(const QString &, const QVariant &)));
+
     applySettings();
 
     // main toolbar
     QToolBar *mainToolBar = new MainToolBar();
     setupToolBar("main", mainToolBar, Qt::TopToolBarArea);
+    mainToolBar->addWidget(new QLabel(tr("Search")));
+    mainToolBar->setStyleSheet("QToolBar{spacing: 8px; margin: 4px}");
+    mainToolBar->addWidget(new QLineEdit());
 
     // quick toolbar
     QToolBar *quickToolBar = new QuickToolBar();
@@ -150,8 +159,8 @@ QToolBar *MainWindow::createToolBar(const QString &title, const QString &name, Q
 
     QToolBar *toolBar = new QToolBar(title);
     addToolBar(area, toolBar);
-    toolBar->setMinimumWidth(32);
-    toolBar->setMinimumHeight(32);
+    toolBar->setMinimumWidth(48);
+    toolBar->setMinimumHeight(48);
     toolBar->setProperty("name", QVariant(name));
     m_toolBars.insert(toolBar->property("name").toString(), toolBar);
 
@@ -165,8 +174,8 @@ bool MainWindow::setupToolBar(const QString &name, QToolBar *toolBar, Qt::ToolBa
     }
 
     addToolBar(area, toolBar);
-    toolBar->setMinimumWidth(32);
-    toolBar->setMinimumHeight(32);
+    toolBar->setMinimumWidth(48);
+    toolBar->setMinimumHeight(48);
     toolBar->setProperty("name", QVariant(name));
     m_toolBars.insert(toolBar->property("name").toString(), toolBar);
 
@@ -328,53 +337,10 @@ const QString& MainWindow::theme() const
         startModule("Default");
     }
 }
-
-bool MainWindow::closeCurrentModule()
-{
-    // If the module didnt clean the windows properly...
-    if (centralWidget() != NULL)
-        delete centralWidget();
-
-    // We clean all remaining dock widget, toolbar, etc
-    QObjectList lChildren = children();
-
-    foreach (QObject * lpObject, lChildren)
-    {
-        QDockWidget * lpDock = qobject_cast<QDockWidget*>(lpObject);
-
-        if (lpDock != NULL)
-        {
-            delete lpDock;
-            continue;
-        }
-
-        QToolBar * lpToolBar = qobject_cast<QToolBar*>(lpObject);
-
-        if (lpToolBar != NULL)
-        {
-            delete lpToolBar;
-            continue;
-        }
-    }
-
-    // We clean all the remaining menus (except the menu "Start")
-    QObjectList lMenuBarChildren = menuBar()->children();
-
-    foreach (QObject * lpObject, lMenuBarChildren)
-    {
-        QMenu * lpMenu = qobject_cast<QMenu*>(lpObject);
-
-        if ((lpMenu != NULL) && (lpMenu != menuStart))
-            delete lpMenu;
-    }
-
-    setCentralWidget(new QWidget(this));
-    centralWidget()->setLayout(new QVBoxLayout());
-}*/
-
+*/
 bool MainWindow::applySettings()
 {
-    const common::Settings &settings = common::Application::instance()->settings();
+    common::Settings &settings = common::Application::instance()->settings();
 
     resize(settings.get("o3s::main::window::size", QVariant(QSize(800, 400))).toSize());
     move(settings.get("o3s::main::window::position", QVariant(QPoint(100, 100))).toPoint());
@@ -391,6 +357,9 @@ bool MainWindow::commitSettings()
 
     settings.set("o3s::main::window::size", QVariant(size()));
     settings.set("o3s::main::window::position", QVariant(pos()));
+
+    // settings.set("o3s::main::language", QVariant(m_currentLanguage));
+    // settings.set("o3s::main::theme::color", QVariant(m_currentTheme));
 
     return true;
 }
@@ -425,6 +394,7 @@ bool MainWindow::setThemeColor(const QString &theme)
         qApp->setPalette(darkPalette);
         qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 
+        // @todo improve dock button, disabled widgets, icon theme
         m_currentTheme = theme;
         return true;
     } else if (theme == "light") {
@@ -480,6 +450,7 @@ void MainWindow::onFileNewProject()
 {
     // new project dialog
     NewProjectDialog *dialog = new NewProjectDialog(this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     dialog->show();
 }
 
@@ -487,6 +458,7 @@ void MainWindow::onFileNewResource()
 {
     // new resource dialog
 //    NewResourceDialog *dialog = new NewResourceDialog(this);
+//    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
 //    dialog->show();
 }
 
@@ -494,6 +466,7 @@ void MainWindow::onFileMenuPreferences()
 {
     // preferences dialog
     PreferencesDialog *dialog = new PreferencesDialog(this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     dialog->show();
 }
 
@@ -526,6 +499,7 @@ void MainWindow::onFileWorkspaceManage()
 {
     // workspace manager dialog
     ManageWorkspaceDialog *dialog = new ManageWorkspaceDialog(this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     dialog->show();
 }
 
@@ -553,6 +527,7 @@ void MainWindow::onSystemInfo()
     QDialog *dialog = new QDialog(this);
     Ui::SystemInfoDialog ui;
     ui.setupUi(dialog);
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     dialog->show();
 }
 
@@ -560,6 +535,7 @@ void MainWindow::onAboutPlugin()
 {
     // preferences dialog
     PluginsInformationsDialog *dialog = new PluginsInformationsDialog(this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     dialog->show();
 }
 
@@ -569,7 +545,26 @@ void MainWindow::onAbout()
     QDialog *dialog = new QDialog(this);
     Ui::AboutDialog ui;
     ui.setupUi(dialog);
+    dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     dialog->show();
+}
+
+void MainWindow::onSettingChanged(const QString &key, const QVariant &value)
+{
+    if (key == "o3s::main::language") {
+        QString language = value.toString();
+        loadLanguage(language);
+        // rest of the UI @todo
+
+        QLocale locale = QLocale::system();
+
+        if (language != "default") {
+            locale = QLocale(language);
+        }
+
+        QString languageName = QLocale::languageToString(locale.language());
+        statusBar()->showMessage(tr("Current language changed to %1").arg(languageName));
+    }
 }
 
 void MainWindow::closeWorkspace()
@@ -588,7 +583,7 @@ void switchTranslator(QTranslator& translator, const QString& filename)
     qApp->removeTranslator(&translator);
 
     // load the new translator
-    QString path = QDir::currentPath() + QDir::separator() + QString(LANGUAGES_PATH);
+    QString path = QDir::currentPath() + QDir::separator() + QString(o3d::studio::common::LANGUAGES_PATH);
     if (translator.load(filename, path, QString(), QString())) {
         qApp->installTranslator(&translator);
     }
@@ -596,6 +591,8 @@ void switchTranslator(QTranslator& translator, const QString& filename)
 
 void MainWindow::loadLanguage(const QString &language)
 {
+    common::Application::instance()->loadLanguage(language);
+
     if (m_currentLanguage != language) {
         QLocale locale = QLocale::system();
         QString languageCode = language;
@@ -606,15 +603,9 @@ void MainWindow::loadLanguage(const QString &language)
             languageCode = locale.name().split("_").at(0);
         }
 
-        QLocale::setDefault(locale);
         QString languageName = QLocale::languageToString(locale.language());
 
         switchTranslator(m_translator, QString("o3smain_%1.qm").arg(languageCode));
-        switchTranslator(m_translatorQt, QString("qt_%1.qm").arg(languageCode));
-
-        // @todo and logger status bar message at certain levels
-        statusBar()->showMessage(tr("Current language changed to %1").arg(languageName));
-
         m_currentLanguage = language;
     }
 }

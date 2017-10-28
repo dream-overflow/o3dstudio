@@ -29,17 +29,22 @@ public:
 protected:
 
     virtual void closeEvent(QCloseEvent*);
+    virtual void changeEvent(QEvent*);
 
 private slots:
 
-  //  void onSectionPropertyChanged(const QModelIndex &current, const QModelIndex &previous);
-  //  void onButtonBox(QAbstractButton *);
+    void onSectionPropertyChanged(const QModelIndex &current, const QModelIndex &previous);
+    void onPluginDetails(const QModelIndex &index);
+
+    void onPluginDetailsClicked();
+    void onPluginErrorDetailsClicked();
 
 private:
 
     Ui::PluginsInformationsDialog ui;
 
-    // void setupCategories();
+    void setupCategories();
+    void showDetailsDialog(const QString &name, QMap<QString, QVariant> properties);
 };
 
 } // namespace main

@@ -39,7 +39,10 @@ SOURCES += \
     src/moduleinfo.cpp \
     src/property/propertymodel.cpp \
     src/property/propertyitem.cpp \
-    src/property/sectionnode.cpp
+    src/plugin/pluginitem.cpp \
+    src/plugin/pluginmodel.cpp \
+    src/property/propertysectionnode.cpp \
+    src/plugin/pluginsectionnode.cpp
 
 
 HEADERS += \ 
@@ -57,13 +60,27 @@ HEADERS += \
     include/common/property/propertymodel.h \
     include/common/property/propertyitem.h \
     include/common/property/propertysection.h \
-    include/common/property/sectionnode.h \
     include/common/ui/toolbar.h \
     include/common/ui/content.h \
-    include/common/ui/dock.h
+    include/common/ui/dock.h \
+    include/common/plugin/pluginitem.h \
+    include/common/plugin/pluginmodel.h \
+    include/common/plugin/pluginsection.h \
+    include/common/plugin/pluginsectionnode.h \
+    include/common/property/propertysectionnode.h
 
+copyToDestdir($$TRANSLATIONS_FILES, languages)
 
 RESOURCES +=
 
 
 FORMS +=
+
+
+ts_target.files = $$TRANSLATIONS_FILES
+ts_target.path = $$BUILD_PREFIX/share/o3dstudio/languages
+
+# share_target.files = $$SHARE_FILES
+# share_target.path = $$BUILD_PREFIX/share/o3dstudio/share
+
+INSTALLS += ts_target  # share_target

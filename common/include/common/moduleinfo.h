@@ -24,20 +24,20 @@ public:
     ~ModuleInfo();
 
     const QString& name() const;
+    QString verbose() const;
     QString version() const;
     QString vendor() const;
     QString description() const;
+    QString section() const;
 
     QVariant property(const QString &name, const QVariant &defaut = QVariant()) const;
+
+    const QMap<QString, QVariant> properties() const;
 
 protected:
 
     QMap<QString, QVariant> m_properties;
-
     QString m_name;               //!< Unique module name
-    QString m_vendor;             //!< Vendor name
-    QString m_version;            //!< Explicit version number
-    QString m_description;        //!< Verbose description of the module
 };
 
 } // namespace common

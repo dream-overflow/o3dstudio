@@ -21,6 +21,16 @@ ModuleInfo::~ModuleInfo()
 
 }
 
+const QString &ModuleInfo::name() const
+{
+    return m_name;
+}
+
+QString ModuleInfo::verbose() const
+{
+    return property("verbose", QString(m_name)).toString();
+}
+
 QString ModuleInfo::version() const
 {
     return property("version", QString("0.0.1")).toString();
@@ -36,6 +46,12 @@ QString ModuleInfo::description() const
     return property("vendor", QString("")).toString();
 }
 
+QString ModuleInfo::section() const
+{
+    // default to o3dstudio section
+    return property("section", QString("o3s::plugin::o3dstudio")).toString();
+}
+
 QVariant ModuleInfo::property(const QString &name, const QVariant &defaut) const
 {
     auto cit = m_properties.find(name);
@@ -44,4 +60,9 @@ QVariant ModuleInfo::property(const QString &name, const QVariant &defaut) const
     }
 
     return defaut;
+}
+
+const QMap<QString, QVariant> ModuleInfo::properties() const
+{
+    return m_properties;
 }

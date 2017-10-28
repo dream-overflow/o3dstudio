@@ -1,33 +1,33 @@
 /**
- * @brief Application property model
+ * @brief Application plugin model
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@gmail.com)
- * @date 2017-10-20
+ * @date 2017-10-28
  * @details
  */
 
-#ifndef _O3DS_COMMON_PROPERTYMODEL_H
-#define _O3DS_COMMON_PROPERTYMODEL_H
+#ifndef _O3DS_COMMON_PLUGINMODEL_H
+#define _O3DS_COMMON_PLUGINMODEL_H
 
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QList>
 
-#include "propertyitem.h"
+#include "pluginitem.h"
 
 namespace o3d {
 namespace studio {
 namespace common {
 
-class PropertySection;
+class PluginSection;
 
-class PropertyModel : public QAbstractItemModel
+class PluginModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
 
-    explicit PropertyModel(const QList<PropertySection*> &data, QObject *parent = nullptr);
-    virtual ~PropertyModel();
+    explicit PluginModel(const QList<PluginSection*> &data, QObject *parent = nullptr);
+    virtual ~PluginModel();
 
     virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
     virtual QModelIndex parent(const QModelIndex &child) const;
@@ -44,14 +44,13 @@ public:
 
 private:
 
-    void setupModelData(const QList<PropertySection*> &data, PropertyItem *parent);
+    void setupModelData(const QList<PluginSection*> &data, PluginItem *parent);
 
-    PropertyItem *m_rootItem;
-    QList<PropertySection*> m_sections;
+    PluginItem *m_rootItem;
 };
 
 } // namespace common
 } // namespace studio
 } // namespace o3d
 
-#endif // _O3DS_COMMON_PROPERTYMODEL_H
+#endif // _O3DS_COMMON_PLUGINMODEL_H

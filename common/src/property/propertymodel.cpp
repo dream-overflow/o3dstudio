@@ -27,6 +27,11 @@ PropertyModel::~PropertyModel()
     if (m_rootItem) {
         delete m_rootItem;
     }
+
+    PropertySection *section;
+    foreach (section, m_sections) {
+        delete section;
+    }
 }
 
 QModelIndex PropertyModel::index(int row, int column, const QModelIndex &parent) const
@@ -124,7 +129,7 @@ QVariant PropertyModel::headerData(int section, Qt::Orientation orientation, int
     return QVariant();
 }
 
-QString makeParentPath(const QStringList &path, int minus) {
+static QString makeParentPath(const QStringList &path, int minus) {
     QString parentPath = "";
     for (int i = 0; i < path.length() - minus; ++i) {
         if (parentPath.length() > 0) {
@@ -183,5 +188,9 @@ void PropertyModel::setupModelData(const QList<PropertySection *> &data, Propert
 
         PropertyItem *item = createItem(leaf, propertySection->label(), propertySection, itemParent);
         itemParent->appendChild(item);
+
+        if (m_sections.indexOf(propertySection) < 0) {
+            m_sections.append(propertySection);
+        }
     }
 }

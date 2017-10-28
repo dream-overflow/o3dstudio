@@ -35,7 +35,8 @@ SOURCES += \
     src/newprojectdialog.cpp \
     src/maintoolbar.cpp \
     src/property/displaysection.cpp \
-    src/quicktoolbar.cpp
+    src/quicktoolbar.cpp \
+    src/plugin/pluginsection.cpp
 
 
 HEADERS += \
@@ -47,7 +48,8 @@ HEADERS += \
     src/newprojectdialog.h \
     src/maintoolbar.h \
     src/property/displaysection.h \
-    src/quicktoolbar.h
+    src/quicktoolbar.h \
+    src/plugin/pluginsection.h
 
 
 RESOURCES += \
@@ -65,17 +67,17 @@ FORMS += \
 
 LIBS += -L$$O3S_BIN_DIR -lo3scommon
 
-#DISTFILES += \
-#    languages/o3smain_fr.ts \
-#    languages/o3smain_en.ts
+SHARE_FILES = $$files($$TARGETPATH/share/*)
+# SHARE_FILES = \
+#    share/*
 
-SHARE_FILES = \
-    share/*
+copyToDestdir($$TRANSLATIONS_FILES, languages)
+copyToDestdir($$SHARE_FILES, share)
 
 ts_target.files = $$TRANSLATIONS_FILES
-ts_target.path = $$O3S_BIN_DIR/languages
+ts_target.path = $$BUILD_PREFIX/share/o3dstudio/languages
 
 share_target.files = $$SHARE_FILES
-share_target.path = $$O3S_BIN_DIR/share
+share_target.path = $$BUILD_PREFIX/share/o3dstudio/share
 
 INSTALLS += ts_target share_target

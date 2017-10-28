@@ -1,23 +1,23 @@
 /**
- * @brief Application property item for model
+ * @brief Application plugin item for model
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@gmail.com)
- * @date 2017-10-20
+ * @date 2017-10-28
  * @details
  */
 
-#include "common/property/propertyitem.h"
+#include "common/plugin/pluginitem.h"
 
 #include <QtCore/qobjectdefs.h>
 
 using namespace o3d::studio::common;
 
 
-PropertyItem::PropertyItem(const QString section, const QList<QVariant> &data, PropertySection *ps, PropertyItem *parentItem) :
+PluginItem::PluginItem(const QString &section, const QString &name, const QList<QVariant> &data, PluginItem *parentItem) :
+    m_name(name),
     m_path(""),
     m_itemData(data),
-    m_parentItem(parentItem),
-    m_section(ps)
+    m_parentItem(parentItem)
 {
     if (parentItem) {
         m_path = parentItem->m_path + "::" + section;
@@ -26,43 +26,43 @@ PropertyItem::PropertyItem(const QString section, const QList<QVariant> &data, P
     }
 }
 
-PropertyItem::~PropertyItem()
+PluginItem::~PluginItem()
 {
     qDeleteAll(m_childItems);
 }
 
-void PropertyItem::appendChild(PropertyItem *item)
+void PluginItem::appendChild(PluginItem *item)
 {
     m_childItems.append(item);
 }
 
-PropertyItem *PropertyItem::child(int row)
+PluginItem *PluginItem::child(int row)
 {
     return m_childItems.value(row);
 }
 
-int PropertyItem::childCount() const
+int PluginItem::childCount() const
 {
     return m_childItems.count();
 }
 
-int PropertyItem::row() const
+int PluginItem::row() const
 {
     if (m_parentItem) {
-        return m_parentItem->m_childItems.indexOf(const_cast<PropertyItem*>(this));
+        return m_parentItem->m_childItems.indexOf(const_cast<PluginItem*>(this));
     }
 
     return 0;
 }
 
-int PropertyItem::columnCount() const
+int PluginItem::columnCount() const
 {
     return m_itemData.count() + 1;
 }
 
-QVariant PropertyItem::data(int column) const
+QVariant PluginItem::data(int column) const
 {
-    if (column == 1) {
+    if (column == 4) {
         if (m_parentItem == nullptr) {
             return QVariant(QObject::tr("Count"));
         } else {
@@ -73,12 +73,12 @@ QVariant PropertyItem::data(int column) const
     return m_itemData.value(column);
 }
 
-PropertyItem* PropertyItem::parentItem()
+PluginItem* PluginItem::parentItem()
 {
     return m_parentItem;
 }
 
-PropertyItem *PropertyItem::find(const QString &path)
+PluginItem *PluginItem::find(const QString &path)
 {
     if (path == m_path) {
         return this;
@@ -87,10 +87,10 @@ PropertyItem *PropertyItem::find(const QString &path)
     QStringList dpath = path.split("::");
     QStringList lpath = m_path.split("::");
 
-    PropertyItem *result = nullptr;
+    PluginItem *result = nullptr;
 
     if (lpath.length() < dpath.length()) {
-        PropertyItem *child = nullptr;
+        PluginItem *child = nullptr;
         foreach (child, m_childItems) {
             result = child->find(path);
 
@@ -103,17 +103,7 @@ PropertyItem *PropertyItem::find(const QString &path)
     return nullptr;
 }
 
-PropertySection *PropertyItem::section()
+const QString &PluginItem::name() const
 {
-    return m_section;
-}
-
-const PropertySection *PropertyItem::section() const
-{
-    return m_section;
-}
-
-const QString &PropertyItem::path() const
-{
-    return m_path;
+    return m_name;
 }

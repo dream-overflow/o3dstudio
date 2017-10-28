@@ -9,10 +9,12 @@
 #include <QtCore/QAbstractItemModel>
 
 #include "pluginsinformationsdialog.h"
-//#include "plugin/pluginmodel.h"
 
-//#include "plugin/sectionnode.h"
-// #include "plugin/displaysection.h"
+#include "common/plugin/pluginmodel.h"
+#include "common/plugin/pluginsectionnode.h"
+
+#include "common/modulemanager.h"
+#include "common/module.h"
 
 using namespace o3d::studio::main;
 
@@ -22,9 +24,10 @@ PluginsInformationsDialog::PluginsInformationsDialog(QWidget *parent) :
 {
     ui.setupUi(this);
 
-//    connect(ui.buttonBox, SIGNAL(clicked(QAbstractButton *)), SLOT(onButtonBox(QAbstractButton *)));
+    connect(ui.pluginDetailsButton, SIGNAL(clicked()), SLOT(onPluginDetailsClicked()));
+    connect(ui.pluginErrorsButton, SIGNAL(clicked()), SLOT(onPluginErrorDetailsClicked()));
 
-  //  setupCategories();
+    setupCategories();
 }
 
 PluginsInformationsDialog::~PluginsInformationsDialog()
@@ -36,10 +39,26 @@ void PluginsInformationsDialog::closeEvent(QCloseEvent *)
 {
 
 }
-/*
+
+void PluginsInformationsDialog::changeEvent(QEvent *event)
+{
+    if (event != nullptr) {
+        switch(event->type()) {
+            // this event is send if a translator is loaded
+            case QEvent::LanguageChange:
+                ui.retranslateUi(this);
+                break;
+
+            default:
+                break;
+        }
+    }
+    QDialog::changeEvent(event);
+}
+
 void PluginsInformationsDialog::onSectionPropertyChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-    if (previous.isValid()) {
+/*    if (previous.isValid()) {
         PropertySection *previousPs = static_cast<PropertyItem*>(previous.internalPointer())->propertySection();
         previousPs->commit();
 
@@ -74,9 +93,81 @@ void PluginsInformationsDialog::onSectionPropertyChanged(const QModelIndex &curr
         }
 
         ui.propertyLabel->setText(label);
+    }*/
+}
+
+void PluginsInformationsDialog::onPluginDetails(const QModelIndex &index)
+{
+    if (!index.isValid()) {
+        return;
+    }
+
+    if (index.internalPointer() == nullptr) {
+        return;
+    }
+
+    common::ModuleManager *moduleManager = common::ModuleManager::instance();
+    common::PluginItem *pluginItem = static_cast<common::PluginItem*>(index.internalPointer());
+
+    const common::Module* module = moduleManager->getModule(pluginItem->name());
+    if (module == nullptr) {
+        return;
+    }
+
+    const common::ModuleInfo info = module->provideInfo();
+    showDetailsDialog(module->name(), info.properties());
+}
+
+void PluginsInformationsDialog::onPluginErrorDetailsClicked()
+{
+    QModelIndex index = ui.pluginsTree->currentIndex();
+
+    if (!index.isValid()) {
+        return;
+    }
+
+    if (index.internalPointer() == nullptr) {
+        return;
+    }
+
+    common::ModuleManager *moduleManager = common::ModuleManager::instance();
+    common::PluginItem *pluginItem = static_cast<common::PluginItem*>(index.internalPointer());
+
+    const common::Module* module = moduleManager->getModule(pluginItem->name());
+    if (module == nullptr) {
+        return;
+    }
+
+    const QStringList &report = module->report();
+    if (report.size() > 0) {
+        // @todo open error details dialog
     }
 }
 
+void PluginsInformationsDialog::onPluginDetailsClicked()
+{
+    QModelIndex index = ui.pluginsTree->currentIndex();
+
+    if (!index.isValid()) {
+        return;
+    }
+
+    if (index.internalPointer() == nullptr) {
+        return;
+    }
+
+    common::ModuleManager *moduleManager = common::ModuleManager::instance();
+    common::PluginItem *pluginItem = static_cast<common::PluginItem*>(index.internalPointer());
+
+    const common::Module* module = moduleManager->getModule(pluginItem->name());
+    if (module == nullptr) {
+        return;
+    }
+
+    const common::ModuleInfo info = module->provideInfo();
+    showDetailsDialog(module->name(), info.properties());
+}
+/*
 QModelIndex recursiveSave(QAbstractItemModel *model, const QModelIndex &parent) {
     if (!parent.isValid()) {
         return parent;
@@ -99,51 +190,69 @@ QModelIndex recursiveSave(QAbstractItemModel *model, const QModelIndex &parent) 
     }
 
     return parent;
-}
+}*/
 
-void PreferencesDialog::onButtonBox(QAbstractButton *btn)
-{
-    if (ui.buttonBox->buttonRole(btn) == QDialogButtonBox::ApplyRole ||
-        ui.buttonBox->buttonRole(btn) == QDialogButtonBox::AcceptRole) {
-
-        // commit current
-        QModelIndex current = ui.categoryTree->currentIndex();
-        if (current.isValid()) {
-            PropertyItem *item = static_cast<PropertyItem*>(current.internalPointer());
-            PropertySection *currentPs = item->propertySection();
-
-            currentPs->commit();
+static QString makeParentPath(const QStringList &path, int minus) {
+    QString parentPath = "";
+    for (int i = 0; i < path.length() - minus; ++i) {
+        if (parentPath.length() > 0) {
+            parentPath.append("::");
         }
 
-        // recursive save
-        QModelIndex parent = ui.categoryTree->model()->index(0, 0);
-        recursiveSave(ui.categoryTree->model(), parent);
+        parentPath.append(path.at(i));
     }
 
-    if (ui.buttonBox->buttonRole(btn) == QDialogButtonBox::AcceptRole) {
-        close();
-    }
+    return parentPath;
 }
 
-void PreferencesDialog::setupCategories()
+void PluginsInformationsDialog::setupCategories()
 {
-    QList<PropertySection*> sections;
+    QList<common::PluginSection*> sections;
 
     // setup standard static sections
-    sections.append(new SectionNode("o3s::main", tr("Global")));
-    sections.append(new DisplaySection());
+    sections.append(new common::PluginSectionNode("o3s::plugin::o3dstudio", tr("Objective-3D Studio")));
+    sections.append(new common::PluginSectionNode("o3s::plugin::tool", tr("Externals tools")));
+    sections.append(new common::PluginSectionNode("o3s::plugin::importer", tr("Importers")));
+    sections.append(new common::PluginSectionNode("o3s::plugin::exporter", tr("Exporters")));
+    sections.append(new common::PluginSectionNode("o3s::plugin::builder", tr("Builders")));
 
-    sections.append(new SectionNode("o3s::workspace", tr("Workspace")));
-    sections.append(new SectionNode("o3s::workspace::project", tr("Projects")));
-    sections.append(new SectionNode("o3s::plugin", tr("Plugins")));
-    sections.append(new SectionNode("o3s::tool", tr("Tools")));
+    common::PluginModel *model = new common::PluginModel(sections, this);
+    ui.pluginsTree->setModel(model);
+    ui.pluginsTree->setColumnWidth(0, 200);
+    ui.pluginsTree->setColumnWidth(1, 50);
+    ui.pluginsTree->setColumnWidth(2, 70);
+    ui.pluginsTree->setColumnWidth(3, 200);
+    ui.pluginsTree->setColumnWidth(4, 50);
 
-    PropertyModel *model = new PropertyModel(sections, this);
-    ui.categoryTree->setModel(model);
-    ui.categoryTree->setColumnWidth(0, 200);
-    ui.categoryTree->setColumnWidth(1, 50);
+    common::ModuleManager *moduleManager = common::ModuleManager::instance();
 
-    QItemSelectionModel *selectionModel = ui.categoryTree->selectionModel();
+    // add loaded modules
+    QString moduleName = "";
+    common::PluginItem *itemParent = nullptr;
+    common::PluginItem *rootItem = static_cast<common::PluginItem*>(model->index(0, 0, QModelIndex()).internalPointer());
+
+    foreach (moduleName, moduleManager->getModuleList()) {
+        const common::Module* module = moduleManager->getModule(moduleName);
+        const common::ModuleInfo info = module->provideInfo();
+
+        QList<QVariant> data;
+        data << info.verbose() << module->started() << info.version() << info.vendor();
+
+        itemParent = rootItem->find(info.section());
+        if (itemParent == nullptr) {
+            // @todo generic or create
+        }
+
+        common::PluginItem *pluginModel = new common::PluginItem(info.section(), moduleName, data, itemParent);
+        itemParent->appendChild(pluginModel);
+    }
+
+    QItemSelectionModel *selectionModel = ui.pluginsTree->selectionModel();
     connect(selectionModel, SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), SLOT(onSectionPropertyChanged(const QModelIndex &, const QModelIndex &)));
+    connect(ui.pluginsTree, SIGNAL(doubleClicked(const QModelIndex &)), SLOT(onPluginDetails(const QModelIndex &)));
 }
-*/
+
+void PluginsInformationsDialog::showDetailsDialog(const QString &name, QMap<QString, QVariant> properties)
+{
+    // @todo
+}

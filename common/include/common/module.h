@@ -29,6 +29,7 @@ public:
     virtual ~Module();
 
     const QString& name() const;
+    bool started() const;
 
     ModuleInfo provideInfo() const;
 
@@ -40,6 +41,8 @@ public:
 
     virtual bool start();
     virtual bool stop();
+
+    const QStringList& report() const;
 
     /**
      * @brief Restart the module if loaded, and previously started.
@@ -55,6 +58,8 @@ protected:
     QBitArray m_capacities{64};   //!< List of exposed and supported capacities
 
     bool m_started{false};        //!< Started module capacities
+
+    QStringList m_report;         //!< report of starting module
 };
 
 } // namespace common

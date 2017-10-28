@@ -38,8 +38,10 @@ public:
 
     PropertyItem *find(const QString &path);
 
-    PropertySection *propertySection();
-    const PropertySection *propertySection() const;
+    PropertySection *section();
+    const PropertySection *section() const;
+
+    const QString& path() const;
 
 private:
 
@@ -50,7 +52,7 @@ private:
     QList<QVariant> m_itemData;
     PropertyItem *m_parentItem;
 
-    PropertySection *m_propertySection;   //! Related property widget to be setup into the property frame
+    PropertySection *m_section;   //! Related property widget to be setup into the property frame
 };
 
 } // namespace common

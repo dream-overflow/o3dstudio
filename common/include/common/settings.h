@@ -18,6 +18,7 @@ namespace common {
 
 static const char PLUGIN_PATH[] = "plugins";
 static const char SETTINGS_FILE[] = "o3dstudiosettings.ini";
+static const char LANGUAGES_PATH[] = "languages";
 
 #ifdef _MSC_VER
 static const char MODULE_EXT[] = "*.dll";
@@ -25,20 +26,26 @@ static const char MODULE_EXT[] = "*.dll";
 static const char MODULE_EXT[] = "*.so";
 #endif
 
-class Settings
+class Settings : public QObject
 {
+    Q_OBJECT
+
 public:
 
     Settings();
-    ~Settings();
+    virtual ~Settings();
 
     void loadAll();
     void saveAll();
 
-    void set(const QString &key, const QVariant& value);
-    QVariant get(const QString &key, const QVariant& _default = QVariant()) const;
+    void set(const QString &key, const QVariant& value, bool force = false);
+    QVariant get(const QString &key, const QVariant& _default = QVariant());
 
     bool has(const QString &key) const;
+
+signals:
+
+    void settingChanged(const QString &key, const QVariant &value);
 
 private:
 

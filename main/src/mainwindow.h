@@ -77,18 +77,19 @@ private slots:
     void onAboutPlugin();
     void onAbout();
 
+    void onSettingChanged(const QString &key, const QVariant &value);
+
 private:
 
     Ui::MainWindow ui;
 
     bool m_darkTheme{false};
 
-    QTranslator m_translator;    // contains the translations for o3s
-    QTranslator m_translatorQt;   // contains the translations for qt
+    QTranslator m_translator;     //!< contains the translations for o3smain
 
     void closeWorkspace();
 
-    // loads a language by the given language shortcur (e.g. de, en)
+    // loads a language by the given language shortcurt (e.g. de, en)
     void loadLanguage(const QString& language);
 
     QString m_currentTheme;                //!< current active theme name

@@ -11,6 +11,12 @@ isEmpty($$O3S_BUILD_ENV) {
     O3S_BUILD_ENV = "amd64"
 }
 
+BUILD_PREFIX = $$getenv(PREFIX)
+isEmpty(BUILD_PREFIX) {
+    linux: BUILD_PREFIX = /usr/local
+    macx: BUILD_PREFIX = /usr/local
+}
+
 O3S_BIN_DIR = $$join($$list($$top_builddir, "bin"), "/")
 
 #CONFIG(debug, debug|release) {
@@ -98,4 +104,23 @@ for(tsfile, TRANSLATIONS) {
     command = $$LRELEASE -removeidentical $$tsfile -qm $$qmfile
     system($$command)|error("Failed to run: $$command")
     TRANSLATIONS_FILES += $$qmfile
+}
+
+# Copies the given files to the destination directory
+defineTest(copyToDestdir) {
+    files = $$1
+    PATH_TO = $$2
+
+    QMAKE_POST_LINK += $$QMAKE_MKDIR $$quote($$DESTDIR/$$PATH_TO/) $$escape_expand(\\n\\t)
+
+    for(FILE, files) {
+        DDIR = $$DESTDIR
+
+        # Replace slashes in paths with backslashes for Windows
+        win32:FILE ~= s,/,\\,g
+        win32:DDIR ~= s,/,\\,g
+
+        QMAKE_POST_LINK += $$QMAKE_COPY -r $$quote($$FILE) $$quote($$DDIR/$$PATH_TO/) $$escape_expand(\\n\\t)
+    }
+    export(QMAKE_POST_LINK)
 }

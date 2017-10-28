@@ -28,6 +28,11 @@ const QString &Module::name() const
     return m_name;
 }
 
+bool Module::started() const
+{
+    return m_started;
+}
+
 ModuleInfo Module::provideInfo() const
 {
     return ModuleInfo(m_name, m_properties);
@@ -55,7 +60,13 @@ bool Module::start()
 
 bool Module::stop()
 {
+    m_report.clear();
     return false;
+}
+
+const QStringList &Module::report() const
+{
+    return m_report;
 }
 
 bool Module::restart()

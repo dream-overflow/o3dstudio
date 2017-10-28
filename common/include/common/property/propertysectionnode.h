@@ -1,13 +1,13 @@
 /**
- * @brief Application generic section node
+ * @brief Application generic property section node
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@gmail.com)
  * @date 2017-10-21
  * @details
  */
 
-#ifndef _O3DS_COMMON_SECTIONNODE_H
-#define _O3DS_COMMON_SECTIONNODE_H
+#ifndef _O3DS_COMMON_PROPERTYSECTIONNODE_H
+#define _O3DS_COMMON_PROPERTYSECTIONNODE_H
 
 #include <QtCore/QString>
 #include <QtCore/QVariant>
@@ -20,19 +20,18 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class SectionNode : public QWidget , public PropertySection
+class PropertySectionNode : public PropertySection
 {
-    Q_OBJECT
-
 public:
 
-    SectionNode(const QString &section, const QString &label, QWidget *parent = 0);
-    virtual ~SectionNode();
+    PropertySectionNode(const QString &section, const QString &label);
+    virtual ~PropertySectionNode();
 
     virtual QString name() override;
     virtual QString label() override;
 
     virtual bool setupSection(QWidget *parent) override;
+    virtual bool cleanupSection(QWidget *parent) override;
 
     virtual void commit() override;
     virtual bool save() override;
@@ -47,4 +46,4 @@ protected:
 } // namespace studio
 } // namespace o3d
 
-#endif // _O3DS_COMMON_SECTIONNODE_H
+#endif // _O3DS_COMMON_PROPERTYSECTIONNODE_H
