@@ -28,7 +28,7 @@ class Command
 {
 public:
 
-    Command(const QMap<QString, QVariant> &options);
+    Command(const QString &name, const QMap<QString, QVariant> &options);
     virtual ~Command();
 
     /**
@@ -68,6 +68,10 @@ public:
      * @return true if success
      */
     virtual bool redoCommand() = 0;
+
+    void setExecuted();
+    void setDone();
+    void setUndone();
 
 protected:
 

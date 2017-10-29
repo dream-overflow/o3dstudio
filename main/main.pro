@@ -36,7 +36,8 @@ SOURCES += \
     src/maintoolbar.cpp \
     src/property/displaysection.cpp \
     src/quicktoolbar.cpp \
-    src/plugin/pluginsection.cpp
+    src/plugin/pluginsection.cpp \
+    src/content/browsercontent.cpp
 
 
 HEADERS += \
@@ -49,13 +50,13 @@ HEADERS += \
     src/maintoolbar.h \
     src/property/displaysection.h \
     src/quicktoolbar.h \
-    src/plugin/pluginsection.h
+    src/plugin/pluginsection.h \
+    src/content/browsercontent.h
 
 
 RESOURCES += \
     rc/mainresources.qrc \
     rc/darkorangetheme.qrc \
-    rc/darktheme.qrc \
     rc/darktheme.qrc
 
 FORMS += \

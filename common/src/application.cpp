@@ -122,6 +122,7 @@ bool Application::start()
 
     m_commandManager->begin();
 
+
     // alway load o3sdummy for testing
     Module *o3sdummy = ModuleManager::instance()->load("o3sdummy");
     if (o3sdummy != nullptr) {

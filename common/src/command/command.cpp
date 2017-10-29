@@ -11,7 +11,8 @@
 using namespace o3d::studio::common;
 
 
-Command::Command(const QMap<QString, QVariant> &options) :
+Command::Command(const QString& name, const QMap<QString, QVariant> &options) :
+    m_commandName(name),
     m_commandState(COMMAND_READY),
     m_commandOptions(options)
 {
@@ -40,4 +41,19 @@ const QMap<QString, QVariant> &Command::commandOptions() const
 QString Command::commandLabel() const
 {
     return m_commandName;
+}
+
+void Command::setExecuted()
+{
+    m_commandState = COMMAND_EXECUTED;
+}
+
+void Command::setDone()
+{
+    m_commandState = COMMAND_DONE;
+}
+
+void Command::setUndone()
+{
+    m_commandState = COMMAND_UNDONE;
 }

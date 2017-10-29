@@ -34,17 +34,29 @@ CommandManager::~CommandManager()
 
 void CommandManager::addCommand(Command *cmd)
 {
+    m_rwLock.lockForWrite();
     m_todoCommandsQueue.enqueue(cmd);
+    m_rwLock.unlock();
 }
 
 void CommandManager::undoLastCommand()
 {
-    if (m_doneCommandsQueue.size() == 0) {
+    int size = 0;
+
+    m_rwLock.lockForRead();
+    size = m_doneCommandsQueue.size();
+    m_rwLock.unlock();
+
+    if (size == 0) {
         return;
     }
 
+    m_rwLock.lockForWrite();
+
     Command *lastCmd = m_doneCommandsQueue.dequeue();
     m_waitingCommandsQueue.enqueue(lastCmd);
+
+    m_rwLock.unlock();
 }
 
 void CommandManager::undoNCommands(int num)
@@ -54,12 +66,22 @@ void CommandManager::undoNCommands(int num)
 
 void CommandManager::redoLastCommand()
 {
-    if (m_undoneCommandsQueue.size() == 0) {
+    int size = 0;
+
+    m_rwLock.lockForRead();
+    size = m_undoneCommandsQueue.size();
+    m_rwLock.unlock();
+
+    if (size == 0) {
         return;
     }
 
+    m_rwLock.lockForWrite();
+
     Command *lastUndone = m_undoneCommandsQueue.dequeue();
     m_waitingCommandsQueue.enqueue(lastUndone);
+
+    m_rwLock.unlock();
 }
 
 void CommandManager::redoNCommands(int num)
@@ -74,31 +96,59 @@ void CommandManager::setCommandDone(Command *cmd)
 
 bool CommandManager::hasPendingCommands() const
 {
-    return !m_todoCommandsQueue.isEmpty();
+    int size = 0;
+
+    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    size = m_todoCommandsQueue.size();
+    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+
+    return size > 0;
 }
 
 bool CommandManager::hasRunningCommands() const
 {
-    return !m_waitingCommandsQueue.isEmpty();
+    int size = 0;
+
+    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    size = m_waitingCommandsQueue.size();
+    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+
+    return size > 0;
 }
 
 bool CommandManager::hasDoneCommands() const
 {
-    return !m_doneCommandsQueue.isEmpty();
+    int size = 0;
+
+    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    size = m_doneCommandsQueue.size();
+    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+
+    return size > 0;
 }
 
 bool CommandManager::hasUndoneCommands() const
 {
-    return !m_undoneCommandsQueue.isEmpty();
+    int size = 0;
+
+    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    size = m_undoneCommandsQueue.size();
+    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+
+    return size > 0;
 }
 
 QStringList CommandManager::undoableCommandList() const
 {
     QStringList cmds;
 
+    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+
     for (auto cit = m_doneCommandsQueue.cbegin(); cit != m_doneCommandsQueue.cend(); ++cit) {
         cmds.append((*cit)->commandLabel());
     }
+
+    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
 
     return cmds;
 }
@@ -107,9 +157,13 @@ QStringList CommandManager::redoableCommandList() const
 {
     QStringList cmds;
 
+    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+
     for (auto cit = m_undoneCommandsQueue.cbegin(); cit != m_undoneCommandsQueue.cend(); ++cit) {
         cmds.append((*cit)->commandLabel());
     }
+
+    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
 
     return cmds;
 }
@@ -141,16 +195,32 @@ void CommandManager::run()
         if (nextCmd != nullptr) {
             if (nextCmd->commandState() == COMMAND_READY) {
                 // never executed, then execute
-                nextCmd->executeCommand();
+                if (nextCmd->executeCommand()) {
+                    nextCmd->setExecuted();
+
+                    emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
+                }
             } else if (nextCmd->commandState() == COMMAND_DONE) {
                 // previously redone, then undo
-                nextCmd->undoCommand();
+                if (nextCmd->undoCommand()) {
+                    nextCmd->setUndone();
+
+                    emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
+                }
             } else if (nextCmd->commandState() == COMMAND_EXECUTED) {
                 // previously executed, then undo
-                nextCmd->undoCommand();
+                if (nextCmd->undoCommand()) {
+                    nextCmd->setUndone();
+
+                    emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
+                }
             } else if (nextCmd->commandState() == COMMAND_UNDONE) {
                 // previously undone, then redo
-                nextCmd->redoCommand();
+                if (nextCmd->redoCommand()) {
+                    nextCmd->setDone();
+
+                    emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
+                }
             }
 
             m_rwLock.lockForWrite();
@@ -168,6 +238,7 @@ void CommandManager::run()
                 m_undoneCommandsQueue.enqueue(nextCmd);
             }
 
+            m_waitingCommandsQueue.dequeue();
             m_rwLock.unlock();
         }
 

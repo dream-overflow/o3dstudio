@@ -45,7 +45,10 @@ SOURCES += \
     src/plugin/pluginsectionnode.cpp \
     src/ui/uicontroller.cpp \
     src/command/command.cpp \
-    src/command/commandmanager.cpp
+    src/command/commandmanager.cpp \
+    src/command/dummycommand.cpp \
+    src/ui/canvas/canvascontent.cpp \
+    src/ui/canvas/glcanvascontent.cpp
 
 
 HEADERS += \ 
@@ -58,7 +61,7 @@ HEADERS += \
     include/common/application.h \
     include/common/dynamicmodule.h \
     include/common/settings.h \
-    include/common/capacity/capacitysettings.h \
+    include/common/capacitysettings.h \
     include/common/moduleinfo.h \
     include/common/property/propertymodel.h \
     include/common/property/propertyitem.h \
@@ -74,7 +77,10 @@ HEADERS += \
     include/common/ui/uicontroller.h \
     include/common/element.h \
     include/common/command/command.h \
-    include/common/command/commandmanager.h
+    include/common/command/commandmanager.h \
+    include/common/command/dummycommand.h \
+    include/common/ui/canvas/canvascontent.h \
+    include/common/ui/canvas/glcanvascontent.h
 
 copyToDestdir($$TRANSLATIONS_FILES, languages)
 

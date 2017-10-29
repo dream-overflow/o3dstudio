@@ -53,26 +53,26 @@
      <addaction name="actionWorkspaceManage"/>
      <addaction name="separator"/>
     </widget>
-    <widget class="QMenu" name="menuRecents_resources">
+    <widget class="QMenu" name="menuRecentsResources">
      <property name="title">
       <string>Recents resources</string>
      </property>
      <addaction name="separator"/>
-     <addaction name="action_Clear_all"/>
+     <addaction name="actionRecentsResourcesClearAll"/>
     </widget>
-    <widget class="QMenu" name="menuRecents_projects">
+    <widget class="QMenu" name="menuRecentsProjects">
      <property name="title">
       <string>Recents projects</string>
      </property>
      <addaction name="separator"/>
-     <addaction name="action_Clear_all_2"/>
+     <addaction name="actionRecentsProjectsClearAll"/>
     </widget>
     <addaction name="separator"/>
     <addaction name="actionNewProject"/>
     <addaction name="actionNewResource"/>
     <addaction name="actionOpenProject"/>
-    <addaction name="menuRecents_resources"/>
-    <addaction name="menuRecents_projects"/>
+    <addaction name="menuRecentsResources"/>
+    <addaction name="menuRecentsProjects"/>
     <addaction name="menu_Workspaces"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
@@ -92,7 +92,7 @@
     <addaction name="separator"/>
     <addaction name="actionSystemInfo"/>
     <addaction name="actionSupport"/>
-    <addaction name="actionSignal_a_bug"/>
+    <addaction name="actionBugReport"/>
     <addaction name="separator"/>
     <addaction name="actionAboutPlugins"/>
     <addaction name="actionAbout"/>
@@ -101,24 +101,25 @@
     <property name="title">
      <string>&amp;Window</string>
     </property>
-    <widget class="QMenu" name="menu_Views">
+    <widget class="QMenu" name="menuViews">
      <property name="title">
       <string>&amp;Views</string>
      </property>
      <property name="icon">
-      <iconset theme="preferences-system-windows"/>
+      <iconset theme="preferences-system-windows">
+       <normaloff>.</normaloff>.</iconset>
      </property>
      <addaction name="actionViewHomePage"/>
      <addaction name="separator"/>
-     <addaction name="actionMain_console"/>
+     <addaction name="actionMainConsole"/>
     </widget>
     <addaction name="actionWindowFullscreen"/>
     <addaction name="separator"/>
-    <addaction name="actionShow_main_toolbar"/>
-    <addaction name="actionShow_left_tree"/>
-    <addaction name="actionShow_bottom_panel"/>
-    <addaction name="actionShow_Bottom_Panel"/>
-    <addaction name="menu_Views"/>
+    <addaction name="actionShowMainToolBar"/>
+    <addaction name="actionShowLeftSideBar"/>
+    <addaction name="actionShowRightSideBar"/>
+    <addaction name="actionShowBottomPanel"/>
+    <addaction name="menuViews"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
@@ -126,18 +127,18 @@
     </property>
     <addaction name="separator"/>
    </widget>
-   <widget class="QMenu" name="menu_Edit">
+   <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <addaction name="action_Undo"/>
-    <addaction name="action_Redo"/>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
     <addaction name="separator"/>
     <addaction name="actionCut"/>
-    <addaction name="action_Copy"/>
-    <addaction name="action_Paste"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
     <addaction name="actionDelete"/>
-    <addaction name="actionSelect_all"/>
+    <addaction name="actionSelectAll"/>
     <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuCompile">
@@ -146,7 +147,7 @@
     </property>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menu_Edit"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuCompile"/>
    <addaction name="menu_Tools"/>
    <addaction name="menu_Window"/>
@@ -282,7 +283,7 @@
     <string>&amp;Support</string>
    </property>
   </action>
-  <action name="actionSignal_a_bug">
+  <action name="actionBugReport">
    <property name="icon">
     <iconset theme="mail-send">
      <normaloff>.</normaloff>.</iconset>
@@ -308,7 +309,7 @@
     <string>&amp;Options</string>
    </property>
   </action>
-  <action name="action_Undo">
+  <action name="actionUndo">
    <property name="icon">
     <iconset theme="edit-undo">
      <normaloff>.</normaloff>.</iconset>
@@ -320,7 +321,7 @@
     <string>Ctrl+Z</string>
    </property>
   </action>
-  <action name="action_Redo">
+  <action name="actionRedo">
    <property name="icon">
     <iconset theme="edit-redo">
      <normaloff>.</normaloff>.</iconset>
@@ -344,7 +345,7 @@
     <string>Ctrl+X</string>
    </property>
   </action>
-  <action name="action_Copy">
+  <action name="actionCopy">
    <property name="icon">
     <iconset theme="edit-copy">
      <normaloff>.</normaloff>.</iconset>
@@ -356,7 +357,7 @@
     <string>Ctrl+C</string>
    </property>
   </action>
-  <action name="action_Paste">
+  <action name="actionPaste">
    <property name="icon">
     <iconset theme="edit-paste">
      <normaloff>.</normaloff>.</iconset>
@@ -377,7 +378,7 @@
     <string>Delete...</string>
    </property>
   </action>
-  <action name="actionSelect_all">
+  <action name="actionSelectAll">
    <property name="icon">
     <iconset theme="edit-select-all">
      <normaloff>.</normaloff>.</iconset>
@@ -389,30 +390,31 @@
     <string>Ctrl+A</string>
    </property>
   </action>
-  <action name="actionShow_main_toolbar">
+  <action name="actionShowMainToolBar">
    <property name="icon">
-    <iconset theme="tab-new"/>
+    <iconset theme="tab-new">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Show Main &amp;Toolbar</string>
    </property>
   </action>
-  <action name="actionShow_left_tree">
+  <action name="actionShowLeftSideBar">
    <property name="text">
     <string>Show &amp;Left Sidebar</string>
    </property>
   </action>
-  <action name="actionShow_bottom_panel">
+  <action name="actionShowRightSideBar">
    <property name="text">
     <string>Show &amp;Right Sidebar</string>
    </property>
   </action>
-  <action name="actionShow_Bottom_Panel">
+  <action name="actionShowBottomPanel">
    <property name="text">
     <string>Show &amp;Bottom Panel</string>
    </property>
   </action>
-  <action name="actionMain_console">
+  <action name="actionMainConsole">
    <property name="text">
     <string>Main console</string>
    </property>
@@ -431,19 +433,20 @@
     <string>&amp;Open project...</string>
    </property>
   </action>
-  <action name="action_Clear_all">
+  <action name="actionRecentsResourcesClearAll">
    <property name="text">
     <string>&amp;Clear all</string>
    </property>
   </action>
-  <action name="action_Clear_all_2">
+  <action name="actionRecentsProjectsClearAll">
    <property name="text">
     <string>&amp;Clear all</string>
    </property>
   </action>
   <action name="actionViewHomePage">
    <property name="icon">
-    <iconset theme="go-home"/>
+    <iconset theme="go-home">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Home page</string>

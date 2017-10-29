@@ -12,7 +12,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtCore/QTranslator>
 
-#include "common/capacity/capacitysettings.h"
+#include "common/capacitysettings.h"
 
 #include "ui_mainwindow.h"
 
@@ -88,6 +88,13 @@ private slots:
     void onDetachContent(QString, QWidget*);
     void onDetachDock(QString, QDockWidget*);
     void onDetachToolBar(QString, QToolBar*);
+
+    void onUndoAction();
+    void onRedoAction();
+
+    void onShowContent(QString name, QWidget *content, bool showHide);
+
+    void onCommandDone(QString name, QString label, bool done);
 
 private:
 

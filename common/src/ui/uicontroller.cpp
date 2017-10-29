@@ -15,7 +15,8 @@ using namespace o3d::studio::common;
 
 
 UiController::UiController() :
-    QObject()
+    QObject(),
+    m_activeContent(nullptr)
 {
 
 }
@@ -82,6 +83,11 @@ bool UiController::removeContent(Content *content)
     int index = -1;
     if ((index = m_contents.indexOf(content)) >= 0) {
         m_contents.removeAt(index);
+
+        if (m_activeContent == content) {
+            m_activeContent = nullptr;
+        }
+
         emit detachContent(content->elementName(), content->ui());
 
         return true;
@@ -122,4 +128,113 @@ bool UiController::removeToolBar(ToolBar *toolBar)
     }
 
     return false;
+}
+
+bool UiController::setActiveContent(Content *content, bool showHide)
+{
+    if (content == nullptr) {
+        return false;
+    }
+
+    int index = -1;
+    if ((index = m_contents.indexOf(content)) >= 0) {
+        if (showHide) {
+            if (m_activeContent == content) {
+                return true;
+            } else {
+                m_activeContent = content;
+                emit showContent(content->elementName(), content->ui(), true);
+            }
+        } else {
+            if (m_activeContent != content) {
+                return true;
+            } else {
+                m_activeContent = nullptr;
+                emit showContent(content->elementName(), content->ui(), false);
+
+                // uses the last in the list
+                if (!m_contents.isEmpty()) {
+                    m_activeContent = m_contents.back();
+
+                    emit showContent(m_activeContent->elementName(), m_activeContent->ui(), true);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+Content *UiController::content(const QString &name)
+{
+    Content *content = nullptr;
+    foreach(content, m_contents) {
+        if (content->elementName() == name) {
+            return content;
+        }
+    }
+
+    return nullptr;
+}
+
+const Content *UiController::content(const QString &name) const
+{
+    const Content *content = nullptr;
+    foreach(content, m_contents) {
+        if (content->elementName() == name) {
+            return content;
+        }
+    }
+
+    return nullptr;
+}
+
+Dock *UiController::dock(const QString &name)
+{
+    Dock *dock = nullptr;
+    foreach(dock, m_docks) {
+        if (dock->elementName() == name) {
+            return dock;
+        }
+    }
+
+    return nullptr;
+}
+
+const Dock *UiController::dock(const QString &name) const
+{
+    const Dock *dock = nullptr;
+    foreach(dock, m_docks) {
+        if (dock->elementName() == name) {
+            return dock;
+        }
+    }
+
+    return nullptr;
+}
+
+ToolBar *UiController::toolBar(const QString &name)
+{
+    ToolBar *toolBar = nullptr;
+    foreach(toolBar, m_toolBars) {
+        if (toolBar->elementName() == name) {
+            return toolBar;
+        }
+    }
+
+    return nullptr;
+}
+
+const ToolBar *UiController::toolBar(const QString &name) const
+{
+    const ToolBar *toolBar = nullptr;
+    foreach(toolBar, m_toolBars) {
+        if (toolBar->elementName() == name) {
+            return toolBar;
+        }
+    }
+
+    return nullptr;
 }

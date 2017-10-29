@@ -11,6 +11,9 @@
 
 #include "common/settings.h"
 
+#include "common/command/commandmanager.h"
+#include "common/command/dummycommand.h"
+
 #include <QtCore/QCoreApplication>
 #include <QtCore/QPluginLoader>
 #include <QtCore/QDir>
@@ -19,7 +22,6 @@
 #include <QtWidgets/QStyleFactory>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QToolBar>
-#include <QtWidgets/QTextBrowser>
 #include <QtGui/QCloseEvent>
 
 #include "preferencesdialog.h"
@@ -40,6 +42,8 @@
 #include "maintoolbar.h"
 #include "quicktoolbar.h"
 
+#include "content/browsercontent.h"
+
 using namespace o3d::studio::main;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -49,6 +53,8 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->showMessage(tr("Objective-3D Studio starting..."));
 
     ui.setupUi(this);
+
+    common::UiController &uiCtrl = common::Application::instance()->ui();
 
     connect(ui.actionNewProject, SIGNAL(triggered(bool)), SLOT(onFileNewProject()));
     connect(ui.actionNewResource, SIGNAL(triggered(bool)), SLOT(onFileNewResource()));
@@ -76,49 +82,61 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&uiController, SIGNAL(detachDock(QString, QDockWidget*)), SLOT(onDetachDock(QString, QDockWidget*)));
     connect(&uiController, SIGNAL(detachToolBar(QString, QToolBar*)), SLOT(onDetachToolBar(QString, QToolBar*)));
 
-    // connection to settings controller
+    connect(&uiController, SIGNAL(showContent(QString, QWidget*, bool)), SLOT(onShowContent(QString, QWidget*, bool)));
+
+    // connections to settings controller
     connect(&common::Application::instance()->settings(),
             SIGNAL(settingChanged(const QString &, const QVariant &)),
             SLOT(onSettingChanged(const QString &, const QVariant &)));
+
+    // connections to command manager
+    connect(&common::Application::instance()->command(),
+            SIGNAL(commandDone(QString, QString, bool)), SLOT(onCommandDone(QString, QString, bool)));
+
+    // connections to menu edit
+    connect(ui.actionUndo, SIGNAL(triggered()), SLOT(onUndoAction()));
+    connect(ui.actionRedo, SIGNAL(triggered()), SLOT(onRedoAction()));
 
     applySettings();
 
     // main toolbar
     MainToolBar *mainToolBar = new MainToolBar();
-    setupToolBar(mainToolBar->elementName(), mainToolBar, Qt::TopToolBarArea);
     mainToolBar->addWidget(new QLabel(tr("Search")));
     mainToolBar->addWidget(new QLineEdit());
+    uiCtrl.addToolBar(mainToolBar);
 
     // quick toolbar
     QuickToolBar *quickToolBar = new QuickToolBar();
-    setupToolBar(quickToolBar->elementName(), quickToolBar, Qt::LeftToolBarArea);
+    uiCtrl.addToolBar(quickToolBar);
 
     connect(quickToolBar, SIGNAL(showHome()), SLOT(onViewHomePage()));
 
-    // @todo setup status bar with some fixed widgets addPermanentWidget()
-
-    // workspace dock
+    // workspace dock @todo using Dock
     createDock(tr("Workspace"), "workspace", Qt::LeftDockWidgetArea);
 
-    // property dock
+    // property dock @todo using Dock
     createDock(tr("Property"), "property", Qt::RightDockWidgetArea);
 
-    // console dock
+    // console dock @todo using Dock
     QDockWidget *consoleDock = createDock(tr("Console"), "console", Qt::BottomDockWidgetArea);
     consoleDock->setMinimumWidth(150);
     consoleDock->setMinimumHeight(150);
     // @todo need a custom title bar
     // consoleDock->titleBarWidget()->addAction(new QAction(QIcon::fromTheme("go-previous"), "Collapse"));
 
-    // welcome central
-    QTextBrowser *welcome = new QTextBrowser();
-    welcome->setSearchPaths(QStringList(common::Application::instance()->appDir() + QDir::separator() + "share/html"));
-    welcome->setSource(QUrl::fromLocalFile("index.html"));
+    // welcome central @todo using Content
+    BrowserContent *browserContent = new BrowserContent();
+    uiCtrl.addContent(browserContent);
+    uiCtrl.setActiveContent(browserContent, true);
 
-    addContentWidget("welcome", welcome);
-    setCurrentContentWidget("welcome");
+    // addContentWidget("welcome", welcome);
+    // setCurrentContentWidget("welcome");
 
+    // @todo setup status bar with some fixed widgets addPermanentWidget()
     statusBar()->showMessage(tr("Objective-3D Studio successfully started !"));
+
+    // for test execute a dummy command @todo remove me
+    common::Application::instance()->command().addCommand(new common::DummyCommand());
 }
 
 MainWindow::~MainWindow()
@@ -551,19 +569,25 @@ void MainWindow::onFileWorkspaceManage()
 void MainWindow::onViewHomePage()
 {
     // browser
-    QTextBrowser *welcome = static_cast<QTextBrowser*>(contentWidget("welcome"));
-    welcome->setSource(QUrl::fromLocalFile("index.html"));
+    common::UiController &uiCtrl = common::Application::instance()->ui();
+    BrowserContent *browserContent = static_cast<BrowserContent*>(uiCtrl.content("o3s::main::browsercontent"));
 
-    setCurrentContentWidget("welcome");
+    if (browserContent) {
+        browserContent->setSource(QUrl::fromLocalFile("index.html"));
+        uiCtrl.setActiveContent(browserContent, true);
+    }
 }
 
 void MainWindow::onHelpIndex()
 {
     // browser
-    QTextBrowser *welcome = static_cast<QTextBrowser*>(contentWidget("welcome"));
-    welcome->setSource(QUrl::fromLocalFile("help/index.html"));
+    common::UiController &uiCtrl = common::Application::instance()->ui();
+    BrowserContent *browserContent = static_cast<BrowserContent*>(uiCtrl.content("o3s::main::browsercontent"));
 
-    setCurrentContentWidget("welcome");
+    if (browserContent) {
+        browserContent->setSource(QUrl::fromLocalFile("help/index.html"));
+        uiCtrl.setActiveContent(browserContent, true);
+    }
 }
 
 void MainWindow::onSystemInfo()
@@ -614,9 +638,9 @@ void MainWindow::onSettingChanged(const QString &key, const QVariant &value)
     }
 }
 
-void MainWindow::onAttachContent(QString, QWidget *)
+void MainWindow::onAttachContent(QString name, QWidget *content)
 {
-    // setupContent
+    addContentWidget(name, content);
 }
 
 void MainWindow::onAttachDock(QString name, QDockWidget *dock, Qt::DockWidgetArea area)
@@ -652,6 +676,50 @@ void MainWindow::onDetachToolBar(QString name, QToolBar *toolBar)
     if (it != m_toolBars.end()) {
         m_toolBars.erase(it);
         removeToolBar(toolBar);
+    }
+}
+
+void MainWindow::onUndoAction()
+{
+    common::Application::instance()->command().undoLastCommand();
+}
+
+void MainWindow::onRedoAction()
+{
+    common::Application::instance()->command().redoLastCommand();
+}
+
+void MainWindow::onShowContent(QString name, QWidget *content, bool showHide)
+{
+    if (content) {
+        if (showHide) {
+            setCurrentContentWidget(name);
+        } else {
+            setCentralWidget(nullptr);
+        }
+    }
+}
+
+void MainWindow::onCommandDone(QString name, QString label, bool done)
+{
+    if (done) {
+        statusBar()->showMessage(tr("%1 done").arg(label));
+        ui.actionUndo->setText(tr("Undo %1").arg(label));
+    } else {
+        statusBar()->showMessage(tr("%1 undone").arg(label));
+        ui.actionRedo->setText(tr("Redo %1").arg(label));
+    }
+
+    if (common::Application::instance()->command().hasDoneCommands()) {
+        ui.actionUndo->setEnabled(true);
+    } else {
+        ui.actionUndo->setEnabled(false);
+    }
+
+    if (common::Application::instance()->command().hasUndoneCommands()) {
+        ui.actionRedo->setEnabled(true);
+    } else {
+        ui.actionRedo->setEnabled(false);
     }
 }
 

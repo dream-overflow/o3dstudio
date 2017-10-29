@@ -37,6 +37,17 @@ public:
     bool removeDock(Dock *dock);
     bool removeToolBar(ToolBar *toolBar);
 
+    bool setActiveContent(Content *content, bool showHide);
+
+    Content* content(const QString &name);
+    const Content* content(const QString &name) const;
+
+    Dock* dock(const QString &name);
+    const Dock* dock(const QString &name) const;
+
+    ToolBar* toolBar(const QString &name);
+    const ToolBar* toolBar(const QString &name) const;
+
 signals:
 
     void attachContent(QString name, QWidget *content);
@@ -47,7 +58,11 @@ signals:
     void detachDock(QString name, QDockWidget *dock);
     void detachToolBar(QString name, QToolBar *toolbar);
 
+    void showContent(QString name, QWidget *content, bool showHide);
+
 private:
+
+    Content* m_activeContent;
 
     QList<Content*> m_contents;
     QList<Dock*> m_docks;

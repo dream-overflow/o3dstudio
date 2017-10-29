@@ -82,7 +82,7 @@ public:
 
 signals:
 
-    void commandDone(QString name, QString label);
+    void commandDone(QString name, QString label, bool done);
 
 protected:
 
