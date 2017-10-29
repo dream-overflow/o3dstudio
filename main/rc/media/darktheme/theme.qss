@@ -689,6 +689,21 @@ QComboBox::down-arrow:focus
     image: url(:/darktheme/images/media/darktheme/images/down_arrow.png);
 }
 
+/* try to fix shift on select but need a max-height to fix the issue generated */
+QComboBox:item {
+    padding-left: 20px; /* move text right to make room for tick mark */
+    max-height: 24px;
+}
+
+QComboBox:item:selected {
+    padding-left: 20px;  /* move text right to make room for tick mark */
+}
+
+QComboBox:item:checked {
+    padding-left: 20px;  /* move text right to make room for tick mark */
+    font-weight: bold;
+}
+
 QAbstractSpinBox {
     padding: 5px;
     border: 1px solid #76797C;

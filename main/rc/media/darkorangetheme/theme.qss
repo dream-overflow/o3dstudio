@@ -13,13 +13,13 @@ QWidget
     background-color: #323232;
 }
 
-QWidget:item:hover
+QWidget::item:hover
 {
     background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #ca0619);
     color: #000000;
 }
 
-QWidget:item:selected
+QWidget::item:selected
 {
     background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
 }
@@ -136,7 +136,6 @@ QComboBox:hover,QPushButton:hover
     border: 2px solid QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
 }
 
-
 QComboBox:on
 {
     padding-top: 3px;
@@ -167,6 +166,21 @@ QComboBox::drop-down
 QComboBox::down-arrow
 {
      image: url(:/down_arrow.png);
+}
+
+/* try to fix shift on select but need a max-height to fix the issue generated */
+QComboBox:item {
+    padding-left: 20px; /* move text right to make room for tick mark */
+    max-height: 24px;
+}
+
+QComboBox:item:selected {
+    padding-left: 20px;  /* move text right to make room for tick mark */
+}
+
+QComboBox:item:checked {
+    padding-left: 20px;  /* move text right to make room for tick mark */
+    font-weight: bold;
 }
 
 QGroupBox:focus
