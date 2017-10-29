@@ -33,6 +33,7 @@ DisplaySection::DisplaySection(QWidget *parent) :
     // theme colors
     ui.themeColor->addItem(tr("Light theme"), QVariant("light"));
     ui.themeColor->addItem(tr("Dark theme"), QVariant("dark"));
+    ui.themeColor->addItem(tr("Dark orange theme"), QVariant("darkorange"));
 }
 
 DisplaySection::~DisplaySection()

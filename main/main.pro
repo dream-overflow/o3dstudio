@@ -53,7 +53,8 @@ HEADERS += \
 
 
 RESOURCES += \
-    rc/mainresources.qrc
+    rc/mainresources.qrc \
+    rc/darkorangetheme.qrc
 
 FORMS += \
     ui/mainwindow.ui \

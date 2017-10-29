@@ -1,0 +1,38 @@
+CMake*
+cmake*
+!CMakeLists.txt
+install_manifest.txt
+*.log
+Makefile
+.project
+.cproject
+.settings
+bin
+lib
+build-*
+moc_*.cpp
+moc_*.h
+ui_*.h
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+
+.qmake.stash
+*.qm
+
+# Qt unit tests
+target_wrapper.*
+
+# QtCreator
+*.autosave
+*.creator.user
+*.creator.user.*
+
+# QtCtreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCtreator CMake
+CMakeLists.txt.user*

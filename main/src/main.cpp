@@ -84,6 +84,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Objective-3D Studio");
 
     // QResource::registerResource("mainresources.rcc");
+    // QResource::registerResource("darkorangetheme.rcc");
 
     o3d::studio::common::Application::instance()->start();
 
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
     delete lMainWindow;
     lMainWindow = nullptr;
 
+    // QResource::unregisterResource("darkorangetheme.rcc");
     // QResource::unregisterResource("mainresources.rcc");
 
     o3d::studio::common::Application::instance()->stop();

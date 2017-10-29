@@ -74,7 +74,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QToolBar *mainToolBar = new MainToolBar();
     setupToolBar("main", mainToolBar, Qt::TopToolBarArea);
     mainToolBar->addWidget(new QLabel(tr("Search")));
-    mainToolBar->setStyleSheet("QToolBar{spacing: 8px; margin: 4px}");
     mainToolBar->addWidget(new QLineEdit());
 
     // quick toolbar
@@ -358,9 +357,6 @@ bool MainWindow::commitSettings()
     settings.set("o3s::main::window::size", QVariant(size()));
     settings.set("o3s::main::window::position", QVariant(pos()));
 
-    // settings.set("o3s::main::language", QVariant(m_currentLanguage));
-    // settings.set("o3s::main::theme::color", QVariant(m_currentTheme));
-
     return true;
 }
 
@@ -371,7 +367,7 @@ bool MainWindow::setThemeColor(const QString &theme)
     }
 
     if (theme == "dark") {
-        qApp->setStyle(QStyleFactory::create("Dark"));
+        qApp->setStyle(QStyleFactory::create("dark"));
 
         QPalette darkPalette;
         darkPalette.setColor(QPalette::Window, QColor(53,53,53));
@@ -398,7 +394,7 @@ bool MainWindow::setThemeColor(const QString &theme)
         m_currentTheme = theme;
         return true;
     } else if (theme == "light") {
-        qApp->setStyle(QStyleFactory::create("Light"));
+        qApp->setStyle(QStyleFactory::create("light"));
 
         qApp->setPalette(style()->standardPalette());
         qApp->setStyleSheet("");
@@ -408,6 +404,17 @@ bool MainWindow::setThemeColor(const QString &theme)
 
         m_currentTheme = theme;
         return true;
+    } else if (theme == "darkorange") {
+        QFile themeFile(":/qss/darkorangetheme.qss");
+        themeFile.open(QIODevice::ReadOnly | QIODevice::Text);
+        QByteArray content = themeFile.readAll();
+
+        themeFile.close();
+
+        qApp->setStyle("plastique");
+        qApp->setStyleSheet(content);
+
+        m_currentTheme = theme;
     }
 
     return false;
@@ -564,6 +571,9 @@ void MainWindow::onSettingChanged(const QString &key, const QVariant &value)
 
         QString languageName = QLocale::languageToString(locale.language());
         statusBar()->showMessage(tr("Current language changed to %1").arg(languageName));
+    } else if (key == "o3s::main::theme::color") {
+        setThemeColor(value.toString());
+        statusBar()->showMessage(tr("Current theme changed to %1").arg(m_currentTheme));
     }
 }
 
@@ -571,9 +581,9 @@ void MainWindow::closeWorkspace()
 {
     o3d::studio::common::Workspace *workspace = o3d::studio::common::Application::instance()->workspaceManager().current();
     if (workspace && workspace->hasChanged()) {
-        statusBar()->showMessage(tr("Objective-3D Studio saving current workspace..."));
+        statusBar()->showMessage(tr("Saving current workspace..."));
         workspace->save();
-        statusBar()->showMessage(tr("Objective-3D Studio current workspace saved !"));
+        statusBar()->showMessage(tr("Current workspace saved !"));
     }
 }
 
