@@ -13,7 +13,9 @@
 
 #include "common/application.h"
 #include "common/modulemanager.h"
+
 #include "common/workspace/workspacemanager.h"
+#include "common/ui/uicontroller.h"
 
 using namespace o3d::studio::common;
 
@@ -29,6 +31,7 @@ Application::Application()
     m_appDir = QCoreApplication::applicationDirPath();
 
     m_workspaceManager = new WorkspaceManager();
+    m_ui = new UiController();
 }
 
 Application::~Application()
@@ -82,6 +85,16 @@ WorkspaceManager &Application::workspaceManager()
 const WorkspaceManager &Application::workspaceManager() const
 {
     return *m_workspaceManager;
+}
+
+UiController &Application::ui()
+{
+    return *m_ui;
+}
+
+const UiController &Application::ui() const
+{
+    return *m_ui;
 }
 
 bool Application::start()

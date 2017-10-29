@@ -54,7 +54,9 @@ HEADERS += \
 
 RESOURCES += \
     rc/mainresources.qrc \
-    rc/darkorangetheme.qrc
+    rc/darkorangetheme.qrc \
+    rc/darktheme.qrc \
+    rc/darktheme.qrc
 
 FORMS += \
     ui/mainwindow.ui \
@@ -82,3 +84,5 @@ share_target.files = $$SHARE_FILES
 share_target.path = $$BUILD_PREFIX/share/o3dstudio/share
 
 INSTALLS += ts_target share_target
+
+DISTFILES +=

@@ -10,16 +10,18 @@
 #define _O3DS_COMMON_DOCK_H
 
 #include <QtWidgets/QDockWidget>
+#include "../element.h"
 
 namespace o3d {
 namespace studio {
 namespace common {
 
-class Dock
+class Dock : public Element
 {
 public:
 
     virtual QDockWidget* ui() = 0;
+    virtual Qt::DockWidgetArea dockWidgetArea() const = 0;
 };
 
 } // namespace common

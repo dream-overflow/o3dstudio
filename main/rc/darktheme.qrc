@@ -1,0 +1,46 @@
+<RCC>
+    <qresource prefix="/darktheme/images">
+        <file>media/darktheme/images/up_arrow_disabled.png</file>
+        <file>media/darktheme/images/Hmovetoolbar.png</file>
+        <file>media/darktheme/images/stylesheet-branch-end.png</file>
+        <file>media/darktheme/images/branch_closed-on.png</file>
+        <file>media/darktheme/images/stylesheet-vline.png</file>
+        <file>media/darktheme/images/branch_closed.png</file>
+        <file>media/darktheme/images/branch_open-on.png</file>
+        <file>media/darktheme/images/transparent.png</file>
+        <file>media/darktheme/images/right_arrow_disabled.png</file>
+        <file>media/darktheme/images/sizegrip.png</file>
+        <file>media/darktheme/images/close.png</file>
+        <file>media/darktheme/images/close-hover.png</file>
+        <file>media/darktheme/images/close-pressed.png</file>
+        <file>media/darktheme/images/down_arrow.png</file>
+        <file>media/darktheme/images/Vmovetoolbar.png</file>
+        <file>media/darktheme/images/left_arrow.png</file>
+        <file>media/darktheme/images/stylesheet-branch-more.png</file>
+        <file>media/darktheme/images/up_arrow.png</file>
+        <file>media/darktheme/images/right_arrow.png</file>
+        <file>media/darktheme/images/left_arrow_disabled.png</file>
+        <file>media/darktheme/images/Hsepartoolbar.png</file>
+        <file>media/darktheme/images/branch_open.png</file>
+        <file>media/darktheme/images/Vsepartoolbar.png</file>
+        <file>media/darktheme/images/down_arrow_disabled.png</file>
+        <file>media/darktheme/images/undock.png</file>
+        <file>media/darktheme/images/checkbox_checked_disabled.png</file>
+        <file>media/darktheme/images/checkbox_checked_focus.png</file>
+        <file>media/darktheme/images/checkbox_checked.png</file>
+        <file>media/darktheme/images/checkbox_indeterminate.png</file>
+        <file>media/darktheme/images/checkbox_indeterminate_focus.png</file>
+        <file>media/darktheme/images/checkbox_unchecked_disabled.png</file>
+        <file>media/darktheme/images/checkbox_unchecked_focus.png</file>
+        <file>media/darktheme/images/checkbox_unchecked.png</file>
+        <file>media/darktheme/images/radio_checked_disabled.png</file>
+        <file>media/darktheme/images/radio_checked_focus.png</file>
+        <file>media/darktheme/images/radio_checked.png</file>
+        <file>media/darktheme/images/radio_unchecked_disabled.png</file>
+        <file>media/darktheme/images/radio_unchecked_focus.png</file>
+        <file>media/darktheme/images/radio_unchecked.png</file>
+    </qresource>
+    <qresource prefix="/style">
+        <file alias="darktheme.qss">media/darktheme/theme.qss</file>
+    </qresource>
+</RCC>

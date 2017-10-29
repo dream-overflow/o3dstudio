@@ -19,6 +19,7 @@ namespace studio {
 namespace common {
 
 class WorkspaceManager;
+class UiController;
 
 class Application
 {
@@ -32,8 +33,26 @@ public:  // singleton
 
 public:
 
+    //
+    // Properties
+    //
+
     const QString& appDir() const;
     const QString& workingDir() const;
+
+    // loads a language by the given language shortcurt (e.g. de, en)
+    void loadLanguage(const QString& language);
+
+    //
+    // Startup
+    //
+
+    bool start();
+    bool stop();
+
+    //
+    // Controllers
+    //
 
     Settings& settings();
     const Settings& settings() const;
@@ -41,11 +60,8 @@ public:
     WorkspaceManager& workspaceManager();
     const WorkspaceManager& workspaceManager() const;
 
-    bool start();
-    bool stop();
-
-    // loads a language by the given language shortcurt (e.g. de, en)
-    void loadLanguage(const QString& language);
+    UiController& ui();
+    const UiController& ui() const;
 
 private:
 
@@ -55,6 +71,8 @@ private:
     Settings m_settings;          //!< Setting manager
 
     WorkspaceManager *m_workspaceManager;
+
+    UiController *m_ui;
 
     bool m_started{false};        //!< Started application
 

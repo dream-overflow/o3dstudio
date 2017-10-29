@@ -26,6 +26,8 @@ public:
     virtual ~QuickToolBar();
 
     virtual QToolBar* ui() override;
+    virtual QString elementName() const override;
+    virtual Qt::ToolBarArea toolBarArea() const override;
 
 signals:
 

@@ -35,6 +35,7 @@
 #include "common/application.h"
 #include "common/workspace/workspacemanager.h"
 #include "common/workspace/workspace.h"
+#include "common/ui/uicontroller.h"
 
 #include "maintoolbar.h"
 #include "quicktoolbar.h"
@@ -64,6 +65,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui.actionAboutPlugins, SIGNAL(triggered(bool)), SLOT(onAboutPlugin()));
     connect(ui.actionAbout, SIGNAL(triggered(bool)), SLOT(onAbout()));
 
+    common::UiController &uiController = common::Application::instance()->ui();
+
+    // connections to ui controller
+    connect(&uiController, SIGNAL(attachContent(QString, QWidget*)), SLOT(onAttachContent(QString, QWidget*)));
+    connect(&uiController, SIGNAL(attachDock(QString, QDockWidget*, Qt::DockWidgetArea)), SLOT(onAttachDock(QString, QDockWidget*, Qt::DockWidgetArea)));
+    connect(&uiController, SIGNAL(attachToolBar(QString, QToolBar*, Qt::ToolBarArea)), SLOT(onAttachToolBar(QString, QToolBar*, Qt::ToolBarArea)));
+
+    connect(&uiController, SIGNAL(detachContent(QString, QWidget*)), SLOT(onDetachContent(QString, QWidget*)));
+    connect(&uiController, SIGNAL(detachDock(QString, QDockWidget*)), SLOT(onDetachDock(QString, QDockWidget*)));
+    connect(&uiController, SIGNAL(detachToolBar(QString, QToolBar*)), SLOT(onDetachToolBar(QString, QToolBar*)));
+
+    // connection to settings controller
     connect(&common::Application::instance()->settings(),
             SIGNAL(settingChanged(const QString &, const QVariant &)),
             SLOT(onSettingChanged(const QString &, const QVariant &)));
@@ -71,14 +84,14 @@ MainWindow::MainWindow(QWidget *parent) :
     applySettings();
 
     // main toolbar
-    QToolBar *mainToolBar = new MainToolBar();
-    setupToolBar("main", mainToolBar, Qt::TopToolBarArea);
+    MainToolBar *mainToolBar = new MainToolBar();
+    setupToolBar(mainToolBar->elementName(), mainToolBar, Qt::TopToolBarArea);
     mainToolBar->addWidget(new QLabel(tr("Search")));
     mainToolBar->addWidget(new QLineEdit());
 
     // quick toolbar
-    QToolBar *quickToolBar = new QuickToolBar();
-    setupToolBar("quick", quickToolBar, Qt::LeftToolBarArea);
+    QuickToolBar *quickToolBar = new QuickToolBar();
+    setupToolBar(quickToolBar->elementName(), quickToolBar, Qt::LeftToolBarArea);
 
     connect(quickToolBar, SIGNAL(showHome()), SLOT(onViewHomePage()));
 
@@ -148,6 +161,22 @@ QDockWidget *MainWindow::createDock(const QString &title, const QString &name, Q
     m_docks.insert(dock->property("name").toString(), dock);
 
     return dock;
+}
+
+bool MainWindow::setupDock(const QString &name, QDockWidget *dock, Qt::DockWidgetArea area)
+{
+    if (m_docks.contains(name)) {
+        return false;
+    }
+
+    // Qt::Orientation orientation ?
+    addDockWidget(area, dock);
+    dock->setMinimumWidth(200);
+    dock->setMinimumHeight(200);
+    dock->setProperty("name", QVariant(name));
+    m_docks.insert(dock->property("name").toString(), dock);
+
+    return true;
 }
 
 QToolBar *MainWindow::createToolBar(const QString &title, const QString &name, Qt::ToolBarArea area)
@@ -367,7 +396,7 @@ bool MainWindow::setThemeColor(const QString &theme)
     }
 
     if (theme == "dark") {
-        qApp->setStyle(QStyleFactory::create("dark"));
+    /*    qApp->setStyle(QStyleFactory::create("dark"));
 
         QPalette darkPalette;
         darkPalette.setColor(QPalette::Window, QColor(53,53,53));
@@ -389,8 +418,16 @@ bool MainWindow::setThemeColor(const QString &theme)
 
         qApp->setPalette(darkPalette);
         qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+*/
+        QFile themeFile(":/style/darktheme.qss");
+        themeFile.open(QIODevice::ReadOnly | QIODevice::Text);
+        QByteArray content = themeFile.readAll();
 
-        // @todo improve dock button, disabled widgets, icon theme
+        themeFile.close();
+
+        qApp->setStyle(QStyleFactory::create("dark"));  // "plastique");
+        qApp->setStyleSheet(content);
+
         m_currentTheme = theme;
         return true;
     } else if (theme == "light") {
@@ -405,16 +442,17 @@ bool MainWindow::setThemeColor(const QString &theme)
         m_currentTheme = theme;
         return true;
     } else if (theme == "darkorange") {
-        QFile themeFile(":/qss/darkorangetheme.qss");
+        QFile themeFile(":/style/darkorangetheme.qss");
         themeFile.open(QIODevice::ReadOnly | QIODevice::Text);
         QByteArray content = themeFile.readAll();
 
         themeFile.close();
 
-        qApp->setStyle("plastique");
+        qApp->setStyle(QStyleFactory::create("darkorange"));  // "plastique");
         qApp->setStyleSheet(content);
 
         m_currentTheme = theme;
+        return true;
     }
 
     return false;
@@ -561,7 +599,6 @@ void MainWindow::onSettingChanged(const QString &key, const QVariant &value)
     if (key == "o3s::main::language") {
         QString language = value.toString();
         loadLanguage(language);
-        // rest of the UI @todo
 
         QLocale locale = QLocale::system();
 
@@ -574,6 +611,47 @@ void MainWindow::onSettingChanged(const QString &key, const QVariant &value)
     } else if (key == "o3s::main::theme::color") {
         setThemeColor(value.toString());
         statusBar()->showMessage(tr("Current theme changed to %1").arg(m_currentTheme));
+    }
+}
+
+void MainWindow::onAttachContent(QString, QWidget *)
+{
+    // setupContent
+}
+
+void MainWindow::onAttachDock(QString name, QDockWidget *dock, Qt::DockWidgetArea area)
+{
+    setupDock(name, dock, area);
+}
+
+void MainWindow::onAttachToolBar(QString name, QToolBar *toolBar, Qt::ToolBarArea area)
+{
+    setupToolBar(name, toolBar, area);
+}
+
+void MainWindow::onDetachContent(QString name, QWidget *content)
+{
+    auto it = m_contents.find(name);
+    if (it != m_contents.end()) {
+        removeContentWidget(name);
+    }
+}
+
+void MainWindow::onDetachDock(QString name, QDockWidget *dock)
+{
+    auto it = m_docks.find(name);
+    if (it != m_docks.end()) {
+        m_docks.erase(it);
+        removeDockWidget(dock);
+    }
+}
+
+void MainWindow::onDetachToolBar(QString name, QToolBar *toolBar)
+{
+    auto it = m_toolBars.find(name);
+    if (it != m_toolBars.end()) {
+        m_toolBars.erase(it);
+        removeToolBar(toolBar);
     }
 }
 

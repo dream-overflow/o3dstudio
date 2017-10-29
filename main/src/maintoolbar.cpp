@@ -29,6 +29,16 @@ QToolBar *MainToolBar::ui()
     return this;
 }
 
+QString MainToolBar::elementName() const
+{
+    return("o3s::main::maintoolbar");
+}
+
+Qt::ToolBarArea MainToolBar::toolBarArea() const
+{
+    return Qt::TopToolBarArea;
+}
+
 void MainToolBar::setupButtons()
 {
    // addAction(QIcon::fromTheme("go-home"), tr("Home"), this, "onHomeBtn");

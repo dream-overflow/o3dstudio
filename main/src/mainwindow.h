@@ -30,6 +30,8 @@ public:
     virtual ~MainWindow();
 
     QDockWidget* createDock(const QString &title, const QString &name, Qt::DockWidgetArea area);
+    bool setupDock(const QString &name, QDockWidget *dock, Qt::DockWidgetArea area);
+
     QToolBar* createToolBar(const QString &title, const QString &name, Qt::ToolBarArea area);
     bool setupToolBar(const QString &name, QToolBar *toolBar, Qt::ToolBarArea area);
 
@@ -78,6 +80,14 @@ private slots:
     void onAbout();
 
     void onSettingChanged(const QString &key, const QVariant &value);
+
+    void onAttachContent(QString, QWidget*);
+    void onAttachDock(QString, QDockWidget*, Qt::DockWidgetArea area);
+    void onAttachToolBar(QString, QToolBar*, Qt::ToolBarArea area);
+
+    void onDetachContent(QString, QWidget*);
+    void onDetachDock(QString, QDockWidget*);
+    void onDetachToolBar(QString, QToolBar*);
 
 private:
 

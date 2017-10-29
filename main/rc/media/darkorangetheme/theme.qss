@@ -91,7 +91,7 @@ QAbstractItemView
 
 QWidget:focus
 {
-    /* border: 1px solid QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a); */
+    border: 1px solid QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
 }
 
 QLineEdit
@@ -171,12 +171,12 @@ QComboBox::down-arrow
 
 QGroupBox:focus
 {
-border: 2px solid QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
+    border: 1px solid QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
 }
 
 QTextEdit:focus
 {
-    border: 2px solid QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
+    border: 1px solid QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #ffa02f, stop: 1 #d7801a);
 }
 
 QScrollBar:horizontal {
@@ -343,12 +343,17 @@ QToolBar
 {
     spacing: 8px;
     margin: 8px;
+    padding: 4px;
 }
 
 QToolBar::handle
 {
      spacing: 3px; /* spacing between items in the tool bar */
       /* background: url(:/images/handle.png);*/
+}
+
+QMenu:focus, QCheckBox:focus {
+    border: none;
 }
 
 QMenu::separator

@@ -10,16 +10,18 @@
 #define _O3DS_COMMON_TOOLBAR_H
 
 #include <QtWidgets/QToolBar>
+#include "../element.h"
 
 namespace o3d {
 namespace studio {
 namespace common {
 
-class ToolBar
+class ToolBar : public Element
 {
 public:
 
     virtual QToolBar* ui() = 0;
+    virtual Qt::ToolBarArea toolBarArea() const = 0;
 };
 
 } // namespace common

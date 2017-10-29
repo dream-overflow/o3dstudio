@@ -30,6 +30,16 @@ QToolBar* QuickToolBar::ui()
     return this;
 }
 
+QString QuickToolBar::elementName() const
+{
+    return "o3s::main::quicktoolbar";
+}
+
+Qt::ToolBarArea QuickToolBar::toolBarArea() const
+{
+    return Qt::LeftToolBarArea;
+}
+
 void QuickToolBar::onHomeBtn()
 {
     showHome();
