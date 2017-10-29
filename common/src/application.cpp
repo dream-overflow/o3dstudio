@@ -8,6 +8,7 @@
 
 #include<QtCore/QDir>
 #include<QtCore/QUrl>
+#include<QtCore/QThread>
 #include<QtCore/QCoreApplication>
 #include<QtCore/QLibraryInfo>
 
@@ -16,6 +17,7 @@
 
 #include "common/workspace/workspacemanager.h"
 #include "common/ui/uicontroller.h"
+#include "common/command/commandmanager.h"
 
 using namespace o3d::studio::common;
 
@@ -32,11 +34,14 @@ Application::Application()
 
     m_workspaceManager = new WorkspaceManager();
     m_ui = new UiController();
+    m_commandManager = new CommandManager();
 }
 
 Application::~Application()
 {
     delete m_workspaceManager;
+    delete m_ui;
+    delete m_commandManager;
 }
 
 // Singleton instantiation
@@ -97,6 +102,16 @@ const UiController &Application::ui() const
     return *m_ui;
 }
 
+CommandManager &Application::command()
+{
+    return *m_commandManager;
+}
+
+const CommandManager &Application::command() const
+{
+    return *m_commandManager;
+}
+
 bool Application::start()
 {
     m_settings.loadAll();
@@ -104,6 +119,8 @@ bool Application::start()
     ModuleManager::instance()->setPluginsPath(m_settings.get("o3s::plugin::path").toUrl().toLocalFile());
     ModuleManager::instance()->setPluginsFilters(m_settings.get("o3s::plugin::exts").toStringList());
     ModuleManager::instance()->searchModules();
+
+    m_commandManager->begin();
 
     // alway load o3sdummy for testing
     Module *o3sdummy = ModuleManager::instance()->load("o3sdummy");
@@ -118,6 +135,12 @@ bool Application::start()
 bool Application::stop()
 {
     m_settings.saveAll();
+
+    m_commandManager->finish();
+
+    while (m_commandManager->hasPendingCommands() || m_commandManager->hasRunningCommands()) {
+        m_commandManager->wait(20);
+    }
 
     ModuleManager::instance()->unloadAll();
     ModuleManager::destroy();

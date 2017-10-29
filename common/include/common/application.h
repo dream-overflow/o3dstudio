@@ -20,6 +20,7 @@ namespace common {
 
 class WorkspaceManager;
 class UiController;
+class CommandManager;
 
 class Application
 {
@@ -63,6 +64,9 @@ public:
     UiController& ui();
     const UiController& ui() const;
 
+    CommandManager& command();
+    const CommandManager& command() const;
+
 private:
 
     QString m_appDir;             //!< Absolute application base directory
@@ -71,6 +75,8 @@ private:
     Settings m_settings;          //!< Setting manager
 
     WorkspaceManager *m_workspaceManager;
+
+    CommandManager *m_commandManager;
 
     UiController *m_ui;
 

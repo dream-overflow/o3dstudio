@@ -43,7 +43,9 @@ SOURCES += \
     src/plugin/pluginmodel.cpp \
     src/property/propertysectionnode.cpp \
     src/plugin/pluginsectionnode.cpp \
-    src/ui/uicontroller.cpp
+    src/ui/uicontroller.cpp \
+    src/command/command.cpp \
+    src/command/commandmanager.cpp
 
 
 HEADERS += \ 
@@ -70,7 +72,9 @@ HEADERS += \
     include/common/plugin/pluginsectionnode.h \
     include/common/property/propertysectionnode.h \
     include/common/ui/uicontroller.h \
-    include/common/element.h
+    include/common/element.h \
+    include/common/command/command.h \
+    include/common/command/commandmanager.h
 
 copyToDestdir($$TRANSLATIONS_FILES, languages)
 
