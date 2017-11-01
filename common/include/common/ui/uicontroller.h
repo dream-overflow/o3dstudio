@@ -37,6 +37,10 @@ public:
     bool removeDock(Dock *dock);
     bool removeToolBar(ToolBar *toolBar);
 
+    bool removeContent(const QString &name);
+    bool removeDock(const QString &name);
+    bool removeToolBar(const QString &name);
+
     bool setActiveContent(Content *content, bool showHide);
 
     Content* content(const QString &name);

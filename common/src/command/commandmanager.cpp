@@ -195,19 +195,19 @@ void CommandManager::run()
         if (nextCmd != nullptr) {
             if (nextCmd->commandState() == COMMAND_READY) {
                 // never executed, then execute
-                if (nextCmd->executeCommand()) {
-                    nextCmd->setExecuted();
+                if (nextCmd->doCommand()) {
+                    nextCmd->setDone();
 
                     emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
                 }
-            } else if (nextCmd->commandState() == COMMAND_DONE) {
+            } else if (nextCmd->commandState() == COMMAND_REDONE) {
                 // previously redone, then undo
                 if (nextCmd->undoCommand()) {
                     nextCmd->setUndone();
 
                     emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
                 }
-            } else if (nextCmd->commandState() == COMMAND_EXECUTED) {
+            } else if (nextCmd->commandState() == COMMAND_DONE) {
                 // previously executed, then undo
                 if (nextCmd->undoCommand()) {
                     nextCmd->setUndone();
@@ -217,7 +217,7 @@ void CommandManager::run()
             } else if (nextCmd->commandState() == COMMAND_UNDONE) {
                 // previously undone, then redo
                 if (nextCmd->redoCommand()) {
-                    nextCmd->setDone();
+                    nextCmd->setReDone();
 
                     emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
                 }
@@ -227,10 +227,10 @@ void CommandManager::run()
 
             if (nextCmd->commandState() == COMMAND_READY) {
                 // error, may not arrives
-            } else if (nextCmd->commandState() == COMMAND_DONE) {
+            } else if (nextCmd->commandState() == COMMAND_REDONE) {
                 // in done queue, can be later undone
                 m_doneCommandsQueue.enqueue(nextCmd);
-            } else if (nextCmd->commandState() == COMMAND_EXECUTED) {
+            } else if (nextCmd->commandState() == COMMAND_DONE) {
                 // in done queue, can be later undone
                 m_doneCommandsQueue.enqueue(nextCmd);
             } else if (nextCmd->commandState() == COMMAND_UNDONE) {

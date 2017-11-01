@@ -13,6 +13,9 @@
 
 using namespace o3d::studio::common;
 
+Element::~Element()
+{
+}
 
 UiController::UiController() :
     QObject(),
@@ -23,7 +26,41 @@ UiController::UiController() :
 
 UiController::~UiController()
 {
+    // docks
+    for (auto it = m_docks.begin(); it != m_docks.end(); ++it) {
+        if ((*it)->ui()) {
+            (*it)->ui()->setParent(nullptr);
+            delete (*it)->ui();
+        }
 
+        if (reinterpret_cast<void*>(*it) != reinterpret_cast<void*>((*it)->ui())) {
+            delete *it;
+        }
+    }
+
+    // toolbars
+    for (auto it = m_toolBars.begin(); it != m_toolBars.end(); ++it) {
+        if ((*it)->ui()) {
+            (*it)->ui()->setParent(nullptr);
+            delete (*it)->ui();
+        }
+
+        if (reinterpret_cast<void*>(*it) != reinterpret_cast<void*>((*it)->ui())) {
+            delete *it;
+        }
+    }
+
+    // contents
+    for (auto it = m_contents.begin(); it != m_contents.end(); ++it) {
+        if ((*it)->ui()) {
+            (*it)->ui()->setParent(nullptr);
+            delete (*it)->ui();
+        }
+
+        if (reinterpret_cast<void*>(*it) != reinterpret_cast<void*>((*it)->ui())) {
+            delete *it;
+        }
+    }
 }
 
 bool UiController::addContent(Content *content)
@@ -90,10 +127,17 @@ bool UiController::removeContent(Content *content)
 
         emit detachContent(content->elementName(), content->ui());
 
+        content->ui()->setParent(nullptr);
         return true;
     }
 
     return false;
+}
+
+bool UiController::removeContent(const QString &name)
+{
+    Content *lcontent = content(name);
+    return removeContent(lcontent);
 }
 
 bool UiController::removeDock(Dock *dock)
@@ -107,10 +151,17 @@ bool UiController::removeDock(Dock *dock)
         m_docks.removeAt(index);
         emit detachDock(dock->elementName(), dock->ui());
 
+        dock->ui()->setParent(nullptr);
         return true;
     }
 
     return false;
+}
+
+bool UiController::removeDock(const QString &name)
+{
+    Dock *ldock = dock(name);
+    return removeDock(ldock);
 }
 
 bool UiController::removeToolBar(ToolBar *toolBar)
@@ -124,10 +175,17 @@ bool UiController::removeToolBar(ToolBar *toolBar)
         m_toolBars.removeAt(index);
         emit detachToolBar(toolBar->elementName(), toolBar->ui());
 
+        toolBar->ui()->setParent(nullptr);
         return true;
     }
 
     return false;
+}
+
+bool UiController::removeToolBar(const QString &name)
+{
+    ToolBar *ltoolBar = toolBar(name);
+    return removeToolBar(ltoolBar);
 }
 
 bool UiController::setActiveContent(Content *content, bool showHide)

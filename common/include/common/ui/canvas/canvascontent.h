@@ -10,6 +10,10 @@
 #define _O3DS_COMMON_CANVASCONTENT_H
 
 #include <QtGui/QImage>
+#include <QtGui/QPen>
+#include <QtGui/QBrush>
+#include <QtGui/QPixmap>
+
 #include "../content.h"
 
 namespace o3d {
@@ -24,6 +28,26 @@ public:
 
     CanvasContent(QWidget *parent = nullptr);
     virtual ~CanvasContent();
+
+    virtual QString elementName() const override;
+    virtual QWidget* ui() override;
+
+    virtual QSize minimumSizeHint() const override;
+    virtual QSize sizeHint() const override;
+
+protected:
+
+    virtual void paintEvent(QPaintEvent *event) override;
+
+private:
+
+    bool m_antialiasing;
+
+//    int shape;
+//    QPen pen;
+//    QBrush brush;
+//    bool transformed;
+//    QPixmap pixmap;
 };
 
 } // namespace common

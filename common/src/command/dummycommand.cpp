@@ -13,8 +13,8 @@
 using namespace o3d::studio::common;
 
 
-DummyCommand::DummyCommand(const QMap<QString, QVariant> &options) :
-    Command("o3s::common::dummy", options)
+DummyCommand::DummyCommand() :
+    Command("o3s::common::dummy")
 {
 }
 
@@ -27,7 +27,7 @@ QString DummyCommand::commandLabel() const
     return QApplication::translate("o3d::studio::common", "Dummy operation");
 }
 
-bool DummyCommand::executeCommand()
+bool DummyCommand::doCommand()
 {
     qDebug("DummyCommand executed");
     return true;

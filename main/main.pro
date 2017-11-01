@@ -37,7 +37,8 @@ SOURCES += \
     src/property/displaysection.cpp \
     src/quicktoolbar.cpp \
     src/plugin/pluginsection.cpp \
-    src/content/browsercontent.cpp
+    src/content/browsercontent.cpp \
+    src/dock/mainconsole.cpp
 
 
 HEADERS += \
@@ -51,7 +52,8 @@ HEADERS += \
     src/property/displaysection.h \
     src/quicktoolbar.h \
     src/plugin/pluginsection.h \
-    src/content/browsercontent.h
+    src/content/browsercontent.h \
+    src/dock/mainconsole.h
 
 
 RESOURCES += \

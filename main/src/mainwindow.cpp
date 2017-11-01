@@ -38,9 +38,13 @@
 #include "common/workspace/workspacemanager.h"
 #include "common/workspace/workspace.h"
 #include "common/ui/uicontroller.h"
+#include "common/ui/canvas/canvascontent.h"
 
 #include "maintoolbar.h"
 #include "quicktoolbar.h"
+
+#include "dock/mainconsole.h"
+// #include "dock/workspace.h"
 
 #include "content/browsercontent.h"
 
@@ -117,20 +121,22 @@ MainWindow::MainWindow(QWidget *parent) :
     // property dock @todo using Dock
     createDock(tr("Property"), "property", Qt::RightDockWidgetArea);
 
-    // console dock @todo using Dock
-    QDockWidget *consoleDock = createDock(tr("Console"), "console", Qt::BottomDockWidgetArea);
-    consoleDock->setMinimumWidth(150);
-    consoleDock->setMinimumHeight(150);
+    // main console dock
+    MainConsole *mainConsole= new MainConsole();
+    uiCtrl.addDock(mainConsole);
+
     // @todo need a custom title bar
     // consoleDock->titleBarWidget()->addAction(new QAction(QIcon::fromTheme("go-previous"), "Collapse"));
 
-    // welcome central @todo using Content
+    // welcome central
     BrowserContent *browserContent = new BrowserContent();
     uiCtrl.addContent(browserContent);
     uiCtrl.setActiveContent(browserContent, true);
 
-    // addContentWidget("welcome", welcome);
-    // setCurrentContentWidget("welcome");
+    // initial OpenGL canvas central
+    common::CanvasContent *glContent = new common::CanvasContent();
+    uiCtrl.addContent(glContent);
+    uiCtrl.setActiveContent(glContent, true);
 
     // @todo setup status bar with some fixed widgets addPermanentWidget()
     statusBar()->showMessage(tr("Objective-3D Studio successfully started !"));
@@ -143,24 +149,30 @@ MainWindow::~MainWindow()
 {
     commitSettings();
 
+    common::UiController &uiCtrl = common::Application::instance()->ui();
+    uiCtrl.disconnect(this);
+
     // docks
     for (auto it = m_docks.begin(); it != m_docks.end(); ++it) {
-        it.value()->setParent(nullptr);
+        if (!uiCtrl.removeDock(it.key())) {
+            it.value()->setParent(nullptr);
+        }
         delete it.value();
     }
 
     // toolbars
     for (auto it = m_toolBars.begin(); it != m_toolBars.end(); ++it) {
-        it.value()->setParent(nullptr);
+        if (!uiCtrl.removeToolBar(it.key())) {
+            it.value()->setParent(nullptr);
+        }
         delete it.value();
     }
 
     // contents
     for (auto it = m_contents.begin(); it != m_contents.end(); ++it) {
-        if (it.value() == m_currentContent) {
+        if (!uiCtrl.removeContent(it.key())) {
             it.value()->setParent(nullptr);
         }
-
         delete it.value();
     }
 }
@@ -245,6 +257,8 @@ bool MainWindow::removeContentWidget(const QString &name)
     if (name == "welcome") {
         return false;
     }
+
+    // @todo using ctrl
 
     auto it = m_contents.find(name);
     if (it != m_contents.end()) {

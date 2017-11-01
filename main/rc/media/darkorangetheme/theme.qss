@@ -165,7 +165,7 @@ QComboBox::drop-down
 
 QComboBox::down-arrow
 {
-     image: url(:/down_arrow.png);
+     image: url(:/images/down_arrow.png);
 }
 
 /* try to fix shift on select but need a max-height to fix the issue generated */

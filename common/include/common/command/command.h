@@ -19,16 +19,16 @@ namespace common {
 
 enum CommandState {
     COMMAND_READY = 0,
-    COMMAND_EXECUTED = 1,
+    COMMAND_DONE = 1,
     COMMAND_UNDONE = 2,
-    COMMAND_DONE = 3
+    COMMAND_REDONE = 3
 };
 
 class Command
 {
 public:
 
-    Command(const QString &name, const QMap<QString, QVariant> &options);
+    Command(const QString &name);
     virtual ~Command();
 
     /**
@@ -42,11 +42,6 @@ public:
     CommandState commandState() const;
 
     /**
-     * @brief Command options map.
-     */
-    const QMap<QString, QVariant>& commandOptions() const;
-
-    /**
      * @brief Return a translated verbose string of the command to display.
      */
     virtual QString commandLabel() const;
@@ -55,7 +50,7 @@ public:
      * @brief First processing of the command.
      * @return true if success
      */
-    virtual bool executeCommand() = 0;
+    virtual bool doCommand() = 0;
 
     /**
      * @brief Undo the command after a previous execute or redo.
@@ -69,8 +64,8 @@ public:
      */
     virtual bool redoCommand() = 0;
 
-    void setExecuted();
     void setDone();
+    void setReDone();
     void setUndone();
 
 protected:
@@ -80,9 +75,6 @@ protected:
 
     //! last command state
     CommandState m_commandState;
-
-    //! local commands options
-    const QMap<QString, QVariant> &m_commandOptions;
 };
 
 } // namespace common

@@ -19,11 +19,11 @@ class DummyCommand : public Command
 {
 public:
 
-    DummyCommand(const QMap<QString, QVariant> &options = QMap<QString, QVariant>());
+    DummyCommand();
     virtual ~DummyCommand();
 
     virtual QString commandLabel() const override;
-    virtual bool executeCommand() override;
+    virtual bool doCommand() override;
     virtual bool undoCommand() override;
     virtual bool redoCommand() override;
 };
