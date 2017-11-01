@@ -35,3 +35,13 @@ QString BrowserContent::elementName() const
 {
     return "o3s::main::browsercontent";
 }
+
+QSize BrowserContent::sizeHint() const
+{
+    return QSize(300, 200);
+}
+
+QSize BrowserContent::minimumSizeHint() const
+{
+    return QSize(100, 100);
+}

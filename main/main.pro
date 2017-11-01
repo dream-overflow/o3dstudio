@@ -6,7 +6,7 @@
 
 include(../o3dstudio.pri)
 
-QT       += core gui widgets
+QT       += core gui widgets opengl
 
 greaterThan(QT_MAJOR_VERSION, 5): QT += widgets
 
@@ -72,6 +72,9 @@ FORMS += \
     ui/newprojectdialog.ui
 
 LIBS += -L$$O3S_BIN_DIR -lo3scommon
+LIBS += -lobjective3d-dbg
+
+INCLUDEPATH += $$(PREFIX)/lib/objective3d-dbg/
 
 SHARE_FILES = $$files($$TARGETPATH/share/*)
 # SHARE_FILES = \

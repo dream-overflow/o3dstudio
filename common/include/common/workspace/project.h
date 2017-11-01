@@ -10,12 +10,16 @@
 #define _O3DS_COMMON_PROJECT_H
 
 #include <QtCore/QString>
+#include <QtCore/QUuid>
+#include <QtCore/QDir>
 
 namespace o3d {
 namespace studio {
 namespace common {
 
 class Workspace;
+class MasterScene;
+class O3DCanvasContent;
 
 /**
  * @brief The Project final class
@@ -27,20 +31,34 @@ public:
     Project(Workspace *workspace, const QString &name);
     ~Project();
 
-    const QString& getName() const;
-    const QString& getFilename() const;
+    const QUuid& uuid() const;
+    const QString& name() const;
+    const QString& filename() const;
+    const QDir& path() const;
 
     bool setLocation(const QString &path);
 
     bool load();
     bool save();
 
+    bool hasChanges();
+
+    MasterScene* masterScene();
+    const MasterScene* masterScene() const;
+
+    void initialize();
+
 private:
 
-    Workspace *m_workspace;    //!< Related workspace;
+    Workspace *m_workspace;    //!< Workspace where the projet is currently loaded
 
-    QString m_filename;        //!< Related project file name
-    QString m_name;            //!< Unique project name
+    QString m_filename;        //!< Project file name
+    QString m_name;            //!< Project display name
+    QDir m_path;               //!< Project path
+
+    QUuid m_uuid;              //!< Unique projet identifier
+
+    MasterScene *m_masterScene;
 };
 
 } // namespace common

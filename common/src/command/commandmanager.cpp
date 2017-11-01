@@ -18,6 +18,8 @@ CommandManager::CommandManager() :
 
 CommandManager::~CommandManager()
 {
+    wait();  // join the thread
+
     Q_ASSERT(m_todoCommandsQueue.isEmpty());
     Q_ASSERT(m_waitingCommandsQueue.isEmpty());
 
@@ -240,6 +242,8 @@ void CommandManager::run()
 
             m_waitingCommandsQueue.dequeue();
             m_rwLock.unlock();
+        } else {
+            sleep(1);
         }
 
         yieldCurrentThread();

@@ -18,6 +18,10 @@
 #include "settings.h"
 #include "common/application.h"
 
+#include <o3d/core/memorymanager.h>
+#include <o3d/core/application.h>
+#include <o3d/core/debug.h>
+
 QT_BEGIN_NAMESPACE
 // Q_IMPORT_PLUGIN(o3spluginoff)
 QT_END_NAMESPACE
@@ -64,6 +68,13 @@ void o3sMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
     // (*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
 }
 
+void onExit()
+{
+    // terminate cleanly if the program call exit before an Application::quit().
+    if (o3d::Application::isInit())
+        o3d::Application::quit();
+}
+
 int main(int argc, char *argv[])
 {
     // Warn the debugger that we want to detect memory leaks
@@ -76,9 +87,41 @@ int main(int argc, char *argv[])
         _CrtSetDbgFlag(lDbgFlag);
     #endif
 
+    atexit(onExit);
+
     qInstallMessageHandler(o3sMessageHandler);
 
     QApplication lApp(argc, argv);
+
+    // o3d initialization
+    o3d::AppSettings settings;
+
+    // no native display management (embedded by Qt)
+    settings.m_display = o3d::False;
+
+    try
+    {
+        o3d::Application::init(settings, argc, argv);
+
+        // cleared log out file with new header
+        o3d::Debug::instance()->setDefaultLog("objective3d.log");
+        o3d::Debug::instance()->getDefaultLog().clearLog();
+        o3d::Debug::instance()->getDefaultLog().writeHeaderLog();
+
+        o3d::MemoryManager::instance()->enableLog(o3d::MemoryManager::MEM_RAM, 128);
+        o3d::MemoryManager::instance()->enableLog(o3d::MemoryManager::MEM_GFX);
+    }
+    catch (o3d::E_BaseException &ex)
+    {
+        o3d::Application::message(
+            o3d::String("Failed to initialize the application: ") + ex.what(),
+            o3d::Application::getAppName(),
+            o3d::Application::ICON_ERROR);
+
+        return -1;
+    }
+
+    int lExitcode = 0;
 
     QCoreApplication::setOrganizationName("Dream Overflow");
     QCoreApplication::setApplicationName("Objective-3D Studio");
@@ -91,7 +134,17 @@ int main(int argc, char *argv[])
     o3d::studio::main::MainWindow *lMainWindow = new o3d::studio::main::MainWindow();
     lMainWindow->show();
 
-    int lResult = lApp.exec();
+    try {
+        lExitcode = lApp.exec();
+    } catch (o3d::E_BaseException &ex) {
+        o3d::Application::message(
+            o3d::String("Exception not caught during application execution: ") + ex.what(),
+            o3d::Application::getAppName(),
+            o3d::Application::ICON_ERROR);
+    }
+
+    // process remaining events
+    o3d::EvtManager::instance()->processEvent();
 
     delete lMainWindow;
     lMainWindow = nullptr;
@@ -102,5 +155,8 @@ int main(int argc, char *argv[])
     o3d::studio::common::Application::instance()->stop();
     o3d::studio::common::Application::destroy();
 
-    return lResult;
+    o3d::Debug::instance()->getDefaultLog().writeFooterLog();
+    o3d::Application::quit();
+
+    return lExitcode;
 }

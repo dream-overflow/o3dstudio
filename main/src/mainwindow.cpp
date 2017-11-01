@@ -38,7 +38,7 @@
 #include "common/workspace/workspacemanager.h"
 #include "common/workspace/workspace.h"
 #include "common/ui/uicontroller.h"
-#include "common/ui/canvas/canvascontent.h"
+#include "common/ui/canvas/o3dcanvascontent.h"
 
 #include "maintoolbar.h"
 #include "quicktoolbar.h"
@@ -47,6 +47,10 @@
 // #include "dock/workspace.h"
 
 #include "content/browsercontent.h"
+
+#include <o3d/core/base.h>
+#include <o3d/core/thread.h>
+#include <o3d/core/evtmanager.h>
 
 using namespace o3d::studio::main;
 
@@ -61,10 +65,16 @@ MainWindow::MainWindow(QWidget *parent) :
     common::UiController &uiCtrl = common::Application::instance()->ui();
 
     connect(ui.actionNewProject, SIGNAL(triggered(bool)), SLOT(onFileNewProject()));
+
     connect(ui.actionNewResource, SIGNAL(triggered(bool)), SLOT(onFileNewResource()));
+    ui.actionNewResource->setEnabled(false);
+
     connect(ui.actionWorkspaceManage, SIGNAL(triggered(bool)), SLOT(onFileWorkspaceManage()));
+
     connect(ui.actionPreferences, SIGNAL(triggered(bool)), SLOT(onFileMenuPreferences()));
     connect(ui.actionClose, SIGNAL(triggered(bool)), SLOT(onFileMenuClose()));
+    ui.actionClose->setEnabled(false);
+
     connect(ui.actionQuit, SIGNAL(triggered(bool)), SLOT(onFileMenuQuit()));
 
     connect(ui.actionWindowFullscreen, SIGNAL(triggered(bool)), SLOT(onWindowFullScreen()));
@@ -133,16 +143,17 @@ MainWindow::MainWindow(QWidget *parent) :
     uiCtrl.addContent(browserContent);
     uiCtrl.setActiveContent(browserContent, true);
 
-    // initial OpenGL canvas central
-    common::CanvasContent *glContent = new common::CanvasContent();
-    uiCtrl.addContent(glContent);
-    uiCtrl.setActiveContent(glContent, true);
-
     // @todo setup status bar with some fixed widgets addPermanentWidget()
     statusBar()->showMessage(tr("Objective-3D Studio successfully started !"));
 
     // for test execute a dummy command @todo remove me
     common::Application::instance()->command().addCommand(new common::DummyCommand());
+
+    // process o3d events
+    // @todo should look using post events http://doc.qt.io/qt-5/qabstracteventdispatcher.html
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateObjective3D()));
+    timer->start(5);
 }
 
 MainWindow::~MainWindow()
@@ -523,6 +534,13 @@ void MainWindow::changeEvent(QEvent *event)
     QMainWindow::changeEvent(event);
 }
 
+void MainWindow::updateObjective3D()
+{
+    if (o3d::EvtManager::instance()->isPendingEvent()) {
+        o3d::EvtManager::instance()->processEvent();
+    }
+}
+
 void MainWindow::onFileNewProject()
 {
     // new project dialog
@@ -740,7 +758,7 @@ void MainWindow::onCommandDone(QString name, QString label, bool done)
 void MainWindow::closeWorkspace()
 {
     o3d::studio::common::Workspace *workspace = o3d::studio::common::Application::instance()->workspaceManager().current();
-    if (workspace && workspace->hasChanged()) {
+    if (workspace && workspace->hasChanges()) {
         statusBar()->showMessage(tr("Saving current workspace..."));
         workspace->save();
         statusBar()->showMessage(tr("Current workspace saved !"));

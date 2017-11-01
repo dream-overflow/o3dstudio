@@ -14,12 +14,14 @@ using namespace o3d::studio::common;
 WorkspaceManager::WorkspaceManager()
 {
     // @todo get last session loaded workspace
+    m_current = new Workspace("default");
 }
 
 WorkspaceManager::~WorkspaceManager()
 {
     if (m_current) {
         m_current->save();
+        delete m_current;
     }
 }
 
@@ -34,7 +36,7 @@ Workspace *WorkspaceManager::addWorkspace(const QString &name)
         return nullptr;
     }
 
-    if (m_current->getName() == name) {
+    if (m_current->name() == name) {
         return nullptr;
     }
 
@@ -74,7 +76,7 @@ bool WorkspaceManager::hasWorkspace(const QString &name) const
 
 bool WorkspaceManager::loadWorkspace(const QString &name)
 {
-    if (m_current && m_current->getName() == name) {
+    if (m_current && m_current->name() == name) {
         return true;
     }
 

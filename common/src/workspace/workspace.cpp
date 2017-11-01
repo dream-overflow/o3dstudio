@@ -19,36 +19,107 @@ Workspace::Workspace(const QString &name) :
 
 Workspace::~Workspace()
 {
+    Project *project = nullptr;
+    foreach (project, m_loadedProjects) {
+        if (project->hasChanges()) {
+            project->save();
+        }
 
+        delete project;
+    }
 }
 
-const QString& Workspace::getName() const
+const QString& Workspace::name() const
 {
     return m_name;
 }
 
-const QString& Workspace::getFilename() const
+const QString& Workspace::filename() const
 {
     return m_filename;
 }
 
-QStringList Workspace::getProjectsList() const
+Project *Workspace::project(const QUuid &uuid)
+{
+    auto it = m_loadedProjects.find(uuid);
+    if (it != m_loadedProjects.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Project *Workspace::project(const QUuid &uuid) const
+{
+    auto cit = m_loadedProjects.find(uuid);
+    if (cit != m_loadedProjects.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
+}
+
+QStringList Workspace::projectsList() const
 {
     return m_foundProjects;
 }
 
-bool Workspace::hasChanged() const
+Project *Workspace::addProject(const QString &name)
 {
-    // @todo
+    Project *project = new Project(this, name);
+    Q_ASSERT(m_loadedProjects.find(project->uuid()) == m_loadedProjects.end());
+
+    m_loadedProjects.insert(project->uuid(), project);
+
+    return project;
+}
+
+bool Workspace::closeProject(const QUuid& uuid)
+{
+    auto it = m_loadedProjects.find(uuid);
+    if (it != m_loadedProjects.end()) {
+        Project *project = it.value();
+
+        m_loadedProjects.erase(it);
+
+        if (project == m_activeProject) {
+            m_activeProject = nullptr;
+            // @todo signal change active project
+        }
+
+        project->save();
+        delete project;
+
+        return true;
+    }
 
     return false;
 }
 
-bool Workspace::selectWorkspace(const QString &name)
+bool Workspace::hasProject(const QUuid& uuid)
 {
-    auto it = m_loadedProjects.find(name);
+    auto cit = m_loadedProjects.find(uuid);
+    return cit != m_loadedProjects.cend();
+}
+
+bool Workspace::hasChanges() const
+{
+    // at least one project has changes to be saved
+    Project *project = nullptr;
+    foreach (project, m_loadedProjects) {
+        if (project->hasChanges()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Workspace::selectProject(const QUuid &uuid)
+{
+    auto it = m_loadedProjects.find(uuid);
     if (it != m_loadedProjects.end()) {
-        m_selectedProject = it.value();
+        m_activeProject = it.value();
         return true;
     }
 
@@ -57,6 +128,13 @@ bool Workspace::selectWorkspace(const QString &name)
 
 bool Workspace::save()
 {
+    Project *project = nullptr;
+    foreach (project, m_loadedProjects) {
+        if (!project->save()) {
+            // @todo what ?
+        }
+    }
+
     return true;
 }
 

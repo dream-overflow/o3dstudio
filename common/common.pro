@@ -6,7 +6,7 @@
 
 include(../o3dstudio.pri)
 
-QT       += core gui widgets
+QT       += core gui widgets opengl
 
 greaterThan(QT_MAJOR_VERSION, 5): QT += widgets
 
@@ -48,7 +48,10 @@ SOURCES += \
     src/command/commandmanager.cpp \
     src/command/dummycommand.cpp \
     src/ui/canvas/canvascontent.cpp \
-    src/ui/canvas/glcanvascontent.cpp
+    src/ui/canvas/glcanvascontent.cpp \
+    src/ui/qtrenderer.cpp \
+    src/ui/canvas/o3dcanvascontent.cpp \
+    src/workspace/masterscene.cpp
 
 
 HEADERS += \ 
@@ -80,7 +83,15 @@ HEADERS += \
     include/common/command/commandmanager.h \
     include/common/command/dummycommand.h \
     include/common/ui/canvas/canvascontent.h \
-    include/common/ui/canvas/glcanvascontent.h
+    include/common/ui/canvas/glcanvascontent.h \
+    include/common/ui/qtrenderer.h \
+    include/common/ui/canvas/o3dcanvascontent.h \
+    include/common/workspace/masterscene.h \
+    include/common/ui/canvas/o3ddrawer.h
+
+LIBS += -lobjective3d-dbg
+
+INCLUDEPATH += $$(PREFIX)/lib/objective3d-dbg/
 
 copyToDestdir($$TRANSLATIONS_FILES, languages)
 

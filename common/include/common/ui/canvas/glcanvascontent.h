@@ -10,17 +10,39 @@
 #define _O3DS_COMMON_GLCANVASCONTENT_H
 
 #include <QtWidgets/QWidget>
+#include <QtOpenGL>
+
 #include "../content.h"
 
 namespace o3d {
 namespace studio {
 namespace common {
 
-class GLCanvasContent : public QWidget, public Content
+class GLCanvasContent : public QOpenGLWidget, public Content
 {
 public:
 
+    explicit GLCanvasContent(QWidget *parent = nullptr);
+    virtual ~GLCanvasContent();
+
+    virtual QString elementName() const override;
+    virtual QWidget* ui() override;
+
+    virtual QSize minimumSizeHint() const override;
+    virtual QSize sizeHint() const override;
+
+public slots:
+
+    //void renderLater();
+    // void renderNow();
+
 protected:
+
+    virtual void initializeGL() override;
+    virtual void paintGL() override;
+    virtual void resizeGL(int w, int h) override;
+
+private:
 };
 
 } // namespace common

@@ -53,10 +53,6 @@ public:
     virtual bool applySettings() override;
     virtual bool commitSettings() override;
 
-signals:
-
-    void setCurrentLanguage(const QString &language);
-
 protected:
 
     virtual void closeEvent(QCloseEvent*);
@@ -65,6 +61,8 @@ protected:
     virtual void changeEvent(QEvent*);
 
 private slots:
+
+    void updateObjective3D();
 
     void onFileNewProject();
     void onFileNewResource();

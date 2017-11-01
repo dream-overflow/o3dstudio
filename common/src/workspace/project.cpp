@@ -8,29 +8,44 @@
 
 #include "common/workspace/project.h"
 #include "common/workspace/workspace.h"
+#include "common/workspace/masterscene.h"
 
 using namespace o3d::studio::common;
 
 Project::Project(Workspace *workspace, const QString &name) :
     m_workspace(workspace),
-    m_name(name)
+    m_filename(),
+    m_path(QDir::current()),
+    m_name(name),
+    m_uuid(QUuid::createUuid()),
+    m_masterScene(nullptr)
 {
-
+    m_masterScene = new MasterScene(this);
 }
 
 Project::~Project()
 {
-
+    delete m_masterScene;
 }
 
-const QString& Project::getName() const
+const QUuid &Project::uuid() const
+{
+    return m_uuid;
+}
+
+const QString& Project::name() const
 {
     return m_name;
 }
 
-const QString& Project::getFilename() const
+const QString& Project::filename() const
 {
     return m_filename;
+}
+
+const QDir &Project::path() const
+{
+    return m_path;
 }
 
 bool Project::setLocation(const QString &path)
@@ -47,4 +62,27 @@ bool Project::load()
 bool Project::save()
 {
     return true;
+}
+
+bool Project::hasChanges()
+{
+    // @todo
+    return true;
+}
+
+MasterScene *Project::masterScene()
+{
+    return m_masterScene;
+}
+
+const MasterScene *Project::masterScene() const
+{
+    return m_masterScene;
+}
+
+void Project::initialize()
+{
+    if (m_masterScene) {
+        m_masterScene->initialize();
+    }
 }

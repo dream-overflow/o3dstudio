@@ -11,6 +11,7 @@
 
 #include <QtCore/QStringList>
 #include <QtCore/QMap>
+#include <QtCore/QUuid>
 
 namespace o3d {
 namespace studio {
@@ -28,34 +29,39 @@ public:
     Workspace(const QString &name);
     ~Workspace();
 
-    const QString& getName() const;
-    const QString& getFilename() const;
+    const QString& name() const;
+    const QString& filename() const;
 
-    Project* getProject(const QString& name);
-    const Project* getProject(const QString& name) const;
+    Project* project(const QUuid& uuid);
+    const Project* project(const QUuid& uuid) const;
 
     /**
      * @brief Return the list of found projects.
      * @return
      */
-    QStringList getProjectsList() const;
+    QStringList projectsList() const;
 
-    Workspace* addWorkspace(const QString &name);
-    Workspace* getWorkspace(const QString &name);
-    bool deleteWorkspace(const QString &name);
-    bool hasWorkspace(const QString &name);
+    Project* addProject(const QString &name);
+
+    /**
+     * @brief The project is saved before to be closed and removed from the workspace.
+     * @param uuid
+     * @return
+     */
+    bool closeProject(const QUuid& uuid);
+    bool hasProject(const QUuid& uuid);
 
     /**
      * @brief Changes occurs to one or more projects.
      * @return
      */
-    bool hasChanged() const;
+    bool hasChanges() const;
 
     /**
-     * @brief Set the current selected workspace.
+     * @brief Set the current selected project.
      * @param name
      */
-    bool selectWorkspace(const QString &name);
+    bool selectProject(const QUuid &uuid);
 
     bool save();
     bool load();
@@ -66,9 +72,9 @@ private:
     QString m_name;            //!< Unique workspace name
 
     QStringList m_foundProjects;
-    QMap<QString, Project*> m_loadedProjects;
+    QMap<QUuid, Project*> m_loadedProjects;
 
-    Project *m_selectedProject{nullptr};
+    Project *m_activeProject{nullptr};
 };
 
 } // namespace common
