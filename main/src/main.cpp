@@ -23,7 +23,6 @@
 #include <o3d/core/debug.h>
 
 QT_BEGIN_NAMESPACE
-// Q_IMPORT_PLUGIN(o3spluginoff)
 QT_END_NAMESPACE
 
 // Get the default Qt message handler.

@@ -10,9 +10,10 @@
 
 using namespace o3d::studio::common;
 
-GLCanvasContent::GLCanvasContent(QWidget *parent) :
+GLCanvasContent::GLCanvasContent(const QString &suffix, QWidget *parent) :
     QOpenGLWidget(parent),
-    Content()
+    Content(),
+    m_suffix(suffix)
 {
     QSurfaceFormat format;
     format.setRedBufferSize(8);
@@ -38,8 +39,7 @@ GLCanvasContent::~GLCanvasContent()
 
 QString GLCanvasContent::elementName() const
 {
-    // @todo need a suffix to have multiples
-    return "o3s::main::glcanvascontent";
+    return "o3s::main::glcanvascontent::" + m_suffix;
 }
 
 QWidget *GLCanvasContent::ui()
@@ -72,5 +72,6 @@ void GLCanvasContent::paintGL()
 
 void GLCanvasContent::resizeGL(int w, int h)
 {
-
+    Q_UNUSED(w)
+    Q_UNUSED(h)
 }

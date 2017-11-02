@@ -6,6 +6,8 @@
  * @details
  */
 
+#include <QtCore/QTimer>
+
 #include "common/ui/canvas/o3dcanvascontent.h"
 
 #include <o3d/engine/context.h>
@@ -13,8 +15,7 @@
 using namespace o3d::studio::common;
 
 O3DCanvasContent::O3DCanvasContent(const QString &suffix, bool debug, QWidget *parent) :
-    GLCanvasContent(parent),
-    m_suffix(suffix),
+    GLCanvasContent(suffix, parent),
     m_debug(debug),
     m_renderer(nullptr),
     m_drawer(nullptr)
@@ -76,6 +77,11 @@ void O3DCanvasContent::initializeGL()
         m_drawer->initializeDrawer();
     }
 
+    // start the update loop
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+    timer->start(8);  // 8 ms update frequency
+
     // m_renderer->getContext()->setBackgroundColor(1.f, 1.f, 1.f, 1.f);
 }
 
@@ -100,5 +106,12 @@ void O3DCanvasContent::resizeGL(int w, int h)
 
     if (m_drawer) {
         m_drawer->resizeDrawer(w, h);
+    }
+}
+
+void O3DCanvasContent::updateGL()
+{
+    if (m_drawer) {
+        m_drawer->updateDrawer();
     }
 }

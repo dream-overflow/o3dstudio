@@ -19,6 +19,7 @@ public:
 
     virtual void initializeDrawer() = 0;
     virtual void paintDrawer() = 0;
+    virtual void updateDrawer() = 0;
     virtual void resizeDrawer(int w, int h) = 0;
     virtual void terminateDrawer() = 0;
 };

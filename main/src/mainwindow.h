@@ -62,7 +62,7 @@ protected:
 
 private slots:
 
-    void updateObjective3D();
+    void updateO3DEvents();
 
     void onFileNewProject();
     void onFileNewResource();

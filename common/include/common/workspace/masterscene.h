@@ -36,10 +36,9 @@ public:
 
     virtual void initialize();
 
-    virtual void update();
-
     virtual void initializeDrawer() override;
     virtual void paintDrawer() override;
+    virtual void updateDrawer() override;
     virtual void resizeDrawer(int w, int h) override;
     virtual void terminateDrawer() override;
 

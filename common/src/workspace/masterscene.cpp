@@ -83,17 +83,17 @@ void MasterScene::initialize()
     uiCtrl.setActiveContent(m_content, true);
 }
 
-void MasterScene::update()
-{
-    if (m_scene) {
-        m_scene->update();
-    }
-}
-
 void MasterScene::paintDrawer()
 {
     if (m_scene) {
         m_scene->display();
+    }
+}
+
+void MasterScene::updateDrawer()
+{
+    if (m_scene) {
+        m_scene->update();
     }
 }
 

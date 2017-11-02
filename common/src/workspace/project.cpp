@@ -15,8 +15,8 @@ using namespace o3d::studio::common;
 Project::Project(Workspace *workspace, const QString &name) :
     m_workspace(workspace),
     m_filename(),
-    m_path(QDir::current()),
     m_name(name),
+    m_path(QDir::current()),
     m_uuid(QUuid::createUuid()),
     m_masterScene(nullptr)
 {

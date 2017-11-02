@@ -22,7 +22,7 @@ class GLCanvasContent : public QOpenGLWidget, public Content
 {
 public:
 
-    explicit GLCanvasContent(QWidget *parent = nullptr);
+    explicit GLCanvasContent(const QString &suffix, QWidget *parent = nullptr);
     virtual ~GLCanvasContent();
 
     virtual QString elementName() const override;
@@ -33,16 +33,15 @@ public:
 
 public slots:
 
-    //void renderLater();
-    // void renderNow();
-
 protected:
 
     virtual void initializeGL() override;
     virtual void paintGL() override;
     virtual void resizeGL(int w, int h) override;
 
-private:
+protected:
+
+    QString m_suffix;
 };
 
 } // namespace common

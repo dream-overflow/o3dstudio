@@ -19,6 +19,8 @@ namespace common {
 
 class O3DCanvasContent : public GLCanvasContent
 {
+    Q_OBJECT
+
 public:
 
     explicit O3DCanvasContent(const QString &suffix, bool debug = false, QWidget *parent = nullptr);
@@ -35,8 +37,7 @@ public:
 
 public slots:
 
-    //void renderLater();
-    // void renderNow();
+    void updateGL();
 
 protected:
 
@@ -47,8 +48,6 @@ protected:
     virtual void resizeGL(int w, int h) override;
 
 private:
-
-    QString m_suffix;
 
     bool m_debug;
     QtRenderer *m_renderer;

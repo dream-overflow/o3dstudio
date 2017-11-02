@@ -150,9 +150,9 @@ MainWindow::MainWindow(QWidget *parent) :
     common::Application::instance()->command().addCommand(new common::DummyCommand());
 
     // process o3d events
-    // @todo should look using post events http://doc.qt.io/qt-5/qabstracteventdispatcher.html
+    // @todo need a wakeup to avoid the 5 ms in some cases or a pushEvent
     QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updateObjective3D()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateO3DEvents()));
     timer->start(5);
 }
 
@@ -503,6 +503,8 @@ bool MainWindow::setThemeColor(const QString &theme)
 
 void MainWindow::closeEvent(QCloseEvent* _pEvent)
 {
+    Q_UNUSED(_pEvent)
+
     closeWorkspace();
 }
 
@@ -534,7 +536,7 @@ void MainWindow::changeEvent(QEvent *event)
     QMainWindow::changeEvent(event);
 }
 
-void MainWindow::updateObjective3D()
+void MainWindow::updateO3DEvents()
 {
     if (o3d::EvtManager::instance()->isPendingEvent()) {
         o3d::EvtManager::instance()->processEvent();
