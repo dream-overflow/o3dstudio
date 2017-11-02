@@ -62,8 +62,6 @@ protected:
 
 private slots:
 
-    void updateO3DEvents();
-
     void onFileNewProject();
     void onFileNewResource();
     void onFileMenuPreferences();

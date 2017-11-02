@@ -148,12 +148,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // for test execute a dummy command @todo remove me
     common::Application::instance()->command().addCommand(new common::DummyCommand());
-
-    // process o3d events
-    // @todo need a wakeup to avoid the 5 ms in some cases or a pushEvent
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updateO3DEvents()));
-    timer->start(5);
 }
 
 MainWindow::~MainWindow()
@@ -534,13 +528,6 @@ void MainWindow::changeEvent(QEvent *event)
         }
     }
     QMainWindow::changeEvent(event);
-}
-
-void MainWindow::updateO3DEvents()
-{
-    if (o3d::EvtManager::instance()->isPendingEvent()) {
-        o3d::EvtManager::instance()->processEvent();
-    }
 }
 
 void MainWindow::onFileNewProject()

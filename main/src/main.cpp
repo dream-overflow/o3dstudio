@@ -21,6 +21,9 @@
 #include <o3d/core/memorymanager.h>
 #include <o3d/core/application.h>
 #include <o3d/core/debug.h>
+#include <o3d/core/timer.h>
+#include <o3d/core/callback.h>
+#include <o3d/core/evtmanager.h>
 
 QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
@@ -70,8 +73,18 @@ void o3sMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
 void onExit()
 {
     // terminate cleanly if the program call exit before an Application::quit().
-    if (o3d::Application::isInit())
+    if (o3d::Application::isInit()) {
         o3d::Application::quit();
+    }
+}
+
+o3d::Int32 processEvtManager(void *) {
+    return (o3d::Int32)o3d::EvtManager::instance()->processEvent();
+}
+
+o3d::Int32 processStdTimer(void *data) {
+    o3d::Timer *timer = reinterpret_cast<o3d::Timer*>(data);
+    return timer->call();
 }
 
 int main(int argc, char *argv[])
@@ -98,9 +111,10 @@ int main(int argc, char *argv[])
     // no native display management (embedded by Qt)
     settings.m_display = o3d::False;
 
-    try
-    {
+    try {
         o3d::Application::init(settings, argc, argv);
+        o3d::Application::setEvtManagerCallback(new o3d::CallbackFunction(processEvtManager));
+        o3d::Application::setStdTimerCallback(new o3d::CallbackFunction(processStdTimer));
 
         // cleared log out file with new header
         o3d::Debug::instance()->setDefaultLog("objective3d.log");
@@ -109,9 +123,7 @@ int main(int argc, char *argv[])
 
         o3d::MemoryManager::instance()->enableLog(o3d::MemoryManager::MEM_RAM, 128);
         o3d::MemoryManager::instance()->enableLog(o3d::MemoryManager::MEM_GFX);
-    }
-    catch (o3d::E_BaseException &ex)
-    {
+    } catch (o3d::E_BaseException &ex) {
         o3d::Application::message(
             o3d::String("Failed to initialize the application: ") + ex.what(),
             o3d::Application::getAppName(),
