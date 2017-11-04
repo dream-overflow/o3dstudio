@@ -530,6 +530,13 @@ void MainWindow::changeEvent(QEvent *event)
     QMainWindow::changeEvent(event);
 }
 
+void MainWindow::customEvent(QEvent *event)
+{
+    if (event->type() == QEvent::User+1) {
+        o3d::EvtManager::instance()->processEvent();
+    }
+}
+
 void MainWindow::onFileNewProject()
 {
     // new project dialog

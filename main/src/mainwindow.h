@@ -60,6 +60,9 @@ protected:
     // this event is called, when a new translator is loaded or the system language is changed
     virtual void changeEvent(QEvent*);
 
+    // process o3d evt manager
+    virtual void customEvent(QEvent*);
+
 private slots:
 
     void onFileNewProject();

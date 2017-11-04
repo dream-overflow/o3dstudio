@@ -78,13 +78,24 @@ void onExit()
     }
 }
 
+static QMainWindow *s_mainWindowPtr = nullptr;
+
 o3d::Int32 processEvtManager(void *) {
-    return (o3d::Int32)o3d::EvtManager::instance()->processEvent();
+    QEvent *event = new QEvent((QEvent::Type)(QEvent::User+1));
+    if (s_mainWindowPtr) {
+        QApplication::postEvent(s_mainWindowPtr, event, Qt::HighEventPriority);
+    }
+    return 0;
 }
 
-o3d::Int32 processStdTimer(void *data) {
-    o3d::Timer *timer = reinterpret_cast<o3d::Timer*>(data);
-    return timer->call();
+o3d::Int32 mainTimer(void *data) {
+    o3d::System::print(o3d::String::print("1> %i", o3d::System::getMsTime()), "");
+    return 0;
+}
+
+o3d::Int32 threadedTimer(void *data) {
+    // o3d::System::print(o3d::String::print("2> %i", o3d::System::getMsTime()), "");
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -113,8 +124,7 @@ int main(int argc, char *argv[])
 
     try {
         o3d::Application::init(settings, argc, argv);
-        o3d::Application::setEvtManagerCallback(new o3d::CallbackFunction(processEvtManager));
-        o3d::Application::setStdTimerCallback(new o3d::CallbackFunction(processStdTimer));
+        o3d::EvtManager::instance()->setWakeupCallback(new o3d::CallbackFunction(processEvtManager));
 
         // cleared log out file with new header
         o3d::Debug::instance()->setDefaultLog("objective3d.log");
@@ -143,7 +153,13 @@ int main(int argc, char *argv[])
     o3d::studio::common::Application::instance()->start();
 
     o3d::studio::main::MainWindow *lMainWindow = new o3d::studio::main::MainWindow();
+    s_mainWindowPtr = lMainWindow;
+
     lMainWindow->show();
+
+    // start timer once main windows is ready to receive events
+    // new o3d::Timer(1000, o3d::Timer::TIMER_TIMEOUT, new o3d::CallbackFunction(mainTimer));
+    // new o3d::TimerThread(16, o3d::Timer::TIMER_TIMEOUT, new o3d::CallbackFunction(threadedTimer));
 
     try {
         lExitcode = lApp.exec();
@@ -157,6 +173,7 @@ int main(int argc, char *argv[])
     // process remaining events
     o3d::EvtManager::instance()->processEvent();
 
+    s_mainWindowPtr = nullptr;
     delete lMainWindow;
     lMainWindow = nullptr;
 
