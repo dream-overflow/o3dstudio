@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
     try {
         o3d::Application::init(settings, argc, argv);
-        o3d::EvtManager::instance()->setWakeupCallback(new o3d::CallbackFunction(processEvtManager));
+        o3d::EvtManager::instance()->setWakeUpCallback(new o3d::CallbackFunction(processEvtManager));
 
         // cleared log out file with new header
         o3d::Debug::instance()->setDefaultLog("objective3d.log");

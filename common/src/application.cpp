@@ -18,6 +18,7 @@
 #include "common/workspace/workspacemanager.h"
 #include "common/ui/uicontroller.h"
 #include "common/command/commandmanager.h"
+#include "common/storage/store.h"
 
 using namespace o3d::studio::common;
 
@@ -35,6 +36,7 @@ Application::Application()
     m_workspaceManager = new WorkspaceManager();
     m_ui = new UiController();
     m_commandManager = new CommandManager();
+    m_store = new Store();
 }
 
 Application::~Application()
@@ -42,21 +44,23 @@ Application::~Application()
     delete m_workspaceManager;
     delete m_ui;
     delete m_commandManager;
+    delete m_store;
 }
 
 // Singleton instantiation
 Application* Application::instance()
 {
-    if (!m_instance)
+    if (!m_instance) {
         m_instance = new Application();
+    }
+
     return m_instance;
 }
 
 // Singleton destruction
 void Application::destroy()
 {
-    if (m_instance)
-    {
+    if (m_instance) {
         delete m_instance;
         m_instance = nullptr;
     }
@@ -110,6 +114,16 @@ CommandManager &Application::command()
 const CommandManager &Application::command() const
 {
     return *m_commandManager;
+}
+
+Store &Application::store()
+{
+    return *m_store;
+}
+
+const Store &Application::store() const
+{
+    return *m_store;
 }
 
 bool Application::start()
