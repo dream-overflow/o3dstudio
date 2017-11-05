@@ -10,6 +10,7 @@
 #define _O3DS_COMMON_DUMMYCOMMAND_H
 
 #include "command.h"
+#include <QtCore/QCoreApplication>
 
 namespace o3d {
 namespace studio {
@@ -17,6 +18,8 @@ namespace common {
 
 class DummyCommand : public Command
 {
+    Q_DECLARE_TR_FUNCTIONS(DummyCommand)
+
 public:
 
     DummyCommand();

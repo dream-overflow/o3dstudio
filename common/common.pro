@@ -53,7 +53,9 @@ SOURCES += \
     src/ui/canvas/o3dcanvascontent.cpp \
     src/workspace/masterscene.cpp \
     src/storage/store.cpp \
-    src/storage/storeitem.cpp
+    src/storage/storeitem.cpp \
+    src/workspace/projectfile.cpp \
+    src/exception.cpp
 
 
 HEADERS += \ 
@@ -91,7 +93,9 @@ HEADERS += \
     include/common/workspace/masterscene.h \
     include/common/ui/canvas/o3ddrawer.h \
     include/common/storage/store.h \
-    include/common/storage/storeitem.h
+    include/common/storage/storeitem.h \
+    include/common/workspace/projectfile.h \
+    include/common/exception.h
 
 LIBS += -lobjective3d-dbg
 

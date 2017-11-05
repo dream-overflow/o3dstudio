@@ -64,14 +64,16 @@ QStringList Workspace::projectsList() const
     return m_foundProjects;
 }
 
-Project *Workspace::addProject(const QString &name)
+bool Workspace::addProject(Project *project)
 {
-    Project *project = new Project(this, name);
-    Q_ASSERT(m_loadedProjects.find(project->uuid()) == m_loadedProjects.end());
+    if (!project) {
+        return false;
+    }
 
+    Q_ASSERT(m_loadedProjects.find(project->uuid()) == m_loadedProjects.end());
     m_loadedProjects.insert(project->uuid(), project);
 
-    return project;
+    return true;
 }
 
 bool Workspace::closeProject(const QUuid& uuid)
@@ -141,4 +143,10 @@ bool Workspace::save()
 bool Workspace::load()
 {
     return true;
+}
+
+WorkspaceException::WorkspaceException(const QString &message) :
+    BaseException(message)
+{
+
 }

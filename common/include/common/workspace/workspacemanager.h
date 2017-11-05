@@ -10,6 +10,7 @@
 #define _O3DS_COMMON_WORKSPACEMANAGER_H
 
 #include <QtCore/QStringList>
+#include <QtCore/QDir>
 
 namespace o3d {
 namespace studio {
@@ -50,7 +51,20 @@ public:
     Workspace* current();
     const Workspace* current() const;
 
+    /**
+     * @brief Default workspaces location directory.
+     * @return
+     */
+    const QDir& defaultPath() const;
+
+    const QDir& defaultProjectsPath() const;
+    const QDir& defaultWorkspacesPath() const;
+
 private:
+
+    QDir m_defaultPath;
+    QDir m_defaultProjectsPath;
+    QDir m_defaultWorkspacesPath;
 
     QStringList m_foundWorkspaces;
     Workspace* m_current{nullptr};

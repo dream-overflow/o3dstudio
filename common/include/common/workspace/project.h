@@ -12,6 +12,12 @@
 #include <QtCore/QString>
 #include <QtCore/QUuid>
 #include <QtCore/QDir>
+#include <QtCore/QException>
+#include <QtCore/QCoreApplication>
+
+#include "../exception.h"
+
+class QDataStream;
 
 namespace o3d {
 namespace studio {
@@ -20,33 +26,48 @@ namespace common {
 class Workspace;
 class MasterScene;
 class O3DCanvasContent;
+class ProjectFile;
 
 /**
  * @brief The Project final class
  */
 class Project
 {
+    Q_DECLARE_TR_FUNCTIONS(Project)
+
 public:
 
-    Project(Workspace *workspace, const QString &name);
-    ~Project();
+    Project(const QString &name, Workspace *workspace = nullptr);
+    virtual ~Project();
+
+    void setWorkspace(Workspace *workspace);
+
+    Workspace* workspace();
+    const Workspace* workspace() const;
+
+    /**
+     * @brief Initialize a new project at the specified path with name.
+     * @param stream
+     */
+    void create();
 
     const QUuid& uuid() const;
     const QString& name() const;
     const QString& filename() const;
     const QDir& path() const;
 
-    bool setLocation(const QString &path);
+    bool setLocation(const QDir &path);
 
     bool load();
     bool save();
 
+    bool exists() const;
     bool hasChanges();
 
     MasterScene* masterScene();
     const MasterScene* masterScene() const;
 
-    void initialize();
+    void setupMasterScene();
 
 private:
 
@@ -56,9 +77,21 @@ private:
     QString m_name;            //!< Project display name
     QDir m_path;               //!< Project path
 
+    ProjectFile *m_projectFile;
+
     QUuid m_uuid;              //!< Unique projet identifier
 
     MasterScene *m_masterScene;
+};
+
+/**
+ * @brief The ProjectException class
+ */
+class ProjectException : public BaseException
+{
+public:
+
+    ProjectException(const QString &message);
 };
 
 } // namespace common

@@ -126,6 +126,8 @@ void MasterScene::terminateDrawer()
 
 void MasterScene::initializeDrawer()
 {
-    // once GL context is ready
-    m_scene = new o3d::Scene(nullptr, m_project->path().absolutePath().toStdWString().c_str(), m_renderer);
+    if (!m_scene && m_renderer && m_project) {
+        // once GL context is ready
+        m_scene = new o3d::Scene(nullptr, m_project->path().absolutePath().toStdWString().c_str(), m_renderer);
+    }
 }

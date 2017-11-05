@@ -24,7 +24,7 @@ DummyCommand::~DummyCommand()
 
 QString DummyCommand::commandLabel() const
 {
-    return QApplication::translate("o3d::studio::common", "Dummy operation");
+    return tr("Dummy operation");
 }
 
 bool DummyCommand::doCommand()

@@ -13,6 +13,8 @@
 #include <QtCore/QMap>
 #include <QtCore/QUuid>
 
+#include "../exception.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -41,7 +43,7 @@ public:
      */
     QStringList projectsList() const;
 
-    Project* addProject(const QString &name);
+    bool addProject(Project *project);
 
     /**
      * @brief The project is saved before to be closed and removed from the workspace.
@@ -75,6 +77,16 @@ private:
     QMap<QUuid, Project*> m_loadedProjects;
 
     Project *m_activeProject{nullptr};
+};
+
+/**
+ * @brief The WorkspaceException class
+ */
+class WorkspaceException : public BaseException
+{
+public:
+
+    WorkspaceException(const QString &message);
 };
 
 } // namespace common

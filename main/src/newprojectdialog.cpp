@@ -44,10 +44,28 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
 {
     if (ui.buttonBox->buttonRole(btn) == QDialogButtonBox::AcceptRole) {
         common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
-        common::Project *project = workspace->addProject("test");
-        workspace->selectProject(project->uuid());
+        common::Project *project = new common::Project("test", workspace);
 
-        project->initialize();
+        project->setLocation(common::Application::instance()->workspaceManager().defaultProjectsPath());
+
+        try {
+            project->create();
+        } catch(common::ProjectException &e) {
+            delete project;
+            close();
+            return;
+        }
+
+        try {
+            workspace->addProject(project);
+        } catch(common::WorkspaceException &e) {
+            delete project;
+            close();
+            return;
+        }
+
+        workspace->selectProject(project->uuid());
+        project->setupMasterScene();
 
         close();
     }

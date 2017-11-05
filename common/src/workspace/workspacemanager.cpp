@@ -13,6 +13,41 @@ using namespace o3d::studio::common;
 
 WorkspaceManager::WorkspaceManager()
 {
+    if (!QDir::home().exists(".o3dstudio")) {
+        if (!QDir::home().mkdir(".o3dstudio")) {
+            throw;
+        }
+    }
+
+    m_defaultPath = QDir::home();
+    if (!m_defaultPath.cd(".o3dstudio")) {
+        throw;
+    }
+
+    if (!m_defaultPath.exists("projects")) {
+        m_defaultPath.mkdir("projects");
+    }
+
+    if (!m_defaultPath.isReadable()) {
+        throw;
+    }
+
+    m_defaultProjectsPath = m_defaultPath.absoluteFilePath("projects");
+
+    if (!m_defaultProjectsPath.isReadable()) {
+        throw;
+    }
+
+    if (!m_defaultPath.exists("workspaces")) {
+        m_defaultPath.mkdir("workspaces");
+    }
+
+    m_defaultWorkspacesPath = m_defaultPath.absoluteFilePath("workspaces");
+
+    if (!m_defaultWorkspacesPath.isReadable()) {
+        throw;
+    }
+
     // @todo get last session loaded workspace
     m_current = new Workspace("default");
 }
@@ -95,4 +130,19 @@ bool WorkspaceManager::loadWorkspace(const QString &name)
 Workspace *WorkspaceManager::current()
 {
     return m_current;
+}
+
+const QDir &WorkspaceManager::defaultPath() const
+{
+    return m_defaultPath;
+}
+
+const QDir &WorkspaceManager::defaultProjectsPath() const
+{
+    return m_defaultProjectsPath;
+}
+
+const QDir &WorkspaceManager::defaultWorkspacesPath() const
+{
+    return m_defaultWorkspacesPath;
 }
