@@ -26,17 +26,20 @@ public:
     NewProjectDialog(QWidget *parent = nullptr);
     virtual ~NewProjectDialog();
 
-protected:
+public :
 
-    virtual void closeEvent(QCloseEvent*);
+    virtual void accept() override;
 
 private slots:
 
     void onButtonBox(QAbstractButton *);
+    void onSelectProjectFolder(bool);
+    void onProjectNameChanged(QString);
 
 private:
 
     Ui::NewProjectDialog ui;
+    bool m_valid;
 };
 
 } // namespace main

@@ -7,10 +7,12 @@
  */
 
 #include <QtCore/QAbstractItemModel>
+#include <QtWidgets/QMessageBox>
 
 #include "newprojectdialog.h"
 
 #include "common/application.h"
+#include "common/settings.h"
 
 #include "common/workspace/workspace.h"
 #include "common/workspace/workspacemanager.h"
@@ -21,13 +23,57 @@
 
 using namespace o3d::studio::main;
 
+class ProjectNameValidator : public QValidator
+{
+public:
+
+    virtual State validate(QString &input, int &pos) const override;
+};
+
+QValidator::State ProjectNameValidator::validate(QString &input, int &pos) const
+{
+    for (int i = 0 ; i < input.length(); ++i) {
+        if (!input[i].isLetterOrNumber() && input[i] != '-' && input[i] != "_") {
+            input.remove(i, 1);
+        }
+    }
+
+    if (input.length() < 3) {
+        return Intermediate;
+    }
+
+    if (input.length() > 128) {
+        return Invalid;
+    }
+
+    return Acceptable;
+}
+
 NewProjectDialog::NewProjectDialog(QWidget *parent) :
     QDialog(parent),
-    ui()
+    ui(),
+    m_valid(false)
 {
+    common::Settings &settings = common::Application::instance()->settings();
+
     ui.setupUi(this);
 
+    // name validator
+    ui.projectName->setValidator(new ProjectNameValidator());  // new QRegExpValidator(QRegExp("[0-9a-zA-Z_-]{3-128}"))
+    ui.projectName->setPlaceholderText(tr("3 to 128 characters, only letters, digits - and _"));
+    connect(ui.projectName, SIGNAL(textChanged(QString)), SLOT(onProjectNameChanged(QString)));
+
+    // path
+    QString dir = settings.get(
+       "o3s::main::newproject::previousfolder",
+       QVariant(common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath())).toString();
+
+    ui.projectLocation->setText(dir);
+
+    disconnect(ui.buttonBox);
+
     connect(ui.buttonBox, SIGNAL(clicked(QAbstractButton *)), SLOT(onButtonBox(QAbstractButton *)));
+    connect(ui.projectLocationSelect, SIGNAL(clicked(bool)), SLOT(onSelectProjectFolder(bool)));
 }
 
 NewProjectDialog::~NewProjectDialog()
@@ -35,16 +81,26 @@ NewProjectDialog::~NewProjectDialog()
 
 }
 
-void NewProjectDialog::closeEvent(QCloseEvent *)
+void NewProjectDialog::accept()
 {
-
+    if (m_valid) {
+        QDialog::accept();
+    }
 }
 
 void NewProjectDialog::onButtonBox(QAbstractButton *btn)
 {
+    m_valid = false;
+
+    QString name = ui.projectName->text();
+    if (name.length() < 3) {
+        ui.projectName->setStyleSheet("QLineEdit{border-color: red;}");
+        return;
+    }
+
     if (ui.buttonBox->buttonRole(btn) == QDialogButtonBox::AcceptRole) {
-        common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
-        common::Project *project = new common::Project("test", workspace);
+        common::Workspace* workspace = common::Application::instance()->workspaceManager().current();       
+        common::Project *project = new common::Project(name, workspace);
 
         project->setLocation(common::Application::instance()->workspaceManager().defaultProjectsPath());
 
@@ -52,7 +108,9 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
             project->create();
         } catch(common::ProjectException &e) {
             delete project;
-            close();
+
+            QMessageBox::warning(this, tr("Project warning"), e.message());
+
             return;
         }
 
@@ -60,13 +118,43 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
             workspace->addProject(project);
         } catch(common::WorkspaceException &e) {
             delete project;
-            close();
+
+            QMessageBox::warning(this, tr("Project warning"), e.message());
+
             return;
         }
 
         workspace->selectProject(project->uuid());
         project->setupMasterScene();
 
-        close();
+        m_valid = true;
+    }
+}
+
+void NewProjectDialog::onSelectProjectFolder(bool)
+{
+    common::Settings &settings = common::Application::instance()->settings();
+
+    QString dir = settings.get(
+       "o3s::main::newproject::previousfolder",
+       QVariant(common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath())).toString();
+
+    dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), dir,
+                                            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+    if (!dir.isEmpty()) {
+        settings.set("o3s::main::newproject::previousfolder", dir);
+        ui.projectLocation->setText(dir);
+    }
+}
+
+void NewProjectDialog::onProjectNameChanged(QString)
+{
+    QString text = ui.projectName->text();
+    int pos = text.length();
+    if (ui.projectName->validator()->validate(text, pos) == QValidator::Invalid) {
+        ui.projectName->setStyleSheet("QLineEdit{border-color: red;}");
+    } else {
+        ui.projectName->setStyleSheet("");
     }
 }
