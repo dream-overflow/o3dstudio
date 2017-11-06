@@ -11,9 +11,9 @@
 
 #include "preferencesdialog.h"
 
-#include "common/property/propertyitem.h"
-#include "common/property/propertymodel.h"
-#include "common/property/propertysectionnode.h"
+#include "o3d/studio/common/property/propertyitem.h"
+#include "o3d/studio/common/property/propertymodel.h"
+#include "o3d/studio/common/property/propertysectionnode.h"
 
 #include "property/displaysection.h"
 

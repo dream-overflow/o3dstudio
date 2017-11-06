@@ -12,7 +12,7 @@
 #include <QtCore/QUuid>
 #include <QtCore/QFile>
 
-#include <common/workspace/project.h>
+#include "o3d/studio/common/workspace/project.h"
 
 namespace o3d {
 namespace studio {

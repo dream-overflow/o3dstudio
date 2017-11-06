@@ -6,7 +6,7 @@
  * @details
  */
 
-#include "common/moduleinfo.h"
+#include "o3d/studio/common/moduleinfo.h"
 
 using namespace o3d::studio::common;
 

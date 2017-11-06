@@ -6,7 +6,7 @@
  * @details
  */
 
-#include "common/command/commandmanager.h"
+#include "o3d/studio/common/command/commandmanager.h"
 
 using namespace o3d::studio::common;
 

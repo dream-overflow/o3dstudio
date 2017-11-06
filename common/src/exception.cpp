@@ -6,7 +6,7 @@
  * @details
  */
 
-#include "common/exception.h"
+#include "o3d/studio/common/exception.h"
 
 using namespace o3d::studio::common;
 

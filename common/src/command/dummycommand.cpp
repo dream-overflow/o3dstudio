@@ -8,7 +8,7 @@
 
 #include <QtWidgets/QApplication>
 
-#include "common/command/dummycommand.h"
+#include "o3d/studio/common/command/dummycommand.h"
 
 using namespace o3d::studio::common;
 

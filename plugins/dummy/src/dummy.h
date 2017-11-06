@@ -10,7 +10,7 @@
 #define _O3DS_DUMMY_DUMMY_H
 
 #include <QtCore/QString>
-#include "common/dynamicmodule.h"
+#include "o3d/studio/common/dynamicmodule.h"
 
 namespace o3d {
 namespace studio {

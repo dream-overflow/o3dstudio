@@ -8,7 +8,7 @@
 
 #include <QtCore/QLibrary>
 
-#include "common/module.h"
+#include "o3d/studio/common/module.h"
 
 using namespace o3d::studio::common;
 

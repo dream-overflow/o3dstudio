@@ -6,7 +6,7 @@
  * @details
  */
 
-#include "common/ui/canvas/glcanvascontent.h"
+#include "o3d/studio/common/ui/canvas/glcanvascontent.h"
 
 using namespace o3d::studio::common;
 

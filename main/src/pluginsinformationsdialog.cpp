@@ -10,11 +10,11 @@
 
 #include "pluginsinformationsdialog.h"
 
-#include "common/plugin/pluginmodel.h"
-#include "common/plugin/pluginsectionnode.h"
+#include "o3d/studio/common/plugin/pluginmodel.h"
+#include "o3d/studio/common/plugin/pluginsectionnode.h"
 
-#include "common/modulemanager.h"
-#include "common/module.h"
+#include "o3d/studio/common/modulemanager.h"
+#include "o3d/studio/common/module.h"
 
 using namespace o3d::studio::main;
 

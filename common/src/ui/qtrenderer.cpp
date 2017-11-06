@@ -7,7 +7,7 @@
  * @details
  */
 
-#include "common/ui/qtrenderer.h"
+#include "o3d/studio/common/ui/qtrenderer.h"
 
 #include <o3d/engine/context.h>
 #include <o3d/engine/glextensionmanager.h>

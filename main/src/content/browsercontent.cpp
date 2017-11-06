@@ -9,7 +9,7 @@
 #include <QtCore/QDir>
 
 #include "browsercontent.h"
-#include "common/application.h"
+#include "o3d/studio/common/application.h"
 
 using namespace o3d::studio::main;
 

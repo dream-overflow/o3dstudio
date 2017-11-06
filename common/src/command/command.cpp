@@ -6,7 +6,7 @@
  * @details
  */
 
-#include "common/command/command.h"
+#include "o3d/studio/common/command/command.h"
 
 using namespace o3d::studio::common;
 

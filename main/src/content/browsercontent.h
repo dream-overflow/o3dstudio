@@ -10,7 +10,7 @@
 #define _O3DS_MAIN_BROWSERCONTENT_H
 
 #include <QtWidgets/QTextBrowser>
-#include "common/ui/content.h"
+#include "o3d/studio/common/ui/content.h"
 
 namespace o3d {
 namespace studio {

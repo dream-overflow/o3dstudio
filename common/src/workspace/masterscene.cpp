@@ -6,12 +6,12 @@
  * @details
  */
 
-#include "common/application.h"
-#include "common/workspace/masterscene.h"
-#include "common/workspace/project.h"
-#include "common/ui/canvas/o3dcanvascontent.h"
-#include "common/ui/qtrenderer.h"
-#include "common/ui/uicontroller.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/workspace/masterscene.h"
+#include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
+#include "o3d/studio/common/ui/qtrenderer.h"
+#include "o3d/studio/common/ui/uicontroller.h"
 
 #include <o3d/engine/scene/scene.h>
 

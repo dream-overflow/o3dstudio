@@ -6,13 +6,13 @@
  * @details
  */
 
-#include "common/application.h"
-#include "common/storage/store.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/storage/store.h"
 
-#include "common/workspace/project.h"
-#include "common/workspace/projectfile.h"
-#include "common/workspace/workspace.h"
-#include "common/workspace/masterscene.h"
+#include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/projectfile.h"
+#include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/workspace/masterscene.h"
 
 using namespace o3d::studio::common;
 

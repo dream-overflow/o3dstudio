@@ -9,10 +9,10 @@
 #include "mainwindow.h"
 #include "settings.h"
 
-#include "common/settings.h"
+#include "o3d/studio/common/settings.h"
 
-#include "common/command/commandmanager.h"
-#include "common/command/dummycommand.h"
+#include "o3d/studio/common/command/commandmanager.h"
+#include "o3d/studio/common/command/dummycommand.h"
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QPluginLoader>
@@ -33,12 +33,12 @@
 #include "ui_aboutdialog.h"
 #include "ui_systeminfodialog.h"
 
-#include "common/modulemanager.h"
-#include "common/application.h"
-#include "common/workspace/workspacemanager.h"
-#include "common/workspace/workspace.h"
-#include "common/ui/uicontroller.h"
-#include "common/ui/canvas/o3dcanvascontent.h"
+#include "o3d/studio/common/modulemanager.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+#include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/ui/uicontroller.h"
+#include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
 #include "maintoolbar.h"
 #include "quicktoolbar.h"

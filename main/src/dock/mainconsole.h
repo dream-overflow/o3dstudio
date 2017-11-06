@@ -10,7 +10,7 @@
 #define _O3DS_MAIN_MAINCONSOLE_H
 
 #include <QtWidgets/QDockWidget>
-#include "common/ui/dock.h"
+#include "o3d/studio/common/ui/dock.h"
 
 namespace o3d {
 namespace studio {

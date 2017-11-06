@@ -9,7 +9,7 @@
 #include <QtCore/QSettings>
 #include <QtCore/QCoreApplication>
 
-#include "common/ui/uicontroller.h"
+#include "o3d/studio/common/ui/uicontroller.h"
 
 using namespace o3d::studio::common;
 

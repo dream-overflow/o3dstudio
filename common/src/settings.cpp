@@ -9,7 +9,7 @@
 #include <QtCore/QSettings>
 #include <QtCore/QCoreApplication>
 
-#include "common/settings.h"
+#include "o3d/studio/common/settings.h"
 
 using namespace o3d::studio::common;
 

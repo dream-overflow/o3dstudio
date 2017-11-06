@@ -12,13 +12,13 @@
 #include<QtCore/QCoreApplication>
 #include<QtCore/QLibraryInfo>
 
-#include "common/application.h"
-#include "common/modulemanager.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/modulemanager.h"
 
-#include "common/workspace/workspacemanager.h"
-#include "common/ui/uicontroller.h"
-#include "common/command/commandmanager.h"
-#include "common/storage/store.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+#include "o3d/studio/common/ui/uicontroller.h"
+#include "o3d/studio/common/command/commandmanager.h"
+#include "o3d/studio/common/storage/store.h"
 
 using namespace o3d::studio::common;
 

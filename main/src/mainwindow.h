@@ -12,7 +12,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtCore/QTranslator>
 
-#include "common/capacitysettings.h"
+#include "o3d/studio/common/capacitysettings.h"
 
 #include "ui_mainwindow.h"
 

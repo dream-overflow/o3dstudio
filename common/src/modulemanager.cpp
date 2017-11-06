@@ -12,10 +12,10 @@
 #include<QtCore/QUrl>
 #include<QtCore/QStringList>
 
-#include "common/application.h"
-#include "common/settings.h"
-#include "common/modulemanager.h"
-#include "common/dynamicmodule.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/settings.h"
+#include "o3d/studio/common/modulemanager.h"
+#include "o3d/studio/common/dynamicmodule.h"
 
 using namespace o3d::studio::common;
 

@@ -11,8 +11,8 @@
 
 #include "displaysection.h"
 
-#include "common/application.h"
-#include "common/settings.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/settings.h"
 
 using namespace o3d::studio::main;
 

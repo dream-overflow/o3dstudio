@@ -14,7 +14,7 @@
 #include <QtCore/QList>
 #include <QtWidgets/QtWidgets>
 
-#include "common/plugin/pluginsection.h"
+#include "o3d/studio/common/plugin/pluginsection.h"
 
 namespace o3d {
 namespace studio {

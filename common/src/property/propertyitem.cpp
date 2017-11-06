@@ -6,7 +6,7 @@
  * @details
  */
 
-#include "common/property/propertyitem.h"
+#include "o3d/studio/common/property/propertyitem.h"
 
 #include <QtCore/qobjectdefs.h>
 

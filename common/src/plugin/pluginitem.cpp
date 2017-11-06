@@ -6,7 +6,7 @@
  * @details
  */
 
-#include "common/plugin/pluginitem.h"
+#include "o3d/studio/common/plugin/pluginitem.h"
 
 #include <QtCore/qobjectdefs.h>
 

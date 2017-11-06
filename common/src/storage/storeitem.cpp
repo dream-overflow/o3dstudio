@@ -6,7 +6,8 @@
  * @details
  */
 
-#include "common/storage/storeitem.h"
+#include "o3d/studio/common/storage/storeitem.h"
+
 #include <QtCore/QCryptographicHash>
 #include <QtCore/QDir>
 

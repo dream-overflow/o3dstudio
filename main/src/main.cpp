@@ -16,7 +16,7 @@
 
 #include "mainwindow.h"
 #include "settings.h"
-#include "common/application.h"
+#include "o3d/studio/common/application.h"
 
 #include <o3d/core/memorymanager.h>
 #include <o3d/core/application.h>

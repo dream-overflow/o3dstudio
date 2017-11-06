@@ -6,8 +6,8 @@
  * @details
  */
 
-#include "common/workspace/workspacemanager.h"
-#include "common/workspace/workspace.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+#include "o3d/studio/common/workspace/workspace.h"
 
 using namespace o3d::studio::common;
 

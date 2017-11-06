@@ -6,9 +6,9 @@
  * @details
  */
 
-#include "common/plugin/pluginmodel.h"
-#include "common/plugin/pluginitem.h"
-#include "common/plugin/pluginsection.h"
+#include "o3d/studio/common/plugin/pluginmodel.h"
+#include "o3d/studio/common/plugin/pluginitem.h"
+#include "o3d/studio/common/plugin/pluginsection.h"
 
 using namespace o3d::studio::common;
 

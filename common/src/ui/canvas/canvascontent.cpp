@@ -8,7 +8,7 @@
 
 #include <QtGui/QPainter>
 
-#include "common/ui/canvas/canvascontent.h"
+#include "o3d/studio/common/ui/canvas/canvascontent.h"
 
 using namespace o3d::studio::common;
 

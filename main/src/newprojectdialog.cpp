@@ -11,15 +11,15 @@
 
 #include "newprojectdialog.h"
 
-#include "common/application.h"
-#include "common/settings.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/settings.h"
 
-#include "common/workspace/workspace.h"
-#include "common/workspace/workspacemanager.h"
-#include "common/workspace/project.h"
+#include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+#include "o3d/studio/common/workspace/project.h"
 
-#include "common/ui/uicontroller.h"
-#include "common/ui/canvas/o3dcanvascontent.h"
+#include "o3d/studio/common/ui/uicontroller.h"
+#include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
 using namespace o3d::studio::main;
 

@@ -6,9 +6,9 @@
  * @details
  */
 
-#include "common/property/propertymodel.h"
-#include "common/property/propertyitem.h"
-#include "common/property/propertysection.h"
+#include "o3d/studio/common/property/propertymodel.h"
+#include "o3d/studio/common/property/propertyitem.h"
+#include "o3d/studio/common/property/propertysection.h"
 
 using namespace o3d::studio::common;
 

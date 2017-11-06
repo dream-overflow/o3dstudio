@@ -14,7 +14,7 @@
 #include <QtCore/QList>
 #include <QtWidgets/QtWidgets>
 
-#include "common/property/propertysection.h"
+#include "o3d/studio/common/property/propertysection.h"
 
 #include "ui_displaysection.h"
 

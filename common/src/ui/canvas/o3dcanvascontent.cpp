@@ -8,7 +8,7 @@
 
 #include <QtCore/QTimer>
 
-#include "common/ui/canvas/o3dcanvascontent.h"
+#include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
 #include <o3d/engine/context.h>
 

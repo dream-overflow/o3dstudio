@@ -6,7 +6,7 @@
  * @details
  */
 
-#include "common/dynamicmodule.h"
+#include "o3d/studio/common/dynamicmodule.h"
 
 using namespace o3d::studio::common;
 

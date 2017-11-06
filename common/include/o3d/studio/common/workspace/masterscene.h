@@ -11,9 +11,9 @@
 
 #include <QtCore/QString>
 
-#include "common/workspace/workspace.h"
-#include "common/ui/qtrenderer.h"
-#include "common/ui/canvas/o3ddrawer.h"
+#include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/ui/qtrenderer.h"
+#include "o3d/studio/common/ui/canvas/o3ddrawer.h"
 
 namespace o3d {
 namespace studio {

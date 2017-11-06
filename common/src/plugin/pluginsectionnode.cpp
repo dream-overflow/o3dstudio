@@ -8,10 +8,10 @@
 
 #include <QtWidgets/QWidget>
 
-#include "common/plugin/pluginsectionnode.h"
+#include "o3d/studio/common/plugin/pluginsectionnode.h"
 
-#include "common/application.h"
-#include "common/settings.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/settings.h"
 
 using namespace o3d::studio::common;
 

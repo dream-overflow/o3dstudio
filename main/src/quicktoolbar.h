@@ -10,7 +10,7 @@
 #define _O3DS_MAIN_QUICKTOOLBAR_H
 
 #include <QtWidgets/QToolBar>
-#include "common/ui/toolbar.h"
+#include "o3d/studio/common/ui/toolbar.h"
 
 namespace o3d {
 namespace studio {

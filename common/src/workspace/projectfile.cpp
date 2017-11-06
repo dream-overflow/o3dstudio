@@ -8,8 +8,8 @@
 
 #include <QtCore/QDataStream>
 
-#include "common/workspace/project.h"
-#include "common/workspace/projectfile.h"
+#include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/projectfile.h"
 
 using namespace o3d::studio::common;
 
