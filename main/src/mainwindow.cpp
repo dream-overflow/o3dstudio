@@ -44,7 +44,7 @@
 #include "quicktoolbar.h"
 
 #include "dock/mainconsole.h"
-// #include "dock/workspace.h"
+#include "dock/workspacedock.h"
 
 #include "content/browsercontent.h"
 
@@ -125,8 +125,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(quickToolBar, SIGNAL(showHome()), SLOT(onViewHomePage()));
 
-    // workspace dock @todo using Dock
-    createDock(tr("Workspace"), "workspace", Qt::LeftDockWidgetArea);
+    // workspace dock
+    WorkspaceDock *workspaceDock = new WorkspaceDock();
+    uiCtrl.addDock(workspaceDock);
 
     // property dock @todo using Dock
     createDock(tr("Property"), "property", Qt::RightDockWidgetArea);

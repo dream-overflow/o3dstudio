@@ -55,7 +55,9 @@ SOURCES += \
     src/storage/store.cpp \
     src/storage/storeitem.cpp \
     src/workspace/projectfile.cpp \
-    src/exception.cpp
+    src/exception.cpp \
+    src/workspace/projectitem.cpp \
+    src/workspace/projectmodel.cpp
 
 
 HEADERS += \ 
@@ -95,7 +97,9 @@ HEADERS += \
     include/o3d/studio/common/storage/store.h \
     include/o3d/studio/common/storage/storeitem.h \
     include/o3d/studio/common/workspace/projectfile.h \
-    include/o3d/studio/common/exception.h
+    include/o3d/studio/common/exception.h \
+    include/o3d/studio/common/workspace/projectitem.h \
+    include/o3d/studio/common/workspace/projectmodel.h
 
 LIBS += -lobjective3d-dbg
 

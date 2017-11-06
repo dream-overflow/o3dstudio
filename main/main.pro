@@ -38,7 +38,8 @@ SOURCES += \
     src/quicktoolbar.cpp \
     src/plugin/pluginsection.cpp \
     src/content/browsercontent.cpp \
-    src/dock/mainconsole.cpp
+    src/dock/mainconsole.cpp \
+    src/dock/workspacedock.cpp
 
 
 HEADERS += \
@@ -53,7 +54,8 @@ HEADERS += \
     src/quicktoolbar.h \
     src/plugin/pluginsection.h \
     src/content/browsercontent.h \
-    src/dock/mainconsole.h
+    src/dock/mainconsole.h \
+    src/dock/workspacedock.h
 
 
 RESOURCES += \
