@@ -62,6 +62,11 @@ void Project::create()
     m_projectFile->create();
 }
 
+void Project::setUuid(const QUuid &uuid)
+{
+    m_uuid = uuid;
+}
+
 const QUuid &Project::uuid() const
 {
     return m_uuid;
@@ -74,7 +79,7 @@ const QString& Project::name() const
 
 const QString& Project::filename() const
 {
-    return m_filename;
+    return m_path.absoluteFilePath("project.o3dstudio");
 }
 
 const QDir &Project::path() const
@@ -95,11 +100,32 @@ bool Project::setLocation(const QDir &path)
 
 bool Project::load()
 {
+    if (!exists()) {
+        throw ProjectException(tr("Project doesn't exists"));
+    };
+
+    // project structure
+    Application::instance()->store().loadProject(this);
+
+    // and project file
+    m_projectFile->load();
+
     return true;
 }
 
 bool Project::save()
 {
+    if (!exists()) {
+        throw ProjectException(tr("Project doesn't exists"));
+    };
+
+    // project structure @todo
+    // Application::instance()->store().saveProject(this);
+
+    // @todo if changes only
+    // and project file
+    m_projectFile->save();
+
     return true;
 }
 

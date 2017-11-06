@@ -48,6 +48,7 @@ void Settings::loadAll()
     loadGroup("Main");
     loadGroup("Plugin");
     loadGroup("Misc");
+    loadGroup("Common");
 }
 
 void Settings::saveGroup(const QString &group)
@@ -76,6 +77,7 @@ void Settings::saveAll()
     saveGroup("Main");
     saveGroup("Plugin");
     saveGroup("Misc");
+    saveGroup("Common");
 }
 
 void Settings::set(const QString &key, const QVariant &value, bool force)

@@ -82,6 +82,7 @@ void Store::initProject(Project *project)
 
 void Store::loadProject(Project *project)
 {
+    // @todo check project structure, integrity
 }
 
 void Store::deleteProject(Project *project)

@@ -95,6 +95,8 @@ private slots:
 
     void onCommandDone(QString name, QString label, bool done);
 
+    void onOpenRecentProject(bool);
+
 private:
 
     Ui::MainWindow ui;

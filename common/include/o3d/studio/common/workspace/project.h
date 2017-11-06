@@ -51,6 +51,8 @@ public:
      */
     void create();
 
+    void setUuid(const QUuid &uuid);
+
     const QUuid& uuid() const;
     const QString& name() const;
     const QString& filename() const;

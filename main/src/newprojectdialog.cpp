@@ -65,7 +65,7 @@ NewProjectDialog::NewProjectDialog(QWidget *parent) :
 
     // path
     QString dir = settings.get(
-       "o3s::main::newproject::previousfolder",
+       "o3s::main::project::previous-folder",
        QVariant(common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath())).toString();
 
     ui.projectLocation->setText(dir);
@@ -108,9 +108,7 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
             project->create();
         } catch(common::ProjectException &e) {
             delete project;
-
             QMessageBox::warning(this, tr("Project warning"), e.message());
-
             return;
         }
 
@@ -118,14 +116,22 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
             workspace->addProject(project);
         } catch(common::WorkspaceException &e) {
             delete project;
-
             QMessageBox::warning(this, tr("Project warning"), e.message());
-
             return;
         }
 
         workspace->selectProject(project->uuid());
         project->setupMasterScene();
+
+        common::Settings &settings = common::Application::instance()->settings();
+        QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+        recentsProject.append(project->path().absolutePath());
+
+        if (recentsProject.size() > 10) {
+            recentsProject.pop_front();
+        }
+
+        settings.set("o3s::main::project::recents", QVariant(recentsProject));
 
         m_valid = true;
     }
@@ -136,14 +142,14 @@ void NewProjectDialog::onSelectProjectFolder(bool)
     common::Settings &settings = common::Application::instance()->settings();
 
     QString dir = settings.get(
-       "o3s::main::newproject::previousfolder",
+       "o3s::main::project::previous-folder",
        QVariant(common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath())).toString();
 
     dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), dir,
                                             QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
     if (!dir.isEmpty()) {
-        settings.set("o3s::main::newproject::previousfolder", dir);
+        settings.set("o3s::main::project::previous-folder", dir);
         ui.projectLocation->setText(dir);
     }
 }

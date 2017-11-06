@@ -51,12 +51,11 @@ void ProjectFile::create()
 void ProjectFile::load()
 {
     QFile file(m_project->path().absoluteFilePath("project.o3dstudio"));
-    file.open(QFile::ReadOnly);
-
-    file.setFileName(m_project->path().absoluteFilePath("project.o3dstudio"));
     if (!file.exists()) {
-        throw ProjectException(m_project->tr("Missing project file for {1}").arg(m_project->name()));
+        throw ProjectException(m_project->tr("Missing project file for %1").arg(m_project->name()));
     }
+
+    file.open(QFile::ReadOnly);
 
     QDataStream stream(&file);
 
@@ -64,14 +63,26 @@ void ProjectFile::load()
         throw ProjectException(m_project->tr("Project file streaming output not ok"));
     }
 
+    // header
     char lmagic[9] = {0};
 
     const int magicLen = sizeof(PROJECT_MAGIC) - 1;
 
     int size = stream.readRawData(lmagic, magicLen);
-    if ((size != sizeof(PROJECT_MAGIC)) || (memcmp(lmagic, PROJECT_MAGIC, magicLen) != 0)) {
-
+    if ((size != magicLen) || (memcmp(lmagic, PROJECT_MAGIC, magicLen) != 0)) {
         throw ProjectException(m_project->tr("Invalid project file format"));
+    }
+
+    QUuid uuid;
+    QString name;
+
+    stream >> uuid
+           >> name;
+
+    m_project->setUuid(uuid);
+
+    if (m_project->name() != name) {
+        // @toto problem
     }
 
     file.close();
@@ -88,8 +99,11 @@ void ProjectFile::save()
         throw ProjectException(m_project->tr("Project file streaming output not ok"));
     }
 
+    // header
     const int magicLen = sizeof(PROJECT_MAGIC) - 1;
     stream.writeRawData(PROJECT_MAGIC, magicLen);
+    stream << m_project->uuid()
+           << m_project->name();
 
     file.close();
 }

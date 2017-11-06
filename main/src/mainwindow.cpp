@@ -37,6 +37,7 @@
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
@@ -149,6 +150,28 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // for test execute a dummy command @todo remove me
     common::Application::instance()->command().addCommand(new common::DummyCommand());
+
+    //
+    // menu
+    //
+
+    common::Settings &settings = common::Application::instance()->settings();
+    QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+
+    int i = 0;
+    QString project;
+    foreach (project, recentsProject) {
+        if (project.isEmpty()) {
+            continue;
+        }
+
+        QAction *action = new QAction(QString("&%1 | %2").arg(i).arg(project));
+        action->setProperty("location", project);
+        connect(action, SIGNAL(triggered(bool)), SLOT(onOpenRecentProject(bool)));
+        ui.menuRecentsProjects->insertAction(ui.actionRecentsProjectsClearAll, action);
+
+        ++i;
+    }
 }
 
 MainWindow::~MainWindow()
@@ -750,6 +773,50 @@ void MainWindow::onCommandDone(QString name, QString label, bool done)
     } else {
         ui.actionRedo->setEnabled(false);
     }
+}
+
+void MainWindow::onOpenRecentProject(bool)
+{
+    common::Settings &settings = common::Application::instance()->settings();
+
+    QString location = sender()->property("location").toString();
+    QStringList parts = location.split(QDir::separator());
+    if (parts.length() == 0) {
+        // remove from list
+        QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+        recentsProject.removeOne(location);
+        settings.set("o3s::main::project::recents", QVariant(recentsProject));
+        return;
+    }
+
+    QString name = parts[parts.length()-1];
+    QString path = common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath();
+
+    if (parts.length() > 1) {
+        parts.removeLast();
+        path = parts.join(QDir::separator());
+        if (path.endsWith("/")) {
+            path.chop(1);
+        }
+    }
+
+    common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
+    common::Project *project = new common::Project(name, workspace);
+
+    project->setLocation(path);
+
+    try {
+        project->load();
+    } catch (common::ProjectException &e) {
+        delete project;
+        QMessageBox::warning(this, tr("Project warning"), e.message());
+        return;
+    }
+
+    workspace->addProject(project);
+    workspace->selectProject(project->uuid());
+
+    project->setupMasterScene();
 }
 
 void MainWindow::closeWorkspace()

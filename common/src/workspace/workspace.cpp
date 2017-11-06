@@ -9,6 +9,9 @@
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/project.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/settings.h"
+
 using namespace o3d::studio::common;
 
 Workspace::Workspace(const QString &name) :
