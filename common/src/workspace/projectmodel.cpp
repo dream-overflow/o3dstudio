@@ -9,14 +9,14 @@
 #include "o3d/studio/common/workspace/projectmodel.h"
 #include "o3d/studio/common/workspace/projectitem.h"
 
+#include "o3d/studio/common/workspace/project.h"
+
 using namespace o3d::studio::common;
 
 ProjectModel::ProjectModel(QObject *parent) :
     QAbstractItemModel(parent)
 {
-    QList<QVariant> rootData;
-    rootData << tr("Name");
-    m_rootItem = new ProjectItem("o3s::workspace", rootData);
+    m_rootItem = new ProjectItem(QUuid(), "o3s::workspace", QIcon());
 }
 
 ProjectModel::~ProjectModel()
@@ -96,6 +96,12 @@ QVariant ProjectModel::data(const QModelIndex &index, int role) const
     }
 
     ProjectItem *item = static_cast<ProjectItem*>(index.internalPointer());
+
+    if (role == Qt::DisplayRole) {
+        return item->data(index.column());
+    } else if (role == Qt::DecorationRole) {
+        return item->decoration(index.column());
+    }
 /*
     if (role == Qt::DisplayRole && index.column() != 1) {
         return item->data(index.column());
@@ -133,11 +139,57 @@ Qt::ItemFlags ProjectModel::flags(const QModelIndex &index) const
 
 QVariant ProjectModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-        return m_rootItem->data(section);
+    Q_UNUSED(section)
+    Q_UNUSED(orientation)
+    Q_UNUSED(role)
+
+    // no header
+    return QVariant();
+}
+
+ProjectItem *ProjectModel::addProject(Project *project)
+{
+    if (!project) {
+        return nullptr;
     }
 
-    return QVariant();
+    int n = m_rootItem->childCount();
+
+    beginInsertRows(QModelIndex(), n, n);
+
+    ProjectItem *item = new ProjectItem(project->uuid(), project->name(), QIcon::fromTheme("document-open"), m_rootItem);
+    m_rootItem->appendChild(item);
+
+    endInsertRows();
+
+    return item;
+}
+
+void ProjectModel::removeProject(Project *project)
+{
+    if (!project) {
+        return;
+    }
+
+    // find the project
+    ProjectItem *projectItem = m_rootItem->find(project->uuid());
+    if (!projectItem) {
+        return;
+    }
+
+    Project *lproject = m_rootItem->project();
+    if (project != lproject) {
+        return;
+    }
+
+    int n = projectItem->row();
+
+    beginRemoveRows(QModelIndex(), n, n);
+    m_rootItem->removeChild(n);
+
+    delete projectItem;
+
+    endRemoveRows();
 }
 
 static QString makeParentPath(const QStringList &path, int minus) {

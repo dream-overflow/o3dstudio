@@ -55,7 +55,7 @@ public:
 
     const QUuid& uuid() const;
     const QString& name() const;
-    const QString& filename() const;
+    QString filename() const;
     const QDir& path() const;
 
     bool setLocation(const QDir &path);

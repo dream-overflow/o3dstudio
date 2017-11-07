@@ -20,6 +20,8 @@ namespace main {
 
 class WorkspaceDock : public QDockWidget, public common::Dock
 {
+    Q_OBJECT
+
 public:
 
     WorkspaceDock(QWidget *parent = nullptr);
@@ -33,7 +35,19 @@ signals:
 
 protected:
 
-private slots:
+public slots:
+
+    void onChangeCurrentWorkspace(const QString &name);
+
+    void onAddProject(const QUuid &uuid);
+    void onRemoveProject(const QUuid &uuid);
+    void onActivateProject(const QUuid &uuid);
+
+    void onSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
+    void onSelectionDetails(const QModelIndex &);
+
+    // void onAddHub(const QUuid &uuid);
+    // void onRemoveHub(const QUuid &uuid);
 
 private:
 

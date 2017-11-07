@@ -76,6 +76,7 @@ signals:
 
     void onProjectAdded(const QUuid &uuid);
     void onProjectActivated(const QUuid &uuid);
+    void onProjectRemoved(const QUuid &uuid);
 
 private:
 

@@ -80,7 +80,6 @@ void MasterScene::initialize()
 
     common::UiController &uiCtrl = common::Application::instance()->ui();
     uiCtrl.addContent(m_content);
-    uiCtrl.setActiveContent(m_content, true);
 }
 
 void MasterScene::paintDrawer()

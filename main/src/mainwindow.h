@@ -109,7 +109,7 @@ private slots:
     void onOpenRecentResources(bool);
     void onClearAllRecentResources(bool);
 
-    void onChangeCurrentWorkspace();
+    void onChangeCurrentWorkspace(const QString &name);
     void onProjectAdded(const QUuid &uuid);
 
     void onChangeMainTitle(const QString &title);

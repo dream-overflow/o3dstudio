@@ -18,11 +18,14 @@ namespace o3d {
 namespace studio {
 namespace common {
 
+class Project;
+// class Hub;
+
 class ProjectItem
 {
 public:
 
-    ProjectItem(const QString &name, const QList<QVariant> &data, ProjectItem *parentItem = nullptr);
+    ProjectItem(const QUuid &uuid, const QString &name, const QIcon &icon, ProjectItem *parentItem = nullptr);
     virtual ~ProjectItem();
 
     void appendChild(ProjectItem *child);
@@ -31,21 +34,33 @@ public:
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
+    QVariant decoration(int column) const;
     int row() const;
     ProjectItem *parentItem();
 
+    void removeChild(int row);
+
     ProjectItem *find(const QString &path);
+    ProjectItem *find(const QUuid &uuid);
 
     const QString& name() const;
+    const QUuid& uuid() const;
+
+    const Project* project() const;
+    Project* project();
+
+//    const Hub* hub() const;
+//    Hub* hub();
 
 private:
 
     QString m_path;
     QString m_name;
+    QUuid m_uuid;
+    QIcon m_icon;
 
     // QDataWidgetMapper
     QList<ProjectItem*> m_childItems;
-    QList<QVariant> m_itemData;
     ProjectItem *m_parentItem;
 };
 

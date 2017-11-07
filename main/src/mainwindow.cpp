@@ -151,15 +151,14 @@ MainWindow::MainWindow(QWidget *parent) :
     // for test execute a dummy command @todo remove me
     common::Application::instance()->command().addCommand(new common::DummyCommand());
 
-    //
     // menu
-    //
-
     connect(ui.actionRecentsProjectsClearAll, SIGNAL(triggered(bool)), SLOT(onClearAllRecentProjects(bool)));
     connect(ui.actionRecentsResourcesClearAll, SIGNAL(triggered(bool)), SLOT(onClearAllRecentResources(bool)));
 
-    // @todo
-    onChangeCurrentWorkspace();
+    common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaceManager();
+    connect(workspaceManager, SIGNAL(onWorkspaceActivated(QString)), SLOT(onChangeCurrentWorkspace(QString)));
+
+    onChangeCurrentWorkspace(workspaceManager->current()->name());
 
     initRecentProjectsMenu();
     initRecentResourcesMenu();
@@ -600,6 +599,8 @@ void MainWindow::onFileMenuPreferences()
 
 void MainWindow::onFileMenuClose()
 {
+    // @todo get selection
+    // @todo do close on selection
     closeWorkspace();
 }
 
@@ -815,11 +816,11 @@ void MainWindow::onClearAllRecentResources(bool)
     initRecentResourcesMenu();
 }
 
-void MainWindow::onChangeCurrentWorkspace()
+void MainWindow::onChangeCurrentWorkspace(const QString&)
 {
     common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
     if (workspace) {
-        connect(workspace, SIGNAL(onProjectAdded(QUuid)), SLOT(onProjectAdded(QUuid)));
+        connect(workspace, SIGNAL(onProjectAdded(const QUuid &)), SLOT(onProjectAdded(const QUuid &)));
     }
 }
 

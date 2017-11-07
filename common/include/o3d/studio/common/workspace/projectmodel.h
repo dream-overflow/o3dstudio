@@ -18,6 +18,9 @@ namespace o3d {
 namespace studio {
 namespace common {
 
+class Project;
+// class Hub;
+
 class ProjectModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -39,6 +42,11 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+
+    ProjectItem *addProject(Project *project);
+    void removeProject(Project *project);
+
+    //ProjectItem *addHub(Hub *hub);
 
 private:
 

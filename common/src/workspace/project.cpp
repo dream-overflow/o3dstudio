@@ -77,7 +77,7 @@ const QString& Project::name() const
     return m_name;
 }
 
-const QString& Project::filename() const
+QString Project::filename() const
 {
     return m_path.absoluteFilePath("project.o3dstudio");
 }
