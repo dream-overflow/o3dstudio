@@ -6,6 +6,8 @@
  * @details
  */
 
+#include "o3d/studio/common/application.h"
+
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
 
@@ -48,6 +50,18 @@ WorkspaceManager::WorkspaceManager()
         throw;
     }
 
+    // check/default settings
+    Settings& settings = Application::instance()->settings();
+
+    if (!settings.has("o3s::main::project::previous-folder") ||
+        settings.get("o3s::main::project::previous-folder").toString().isEmpty() ||
+        !QDir(settings.get("o3s::main::project::previous-folder").toString()).exists()) {
+
+        settings.set(
+            "o3s::main::project::previous-folder",
+            QVariant(m_defaultProjectsPath.absolutePath()));
+    }
+
     // @todo get last session loaded workspace
     m_current = new Workspace("default");
 }
@@ -77,6 +91,8 @@ Workspace *WorkspaceManager::addWorkspace(const QString &name)
 
     Workspace *workspace = new Workspace(name);
     m_foundWorkspaces.append(name);
+
+    emit onWorkspaceAdded(name);
 
     return workspace;
 }
@@ -123,6 +139,8 @@ bool WorkspaceManager::loadWorkspace(const QString &name)
     Workspace *workspace = nullptr;
 
     m_current = workspace;
+
+    emit onWorkspaceActivated(name);
 
     return true;
 }

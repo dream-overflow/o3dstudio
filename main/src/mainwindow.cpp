@@ -9,8 +9,6 @@
 #include "mainwindow.h"
 #include "settings.h"
 
-#include "o3d/studio/common/settings.h"
-
 #include "o3d/studio/common/command/commandmanager.h"
 #include "o3d/studio/common/command/dummycommand.h"
 
@@ -33,6 +31,7 @@
 #include "ui_aboutdialog.h"
 #include "ui_systeminfodialog.h"
 
+#include "o3d/studio/common/settings.h"
 #include "o3d/studio/common/modulemanager.h"
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
@@ -66,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
     common::UiController &uiCtrl = common::Application::instance()->ui();
 
     connect(ui.actionNewProject, SIGNAL(triggered(bool)), SLOT(onFileNewProject()));
+    connect(ui.actionOpenProject, SIGNAL(triggered(bool)), SLOT(onFileOpenProject()));
 
     connect(ui.actionNewResource, SIGNAL(triggered(bool)), SLOT(onFileNewResource()));
     ui.actionNewResource->setEnabled(false);
@@ -155,23 +155,14 @@ MainWindow::MainWindow(QWidget *parent) :
     // menu
     //
 
-    common::Settings &settings = common::Application::instance()->settings();
-    QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+    connect(ui.actionRecentsProjectsClearAll, SIGNAL(triggered(bool)), SLOT(onClearAllRecentProjects(bool)));
+    connect(ui.actionRecentsResourcesClearAll, SIGNAL(triggered(bool)), SLOT(onClearAllRecentResources(bool)));
 
-    int i = 0;
-    QString project;
-    foreach (project, recentsProject) {
-        if (project.isEmpty()) {
-            continue;
-        }
+    // @todo
+    onChangeCurrentWorkspace();
 
-        QAction *action = new QAction(QString("&%1 | %2").arg(i).arg(project));
-        action->setProperty("location", project);
-        connect(action, SIGNAL(triggered(bool)), SLOT(onOpenRecentProject(bool)));
-        ui.menuRecentsProjects->insertAction(ui.actionRecentsProjectsClearAll, action);
-
-        ++i;
-    }
+    initRecentProjectsMenu();
+    initRecentResourcesMenu();
 }
 
 MainWindow::~MainWindow()
@@ -569,6 +560,28 @@ void MainWindow::onFileNewProject()
     dialog->show();
 }
 
+void MainWindow::onFileOpenProject()
+{
+    QString dir = settings().get("o3s::main::project::previous-folder").toString();
+    QString filename = QFileDialog::getOpenFileName(
+                this, tr("Open project"), dir, "project.o3dstudio");
+
+    if (!filename.isEmpty()) {
+        QFileInfo lfile(filename);
+        QDir ldir(lfile.absoluteDir());
+
+        if (!ldir.exists()) {
+            return;
+        }
+
+        openProject(ldir.absolutePath());
+
+        if (ldir.cdUp()) {
+            settings().set("o3s::main::project::previous-folder", ldir.absolutePath());
+        }
+    }
+}
+
 void MainWindow::onFileNewResource()
 {
     // new resource dialog
@@ -707,6 +720,8 @@ void MainWindow::onAttachToolBar(QString name, QToolBar *toolBar, Qt::ToolBarAre
 
 void MainWindow::onDetachContent(QString name, QWidget *content)
 {
+    Q_UNUSED(content)
+
     auto it = m_contents.find(name);
     if (it != m_contents.end()) {
         removeContentWidget(name);
@@ -754,6 +769,8 @@ void MainWindow::onShowContent(QString name, QWidget *content, bool showHide)
 
 void MainWindow::onCommandDone(QString name, QString label, bool done)
 {
+    Q_UNUSED(name)
+
     if (done) {
         statusBar()->showMessage(tr("%1 done").arg(label));
         ui.actionUndo->setText(tr("Undo %1").arg(label));
@@ -777,46 +794,64 @@ void MainWindow::onCommandDone(QString name, QString label, bool done)
 
 void MainWindow::onOpenRecentProject(bool)
 {
-    common::Settings &settings = common::Application::instance()->settings();
-
     QString location = sender()->property("location").toString();
-    QStringList parts = location.split(QDir::separator());
-    if (parts.length() == 0) {
-        // remove from list
-        QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
-        recentsProject.removeOne(location);
-        settings.set("o3s::main::project::recents", QVariant(recentsProject));
-        return;
-    }
+    openProject(location);
+}
 
-    QString name = parts[parts.length()-1];
-    QString path = common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath();
+void MainWindow::onClearAllRecentProjects(bool)
+{
+    settings().set("o3s::main::project::recents", QVariant(QStringList()));
+    initRecentProjectsMenu();
+}
 
-    if (parts.length() > 1) {
-        parts.removeLast();
-        path = parts.join(QDir::separator());
-        if (path.endsWith("/")) {
-            path.chop(1);
-        }
-    }
+void MainWindow::onOpenRecentResources(bool)
+{
+    // @todo
+}
 
+void MainWindow::onClearAllRecentResources(bool)
+{
+    settings().set("o3s::main::resource::recents", QVariant(QStringList()));
+    initRecentResourcesMenu();
+}
+
+void MainWindow::onChangeCurrentWorkspace()
+{
     common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
-    common::Project *project = new common::Project(name, workspace);
+    if (workspace) {
+        connect(workspace, SIGNAL(onProjectAdded(QUuid)), SLOT(onProjectAdded(QUuid)));
+    }
+}
 
-    project->setLocation(path);
+void MainWindow::onProjectAdded(const QUuid &uuid)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
+    common::Project *project = workspace->project(uuid);
 
-    try {
-        project->load();
-    } catch (common::ProjectException &e) {
-        delete project;
-        QMessageBox::warning(this, tr("Project warning"), e.message());
-        return;
+    QStringList recentsProject = settings().get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+    recentsProject.push_front(project->path().absolutePath());
+
+    while (recentsProject.size() > 10) {
+        recentsProject.pop_back();
     }
 
-    workspace->addProject(project);
-    workspace->selectProject(project->uuid());
+    settings().set("o3s::main::project::recents", QVariant(recentsProject));
 
-    project->setupMasterScene();
+    initRecentProjectsMenu();
+}
+
+void MainWindow::onChangeMainTitle(const QString &title)
+{
+    if (title.isEmpty()) {
+        setWindowTitle(tr("Objective-3D Studio"));
+    } else {
+        setWindowTitle(title);
+    }
+}
+
+void MainWindow::onChangeInfoMessage(const QString &message)
+{
+    statusBar()->showMessage(message);
 }
 
 void MainWindow::closeWorkspace()
@@ -860,4 +895,121 @@ void MainWindow::loadLanguage(const QString &language)
         switchTranslator(m_translator, QString("o3smain_%1.qm").arg(languageCode));
         m_currentLanguage = language;
     }
+}
+
+o3d::studio::common::Settings &MainWindow::settings()
+{
+    return common::Application::instance()->settings();
+}
+
+void MainWindow::initRecentProjectsMenu()
+{
+    common::Settings &settings = common::Application::instance()->settings();
+    QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+
+    QAction *action;
+    foreach (action, ui.menuRecentsProjects->actions()) {
+        if (action->property("location").isValid()) {
+            ui.menuRecentsProjects->removeAction(action);
+        }
+    }
+
+    QAction *separator = ui.menuRecentsProjects->actions().at(0);
+
+    int i = 0;
+    QString project;
+    foreach (project, recentsProject) {
+        if (project.isEmpty()) {
+            continue;
+        }
+
+        QAction *action = new QAction(QString("&%1 | %2").arg(i).arg(project));
+        action->setProperty("location", project);
+        connect(action, SIGNAL(triggered(bool)), SLOT(onOpenRecentProject(bool)));
+        ui.menuRecentsProjects->insertAction(separator, action);
+
+        ++i;
+    }
+}
+
+void MainWindow::initRecentResourcesMenu()
+{
+    common::Settings &settings = common::Application::instance()->settings();
+    QStringList recentsResource = settings.get("o3s::main::resource::recents", QVariant(QStringList())).toStringList();
+
+    QAction *action;
+    foreach (action, ui.menuRecentsResources->actions()) {
+        if (action->property("location").isValid()) {
+            ui.menuRecentsResources->removeAction(action);
+        }
+    }
+
+    QAction *separator = ui.menuRecentsResources->actions().at(0);
+
+    int i = 0;
+    QString resource;
+    foreach (resource, recentsResource) {
+        if (resource.isEmpty()) {
+            continue;
+        }
+
+        QAction *action = new QAction(QString("&%1 | %2").arg(i).arg(resource));
+        action->setProperty("location", resource);
+        connect(action, SIGNAL(triggered(bool)), SLOT(onOpenRecentResources(bool)));
+        ui.menuRecentsResources->insertAction(separator, action);
+
+        ++i;
+    }
+}
+
+void MainWindow::openProject(const QString &location)
+{
+    // remove from list
+    QStringList recentsProject = settings().get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+    recentsProject.removeOne(location);
+    settings().set("o3s::main::project::recents", QVariant(recentsProject));
+
+    QStringList parts = location.split(QDir::separator());
+    if (parts.length() == 0) {
+        return;
+    }
+
+    QString name = parts[parts.length()-1];
+    QString path = common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath();
+
+    if (parts.length() > 1) {
+        parts.removeLast();
+        path = parts.join(QDir::separator());
+        if (path.endsWith("/")) {
+            path.chop(1);
+        }
+    }
+
+    common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
+    if (workspace->hasProject(location)) {
+        // currently loaded
+        return;
+    }
+
+    common::Project *project = new common::Project(name, workspace);
+    project->setLocation(path);
+
+    try {
+        project->load();
+    } catch (common::ProjectException &e) {
+        delete project;
+        QMessageBox::warning(this, tr("Project warning"), e.message());
+        return;
+    }
+
+    workspace->addProject(project);
+    workspace->selectProject(project->uuid());
+
+    project->setupMasterScene();
+}
+
+void MainWindow::openResource(const QString &location)
+{
+    Q_UNUSED(location)
+    // @todo
 }

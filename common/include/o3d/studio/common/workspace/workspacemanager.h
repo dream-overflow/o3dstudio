@@ -21,8 +21,10 @@ class Workspace;
 /**
  * @brief The WorkspaceManager final class
  */
-class WorkspaceManager
+class WorkspaceManager : public QObject
 {
+    Q_OBJECT
+
 public:
 
     WorkspaceManager();
@@ -59,6 +61,11 @@ public:
 
     const QDir& defaultProjectsPath() const;
     const QDir& defaultWorkspacesPath() const;
+
+signals:
+
+    void onWorkspaceAdded(const QString &name);
+    void onWorkspaceActivated(const QString &name);
 
 private:
 

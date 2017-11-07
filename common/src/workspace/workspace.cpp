@@ -76,6 +76,8 @@ bool Workspace::addProject(Project *project)
     Q_ASSERT(m_loadedProjects.find(project->uuid()) == m_loadedProjects.end());
     m_loadedProjects.insert(project->uuid(), project);
 
+    emit onProjectAdded(project->uuid());
+
     return true;
 }
 
@@ -101,7 +103,27 @@ bool Workspace::closeProject(const QUuid& uuid)
     return false;
 }
 
-bool Workspace::hasProject(const QUuid& uuid)
+bool Workspace::hasProject(QString location) const
+{
+    location = QDir::cleanPath(location);
+
+    if (location.endsWith(QDir::separator())) {
+        location.chop(1);
+    }
+
+    auto cit = m_loadedProjects.cbegin();
+    while (cit != m_loadedProjects.cend()) {
+        if (cit.value()->path().absolutePath() == location) {
+            return true;
+        }
+
+        ++cit;
+    }
+
+    return false;
+}
+
+bool Workspace::hasProject(const QUuid& uuid) const
 {
     auto cit = m_loadedProjects.find(uuid);
     return cit != m_loadedProjects.cend();
@@ -125,6 +147,9 @@ bool Workspace::selectProject(const QUuid &uuid)
     auto it = m_loadedProjects.find(uuid);
     if (it != m_loadedProjects.end()) {
         m_activeProject = it.value();
+
+        emit onProjectActivated(uuid);
+
         return true;
     }
 

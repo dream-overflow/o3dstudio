@@ -59,6 +59,7 @@ NewProjectDialog::NewProjectDialog(QWidget *parent) :
     ui.setupUi(this);
 
     // name validator
+    ui.projectName->setFocus();
     ui.projectName->setValidator(new ProjectNameValidator());  // new QRegExpValidator(QRegExp("[0-9a-zA-Z_-]{3-128}"))
     ui.projectName->setPlaceholderText(tr("3 to 128 characters, only letters, digits - and _"));
     connect(ui.projectName, SIGNAL(textChanged(QString)), SLOT(onProjectNameChanged(QString)));

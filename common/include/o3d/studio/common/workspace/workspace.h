@@ -24,8 +24,10 @@ class Project;
 /**
  * @brief The Workspace final class.
  */
-class Workspace
+class Workspace : public QObject
 {
+    Q_OBJECT
+
 public:
 
     Workspace(const QString &name);
@@ -51,7 +53,9 @@ public:
      * @return
      */
     bool closeProject(const QUuid& uuid);
-    bool hasProject(const QUuid& uuid);
+
+    bool hasProject(const QUuid& uuid) const;
+    bool hasProject(QString location) const;
 
     /**
      * @brief Changes occurs to one or more projects.
@@ -67,6 +71,11 @@ public:
 
     bool save();
     bool load();
+
+signals:
+
+    void onProjectAdded(const QUuid &uuid);
+    void onProjectActivated(const QUuid &uuid);
 
 private:
 

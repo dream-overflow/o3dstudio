@@ -13,6 +13,7 @@
 #include <QtCore/QTranslator>
 
 #include "o3d/studio/common/capacitysettings.h"
+#include "o3d/studio/common/settings.h"
 
 #include "ui_mainwindow.h"
 
@@ -66,13 +67,20 @@ protected:
 private slots:
 
     void onFileNewProject();
+    void onFileOpenProject();
+
     void onFileNewResource();
+
+    void onFileWorkspaceManage();
+
     void onFileMenuPreferences();
     void onFileMenuClose();
     void onFileMenuQuit();
+
     void onWindowFullScreen();
-    void onFileWorkspaceManage();
+
     void onViewHomePage();
+
     void onHelpIndex();
     void onSystemInfo();
     void onAboutPlugin();
@@ -96,6 +104,16 @@ private slots:
     void onCommandDone(QString name, QString label, bool done);
 
     void onOpenRecentProject(bool);
+    void onClearAllRecentProjects(bool);
+
+    void onOpenRecentResources(bool);
+    void onClearAllRecentResources(bool);
+
+    void onChangeCurrentWorkspace();
+    void onProjectAdded(const QUuid &uuid);
+
+    void onChangeMainTitle(const QString &title);
+    void onChangeInfoMessage(const QString &message);
 
 private:
 
@@ -116,10 +134,18 @@ private:
     QStatusBar *m_statusBar{nullptr};      //!< unique bottom status bar
     QWidget *m_currentContent{nullptr};    //!< current active content widget
 
-    QMap<QString, QWidget*> m_contents;   //!< existings content widget (only once activated)
+    QMap<QString, QWidget*> m_contents;    //!< existings content widget (only once activated)
 
     QMap<QString, QToolBar*> m_toolBars;   //!< existings toolbars (many can be activated)
     QMap<QString, QDockWidget*> m_docks;   //!< existings docks (many can be activated)
+
+    common::Settings& settings();
+
+    void initRecentProjectsMenu();
+    void initRecentResourcesMenu();
+
+    void openProject(const QString &location);
+    void openResource(const QString &location);
 };
 
 } // namespace main
