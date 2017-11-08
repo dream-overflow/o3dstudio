@@ -101,25 +101,36 @@
     <property name="title">
      <string>&amp;Window</string>
     </property>
-    <widget class="QMenu" name="menuViews">
+    <widget class="QMenu" name="menuContentViews">
      <property name="title">
-      <string>&amp;Views</string>
+      <string>Content &amp;Views</string>
      </property>
      <property name="icon">
       <iconset theme="preferences-system-windows">
        <normaloff>.</normaloff>.</iconset>
      </property>
-     <addaction name="actionViewHomePage"/>
-     <addaction name="separator"/>
-     <addaction name="actionMainConsole"/>
+    </widget>
+    <widget class="QMenu" name="menuDockViews">
+     <property name="title">
+      <string>&amp;Dock views</string>
+     </property>
+     <property name="icon">
+      <iconset theme="folder-visiting"/>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuToolBarViews">
+     <property name="title">
+      <string>Toolbar views</string>
+     </property>
+     <property name="icon">
+      <iconset theme="preferences-system"/>
+     </property>
     </widget>
     <addaction name="actionWindowFullscreen"/>
     <addaction name="separator"/>
-    <addaction name="actionShowMainToolBar"/>
-    <addaction name="actionShowLeftSideBar"/>
-    <addaction name="actionShowRightSideBar"/>
-    <addaction name="actionShowBottomPanel"/>
-    <addaction name="menuViews"/>
+    <addaction name="menuContentViews"/>
+    <addaction name="menuDockViews"/>
+    <addaction name="menuToolBarViews"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">

@@ -7,16 +7,24 @@
  */
 
 #include <QtGui/QPainter>
+#include <QtGui/QIcon>
+#include <QtCore/QVariant>
 
 #include "o3d/studio/common/ui/canvas/canvascontent.h"
 
 using namespace o3d::studio::common;
 
 
-CanvasContent::CanvasContent(QWidget *parent) :
+CanvasContent::CanvasContent(const QString &name, QWidget *parent) :
     QWidget(parent),
     m_antialiasing(true)
 {
+    setProperty("name", QVariant(name));
+
+    // @todo according to project name
+    setWindowTitle(tr("Display %s").arg(name));
+    setWindowIcon(QIcon::fromTheme("input-gaming"));
+
     setAutoFillBackground(true);
 
 //    shape = 7;
@@ -33,7 +41,7 @@ CanvasContent::~CanvasContent()
 
 QString CanvasContent::elementName() const
 {
-    return "o3s::common::canvascontent";
+    return "o3s::common::canvascontent" + property("name").toString();
 }
 
 QWidget *CanvasContent::ui()

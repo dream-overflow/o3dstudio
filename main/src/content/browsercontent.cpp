@@ -7,6 +7,7 @@
  */
 
 #include <QtCore/QDir>
+#include <QtGui/QIcon>
 
 #include "browsercontent.h"
 #include "o3d/studio/common/application.h"
@@ -17,6 +18,9 @@ using namespace o3d::studio::main;
 BrowserContent:: BrowserContent(QWidget *parent) :
     QTextBrowser(parent)
 {
+    setWindowTitle(tr("Home page"));
+    setWindowIcon(QIcon::fromTheme("go-home"));
+
     setSearchPaths(QStringList(common::Application::instance()->appDir() + QDir::separator() + "share/html"));
     setSource(QUrl::fromLocalFile("index.html"));
 }

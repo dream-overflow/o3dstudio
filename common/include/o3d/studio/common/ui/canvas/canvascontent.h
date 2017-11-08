@@ -26,7 +26,7 @@ class CanvasContent : public QWidget, public Content
 
 public:
 
-    CanvasContent(QWidget *parent = nullptr);
+    CanvasContent(const QString &name, QWidget *parent = nullptr);
     virtual ~CanvasContent();
 
     virtual QString elementName() const override;

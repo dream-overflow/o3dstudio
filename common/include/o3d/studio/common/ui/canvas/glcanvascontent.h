@@ -22,7 +22,7 @@ class GLCanvasContent : public QOpenGLWidget, public Content
 {
 public:
 
-    explicit GLCanvasContent(const QString &suffix, QWidget *parent = nullptr);
+    explicit GLCanvasContent(const QUuid &ref, QWidget *parent = nullptr);
     virtual ~GLCanvasContent();
 
     virtual QString elementName() const override;
@@ -41,7 +41,7 @@ protected:
 
 protected:
 
-    QString m_suffix;
+    QUuid m_ref;
 };
 
 } // namespace common

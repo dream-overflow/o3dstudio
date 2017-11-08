@@ -13,6 +13,7 @@ class QTreeView;
 
 #include <QtWidgets/QDockWidget>
 #include "o3d/studio/common/ui/dock.h"
+#include "o3d/studio/common/workspace/projectitem.h"
 
 namespace o3d {
 namespace studio {
@@ -59,6 +60,8 @@ private:
     void setupUi();
 
     QTreeView *m_treeView;
+
+    common::ProjectItem *m_lastSelected;
 };
 
 } // namespace main

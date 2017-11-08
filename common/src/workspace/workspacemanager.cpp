@@ -64,6 +64,7 @@ WorkspaceManager::WorkspaceManager()
 
     // @todo get last session loaded workspace
     m_current = new Workspace("default");
+    m_current->setUuid(QUuid::createUuid());
 }
 
 WorkspaceManager::~WorkspaceManager()

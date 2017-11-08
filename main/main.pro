@@ -39,7 +39,10 @@ SOURCES += \
     src/plugin/pluginsection.cpp \
     src/content/browsercontent.cpp \
     src/dock/mainconsole.cpp \
-    src/dock/workspacedock.cpp
+    src/dock/workspacedock.cpp \
+    src/property/workspacesection.cpp \
+    src/property/projectsection.cpp \
+    src/dock/propertydock.cpp
 
 
 HEADERS += \
@@ -55,7 +58,10 @@ HEADERS += \
     src/plugin/pluginsection.h \
     src/content/browsercontent.h \
     src/dock/mainconsole.h \
-    src/dock/workspacedock.h
+    src/dock/workspacedock.h \
+    src/property/workspacesection.h \
+    src/property/projectsection.h \
+    src/dock/propertydock.h
 
 
 RESOURCES += \

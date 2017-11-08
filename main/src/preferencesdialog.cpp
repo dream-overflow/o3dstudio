@@ -23,6 +23,8 @@
 #include "o3d/studio/common/workspace/project.h"
 
 #include "property/displaysection.h"
+#include "property/workspacesection.h"
+#include "property/projectsection.h"
 
 using namespace o3d::studio::main;
 
@@ -207,8 +209,9 @@ void PreferencesDialog::setupCategories()
     // workspace
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        // @todo specialize to workspace section node
-        sections.append(new common::PropertySectionNode("o3s::workspace::local", tr("Local")));
+        // specialized workspace section node
+        sections.append(new WorkspaceSection(workspace->uuid()));
+        // @todo others workspace section
 
         QList<common::Project*> loadedProjectList = workspace->loadedProjectList();
 
@@ -217,8 +220,9 @@ void PreferencesDialog::setupCategories()
 
         common::Project *project = nullptr;
         foreach (project, loadedProjectList) {
-            // @todo specialize to project section node
-            sections.append(new common::PropertySectionNode("o3s::workspace::project::" + project->name(), project->name()));
+            // specialized project section node
+            sections.append(new ProjectSection(project->uuid()));
+            // @todo project sub-sections
         }
     }
 

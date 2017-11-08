@@ -8,13 +8,28 @@
 
 #include "o3d/studio/common/ui/canvas/glcanvascontent.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+#include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/workspace/project.h"
+
 using namespace o3d::studio::common;
 
-GLCanvasContent::GLCanvasContent(const QString &suffix, QWidget *parent) :
+GLCanvasContent::GLCanvasContent(const QUuid &ref, QWidget *parent) :
     QOpenGLWidget(parent),
     Content(),
-    m_suffix(suffix)
+    m_ref(ref)
 {
+    setWindowTitle(tr("Display"));
+    setWindowIcon(QIcon::fromTheme("input-gaming"));
+
+    // add project name
+    common::WorkspaceManager *workspaces = &common::Application::instance()->workspaces();
+    if (workspaces->current()) {
+        common::Project *project = workspaces->current()->project(ref);
+        setWindowTitle(tr("Display %1").arg(project->name()));
+    }
+
     QSurfaceFormat format;
     format.setRedBufferSize(8);
     format.setGreenBufferSize(8);
@@ -39,7 +54,7 @@ GLCanvasContent::~GLCanvasContent()
 
 QString GLCanvasContent::elementName() const
 {
-    return "o3s::main::glcanvascontent::" + m_suffix;
+    return "o3s::main::glcanvascontent::" + m_ref.toString();
 }
 
 QWidget *GLCanvasContent::ui()

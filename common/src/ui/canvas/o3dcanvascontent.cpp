@@ -10,17 +10,30 @@
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+#include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/workspace/project.h"
+
 #include <o3d/engine/context.h>
 
 using namespace o3d::studio::common;
 
-O3DCanvasContent::O3DCanvasContent(const QString &suffix, bool debug, QWidget *parent) :
-    GLCanvasContent(suffix, parent),
+O3DCanvasContent::O3DCanvasContent(const QUuid &ref, bool debug, QWidget *parent) :
+    GLCanvasContent(ref, parent),
     m_debug(debug),
     m_renderer(nullptr),
     m_drawer(nullptr)
 {
+    setWindowTitle(tr("Display"));
+    setWindowIcon(QIcon::fromTheme("input-gaming"));
 
+    // add project name
+    common::WorkspaceManager *workspaces = &common::Application::instance()->workspaces();
+    if (workspaces->current()) {
+        common::Project *project = workspaces->current()->project(ref);
+        setWindowTitle(tr("Display %1").arg(project->name()));
+    }
 }
 
 O3DCanvasContent::~O3DCanvasContent()
@@ -32,7 +45,7 @@ O3DCanvasContent::~O3DCanvasContent()
 
 QString O3DCanvasContent::elementName() const
 {
-    return "o3s::main::o3dcanvascontent::" + m_suffix;
+    return "o3s::main::o3dcanvascontent::" + m_ref.toString();
 }
 
 void O3DCanvasContent::setRenderer(QtRenderer *renderer)

@@ -17,6 +17,8 @@ MainToolBar::MainToolBar(QWidget *parent) :
 {
     setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea | Qt::RightToolBarArea);
     setupButtons();
+
+    setWindowIcon(QIcon::fromTheme("applications-accessories"));
 }
 
 MainToolBar::~MainToolBar()

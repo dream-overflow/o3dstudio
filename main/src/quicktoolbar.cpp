@@ -18,6 +18,8 @@ QuickToolBar::QuickToolBar(QWidget *parent) :
     setFloatable(false);
 
     setupButtons();
+
+    setWindowIcon(QIcon::fromTheme("applications-internet"));
 }
 
 QuickToolBar::~QuickToolBar()

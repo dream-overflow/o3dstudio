@@ -32,9 +32,11 @@ public:
 
     QDockWidget* createDock(const QString &title, const QString &name, Qt::DockWidgetArea area);
     bool setupDock(const QString &name, QDockWidget *dock, Qt::DockWidgetArea area);
+    bool removeDock(const QString &name);
 
     QToolBar* createToolBar(const QString &title, const QString &name, Qt::ToolBarArea area);
     bool setupToolBar(const QString &name, QToolBar *toolBar, Qt::ToolBarArea area);
+    bool removeToolBarWidget(const QString &name);
 
     bool addContentWidget(const QString &name, QWidget *widget);
     bool removeContentWidget(const QString &name);
@@ -80,6 +82,10 @@ private slots:
     void onWindowFullScreen();
 
     void onViewHomePage();
+
+    void onViewContent();
+    void onViewDock();
+    void onViewToolBar();
 
     void onHelpIndex();
     void onSystemInfo();

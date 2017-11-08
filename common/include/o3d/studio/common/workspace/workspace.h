@@ -33,8 +33,11 @@ public:
     Workspace(const QString &name, QObject *parent = nullptr);
     virtual ~Workspace();
 
+    const QUuid& uuid() const;
     const QString& name() const;
     const QString& filename() const;
+
+    void setUuid(const QUuid &uuid);
 
     Project* project(const QUuid& uuid);
     const Project* project(const QUuid& uuid) const;
@@ -94,6 +97,8 @@ public slots:
     void onSelectionChanged();
 
 private:
+
+    QUuid m_uuid;
 
     QString m_filename;        //!< Related workspace file name
     QString m_name;            //!< Unique workspace name

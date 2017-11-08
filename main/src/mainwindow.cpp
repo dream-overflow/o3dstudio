@@ -45,6 +45,7 @@
 
 #include "dock/mainconsole.h"
 #include "dock/workspacedock.h"
+#include "dock/propertydock.h"
 
 #include "content/browsercontent.h"
 
@@ -79,7 +80,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui.actionQuit, SIGNAL(triggered(bool)), SLOT(onFileMenuQuit()));
 
     connect(ui.actionWindowFullscreen, SIGNAL(triggered(bool)), SLOT(onWindowFullScreen()));
-    connect(ui.actionViewHomePage, SIGNAL(triggered(bool)), SLOT(onViewHomePage()));
 
     connect(ui.actionHelpIndex, SIGNAL(triggered(bool)), SLOT(onHelpIndex()));
     connect(ui.actionSystemInfo, SIGNAL(triggered(bool)), SLOT(onSystemInfo()));
@@ -124,14 +124,16 @@ MainWindow::MainWindow(QWidget *parent) :
     QuickToolBar *quickToolBar = new QuickToolBar();
     uiCtrl.addToolBar(quickToolBar);
 
+    // @todo setActive view... plus context into the quicktoolbar
     connect(quickToolBar, SIGNAL(showHome()), SLOT(onViewHomePage()));
 
     // workspace dock
     WorkspaceDock *workspaceDock = new WorkspaceDock();
     uiCtrl.addDock(workspaceDock);
 
-    // property dock @todo using Dock
-    createDock(tr("Property"), "property", Qt::RightDockWidgetArea);
+    // property dock
+    PropertyDock *propertyDock = new PropertyDock();
+    uiCtrl.addDock(propertyDock);
 
     // main console dock
     MainConsole *mainConsole= new MainConsole();
@@ -225,7 +227,30 @@ bool MainWindow::setupDock(const QString &name, QDockWidget *dock, Qt::DockWidge
     dock->setProperty("name", QVariant(name));
     m_docks.insert(dock->property("name").toString(), dock);
 
+    // add view menu action
+    QAction *action = new QAction(dock->windowIcon(), dock->windowTitle());
+    action->setProperty("name", name);
+
+    connect(action, SIGNAL(triggered(bool)), SLOT(onViewDock()));
+
+    ui.menuDockViews->addAction(action);
+
     return true;
+}
+
+bool MainWindow::removeDock(const QString &name)
+{
+    // erase menu entry
+    QList<QAction*> actions = ui.menuDockViews->actions();
+    QAction *action = nullptr;
+    foreach (action, actions) {
+        if (action->property("name").toString() == name) {
+            ui.menuDockViews->removeAction(action);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 QToolBar *MainWindow::createToolBar(const QString &title, const QString &name, Qt::ToolBarArea area)
@@ -256,7 +281,30 @@ bool MainWindow::setupToolBar(const QString &name, QToolBar *toolBar, Qt::ToolBa
     toolBar->setProperty("name", QVariant(name));
     m_toolBars.insert(toolBar->property("name").toString(), toolBar);
 
+    // add view menu action
+    QAction *action = new QAction(toolBar->windowIcon(), toolBar->windowTitle());
+    action->setProperty("name", name);
+
+    connect(action, SIGNAL(triggered(bool)), SLOT(onViewToolBar()));
+
+    ui.menuToolBarViews->addAction(action);
+
     return true;
+}
+
+bool MainWindow::removeToolBarWidget(const QString &name)
+{
+    // erase menu entry
+    QList<QAction*> actions = ui.menuToolBarViews->actions();
+    QAction *action = nullptr;
+    foreach (action, actions) {
+        if (action->property("name").toString() == name) {
+            ui.menuToolBarViews->removeAction(action);
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool MainWindow::addContentWidget(const QString &name, QWidget *widget)
@@ -266,6 +314,14 @@ bool MainWindow::addContentWidget(const QString &name, QWidget *widget)
     }
 
     m_contents.insert(name, widget);
+
+    // add view menu action
+    QAction *action = new QAction(widget->windowIcon(), widget->windowTitle());
+    action->setProperty("name", name);
+
+    connect(action, SIGNAL(triggered(bool)), SLOT(onViewContent()));
+
+    ui.menuContentViews->addAction(action);
 
     return true;
 }
@@ -290,6 +346,16 @@ bool MainWindow::removeContentWidget(const QString &name)
 
         it.value()->setParent(nullptr);
         delete it.value();
+
+        // erase menu entry
+        QList<QAction*> actions = ui.menuContentViews->actions();
+        QAction *action = nullptr;
+        foreach (action, actions) {
+            if (action->property("name").toString() == name) {
+                ui.menuContentViews->removeAction(action);
+                break;
+            }
+        }
 
         m_contents.erase(it);
 
@@ -316,6 +382,13 @@ bool MainWindow::setCurrentContentWidget(const QString &name)
         // setup
         setCentralWidget(it.value());
         m_currentContent = it.value();
+
+        // adapt window title
+        if (m_currentContent->windowTitle().isEmpty()) {
+            setWindowTitle(tr("Objective-3D Studio"));
+        } else {
+            setWindowTitle(m_currentContent->windowTitle() + " - " + tr("Objective-3D Studio"));
+        }
 
         return true;
     }
@@ -523,6 +596,12 @@ void MainWindow::changeEvent(QEvent *event)
             // this event is send if a translator is loaded
             case QEvent::LanguageChange:
                 ui.retranslateUi(this);
+
+                // adapt window title
+                if (m_currentContent && !m_currentContent->windowTitle().isEmpty()) {
+                    setWindowTitle(m_currentContent->windowTitle() + " - " + tr("Objective-3D Studio"));
+                }
+
                 break;
 
             // this event is send, if the system, language changes
@@ -641,6 +720,56 @@ void MainWindow::onViewHomePage()
     if (browserContent) {
         browserContent->setSource(QUrl::fromLocalFile("index.html"));
         uiCtrl.setActiveContent(browserContent, true);
+    }
+}
+
+void MainWindow::onViewContent()
+{
+    QString name = sender()->property("name").toString();
+
+    common::UiController &uiCtrl = common::Application::instance()->ui();
+    common::Content *content = uiCtrl.content(name);
+
+    if (content) {
+        // special case for main browser
+        if (name == "o3s::main::browsercontent") {
+            BrowserContent *browserContent = static_cast<BrowserContent*>(content);
+            browserContent->setSource(QUrl::fromLocalFile("index.html"));
+        }
+
+        uiCtrl.setActiveContent(content, true);
+    }
+}
+
+void MainWindow::onViewDock()
+{
+    QString name = sender()->property("name").toString();
+
+    common::UiController &uiCtrl = common::Application::instance()->ui();
+    common::Dock *dock = uiCtrl.dock(name);
+
+    if (dock) {
+        if (!dock->ui()->isVisible()) {
+            dock->ui()->show();
+        } else {
+            dock->ui()->hide();
+        }
+    }
+}
+
+void MainWindow::onViewToolBar()
+{
+    QString name = sender()->property("name").toString();
+
+    common::UiController &uiCtrl = common::Application::instance()->ui();
+    common::ToolBar *toolBar = uiCtrl.toolBar(name);
+
+    if (toolBar) {
+        if (!toolBar->ui()->isVisible()) {
+            toolBar->ui()->show();
+        } else {
+            toolBar->ui()->hide();
+        }
     }
 }
 
@@ -846,7 +975,7 @@ void MainWindow::onChangeMainTitle(const QString &title)
     if (title.isEmpty()) {
         setWindowTitle(tr("Objective-3D Studio"));
     } else {
-        setWindowTitle(title);
+        setWindowTitle(title + " - " + tr("Objective-3D Studio"));
     }
 }
 

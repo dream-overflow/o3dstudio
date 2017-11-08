@@ -36,6 +36,11 @@ Workspace::~Workspace()
     }
 }
 
+const QUuid &Workspace::uuid() const
+{
+    return m_uuid;
+}
+
 const QString& Workspace::name() const
 {
     return m_name;
@@ -44,6 +49,11 @@ const QString& Workspace::name() const
 const QString& Workspace::filename() const
 {
     return m_filename;
+}
+
+void Workspace::setUuid(const QUuid &uuid)
+{
+    m_uuid = uuid;
 }
 
 Project *Workspace::project(const QUuid &uuid)

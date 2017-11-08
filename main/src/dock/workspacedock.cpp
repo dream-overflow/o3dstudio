@@ -27,12 +27,14 @@ using namespace o3d::studio::main;
 
 WorkspaceDock::WorkspaceDock(QWidget *parent) :
     QDockWidget(tr("Workspace"), parent),
-    common::Dock()
+    common::Dock(),
+    m_lastSelected(nullptr)
 {
     setMinimumWidth(200);
     setMinimumHeight(200);
 
     setupUi();
+    setFocusPolicy(Qt::StrongFocus);
 
     // initial setup of current workspace
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
@@ -54,7 +56,7 @@ WorkspaceDock::WorkspaceDock(QWidget *parent) :
 
 WorkspaceDock::~WorkspaceDock()
 {
-
+    delete m_treeView;
 }
 
 QDockWidget *WorkspaceDock::ui()
@@ -122,11 +124,15 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
 {
     if (previous.isValid()) {
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(previous.internalPointer());
+        m_lastSelected = nullptr;
+
         // projectItem->unselect();
     }
 
     if (current.isValid()) {
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
+        m_lastSelected = projectItem;
+
         // projectItem->select();
 
         common::Project *project = projectItem->project();
@@ -139,14 +145,33 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
 
 void WorkspaceDock::onSelectionDetails(const QModelIndex &)
 {
-    QModelIndex index = m_treeView->currentIndex();
-    // @todo
+    QModelIndex current = m_treeView->currentIndex();
+
+    if (current.isValid()) {
+        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
+        common::Project *project = projectItem->project();
+        if (project) {
+            // @todo
+        }
+    }
 }
 
 void WorkspaceDock::onSelectItem(const QModelIndex &index)
 {
     // @todo should be unset when selection change
     // onSelectionChanged(index, index);
+
+    // on click second time, to reselect
+    // @todo should only arrives after a lost of focus or a change of selection...
+    if (index.isValid()) {
+        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(index.internalPointer());
+        if (m_lastSelected != nullptr && m_lastSelected == projectItem) {
+            common::Project *project = projectItem->project();
+            if (project) {
+                common::Application::instance()->selection().select(project);
+            }
+        }
+    }
 }
 
 void WorkspaceDock::focusInEvent(QFocusEvent *event)
@@ -184,6 +209,8 @@ void WorkspaceDock::onSelectManagerChange()
 
 void WorkspaceDock::setupUi()
 {
+    setWindowIcon(QIcon::fromTheme("input-gaming"));
+
     m_treeView = new QTreeView(this);
     setWidget(m_treeView);
 

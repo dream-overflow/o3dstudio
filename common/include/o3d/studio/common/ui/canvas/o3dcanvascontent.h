@@ -23,7 +23,7 @@ class O3DCanvasContent : public GLCanvasContent
 
 public:
 
-    explicit O3DCanvasContent(const QString &suffix, bool debug = false, QWidget *parent = nullptr);
+    explicit O3DCanvasContent(const QUuid &ref, bool debug = false, QWidget *parent = nullptr);
     virtual ~O3DCanvasContent();
 
     virtual QString elementName() const override;
