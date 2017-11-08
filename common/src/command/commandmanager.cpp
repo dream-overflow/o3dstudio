@@ -243,7 +243,7 @@ void CommandManager::run()
             m_waitingCommandsQueue.dequeue();
             m_rwLock.unlock();
         } else {
-            sleep(1);
+            msleep(2);
         }
 
         yieldCurrentThread();

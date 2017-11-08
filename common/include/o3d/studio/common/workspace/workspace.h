@@ -45,6 +45,17 @@ public:
      */
     QStringList projectsList() const;
 
+    /**
+     * @brief loadedProjectList
+     * @return
+     */
+    QList<Project*> loadedProjectList() const;
+
+    /**
+     * @brief addProject
+     * @param project
+     * @return
+     */
     bool addProject(Project *project);
 
     /**

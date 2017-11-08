@@ -6,6 +6,8 @@
  * @details
  */
 
+#include <algorithm>
+
 #include <QtCore/QAbstractItemModel>
 #include <QtWidgets/QApplication>
 
@@ -14,6 +16,11 @@
 #include "o3d/studio/common/property/propertyitem.h"
 #include "o3d/studio/common/property/propertymodel.h"
 #include "o3d/studio/common/property/propertysectionnode.h"
+
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+#include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/workspace/project.h"
 
 #include "property/displaysection.h"
 
@@ -112,7 +119,7 @@ void PreferencesDialog::onSectionPropertyChanged(const QModelIndex &current, con
         common::PropertyItem *parent = item->parentItem();
         while (parent != nullptr && parent->section()) {
             QString l = parent->section()->label();
-            label.append(" > ").append(l);
+            label.prepend(" > ").prepend(l);
             parent = parent->parentItem();
         }
 
@@ -171,6 +178,12 @@ void PreferencesDialog::onButtonBox(QAbstractButton *btn)
     }
 }
 
+bool caseInsensitiveLessThan(const o3d::studio::common::Project *p1, const o3d::studio::common::Project *p2)
+{
+    return p1->name().toLower() < p2->name().toLower();
+}
+
+
 void PreferencesDialog::setupCategories()
 {
     common::PropertyModel *model = static_cast<common::PropertyModel*>(ui.categoryTree->model());
@@ -190,6 +203,24 @@ void PreferencesDialog::setupCategories()
     sections.append(new common::PropertySectionNode("o3s::workspace::project", tr("Projects")));
     sections.append(new common::PropertySectionNode("o3s::plugin", tr("Plugins")));
     sections.append(new common::PropertySectionNode("o3s::tool", tr("Tools")));
+
+    // workspace
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        // @todo specialize to workspace section node
+        sections.append(new common::PropertySectionNode("o3s::workspace::local", tr("Local")));
+
+        QList<common::Project*> loadedProjectList = workspace->loadedProjectList();
+
+        // sort by project name
+        std::sort(loadedProjectList.begin(), loadedProjectList.end(), caseInsensitiveLessThan);
+
+        common::Project *project = nullptr;
+        foreach (project, loadedProjectList) {
+            // @todo specialize to project section node
+            sections.append(new common::PropertySectionNode("o3s::workspace::project::" + project->name(), project->name()));
+        }
+    }
 
     model = new common::PropertyModel(sections, this);
     ui.categoryTree->setModel(model);

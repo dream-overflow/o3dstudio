@@ -71,6 +71,11 @@ QStringList Workspace::projectsList() const
     return m_foundProjects;
 }
 
+QList<Project*> Workspace::loadedProjectList() const
+{
+    return m_loadedProjects.values();
+}
+
 bool Workspace::addProject(Project *project)
 {
     if (!project) {
