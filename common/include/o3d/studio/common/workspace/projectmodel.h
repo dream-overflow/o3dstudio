@@ -43,6 +43,9 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
+    const ProjectItem *find(int type, const QUuid &uuid) const;
+    ProjectItem *find(int type, const QUuid &uuid);
+
     ProjectItem *addProject(Project *project);
     void removeProject(Project *project);
 

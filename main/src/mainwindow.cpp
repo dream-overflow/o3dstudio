@@ -155,7 +155,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui.actionRecentsProjectsClearAll, SIGNAL(triggered(bool)), SLOT(onClearAllRecentProjects(bool)));
     connect(ui.actionRecentsResourcesClearAll, SIGNAL(triggered(bool)), SLOT(onClearAllRecentResources(bool)));
 
-    common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaceManager();
+    common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
     connect(workspaceManager, SIGNAL(onWorkspaceActivated(QString)), SLOT(onChangeCurrentWorkspace(QString)));
 
     onChangeCurrentWorkspace(workspaceManager->current()->name());
@@ -606,7 +606,7 @@ void MainWindow::onFileMenuClose()
 
 void MainWindow::onFileMenuQuit()
 {
-    common::Workspace *workspace = common::Application::instance()->workspaceManager().current();
+    common::Workspace *workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         // @todo if non-saved projects ask
         workspace->save();
@@ -818,7 +818,7 @@ void MainWindow::onClearAllRecentResources(bool)
 
 void MainWindow::onChangeCurrentWorkspace(const QString&)
 {
-    common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         connect(workspace, SIGNAL(onProjectAdded(const QUuid &)), SLOT(onProjectAdded(const QUuid &)));
     }
@@ -826,7 +826,7 @@ void MainWindow::onChangeCurrentWorkspace(const QString&)
 
 void MainWindow::onProjectAdded(const QUuid &uuid)
 {
-    common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
     common::Project *project = workspace->project(uuid);
 
     QStringList recentsProject = settings().get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
@@ -857,7 +857,7 @@ void MainWindow::onChangeInfoMessage(const QString &message)
 
 void MainWindow::closeWorkspace()
 {
-    o3d::studio::common::Workspace *workspace = o3d::studio::common::Application::instance()->workspaceManager().current();
+    o3d::studio::common::Workspace *workspace = o3d::studio::common::Application::instance()->workspaces().current();
     if (workspace && workspace->hasChanges()) {
         statusBar()->showMessage(tr("Saving current workspace..."));
         workspace->save();
@@ -976,7 +976,7 @@ void MainWindow::openProject(const QString &location)
     }
 
     QString name = parts[parts.length()-1];
-    QString path = common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath();
+    QString path = common::Application::instance()->workspaces().defaultProjectsPath().absolutePath();
 
     if (parts.length() > 1) {
         parts.removeLast();
@@ -986,7 +986,7 @@ void MainWindow::openProject(const QString &location)
         }
     }
 
-    common::Workspace* workspace = common::Application::instance()->workspaceManager().current();
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace->hasProject(location)) {
         // currently loaded
         return;
@@ -1004,9 +1004,9 @@ void MainWindow::openProject(const QString &location)
     }
 
     workspace->addProject(project);
-    workspace->selectProject(project->uuid());
-
     project->setupMasterScene();
+
+    workspace->selectProject(project->uuid());
 }
 
 void MainWindow::openResource(const QString &location)

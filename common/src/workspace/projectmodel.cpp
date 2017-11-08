@@ -147,6 +147,16 @@ QVariant ProjectModel::headerData(int section, Qt::Orientation orientation, int 
     return QVariant();
 }
 
+const ProjectItem *ProjectModel::find(int type, const QUuid &uuid) const
+{
+    return m_rootItem->find(uuid);
+}
+
+ProjectItem *ProjectModel::find(int type, const QUuid &uuid)
+{
+    return m_rootItem->find(uuid);
+}
+
 ProjectItem *ProjectModel::addProject(Project *project)
 {
     if (!project) {

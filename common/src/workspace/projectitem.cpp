@@ -153,12 +153,12 @@ const QUuid &ProjectItem::uuid() const
 
 const Project *ProjectItem::project() const
 {
-    Workspace *workspace = Application::instance()->workspaceManager().current();
+    Workspace *workspace = Application::instance()->workspaces().current();
     return workspace->project(m_uuid);
 }
 
 Project *ProjectItem::project()
 {
-    Workspace *workspace = Application::instance()->workspaceManager().current();
+    Workspace *workspace = Application::instance()->workspaces().current();
     return workspace->project(m_uuid);
 }

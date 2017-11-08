@@ -30,8 +30,8 @@ class Workspace : public QObject
 
 public:
 
-    Workspace(const QString &name);
-    ~Workspace();
+    Workspace(const QString &name, QObject *parent = nullptr);
+    virtual ~Workspace();
 
     const QString& name() const;
     const QString& filename() const;
@@ -77,6 +77,10 @@ signals:
     void onProjectAdded(const QUuid &uuid);
     void onProjectActivated(const QUuid &uuid);
     void onProjectRemoved(const QUuid &uuid);
+
+public slots:
+
+    void onSelectionChanged();
 
 private:
 

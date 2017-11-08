@@ -22,6 +22,7 @@ class WorkspaceManager;
 class UiController;
 class CommandManager;
 class Store;
+class Selection;
 
 class Application
 {
@@ -59,8 +60,8 @@ public:
     Settings& settings();
     const Settings& settings() const;
 
-    WorkspaceManager& workspaceManager();
-    const WorkspaceManager& workspaceManager() const;
+    WorkspaceManager& workspaces();
+    const WorkspaceManager& workspaces() const;
 
     UiController& ui();
     const UiController& ui() const;
@@ -70,6 +71,9 @@ public:
 
     Store& store();
     const Store& store() const;
+
+    Selection& selection();
+    const Selection& selection() const;
 
 
 private:
@@ -83,6 +87,7 @@ private:
     CommandManager *m_commandManager;
     UiController *m_ui;
     Store *m_store;
+    Selection *m_selection;
 
     bool m_started{false};        //!< Started application
 

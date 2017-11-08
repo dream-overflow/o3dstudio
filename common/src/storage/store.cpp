@@ -30,17 +30,17 @@ Store::~Store()
 
 void Store::initProject(Project *project)
 {
+    if (!project) {
+        return;
+    }
+
     if (project->path().exists()) {
         throw StoreException(tr("Project path exists"));
     }
 
-    if (!Application::instance()->workspaceManager().defaultProjectsPath().mkdir(project->name())) {
+    if (!Application::instance()->workspaces().defaultProjectsPath().mkdir(project->name())) {
         throw StoreException("Unable to create the project directory");
     }
-
-    /*if (!project->path().mkdir(".")) {
-        throw StoreException("Unable to create the project directory");
-    }*/
 
     if (!project->path().mkdir("items")) {
         throw StoreException("Unable to create the project items directory");
@@ -82,16 +82,132 @@ void Store::initProject(Project *project)
 
 void Store::loadProject(Project *project)
 {
-    // @todo check project structure, integrity
+    if (!project) {
+        return;
+    }
+
+    // check project structure, integrity
+    if (!project->path().exists()) {
+        throw StoreException(tr("Project directory doesn't exists"));
+    }
+
+    if (!project->path().exists("items")) {
+        throw StoreException("Project items directory is missing");
+    }
+
+    if (!project->path().exists("cache")) {
+        qWarning("Project cache directory is missing");
+
+        if (!project->path().mkdir("cache")) {
+            throw StoreException("Unable to create the project cache directory");
+        }
+    }
+
+    if (!project->path().exists("tmp")) {
+        qWarning("Project temporary directory is missing");
+
+        if (!project->path().mkdir("tmp")) {
+            throw StoreException("Unable to create the project temporary directory");
+        }
+    }
+
+    if (!project->path().exists("targets")) {
+        throw StoreException("Project targets directory is missing");
+    }
+
+    if (!project->path().exists("README.txt")) {
+        qWarning("Project readme file is missing");
+
+        QFile readmeFile(project->path().absoluteFilePath("README.txt"));
+        if (!readmeFile.open(QFile::WriteOnly | QFile::Text)) {
+            throw StoreException("Unable to create the project readme file");
+        }
+        readmeFile.write("TODO\n");
+        readmeFile.close();
+    }
+
+    if (!project->path().exists("LICENSE.txt")) {
+        qWarning("Project license file is missing");
+
+        QFile licenseFile(project->path().absoluteFilePath("LICENSE.txt"));
+        if (!licenseFile.open(QFile::WriteOnly | QFile::Text)) {
+            throw StoreException("Unable to create the project license file");
+        }
+        licenseFile.write("TODO\n");
+        licenseFile.close();
+    }
+
+    if (!project->path().exists("INFO.txt")) {
+        qWarning("Project information file is missing");
+
+        QFile infoFile(project->path().absoluteFilePath("INFO.txt"));
+        if (!infoFile.open(QFile::WriteOnly | QFile::Text)) {
+            throw StoreException("Unable to create the project information file");
+        }
+        infoFile.write("TODO\n");
+        infoFile.close();
+    }
 }
 
 void Store::deleteProject(Project *project)
 {
-    if (project->path().exists()) {
-        throw StoreException(tr("Project path exists"));
+    if (!project) {
+        return;
     }
 
-    project->path().rmdir(".");
+    QDir path(project->path());
+
+    if (!path.exists()) {
+        throw StoreException(tr("Project directory doesn't exists"));
+    }
+
+    // items
+    if (path.exists("items")) {
+        // @todo delete all its content
+
+        path.rmdir("items");
+    }
+
+    // cache
+    if (path.exists("cache")) {
+        // @todo delete all its content
+
+        path.rmdir("cache");
+    }
+
+    // tmp
+    if (path.exists("tmp")) {
+        // @todo delete all its content
+
+        path.rmdir("tmp");
+    }
+
+    // targets
+    if (path.exists("targets")) {
+        // @todo delete all its content
+
+        path.rmdir("targets");
+    }
+
+    // README
+    if (path.exists("README.txt")) {
+        path.remove("README.txt");
+    }
+
+    // LICENSE
+    if (path.exists("LICENSE.txt")) {
+        path.remove("LICENSE.txt");
+    }
+
+    // INFO
+    if (path.exists("INFO.txt")) {
+        path.remove("INFO.txt");
+    }
+
+    // project directory himself if empty
+    if (path.isEmpty() && path.cdUp()) {
+        path.rmdir(project->name());
+    }
 }
 
 StoreItem *Store::item(const QUuid &uuid)

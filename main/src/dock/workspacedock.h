@@ -31,6 +31,8 @@ public:
     virtual QString elementName() const override;
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
+    virtual void focusInEvent(QFocusEvent *event) override;
+
 signals:
 
 protected:
@@ -45,9 +47,12 @@ public slots:
 
     void onSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
     void onSelectionDetails(const QModelIndex &);
+    void onSelectItem(const QModelIndex &index);
 
     // void onAddHub(const QUuid &uuid);
     // void onRemoveHub(const QUuid &uuid);
+
+    void onSelectManagerChange();
 
 private:
 

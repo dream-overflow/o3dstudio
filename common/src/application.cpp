@@ -19,6 +19,7 @@
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/command/commandmanager.h"
 #include "o3d/studio/common/storage/store.h"
+#include "o3d/studio/common/workspace/selection.h"
 
 using namespace o3d::studio::common;
 
@@ -33,14 +34,18 @@ Application::Application()
     m_workingDir = QDir::currentPath();
     m_appDir = QCoreApplication::applicationDirPath();
 
-    m_workspaceManager = new WorkspaceManager();
-    m_ui = new UiController();
+    // take care of ordering
+    m_selection = new Selection();
     m_commandManager = new CommandManager();
     m_store = new Store();
+    m_workspaceManager = new WorkspaceManager();
+    m_ui = new UiController();
 }
 
 Application::~Application()
 {
+    // take care of ordering
+    delete m_selection;
     delete m_workspaceManager;
     delete m_ui;
     delete m_commandManager;
@@ -86,12 +91,12 @@ const Settings &Application::settings() const
     return m_settings;
 }
 
-WorkspaceManager &Application::workspaceManager()
+WorkspaceManager &Application::workspaces()
 {
     return *m_workspaceManager;
 }
 
-const WorkspaceManager &Application::workspaceManager() const
+const WorkspaceManager &Application::workspaces() const
 {
     return *m_workspaceManager;
 }
@@ -126,6 +131,16 @@ const Store &Application::store() const
     return *m_store;
 }
 
+Selection &Application::selection()
+{
+    return *m_selection;
+}
+
+const Selection &Application::selection() const
+{
+    return *m_selection;
+}
+
 bool Application::start()
 {
     m_settings.loadAll();
@@ -135,7 +150,6 @@ bool Application::start()
     ModuleManager::instance()->searchModules();
 
     m_commandManager->begin();
-
 
     // alway load o3sdummy for testing
     Module *o3sdummy = ModuleManager::instance()->load("o3sdummy");

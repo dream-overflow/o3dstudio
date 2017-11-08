@@ -8,16 +8,20 @@
 
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/selection.h"
+#include "o3d/studio/common/workspace/selectionitem.h"
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/settings.h"
 
 using namespace o3d::studio::common;
 
-Workspace::Workspace(const QString &name) :
+Workspace::Workspace(const QString &name, QObject *parent) :
+    QObject(),
     m_name(name)
 {
-
+    // selection manager
+    connect(&Application::instance()->selection(), SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
 }
 
 Workspace::~Workspace()
@@ -171,6 +175,48 @@ bool Workspace::save()
 bool Workspace::load()
 {
     return true;
+}
+
+void Workspace::onSelectionChanged()
+{
+    const QSet<SelectionItem *> previousSelection = Application::instance()->selection().filterPrevious(
+                                              common::SelectionItem::SELECTION_PROJECT);
+
+    const QSet<SelectionItem *> currentSelection = Application::instance()->selection().filterCurrent(
+                                              common::SelectionItem::SELECTION_PROJECT);
+
+    bool changeProject = false;
+
+    if (!previousSelection.isEmpty()) {
+        SelectionItem *selectionItem = nullptr;
+        foreach (selectionItem, previousSelection) {
+            if (selectionItem->uuid() == m_activeProject->uuid()) {
+                m_activeProject = nullptr;
+                changeProject = true;
+                break;
+            }
+        }
+    }
+
+    if (!currentSelection.isEmpty()) {
+        SelectionItem *selectionItem = nullptr;
+        foreach (selectionItem, previousSelection) {
+            Project *lproject = project(selectionItem->uuid());
+            if (lproject) {
+                m_activeProject = lproject;
+                changeProject = true;
+                break;
+            }
+        }
+    }
+
+    if (changeProject) {
+        if (m_activeProject) {
+            emit onProjectActivated(m_activeProject->uuid());
+        } else {
+            emit onProjectActivated(QUuid());
+        }
+    }
 }
 
 WorkspaceException::WorkspaceException(const QString &message) :

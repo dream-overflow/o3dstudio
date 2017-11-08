@@ -57,7 +57,9 @@ SOURCES += \
     src/workspace/projectfile.cpp \
     src/exception.cpp \
     src/workspace/projectitem.cpp \
-    src/workspace/projectmodel.cpp
+    src/workspace/projectmodel.cpp \
+    src/workspace/selection.cpp \
+    src/workspace/selectionitem.cpp
 
 
 HEADERS += \ 
@@ -99,7 +101,9 @@ HEADERS += \
     include/o3d/studio/common/workspace/projectfile.h \
     include/o3d/studio/common/exception.h \
     include/o3d/studio/common/workspace/projectitem.h \
-    include/o3d/studio/common/workspace/projectmodel.h
+    include/o3d/studio/common/workspace/projectmodel.h \
+    include/o3d/studio/common/workspace/selection.h \
+    include/o3d/studio/common/workspace/selectionitem.h
 
 LIBS += -lobjective3d-dbg
 

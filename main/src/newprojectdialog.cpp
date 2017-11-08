@@ -67,7 +67,7 @@ NewProjectDialog::NewProjectDialog(QWidget *parent) :
     // path
     QString dir = settings.get(
        "o3s::main::project::previous-folder",
-       QVariant(common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath())).toString();
+       QVariant(common::Application::instance()->workspaces().defaultProjectsPath().absolutePath())).toString();
 
     ui.projectLocation->setText(dir);
 
@@ -100,10 +100,10 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
     }
 
     if (ui.buttonBox->buttonRole(btn) == QDialogButtonBox::AcceptRole) {
-        common::Workspace* workspace = common::Application::instance()->workspaceManager().current();       
+        common::Workspace* workspace = common::Application::instance()->workspaces().current();       
         common::Project *project = new common::Project(name, workspace);
 
-        project->setLocation(common::Application::instance()->workspaceManager().defaultProjectsPath());
+        project->setLocation(common::Application::instance()->workspaces().defaultProjectsPath());
 
         try {
             project->create();
@@ -121,8 +121,8 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
             return;
         }
 
-        workspace->selectProject(project->uuid());
         project->setupMasterScene();
+        workspace->selectProject(project->uuid());
 
         common::Settings &settings = common::Application::instance()->settings();
         QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
@@ -144,7 +144,7 @@ void NewProjectDialog::onSelectProjectFolder(bool)
 
     QString dir = settings.get(
        "o3s::main::project::previous-folder",
-       QVariant(common::Application::instance()->workspaceManager().defaultProjectsPath().absolutePath())).toString();
+       QVariant(common::Application::instance()->workspaces().defaultProjectsPath().absolutePath())).toString();
 
     dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), dir,
                                             QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
