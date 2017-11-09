@@ -221,7 +221,7 @@ void PreferencesDialog::setupCategories()
         common::Project *project = nullptr;
         foreach (project, loadedProjectList) {
             // specialized project section node
-            sections.append(new ProjectSection(project->uuid()));
+            sections.append(new ProjectSection(project->ref().light()));
             // @todo project sub-sections
         }
     }

@@ -14,12 +14,15 @@
 
 #include "o3d/studio/common/capacitysettings.h"
 #include "o3d/studio/common/settings.h"
+#include "o3d/studio/common/objectref.h"
 
 #include "ui_mainwindow.h"
 
 namespace o3d {
 namespace studio {
 namespace main {
+
+using o3d::studio::common::LightRef;
 
 class MainWindow : public QMainWindow, public common::CapacitySettings
 {
@@ -70,6 +73,9 @@ private slots:
 
     void onFileNewProject();
     void onFileOpenProject();
+    void onFileMenuSave();
+    void onFileMenuSaveAll();
+    void onFileMenuSaveAs();
 
     void onFileNewResource();
 
@@ -116,7 +122,7 @@ private slots:
     void onClearAllRecentResources(bool);
 
     void onChangeCurrentWorkspace(const QString &name);
-    void onProjectAdded(const QUuid &uuid);
+    void onProjectAdded(const LightRef &ref);
 
     void onChangeMainTitle(const QString &title);
     void onChangeInfoMessage(const QString &message);

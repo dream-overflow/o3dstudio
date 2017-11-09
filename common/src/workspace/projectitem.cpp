@@ -17,15 +17,15 @@
 using namespace o3d::studio::common;
 
 
-ProjectItem::ProjectItem(const QUuid &uuid, const QString &name, const QIcon &icon, ProjectItem *parentItem) :
+ProjectItem::ProjectItem(const LightRef &ref, const QString &name, const QIcon &icon, ProjectItem *parentItem) :
     m_path(""),
     m_name(name),
-    m_uuid(uuid),
+    m_ref(ref),
     m_icon(icon),
     m_parentItem(parentItem)
 {
     if (parentItem) {
-        m_path = parentItem->m_path + "::" + uuid.toString();
+        m_path = parentItem->m_path + "::" + ref.longId();
     } else {
         m_path = name;
     }
@@ -122,16 +122,16 @@ ProjectItem *ProjectItem::find(const QString &path)
     return nullptr;
 }
 
-ProjectItem *ProjectItem::find(const QUuid &uuid)
+ProjectItem *ProjectItem::find(const LightRef &ref)
 {
-    if (m_uuid == uuid) {
+    if (m_ref == ref) {
         return this;
     }
 
     ProjectItem *result = nullptr;
     ProjectItem *child = nullptr;
     foreach (child, m_childItems) {
-        result = child->find(uuid);
+        result = child->find(ref);
 
         if (result != nullptr) {
             return result;
@@ -146,19 +146,19 @@ const QString &ProjectItem::name() const
     return m_name;
 }
 
-const QUuid &ProjectItem::uuid() const
+const LightRef& ProjectItem::ref() const
 {
-    return m_uuid;
+    return m_ref;
 }
 
 const Project *ProjectItem::project() const
 {
     Workspace *workspace = Application::instance()->workspaces().current();
-    return workspace->project(m_uuid);
+    return workspace->project(m_ref);
 }
 
 Project *ProjectItem::project()
 {
     Workspace *workspace = Application::instance()->workspaces().current();
-    return workspace->project(m_uuid);
+    return workspace->project(m_ref);
 }

@@ -9,10 +9,10 @@
 #ifndef _O3DS_COMMON_STOREITEM_H
 #define _O3DS_COMMON_STOREITEM_H
 
-#include <QtCore/QUuid>
 #include <QtCore/QFile>
 
-#include "o3d/studio/common/workspace/project.h"
+#include "../workspace/project.h"
+#include "../objectref.h"
 
 namespace o3d {
 namespace studio {
@@ -36,7 +36,7 @@ public:
     ~StoreItem();
 
     const QString& name() const;
-    const QUuid& uuid() const;
+    const ObjectRef& ref() const;
 
     Project* project();
     const Project* project() const;
@@ -68,7 +68,7 @@ protected:
 
     StoreItemState m_itemState;
 
-    QUuid m_uuid;                       //!< Unique universal identifier
+    ObjectRef m_ref;                    //!< Unique object identifier
     QString m_name;                     //!< User item name
 
     Project *m_project;                 //!< Owner project

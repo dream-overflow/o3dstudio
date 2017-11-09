@@ -15,6 +15,7 @@ namespace main {
 
 static const char SETTINGS_FILE[] = "o3dstudiosettings.ini";
 static const char MAIN_LOG_FILE[] = "o3dstudio.log";
+static const int MAX_RECENTS_FILES = 10;
 
 } // namespace main
 } // namespace o3d

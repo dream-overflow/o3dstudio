@@ -22,7 +22,7 @@ CanvasContent::CanvasContent(const QString &name, QWidget *parent) :
     setProperty("name", QVariant(name));
 
     // @todo according to project name
-    setWindowTitle(tr("Display %s").arg(name));
+    setWindowTitle(tr("Display %1").arg(name));
     setWindowIcon(QIcon::fromTheme("input-gaming"));
 
     setAutoFillBackground(true);

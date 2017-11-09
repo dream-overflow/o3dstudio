@@ -14,6 +14,9 @@
 #include <QtCore/QUuid>
 
 #include "../exception.h"
+#include "../objectref.h"
+
+#include "project.h"
 
 namespace o3d {
 namespace studio {
@@ -37,10 +40,15 @@ public:
     const QString& name() const;
     const QString& filename() const;
 
+    qint64 generateId();
+
     void setUuid(const QUuid &uuid);
 
-    Project* project(const QUuid& uuid);
-    const Project* project(const QUuid& uuid) const;
+    Project* project(const LightRef& ref);
+    const Project* project(const LightRef& ref) const;
+
+    Project* activeProject();
+    const Project* activeProject() const;
 
     /**
      * @brief Return the list of found projects.
@@ -66,9 +74,9 @@ public:
      * @param uuid
      * @return
      */
-    bool closeProject(const QUuid& uuid);
+    bool closeProject(const LightRef& ref);
 
-    bool hasProject(const QUuid& uuid) const;
+    bool hasProject(const LightRef& ref) const;
     bool hasProject(QString location) const;
 
     /**
@@ -81,16 +89,16 @@ public:
      * @brief Set the current selected project.
      * @param name
      */
-    bool selectProject(const QUuid &uuid);
+    bool selectProject(const LightRef &ref);
 
     bool save();
     bool load();
 
 signals:
 
-    void onProjectAdded(const QUuid &uuid);
-    void onProjectActivated(const QUuid &uuid);
-    void onProjectRemoved(const QUuid &uuid);
+    void onProjectAdded(const LightRef &ref);
+    void onProjectActivated(const LightRef &ref);
+    void onProjectRemoved(const LightRef &ref);
 
 public slots:
 
@@ -99,12 +107,13 @@ public slots:
 private:
 
     QUuid m_uuid;
+    qint64 m_nextId;
 
     QString m_filename;        //!< Related workspace file name
     QString m_name;            //!< Unique workspace name
 
     QStringList m_foundProjects;
-    QMap<QUuid, Project*> m_loadedProjects;
+    QMap<LightRef, Project*> m_loadedProjects;
 
     Project *m_activeProject{nullptr};
 };

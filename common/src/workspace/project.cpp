@@ -10,6 +10,7 @@
 #include "o3d/studio/common/storage/store.h"
 
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/projectinfo.h"
 #include "o3d/studio/common/workspace/projectfile.h"
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/masterscene.h"
@@ -21,17 +22,22 @@ Project::Project(const QString &name, Workspace *workspace) :
     m_filename(),
     m_name(name),
     m_path(QDir::current()),
-    m_uuid(QUuid::createUuid()),
+    m_ref(),
+    m_nextId(1),
+    m_info(nullptr),
     m_masterScene(nullptr)
 {
+    m_ref = ObjectRef::buildRef(workspace);
     m_masterScene = new MasterScene(this);
     m_projectFile = new ProjectFile(this, ProjectFile::PF_100);
+    m_info = new ProjectInfo();
 }
 
 Project::~Project()
 {
     delete m_masterScene;
     delete m_projectFile;
+    delete m_info;
 }
 
 void Project::setWorkspace(Workspace *workspace)
@@ -49,6 +55,12 @@ const Workspace *Project::workspace() const
     return m_workspace;
 }
 
+qint64 Project::generateId()
+{
+    qint64 nextId = m_nextId++;
+    return nextId;
+}
+
 void Project::create()
 {
     if (exists()) {
@@ -62,14 +74,9 @@ void Project::create()
     m_projectFile->create();
 }
 
-void Project::setUuid(const QUuid &uuid)
+void Project::setRef(const ObjectRef &ref)
 {
-    m_uuid = uuid;
-}
-
-const QUuid &Project::uuid() const
-{
-    return m_uuid;
+    m_ref = ref;
 }
 
 const QString& Project::name() const
@@ -85,6 +92,21 @@ QString Project::filename() const
 const QDir &Project::path() const
 {
     return m_path;
+}
+
+const ProjectInfo &Project::info() const
+{
+    return *m_info;
+}
+
+ProjectInfo &Project::info()
+{
+    return *m_info;
+}
+
+const ObjectRef &Project::ref() const
+{
+    return m_ref;
 }
 
 bool Project::setLocation(const QDir &path)
@@ -110,6 +132,8 @@ bool Project::load()
     // and project file
     m_projectFile->load();
 
+    // @todo save next id
+
     return true;
 }
 
@@ -125,6 +149,8 @@ bool Project::save()
     // @todo if changes only
     // and project file
     m_projectFile->save();
+
+    // @todo load next id
 
     return true;
 }

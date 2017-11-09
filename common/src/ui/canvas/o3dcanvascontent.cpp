@@ -19,7 +19,7 @@
 
 using namespace o3d::studio::common;
 
-O3DCanvasContent::O3DCanvasContent(const QUuid &ref, bool debug, QWidget *parent) :
+O3DCanvasContent::O3DCanvasContent(const LightRef &ref, bool debug, QWidget *parent) :
     GLCanvasContent(ref, parent),
     m_debug(debug),
     m_renderer(nullptr),
@@ -45,7 +45,7 @@ O3DCanvasContent::~O3DCanvasContent()
 
 QString O3DCanvasContent::elementName() const
 {
-    return "o3s::main::o3dcanvascontent::" + m_ref.toString();
+    return "o3s::main::o3dcanvascontent::" + m_ref.longId();
 }
 
 void O3DCanvasContent::setRenderer(QtRenderer *renderer)

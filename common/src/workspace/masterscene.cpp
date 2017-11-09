@@ -73,7 +73,7 @@ void MasterScene::initialize()
 
     // master OpenGL canvas content
     // @todo debug options
-    m_content = new common::O3DCanvasContent(m_project->uuid().toString(), false);
+    m_content = new common::O3DCanvasContent(m_project->ref().light(), false);
     m_renderer = new common::QtRenderer(m_content);
     m_content->setDrawer(this);
     m_content->setRenderer(m_renderer);

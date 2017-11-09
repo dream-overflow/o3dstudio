@@ -9,6 +9,7 @@
 #include <QtCore/QDataStream>
 
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/projectinfo.h"
 #include "o3d/studio/common/workspace/projectfile.h"
 
 using namespace o3d::studio::common;
@@ -52,7 +53,7 @@ void ProjectFile::load()
 {
     QFile file(m_project->path().absoluteFilePath("project.o3dstudio"));
     if (!file.exists()) {
-        throw ProjectException(m_project->tr("Missing project file for %1").arg(m_project->name()));
+        throw ProjectException(tr("Missing project file for %1").arg(m_project->name()));
     }
 
     file.open(QFile::ReadOnly);
@@ -60,7 +61,7 @@ void ProjectFile::load()
     QDataStream stream(&file);
 
     if (stream.status() != QDataStream::Ok) {
-        throw ProjectException(m_project->tr("Project file streaming output not ok"));
+        throw ProjectException(tr("Project file streaming output not ok"));
     }
 
     // header
@@ -70,7 +71,7 @@ void ProjectFile::load()
 
     int size = stream.readRawData(lmagic, magicLen);
     if ((size != magicLen) || (memcmp(lmagic, PROJECT_MAGIC, magicLen) != 0)) {
-        throw ProjectException(m_project->tr("Invalid project file format"));
+        throw ProjectException(tr("Invalid project file format"));
     }
 
     QUuid uuid;
@@ -79,11 +80,17 @@ void ProjectFile::load()
     stream >> uuid
            >> name;
 
-    m_project->setUuid(uuid);
+    m_project->setRef(ObjectRef::buildRef(m_project->workspace(), uuid));
 
     if (m_project->name() != name) {
-        // @toto problem
+        throw ProjectException(tr("Invalid project name"));
     }
+
+    // id generator
+    stream >> m_project->m_nextId;
+
+    // global info
+    stream >> *m_project->m_info;
 
     file.close();
 }
@@ -96,14 +103,23 @@ void ProjectFile::save()
     QDataStream stream(&file);
 
     if (stream.status() != QDataStream::Ok) {
-        throw ProjectException(m_project->tr("Project file streaming output not ok"));
+        throw ProjectException(tr("Project file streaming output not ok"));
     }
 
     // header
     const int magicLen = sizeof(PROJECT_MAGIC) - 1;
     stream.writeRawData(PROJECT_MAGIC, magicLen);
-    stream << m_project->uuid()
+    stream << m_project->ref().uuid()
            << m_project->name();
+
+    // id generator
+    stream << m_project->m_nextId;
+
+    // global info
+    // update modification date to now
+    m_project->m_info->modificationDate() = QDateTime::currentDateTime();
+
+    stream << *m_project->m_info;
 
     file.close();
 }

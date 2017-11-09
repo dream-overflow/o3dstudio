@@ -28,9 +28,12 @@ QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm h
 
 
 StoreItem::StoreItem(Project* project) :
+    m_ref(),
     m_project(project)
 {
     Q_ASSERT(project != nullptr);
+
+    m_ref = ObjectRef::buildRef(project, TypeRef());  // @todo store ref type
 }
 
 StoreItem::~StoreItem()
@@ -43,9 +46,9 @@ const QString &StoreItem::name() const
     return m_name;
 }
 
-const QUuid &StoreItem::uuid() const
+const ObjectRef &StoreItem::ref() const
 {
-    return m_uuid;
+    return m_ref;
 }
 
 const Project *StoreItem::project() const
@@ -74,11 +77,13 @@ QString StoreItem::itemFileName() const
     QChar s = QDir::separator();
     QString hash1, hash2;
 
-    // generate two levels of path from the uuid node
-    hash1 = QString::asprintf("%02x", (m_uuid.data4[2] << 16 & m_uuid.data4[3] << 8 & m_uuid.data4[4]) % 256);
-    hash2 = QString::asprintf("%02x", (m_uuid.data4[5] << 16 & m_uuid.data4[6] << 8 & m_uuid.data4[7]) % 256);
+    const QUuid &uuid = m_ref.uuid();
 
-    filename = m_project->path().absolutePath() + s + "data" + hash1 + s + hash2 + s + m_uuid.toString() + ".content";
+    // generate two levels of path from the uuid node
+    hash1 = QString::asprintf("%02x", (uuid.data4[2] << 16 & uuid.data4[3] << 8 & uuid.data4[4]) % 256);
+    hash2 = QString::asprintf("%02x", (uuid.data4[5] << 16 & uuid.data4[6] << 8 & uuid.data4[7]) % 256);
+
+    filename = m_project->path().absolutePath() + s + "data" + hash1 + s + hash2 + s + uuid.toString() + ".content";
 
     return filename;
 }

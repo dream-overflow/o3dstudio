@@ -77,6 +77,7 @@
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
+    <addaction name="actionSaveAll"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
     <addaction name="separator"/>
@@ -115,7 +116,8 @@
       <string>&amp;Dock views</string>
      </property>
      <property name="icon">
-      <iconset theme="folder-visiting"/>
+      <iconset theme="folder-visiting">
+       <normaloff>.</normaloff>.</iconset>
      </property>
     </widget>
     <widget class="QMenu" name="menuToolBarViews">
@@ -123,7 +125,8 @@
       <string>Toolbar views</string>
      </property>
      <property name="icon">
-      <iconset theme="preferences-system"/>
+      <iconset theme="preferences-system">
+       <normaloff>.</normaloff>.</iconset>
      </property>
     </widget>
     <addaction name="actionWindowFullscreen"/>
@@ -461,6 +464,11 @@
    </property>
    <property name="text">
     <string>Home page</string>
+   </property>
+  </action>
+  <action name="actionSaveAll">
+   <property name="text">
+    <string>Save &amp;all</string>
    </property>
   </action>
  </widget>

@@ -14,6 +14,8 @@
 #include <QtCore/QList>
 #include <QtWidgets/QtWidgets>
 
+#include "../objectref.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -25,7 +27,7 @@ class ProjectItem
 {
 public:
 
-    ProjectItem(const QUuid &uuid, const QString &name, const QIcon &icon, ProjectItem *parentItem = nullptr);
+    ProjectItem(const LightRef &ref, const QString &name, const QIcon &icon, ProjectItem *parentItem = nullptr);
     virtual ~ProjectItem();
 
     void appendChild(ProjectItem *child);
@@ -41,10 +43,10 @@ public:
     void removeChild(int row);
 
     ProjectItem *find(const QString &path);
-    ProjectItem *find(const QUuid &uuid);
+    ProjectItem *find(const LightRef &ref);
 
     const QString& name() const;
-    const QUuid& uuid() const;
+    const LightRef& ref() const;
 
     const Project* project() const;
     Project* project();
@@ -56,7 +58,7 @@ private:
 
     QString m_path;
     QString m_name;
-    QUuid m_uuid;
+    LightRef m_ref;
     QIcon m_icon;
 
     // QDataWidgetMapper

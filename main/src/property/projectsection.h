@@ -15,6 +15,7 @@
 #include <QtWidgets/QtWidgets>
 
 #include "o3d/studio/common/property/propertysection.h"
+#include "o3d/studio/common/objectref.h"
 
 // #include "ui_projectsection.h"
 
@@ -28,7 +29,7 @@ class ProjectSection : public QWidget, public common::PropertySection
 
 public:
 
-    ProjectSection(const QUuid &ref, QWidget *parent = 0);
+    ProjectSection(const common::LightRef &ref, QWidget *parent = 0);
     virtual ~ProjectSection();
 
     virtual QString name() override;

@@ -8,11 +8,13 @@
 
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/hub.h"
 
 using namespace o3d::studio::common;
 
 Selection::Selection(QObject *parent) :
     QObject(parent),
+    m_selecting(false),
     m_workspace(nullptr)
 {
 
@@ -51,8 +53,52 @@ void Selection::terminate()
 
         m_currentSelection.clear();
 
+        selectionItem = nullptr;
+        foreach (selectionItem, m_selectingMap) {
+            delete selectionItem;
+        }
+
+        m_selectingMap.clear();
+        m_selecting = false;
+
         m_workspace = nullptr;
     }
+}
+
+void Selection::beginSelection()
+{
+    Q_ASSERT(!m_selecting);
+
+    if (m_selecting) {
+        return;
+    }
+
+    m_selectingMap.clear();
+}
+
+void Selection::endSelection()
+{
+    Q_ASSERT(m_selecting);
+
+    if (!m_selecting) {
+        return;
+    }
+
+    SelectionItem *selectionItem = nullptr;
+    foreach (selectionItem, m_previousSelection) {
+        delete selectionItem;
+    }
+
+    m_previousSelection = m_currentSelection;
+    m_currentSelection.clear();
+
+    foreach (selectionItem, m_selectingMap) {
+        m_currentSelection.insert(selectionItem);
+    }
+
+    m_selectingMap.clear();
+
+    emit selectionChanged();
 }
 
 void Selection::select(Project *project)
@@ -66,7 +112,7 @@ void Selection::select(Project *project)
     m_currentSelection.clear();
 
     if (project) {
-        SelectionItem *selectionItem = new SelectionItem(SelectionItem::SELECTION_PROJECT, project->uuid());
+        SelectionItem *selectionItem = new SelectionItem(SelectionItem::SELECTION_PROJECT, project->ref().light());
         m_currentSelection.insert(selectionItem);
     }
 

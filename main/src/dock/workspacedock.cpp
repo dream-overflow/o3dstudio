@@ -74,10 +74,10 @@ Qt::DockWidgetArea WorkspaceDock::dockWidgetArea() const
     return Qt::LeftDockWidgetArea;
 }
 
-void WorkspaceDock::onAddProject(const QUuid &uuid)
+void WorkspaceDock::onAddProject(const common::LightRef &ref)
 {
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-    common::Project *project = common::Application::instance()->workspaces().current()->project(uuid);
+    common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
 
     // add a new project item
     if (project) {
@@ -85,10 +85,10 @@ void WorkspaceDock::onAddProject(const QUuid &uuid)
     }
 }
 
-void WorkspaceDock::onRemoveProject(const QUuid &uuid)
+void WorkspaceDock::onRemoveProject(const common::LightRef &ref)
 {
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-    common::Project *project = common::Application::instance()->workspaces().current()->project(uuid);
+    common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
 
     // add a new project item
     if (project) {
@@ -96,12 +96,12 @@ void WorkspaceDock::onRemoveProject(const QUuid &uuid)
     }
 }
 
-void WorkspaceDock::onActivateProject(const QUuid &uuid)
+void WorkspaceDock::onActivateProject(const common::LightRef &ref)
 {
     common::UiController &uiCtrl = common::Application::instance()->ui();
 
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    common::Project *project = workspace->project(uuid);
+    common::Project *project = workspace->project(ref);
 
     if (!project) {
         // set to default view
@@ -113,7 +113,7 @@ void WorkspaceDock::onActivateProject(const QUuid &uuid)
     }
 
     common::O3DCanvasContent *content = static_cast<common::O3DCanvasContent*>(
-        uiCtrl.content(QString("o3s::main::o3dcanvascontent::") + project->uuid().toString()));
+        uiCtrl.content(QString("o3s::main::o3dcanvascontent::") + project->ref().light().longId()));
 
     if (content) {
         uiCtrl.setActiveContent(content, true);
@@ -138,7 +138,7 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
         common::Project *project = projectItem->project();
         if (project) {
             common::Application::instance()->selection().select(project);
-            // project->workspace()->selectProject(project->uuid());
+            // project->workspace()->selectProject(project->ref());
         }
     }
 }
@@ -200,7 +200,7 @@ void WorkspaceDock::onSelectManagerChange()
 //    QModelIndex current = QModelIndex();
 
 //    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-//    common::ProjectItem *projectItem = projectModel->find(type, uuid);
+//    common::ProjectItem *projectItem = projectModel->find(ref);
 //    if (projectItem) {
 //        current = projectModel->index(projectItem->row(), 0);
 //        m_treeView->selectionModel()->select(current, QItemSelectionModel::Current);
@@ -222,8 +222,8 @@ void WorkspaceDock::onChangeCurrentWorkspace(const QString &name)
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        connect(workspace, SIGNAL(onProjectAdded(const QUuid &)), SLOT(onAddProject(const QUuid &)));
-        connect(workspace, SIGNAL(onProjectActivated(const QUuid &)), SLOT(onActivateProject(const QUuid &)));
-        connect(workspace, SIGNAL(onProjectRemoved(const QUuid &)), SLOT(onRemoveProject(const QUuid &)));
+        connect(workspace, SIGNAL(onProjectAdded(const LightRef &)), SLOT(onAddProject(const LightRef &)));
+        connect(workspace, SIGNAL(onProjectActivated(const LightRef &)), SLOT(onActivateProject(const LightRef &)));
+        connect(workspace, SIGNAL(onProjectRemoved(const LightRef &)), SLOT(onRemoveProject(const LightRef &)));
     }
 }

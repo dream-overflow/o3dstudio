@@ -13,6 +13,7 @@
 #include <QtOpenGL>
 
 #include "../content.h"
+#include "../../objectref.h"
 
 namespace o3d {
 namespace studio {
@@ -22,7 +23,7 @@ class GLCanvasContent : public QOpenGLWidget, public Content
 {
 public:
 
-    explicit GLCanvasContent(const QUuid &ref, QWidget *parent = nullptr);
+    explicit GLCanvasContent(const LightRef &ref, QWidget *parent = nullptr);
     virtual ~GLCanvasContent();
 
     virtual QString elementName() const override;
@@ -41,7 +42,7 @@ protected:
 
 protected:
 
-    QUuid m_ref;
+    LightRef m_ref;
 };
 
 } // namespace common

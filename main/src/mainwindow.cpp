@@ -67,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui.actionNewProject, SIGNAL(triggered(bool)), SLOT(onFileNewProject()));
     connect(ui.actionOpenProject, SIGNAL(triggered(bool)), SLOT(onFileOpenProject()));
+    connect(ui.actionSave, SIGNAL(triggered(bool)), SLOT(onFileMenuSave()));
+    connect(ui.actionSaveAll, SIGNAL(triggered(bool)), SLOT(onFileMenuSaveAll()));
+    connect(ui.actionSaveAs, SIGNAL(triggered(bool)), SLOT(onFileMenuSaveAs()));
 
     connect(ui.actionNewResource, SIGNAL(triggered(bool)), SLOT(onFileNewResource()));
     ui.actionNewResource->setEnabled(false);
@@ -660,6 +663,31 @@ void MainWindow::onFileOpenProject()
     }
 }
 
+void MainWindow::onFileMenuSave()
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace && workspace->activeProject()) {
+        if (workspace->activeProject()->hasChanges()) {
+            workspace->activeProject()->save();
+        }
+    }
+}
+
+void MainWindow::onFileMenuSaveAll()
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        if (workspace->hasChanges()) {
+            workspace->save();
+        }
+    }
+}
+
+void MainWindow::onFileMenuSaveAs()
+{
+    // @todo
+}
+
 void MainWindow::onFileNewResource()
 {
     // new resource dialog
@@ -949,19 +977,20 @@ void MainWindow::onChangeCurrentWorkspace(const QString&)
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        connect(workspace, SIGNAL(onProjectAdded(const QUuid &)), SLOT(onProjectAdded(const QUuid &)));
+        connect(workspace, SIGNAL(onProjectAdded(const LightRef &)), SLOT(onProjectAdded(const LightRef &)));
     }
 }
 
-void MainWindow::onProjectAdded(const QUuid &uuid)
+void MainWindow::onProjectAdded(const common::LightRef &ref)
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    common::Project *project = workspace->project(uuid);
+    common::Project *project = workspace->project(ref);
 
     QStringList recentsProject = settings().get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+    recentsProject.removeAll(project->path().absolutePath());
     recentsProject.push_front(project->path().absolutePath());
 
-    while (recentsProject.size() > 10) {
+    while (recentsProject.size() > MAX_RECENTS_FILES) {
         recentsProject.pop_back();
     }
 
@@ -1046,8 +1075,8 @@ void MainWindow::initRecentProjectsMenu()
 
     QAction *separator = ui.menuRecentsProjects->actions().at(0);
 
-    int i = 0;
     QString project;
+    int i = 0;
     foreach (project, recentsProject) {
         if (project.isEmpty()) {
             continue;
@@ -1135,7 +1164,7 @@ void MainWindow::openProject(const QString &location)
     workspace->addProject(project);
     project->setupMasterScene();
 
-    workspace->selectProject(project->uuid());
+    workspace->selectProject(project->ref().light());
 }
 
 void MainWindow::openResource(const QString &location)

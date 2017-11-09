@@ -9,7 +9,7 @@
 #ifndef _O3DS_COMMON_SELECTIONITEM_H
 #define _O3DS_COMMON_SELECTIONITEM_H
 
-#include <QtCore/QUuid>
+#include "../objectref.h"
 
 namespace o3d {
 namespace studio {
@@ -25,16 +25,16 @@ public:
         SELECTION_HUB = 1
     };
 
-    SelectionItem(SelectionType type, const QUuid uuid);
+    SelectionItem(SelectionType type, const LightRef &ref);
     ~SelectionItem();
 
-    const QUuid uuid() const;
+    const LightRef& ref() const;
     SelectionType selectionType() const;
 
 private:
 
     SelectionType m_type;
-    QUuid m_uuid;
+    LightRef m_ref;
 };
 
 } // namespace common

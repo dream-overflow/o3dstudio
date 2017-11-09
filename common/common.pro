@@ -59,7 +59,10 @@ SOURCES += \
     src/workspace/projectitem.cpp \
     src/workspace/projectmodel.cpp \
     src/workspace/selection.cpp \
-    src/workspace/selectionitem.cpp
+    src/workspace/selectionitem.cpp \
+    src/workspace/hub.cpp \
+    src/objectref.cpp \
+    src/workspace/projectinfo.cpp
 
 
 HEADERS += \ 
@@ -103,7 +106,11 @@ HEADERS += \
     include/o3d/studio/common/workspace/projectitem.h \
     include/o3d/studio/common/workspace/projectmodel.h \
     include/o3d/studio/common/workspace/selection.h \
-    include/o3d/studio/common/workspace/selectionitem.h
+    include/o3d/studio/common/workspace/selectionitem.h \
+    include/o3d/studio/common/workspace/hub.h \
+    include/o3d/studio/common/objectref.h \
+    include/o3d/studio/common/workspace/projectinfo.h \
+    include/o3d/studio/common/global.h
 
 LIBS += -lobjective3d-dbg
 
@@ -124,3 +131,7 @@ ts_target.path = $$BUILD_PREFIX/share/o3dstudio/languages
 # share_target.path = $$BUILD_PREFIX/share/o3dstudio/share
 
 INSTALLS += ts_target  # share_target
+
+DISTFILES += \
+    languages/o3scommon_en.ts \
+    languages/o3scommon_fr.ts

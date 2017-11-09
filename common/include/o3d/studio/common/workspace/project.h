@@ -16,6 +16,7 @@
 #include <QtCore/QCoreApplication>
 
 #include "../exception.h"
+#include "../objectref.h"
 
 class QDataStream;
 
@@ -27,6 +28,7 @@ class Workspace;
 class MasterScene;
 class O3DCanvasContent;
 class ProjectFile;
+class ProjectInfo;
 
 /**
  * @brief The Project final class
@@ -34,6 +36,8 @@ class ProjectFile;
 class Project
 {
     Q_DECLARE_TR_FUNCTIONS(Project)
+
+    friend class ProjectFile;
 
 public:
 
@@ -45,20 +49,26 @@ public:
     Workspace* workspace();
     const Workspace* workspace() const;
 
+    qint64 generateId();
+
     /**
      * @brief Initialize a new project at the specified path with name.
      * @param stream
      */
     void create();
 
-    void setUuid(const QUuid &uuid);
+    void setRef(const ObjectRef &ref);
 
-    const QUuid& uuid() const;
     const QString& name() const;
     QString filename() const;
     const QDir& path() const;
 
+    const ObjectRef& ref() const;
+
     bool setLocation(const QDir &path);
+
+    const ProjectInfo& info() const;
+    ProjectInfo& info();
 
     bool load();
     bool save();
@@ -81,8 +91,10 @@ private:
 
     ProjectFile *m_projectFile;
 
-    QUuid m_uuid;              //!< Unique projet identifier
+    ObjectRef m_ref;
+    qint64 m_nextId;
 
+    ProjectInfo *m_info;
     MasterScene *m_masterScene;
 };
 

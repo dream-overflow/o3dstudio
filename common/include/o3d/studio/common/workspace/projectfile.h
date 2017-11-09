@@ -12,6 +12,7 @@
 #include <QtCore/QString>
 #include <QtCore/QUuid>
 #include <QtCore/QDir>
+#include <QtCore/QCoreApplication>
 
 class QDataStream;
 
@@ -26,6 +27,8 @@ class Project;
  */
 class ProjectFile
 {
+    Q_DECLARE_TR_FUNCTIONS(ProjectFile)
+
 public:
 
     enum ProjectVersion

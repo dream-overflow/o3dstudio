@@ -99,4 +99,6 @@ share_target.path = $$BUILD_PREFIX/share/o3dstudio/share
 
 INSTALLS += ts_target share_target
 
-DISTFILES +=
+DISTFILES += \
+    languages/o3smain_en.ts \
+    languages/o3smain_fr.ts

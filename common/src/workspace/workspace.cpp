@@ -18,6 +18,7 @@ using namespace o3d::studio::common;
 
 Workspace::Workspace(const QString &name, QObject *parent) :
     QObject(),
+    m_nextId(1),
     m_name(name)
 {
     // selection manager
@@ -34,6 +35,12 @@ Workspace::~Workspace()
 
         delete project;
     }
+}
+
+qint64 Workspace::generateId()
+{
+    qint64 nextId = m_nextId++;
+    return nextId;
 }
 
 const QUuid &Workspace::uuid() const
@@ -56,9 +63,9 @@ void Workspace::setUuid(const QUuid &uuid)
     m_uuid = uuid;
 }
 
-Project *Workspace::project(const QUuid &uuid)
+Project *Workspace::project(const LightRef &ref)
 {
-    auto it = m_loadedProjects.find(uuid);
+    auto it = m_loadedProjects.find(ref);
     if (it != m_loadedProjects.end()) {
         return it.value();
     }
@@ -66,14 +73,24 @@ Project *Workspace::project(const QUuid &uuid)
     return nullptr;
 }
 
-const Project *Workspace::project(const QUuid &uuid) const
+const Project *Workspace::project(const LightRef &ref) const
 {
-    auto cit = m_loadedProjects.find(uuid);
+    auto cit = m_loadedProjects.find(ref);
     if (cit != m_loadedProjects.cend()) {
         return cit.value();
     }
 
     return nullptr;
+}
+
+Project *Workspace::activeProject()
+{
+    return m_activeProject;
+}
+
+const Project *Workspace::activeProject() const
+{
+    return m_activeProject;
 }
 
 QStringList Workspace::projectsList() const
@@ -92,17 +109,21 @@ bool Workspace::addProject(Project *project)
         return false;
     }
 
-    Q_ASSERT(m_loadedProjects.find(project->uuid()) == m_loadedProjects.end());
-    m_loadedProjects.insert(project->uuid(), project);
+    Q_ASSERT(m_loadedProjects.find(project->ref().light()) == m_loadedProjects.end());
+    if (m_loadedProjects.find(project->ref().light()) != m_loadedProjects.end()) {
+        return false;
+    }
 
-    emit onProjectAdded(project->uuid());
+    m_loadedProjects.insert(project->ref().light(), project);
+
+    emit onProjectAdded(project->ref().light());
 
     return true;
 }
 
-bool Workspace::closeProject(const QUuid& uuid)
+bool Workspace::closeProject(const LightRef &ref)
 {
-    auto it = m_loadedProjects.find(uuid);
+    auto it = m_loadedProjects.find(ref);
     if (it != m_loadedProjects.end()) {
         Project *project = it.value();
 
@@ -142,9 +163,9 @@ bool Workspace::hasProject(QString location) const
     return false;
 }
 
-bool Workspace::hasProject(const QUuid& uuid) const
+bool Workspace::hasProject(const LightRef& ref) const
 {
-    auto cit = m_loadedProjects.find(uuid);
+    auto cit = m_loadedProjects.find(ref);
     return cit != m_loadedProjects.cend();
 }
 
@@ -161,13 +182,13 @@ bool Workspace::hasChanges() const
     return false;
 }
 
-bool Workspace::selectProject(const QUuid &uuid)
+bool Workspace::selectProject(const LightRef &ref)
 {
-    auto it = m_loadedProjects.find(uuid);
+    auto it = m_loadedProjects.find(ref);
     if (it != m_loadedProjects.end()) {
         m_activeProject = it.value();
 
-        emit onProjectActivated(uuid);
+        emit onProjectActivated(ref);
 
         return true;
     }
@@ -205,7 +226,7 @@ void Workspace::onSelectionChanged()
     if (!previousSelection.isEmpty()) {
         SelectionItem *selectionItem = nullptr;
         foreach (selectionItem, previousSelection) {
-            if (selectionItem->uuid() == m_activeProject->uuid()) {
+            if (selectionItem->ref() == m_activeProject->ref().light()) {
                 m_activeProject = nullptr;
                 changeProject = true;
                 break;
@@ -216,7 +237,7 @@ void Workspace::onSelectionChanged()
     if (!currentSelection.isEmpty()) {
         SelectionItem *selectionItem = nullptr;
         foreach (selectionItem, previousSelection) {
-            Project *lproject = project(selectionItem->uuid());
+            Project *lproject = project(selectionItem->ref());
             if (lproject) {
                 m_activeProject = lproject;
                 changeProject = true;
@@ -227,9 +248,9 @@ void Workspace::onSelectionChanged()
 
     if (changeProject) {
         if (m_activeProject) {
-            emit onProjectActivated(m_activeProject->uuid());
+            emit onProjectActivated(m_activeProject->ref().light());
         } else {
-            emit onProjectActivated(QUuid());
+            emit onProjectActivated(LightRef());
         }
     }
 }

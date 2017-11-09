@@ -10,9 +10,9 @@
 
 using namespace o3d::studio::common;
 
-SelectionItem::SelectionItem(SelectionItem::SelectionType type, const QUuid uuid) :
+SelectionItem::SelectionItem(SelectionItem::SelectionType type, const LightRef &ref) :
     m_type(type),
-    m_uuid(uuid)
+    m_ref(ref)
 {
 
 }
@@ -22,9 +22,9 @@ SelectionItem::~SelectionItem()
 
 }
 
-const QUuid SelectionItem::uuid() const
+const LightRef& SelectionItem::ref() const
 {
-    return m_uuid;
+    return m_ref;
 }
 
 SelectionItem::SelectionType SelectionItem::selectionType() const

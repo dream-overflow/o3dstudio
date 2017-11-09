@@ -15,7 +15,7 @@
 
 using namespace o3d::studio::common;
 
-GLCanvasContent::GLCanvasContent(const QUuid &ref, QWidget *parent) :
+GLCanvasContent::GLCanvasContent(const LightRef &ref, QWidget *parent) :
     QOpenGLWidget(parent),
     Content(),
     m_ref(ref)
@@ -54,7 +54,7 @@ GLCanvasContent::~GLCanvasContent()
 
 QString GLCanvasContent::elementName() const
 {
-    return "o3s::main::glcanvascontent::" + m_ref.toString();
+    return "o3s::main::glcanvascontent::" + m_ref.longId();
 }
 
 QWidget *GLCanvasContent::ui()

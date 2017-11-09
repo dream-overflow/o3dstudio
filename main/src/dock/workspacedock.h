@@ -12,12 +12,15 @@
 class QTreeView;
 
 #include <QtWidgets/QDockWidget>
+#include "o3d/studio/common/objectref.h"
 #include "o3d/studio/common/ui/dock.h"
 #include "o3d/studio/common/workspace/projectitem.h"
 
 namespace o3d {
 namespace studio {
 namespace main {
+
+using o3d::studio::common::LightRef;
 
 class WorkspaceDock : public QDockWidget, public common::Dock
 {
@@ -42,9 +45,9 @@ public slots:
 
     void onChangeCurrentWorkspace(const QString &name);
 
-    void onAddProject(const QUuid &uuid);
-    void onRemoveProject(const QUuid &uuid);
-    void onActivateProject(const QUuid &uuid);
+    void onAddProject(const LightRef &ref);
+    void onRemoveProject(const LightRef &ref);
+    void onActivateProject(const LightRef &ref);
 
     void onSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
     void onSelectionDetails(const QModelIndex &);

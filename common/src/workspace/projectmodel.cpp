@@ -16,7 +16,7 @@ using namespace o3d::studio::common;
 ProjectModel::ProjectModel(QObject *parent) :
     QAbstractItemModel(parent)
 {
-    m_rootItem = new ProjectItem(QUuid(), "o3s::workspace", QIcon());
+    m_rootItem = new ProjectItem(LightRef(), "o3s::workspace", QIcon());
 }
 
 ProjectModel::~ProjectModel()
@@ -147,14 +147,14 @@ QVariant ProjectModel::headerData(int section, Qt::Orientation orientation, int 
     return QVariant();
 }
 
-const ProjectItem *ProjectModel::find(int type, const QUuid &uuid) const
+const ProjectItem *ProjectModel::find(const LightRef &ref) const
 {
-    return m_rootItem->find(uuid);
+    return m_rootItem->find(ref);
 }
 
-ProjectItem *ProjectModel::find(int type, const QUuid &uuid)
+ProjectItem *ProjectModel::find(const LightRef &ref)
 {
-    return m_rootItem->find(uuid);
+    return m_rootItem->find(ref);
 }
 
 ProjectItem *ProjectModel::addProject(Project *project)
@@ -167,7 +167,7 @@ ProjectItem *ProjectModel::addProject(Project *project)
 
     beginInsertRows(QModelIndex(), n, n);
 
-    ProjectItem *item = new ProjectItem(project->uuid(), project->name(), QIcon::fromTheme("document-open"), m_rootItem);
+    ProjectItem *item = new ProjectItem(project->ref().light(), project->name(), QIcon::fromTheme("document-open"), m_rootItem);
     m_rootItem->appendChild(item);
 
     endInsertRows();
@@ -182,7 +182,7 @@ void ProjectModel::removeProject(Project *project)
     }
 
     // find the project
-    ProjectItem *projectItem = m_rootItem->find(project->uuid());
+    ProjectItem *projectItem = m_rootItem->find(project->ref().light());
     if (!projectItem) {
         return;
     }
