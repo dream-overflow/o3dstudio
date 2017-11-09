@@ -64,7 +64,7 @@ QWidget *GLCanvasContent::ui()
 
 QSize GLCanvasContent::sizeHint() const
 {
-    return QSize(300, 200);
+    return QOpenGLWidget::sizeHint();  // return QSize(300, 200);
 }
 
 QSize GLCanvasContent::minimumSizeHint() const

@@ -202,7 +202,7 @@ All rights reserved.</source>
     <message>
         <location filename="../ui/mainwindow.ui" line="285"/>
         <source>&amp;Index</source>
-        <translation>&amp;Indexe</translation>
+        <translation>&amp;Index</translation>
     </message>
     <message>
         <location filename="../ui/mainwindow.ui" line="288"/>

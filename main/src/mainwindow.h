@@ -14,6 +14,7 @@
 
 #include "o3d/studio/common/capacitysettings.h"
 #include "o3d/studio/common/settings.h"
+#include "o3d/studio/common/messenger.h"
 #include "o3d/studio/common/objectref.h"
 
 #include "ui_mainwindow.h"
@@ -125,7 +126,7 @@ private slots:
     void onProjectAdded(const LightRef &ref);
 
     void onChangeMainTitle(const QString &title);
-    void onChangeInfoMessage(const QString &message);
+    void onMessage(QtMsgType msgType, const QString &message);
 
 private:
 
@@ -158,6 +159,8 @@ private:
 
     void openProject(const QString &location);
     void openResource(const QString &location);
+
+    common::Messenger& messenger();
 };
 
 } // namespace main

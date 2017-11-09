@@ -9,17 +9,24 @@
 #include "mainconsole.h"
 #include "../mainwindow.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/messenger.h"
+
 using namespace o3d::studio::main;
 
 
 MainConsole::MainConsole(QWidget *parent) :
     QDockWidget(tr("Main console"), parent),
-    common::Dock()
+    common::Dock(),
+    m_listWidget(nullptr)
 {
     setMinimumWidth(150);
     setMinimumHeight(150);
 
     setupUi();
+
+    common::Messenger& messenger = common::Application::instance()->messenger();
+    connect(&messenger, SIGNAL(onNewMessage(QtMsgType, const QString&)), SLOT(onMessage(QtMsgType, const QString&)));
 }
 
 MainConsole::~MainConsole()
@@ -42,7 +49,43 @@ Qt::DockWidgetArea MainConsole::dockWidgetArea() const
     return Qt::BottomDockWidgetArea;
 }
 
+void MainConsole::onMessage(QtMsgType msgType, const QString &message)
+{
+    QIcon icon = QIcon::fromTheme("dialog-question");
+
+    switch (msgType) {
+        case QtDebugMsg:
+            icon = QIcon::fromTheme("edit-delete");
+            break;
+        case QtWarningMsg:
+            icon = QIcon::fromTheme("emblem-important");
+            break;
+        case QtCriticalMsg:
+            icon = QIcon::fromTheme("process-stop");
+            break;
+        case QtFatalMsg:
+            icon = QIcon::fromTheme("emblem-unreadable");
+            break;
+        case QtInfoMsg:
+            icon = QIcon::fromTheme("dialog-information");
+            break;
+        default:
+            break;
+    }
+
+    QListWidgetItem *item = new QListWidgetItem();
+
+    item->setText(message);
+    item->setIcon(icon);
+    item->setToolTip(message);
+
+    m_listWidget->addItem(item);
+}
+
 void MainConsole::setupUi()
 {
-
+    m_listWidget = new QListWidget();
+    m_listWidget->setAutoScroll(true);   // @todo add a layout with some filters and a auto scroll button
+    m_listWidget->setIconSize(QSize(16, 16));
+    setWidget(m_listWidget);
 }

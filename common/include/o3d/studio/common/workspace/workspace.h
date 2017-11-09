@@ -23,6 +23,7 @@ namespace studio {
 namespace common {
 
 class Project;
+class Messenger;
 
 /**
  * @brief The Workspace final class.
@@ -116,6 +117,8 @@ private:
     QMap<LightRef, Project*> m_loadedProjects;
 
     Project *m_activeProject{nullptr};
+
+    Messenger& messenger();
 };
 
 /**

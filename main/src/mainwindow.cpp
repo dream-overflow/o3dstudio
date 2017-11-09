@@ -59,10 +59,16 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui()
 {
-    statusBar()->showMessage(tr("Objective-3D Studio starting..."));
-
     ui.setupUi(this);
 
+    // message
+    common::Messenger& messenger = common::Application::instance()->messenger();
+    connect(&messenger, SIGNAL(onNewMessage(QtMsgType, const QString&)), SLOT(onMessage(QtMsgType, const QString&)));
+
+    // @todo setup status bar with some fixed widgets addPermanentWidget()
+    messenger.info(tr("Objective-3D Studio starting..."));
+
+    // common gui
     common::UiController &uiCtrl = common::Application::instance()->ui();
 
     connect(ui.actionNewProject, SIGNAL(triggered(bool)), SLOT(onFileNewProject()));
@@ -150,9 +156,6 @@ MainWindow::MainWindow(QWidget *parent) :
     uiCtrl.addContent(browserContent);
     uiCtrl.setActiveContent(browserContent, true);
 
-    // @todo setup status bar with some fixed widgets addPermanentWidget()
-    statusBar()->showMessage(tr("Objective-3D Studio successfully started !"));
-
     // for test execute a dummy command @todo remove me
     common::Application::instance()->command().addCommand(new common::DummyCommand());
 
@@ -167,6 +170,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initRecentProjectsMenu();
     initRecentResourcesMenu();
+
+    messenger.info(tr("Objective-3D Studio successfully started !"));
 }
 
 MainWindow::~MainWindow()
@@ -854,10 +859,10 @@ void MainWindow::onSettingChanged(const QString &key, const QVariant &value)
         }
 
         QString languageName = QLocale::languageToString(locale.language());
-        statusBar()->showMessage(tr("Current language changed to %1").arg(languageName));
+        messenger().info(tr("Current language changed to %1").arg(languageName));
     } else if (key == "o3s::main::theme::color") {
         setThemeColor(value.toString());
-        statusBar()->showMessage(tr("Current theme changed to %1").arg(m_currentTheme));
+        messenger().info(tr("Current theme changed to %1").arg(m_currentTheme));
     }
 }
 
@@ -930,10 +935,10 @@ void MainWindow::onCommandDone(QString name, QString label, bool done)
     Q_UNUSED(name)
 
     if (done) {
-        statusBar()->showMessage(tr("%1 done").arg(label));
+        messenger().info(tr("%1 done").arg(label));
         ui.actionUndo->setText(tr("Undo %1").arg(label));
     } else {
-        statusBar()->showMessage(tr("%1 undone").arg(label));
+        messenger().info(tr("%1 undone").arg(label));
         ui.actionRedo->setText(tr("Redo %1").arg(label));
     }
 
@@ -1008,18 +1013,18 @@ void MainWindow::onChangeMainTitle(const QString &title)
     }
 }
 
-void MainWindow::onChangeInfoMessage(const QString &message)
+void MainWindow::onMessage(QtMsgType msgType, const QString &message)
 {
-    statusBar()->showMessage(message);
+    if (msgType == QtInfoMsg) {
+        statusBar()->showMessage(message);
+    }
 }
 
 void MainWindow::closeWorkspace()
 {
     o3d::studio::common::Workspace *workspace = o3d::studio::common::Application::instance()->workspaces().current();
     if (workspace && workspace->hasChanges()) {
-        statusBar()->showMessage(tr("Saving current workspace..."));
         workspace->save();
-        statusBar()->showMessage(tr("Current workspace saved !"));
     }
 }
 
@@ -1157,12 +1162,15 @@ void MainWindow::openProject(const QString &location)
         project->load();
     } catch (common::ProjectException &e) {
         delete project;
+        messenger().warning(e.message());
         QMessageBox::warning(this, tr("Project warning"), e.message());
         return;
     }
 
     workspace->addProject(project);
     project->setupMasterScene();
+
+    messenger().info(tr("Project %1 successfuly open").arg(name));
 
     workspace->selectProject(project->ref().light());
 }
@@ -1171,4 +1179,9 @@ void MainWindow::openResource(const QString &location)
 {
     Q_UNUSED(location)
     // @todo
+}
+
+o3d::studio::common::Messenger &MainWindow::messenger()
+{
+    return common::Application::instance()->messenger();
 }

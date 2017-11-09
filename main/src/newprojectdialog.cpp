@@ -100,7 +100,7 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
     }
 
     if (ui.buttonBox->buttonRole(btn) == QDialogButtonBox::AcceptRole) {
-        common::Workspace* workspace = common::Application::instance()->workspaces().current();       
+        common::Workspace* workspace = common::Application::instance()->workspaces().current();
         common::Project *project = new common::Project(name, workspace);
 
         project->setLocation(common::Application::instance()->workspaces().defaultProjectsPath());

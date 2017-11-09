@@ -13,6 +13,7 @@
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/settings.h"
+#include "o3d/studio/common/messenger.h"
 
 using namespace o3d::studio::common;
 
@@ -198,12 +199,16 @@ bool Workspace::selectProject(const LightRef &ref)
 
 bool Workspace::save()
 {
+    messenger().info(tr("Saving current workspace..."));
+
     Project *project = nullptr;
     foreach (project, m_loadedProjects) {
         if (!project->save()) {
             // @todo what ?
         }
     }
+
+    messenger().info(tr("Current workspace saved !"));
 
     return true;
 }
@@ -253,6 +258,11 @@ void Workspace::onSelectionChanged()
             emit onProjectActivated(LightRef());
         }
     }
+}
+
+Messenger &Workspace::messenger()
+{
+    return Application::instance()->messenger();
 }
 
 WorkspaceException::WorkspaceException(const QString &message) :

@@ -42,7 +42,8 @@ SOURCES += \
     src/dock/workspacedock.cpp \
     src/property/workspacesection.cpp \
     src/property/projectsection.cpp \
-    src/dock/propertydock.cpp
+    src/dock/propertydock.cpp \
+    src/messenger.cpp
 
 
 HEADERS += \

@@ -10,6 +10,7 @@
 #define _O3DS_MAIN_MAINCONSOLE_H
 
 #include <QtWidgets/QDockWidget>
+#include <QtWidgets/QListWidget>
 #include "o3d/studio/common/ui/dock.h"
 
 namespace o3d {
@@ -18,6 +19,8 @@ namespace main {
 
 class MainConsole : public QDockWidget, public common::Dock
 {
+    Q_OBJECT
+
 public:
 
     MainConsole(QWidget *parent = nullptr);
@@ -31,11 +34,15 @@ signals:
 
 protected:
 
-private slots:
+public slots:
+
+    void onMessage(QtMsgType msgType, const QString &message);
 
 private:
 
     void setupUi();
+
+    QListWidget *m_listWidget;
 };
 
 } // namespace main

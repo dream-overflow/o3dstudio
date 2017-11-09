@@ -17,6 +17,7 @@
 #include "mainwindow.h"
 #include "settings.h"
 #include "o3d/studio/common/application.h"
+#include "o3d/studio/common/messenger.h"
 
 #include <o3d/core/memorymanager.h>
 #include <o3d/core/application.h>
@@ -65,6 +66,11 @@ void o3sMessageHandler(QtMsgType type, const QMessageLogContext &context, const 
             context.line,
             context.function);
     fflush(stderr);
+
+    if (o3d::studio::common::Application::hasInstance()) {
+        o3d::studio::common::Messenger& messenger = o3d::studio::common::Application::instance()->messenger();
+        messenger.message(type, msg);
+    }
 
     // no default handler
     // (*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);

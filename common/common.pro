@@ -110,7 +110,8 @@ HEADERS += \
     include/o3d/studio/common/workspace/hub.h \
     include/o3d/studio/common/objectref.h \
     include/o3d/studio/common/workspace/projectinfo.h \
-    include/o3d/studio/common/global.h
+    include/o3d/studio/common/global.h \
+    include/o3d/studio/common/messenger.h
 
 LIBS += -lobjective3d-dbg
 

@@ -23,6 +23,7 @@ class UiController;
 class CommandManager;
 class Store;
 class Selection;
+class Messenger;
 
 class Application
 {
@@ -30,6 +31,9 @@ public:  // singleton
 
     //! Get the singleton instance.
     static Application* instance();
+
+    //! Has a singleton instance.
+    static bool hasInstance();
 
     //! Delete the singleton instance.
     static void destroy();
@@ -75,6 +79,8 @@ public:
     Selection& selection();
     const Selection& selection() const;
 
+    Messenger& messenger();
+    const Messenger& messenger() const;
 
 private:
 
@@ -88,6 +94,7 @@ private:
     UiController *m_ui;
     Store *m_store;
     Selection *m_selection;
+    Messenger *m_messenger;
 
     bool m_started{false};        //!< Started application
 

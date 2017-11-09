@@ -14,6 +14,7 @@
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/modulemanager.h"
+#include "o3d/studio/common/messenger.h"
 
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/ui/uicontroller.h"
@@ -40,6 +41,7 @@ Application::Application()
     m_store = new Store();
     m_workspaceManager = new WorkspaceManager();
     m_ui = new UiController();
+    m_messenger = new Messenger();
 }
 
 Application::~Application()
@@ -50,6 +52,7 @@ Application::~Application()
     delete m_ui;
     delete m_commandManager;
     delete m_store;
+    delete m_messenger;
 }
 
 // Singleton instantiation
@@ -60,6 +63,11 @@ Application* Application::instance()
     }
 
     return m_instance;
+}
+
+bool Application::hasInstance()
+{
+    return m_instance != nullptr;
 }
 
 // Singleton destruction
@@ -139,6 +147,16 @@ Selection &Application::selection()
 const Selection &Application::selection() const
 {
     return *m_selection;
+}
+
+Messenger &Application::messenger()
+{
+    return *m_messenger;
+}
+
+const Messenger &Application::messenger() const
+{
+    return *m_messenger;
 }
 
 bool Application::start()

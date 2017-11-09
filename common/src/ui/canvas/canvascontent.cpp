@@ -51,7 +51,7 @@ QWidget *CanvasContent::ui()
 
 QSize CanvasContent::sizeHint() const
 {
-    return QSize(300, 200);
+    return QWidget::sizeHint();  // return QSize(300, 200);
 }
 
 QSize CanvasContent::minimumSizeHint() const
