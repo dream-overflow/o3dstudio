@@ -21,7 +21,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class Store
+class O3S_API Store
 {
     Q_DECLARE_TR_FUNCTIONS(Store)
 

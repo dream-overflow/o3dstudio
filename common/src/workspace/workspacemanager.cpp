@@ -62,7 +62,7 @@ WorkspaceManager::WorkspaceManager()
             QVariant(m_defaultProjectsPath.absolutePath()));
     }
 
-    // @todo get last session loaded workspace
+    // setup a new empty workspace
     m_current = new Workspace("default");
     m_current->setUuid(QUuid::createUuid());
 }
@@ -70,7 +70,10 @@ WorkspaceManager::WorkspaceManager()
 WorkspaceManager::~WorkspaceManager()
 {
     if (m_current) {
-        m_current->save();
+        if (m_current->hasChanges()) {
+            m_current->save();
+        }
+
         delete m_current;
     }
 }
@@ -149,6 +152,25 @@ bool WorkspaceManager::loadWorkspace(const QString &name)
 Workspace *WorkspaceManager::current()
 {
     return m_current;
+}
+
+bool WorkspaceManager::closeCurrent()
+{
+    if (m_current) {
+        if (m_current->hasChanges()) {
+            m_current->save();
+        }
+
+        // setup a new empty workspace
+        m_current = new Workspace("default");
+        m_current->setUuid(QUuid::createUuid());
+
+        emit onWorkspaceActivated(m_current->name());
+
+        return true;
+    }
+
+    return false;
 }
 
 const QDir &WorkspaceManager::defaultPath() const

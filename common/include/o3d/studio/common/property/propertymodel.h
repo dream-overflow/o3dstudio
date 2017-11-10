@@ -20,7 +20,7 @@ namespace common {
 
 class PropertySection;
 
-class PropertyModel : public QAbstractItemModel
+class O3S_API PropertyModel : public QAbstractItemModel
 {
     Q_OBJECT
 

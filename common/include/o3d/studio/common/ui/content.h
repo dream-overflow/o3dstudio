@@ -16,7 +16,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class Content : public Element
+class O3S_API Content : public Element
 {
 public:
 

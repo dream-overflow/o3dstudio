@@ -12,11 +12,13 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 
+#include "global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
 
-class ModuleInfo
+class O3S_API ModuleInfo
 {
 public:
 

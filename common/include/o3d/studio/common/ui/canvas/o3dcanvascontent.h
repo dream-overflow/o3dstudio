@@ -18,7 +18,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class O3DCanvasContent : public GLCanvasContent
+class O3S_API O3DCanvasContent : public GLCanvasContent
 {
     Q_OBJECT
 

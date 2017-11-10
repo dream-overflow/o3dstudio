@@ -12,6 +12,8 @@
 #include <QtCore/QException>
 #include <QtCore/QCoreApplication>
 
+#include "global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -19,7 +21,7 @@ namespace common {
 /**
  * @brief The StoreException class
  */
-class BaseException : public QException
+class O3S_API BaseException : public QException
 {
 public:
 

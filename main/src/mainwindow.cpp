@@ -34,6 +34,7 @@
 #include "o3d/studio/common/settings.h"
 #include "o3d/studio/common/modulemanager.h"
 #include "o3d/studio/common/application.h"
+#include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/project.h"
@@ -67,6 +68,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // @todo setup status bar with some fixed widgets addPermanentWidget()
     messenger.info(tr("Objective-3D Studio starting..."));
+
+    // selection manager
+    connect(&common::Application::instance()->selection(), SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
 
     // common gui
     common::UiController &uiCtrl = common::Application::instance()->ui();
@@ -1135,11 +1139,20 @@ void MainWindow::onMessage(QtMsgType msgType, const QString &message)
     }
 }
 
+void MainWindow::onSelectionChanged()
+{
+//    common::Selection &selection = common::Application::instance()->selection();
+}
+
 void MainWindow::closeWorkspace()
 {
-    o3d::studio::common::Workspace *workspace = o3d::studio::common::Application::instance()->workspaces().current();
-    if (workspace && workspace->hasChanges()) {
-        workspace->save();
+    common::Workspace *workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        if (workspace->hasChanges()) {
+            workspace->save();
+        }
+
+        common::Application::instance()->workspaces().closeCurrent();
     }
 }
 

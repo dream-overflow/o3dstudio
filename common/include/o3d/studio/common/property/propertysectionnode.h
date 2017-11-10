@@ -20,7 +20,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class PropertySectionNode : public PropertySection
+class O3S_API PropertySectionNode : public PropertySection
 {
 public:
 

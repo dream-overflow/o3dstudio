@@ -14,13 +14,15 @@
 #include <QtCore/QList>
 #include <QtWidgets/QtWidgets>
 
+#include "../global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
 
 class PluginSection;
 
-class PluginItem
+class O3S_API PluginItem
 {
 public:
 

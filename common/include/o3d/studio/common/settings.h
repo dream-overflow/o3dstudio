@@ -12,6 +12,8 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 
+#include "global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -26,7 +28,7 @@ static const char MODULE_EXT[] = "*.dll";
 static const char MODULE_EXT[] = "*.so";
 #endif
 
-class Settings : public QObject
+class O3S_API Settings : public QObject
 {
     Q_OBJECT
 

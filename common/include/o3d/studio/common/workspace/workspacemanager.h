@@ -12,6 +12,8 @@
 #include <QtCore/QStringList>
 #include <QtCore/QDir>
 
+#include "../global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -21,7 +23,7 @@ class Workspace;
 /**
  * @brief The WorkspaceManager final class
  */
-class WorkspaceManager : public QObject
+class O3S_API WorkspaceManager : public QObject
 {
     Q_OBJECT
 
@@ -52,6 +54,12 @@ public:
 
     Workspace* current();
     const Workspace* current() const;
+
+    /**
+     * @brief Close the current workspace, and save changes, finally setup an empty new workspace
+     * @return
+     */
+    bool closeCurrent();
 
     /**
      * @brief Default workspaces location directory.

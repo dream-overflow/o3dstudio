@@ -28,7 +28,7 @@ class Messenger;
 /**
  * @brief The Workspace final class.
  */
-class Workspace : public QObject
+class O3S_API Workspace : public QObject
 {
     Q_OBJECT
 

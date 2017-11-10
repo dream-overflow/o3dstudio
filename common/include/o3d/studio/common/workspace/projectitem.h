@@ -23,7 +23,7 @@ namespace common {
 class Project;
 // class Hub;
 
-class ProjectItem
+class O3S_API ProjectItem
 {
 public:
 

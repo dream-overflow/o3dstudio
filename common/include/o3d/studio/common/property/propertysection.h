@@ -14,11 +14,13 @@
 #include <QtCore/QList>
 #include <QtWidgets/QtWidgets>
 
+#include "../global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
 
-class PropertySection
+class O3S_API PropertySection
 {
 public:
 

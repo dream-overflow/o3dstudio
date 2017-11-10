@@ -20,7 +20,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class PluginSectionNode : public QWidget , public PluginSection
+class O3S_API PluginSectionNode : public QWidget , public PluginSection
 {
     Q_OBJECT
 

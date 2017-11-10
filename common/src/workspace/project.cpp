@@ -18,15 +18,17 @@
 using namespace o3d::studio::common;
 
 Project::Project(const QString &name, Workspace *workspace) :
+    Entity(nullptr),
     m_workspace(workspace),
     m_filename(),
-    m_name(name),
     m_path(QDir::current()),
-    m_ref(),
     m_nextId(1),
     m_info(nullptr),
     m_masterScene(nullptr)
 {
+    m_typeRef = TypeRef::project();
+
+    m_name = name;
     m_ref = ObjectRef::buildRef(workspace);
     m_masterScene = new MasterScene(this);
     m_projectFile = new ProjectFile(this, ProjectFile::PF_100);
@@ -38,6 +40,11 @@ Project::~Project()
     delete m_masterScene;
     delete m_projectFile;
     delete m_info;
+
+    Fragment *fragment = nullptr;
+    foreach (fragment, m_fragments) {
+        delete fragment;
+    }
 }
 
 void Project::setWorkspace(Workspace *workspace)
@@ -74,16 +81,6 @@ void Project::create()
     m_projectFile->create();
 }
 
-void Project::setRef(const ObjectRef &ref)
-{
-    m_ref = ref;
-}
-
-const QString& Project::name() const
-{
-    return m_name;
-}
-
 QString Project::filename() const
 {
     return m_path.absoluteFilePath("project.o3dstudio");
@@ -102,11 +99,6 @@ const ProjectInfo &Project::info() const
 ProjectInfo &Project::info()
 {
     return *m_info;
-}
-
-const ObjectRef &Project::ref() const
-{
-    return m_ref;
 }
 
 bool Project::setLocation(const QDir &path)

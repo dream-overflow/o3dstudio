@@ -13,6 +13,8 @@
 #include <QtCore/QUuid>
 #include <QtCore/QUrl>
 
+#include "global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -23,13 +25,18 @@ class Project;
 /**
  * @brief Permit the identification of a type.
  */
-class TypeRef final
+class O3S_API TypeRef final
 {
     friend class ObjectRef;
 
 public:
 
+    static TypeRef project();
+    static TypeRef fragment();
+    static TypeRef hub();
+
     TypeRef();
+    TypeRef(qint64 id, const QString &name);
     TypeRef(const TypeRef &dup);
 
     TypeRef& operator= (const TypeRef &dup);
@@ -86,7 +93,7 @@ private:
  * @brief Permit the identification of an object internaly.
  * If projectId is > 0 it is an object inside of a project, else the id reference a project into the workspace.
  */
-class LightRef final
+class O3S_API LightRef final
 {
     friend class ObjectRef;
 
@@ -192,7 +199,7 @@ private:
 /**
  * @brief Permit the strong identification of an object externaly
  */
-class StrongRef final
+class O3S_API StrongRef final
 {
     friend class ObjectRef;
 
@@ -300,7 +307,7 @@ private:
  *  - light for internal, more short, but robust within a project/workspace
  *  - strong for external, bigger, but works in all cases with third parts
  */
-class ObjectRef final
+class O3S_API ObjectRef final
 {
 public:
 

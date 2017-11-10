@@ -16,6 +16,7 @@
 #include "o3d/studio/common/modulemanager.h"
 #include "o3d/studio/common/messenger.h"
 
+#include "o3d/studio/common/component/componentregistry.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/command/commandmanager.h"
@@ -36,22 +37,24 @@ Application::Application()
     m_appDir = QCoreApplication::applicationDirPath();
 
     // take care of ordering
+    m_messenger = new Messenger();
     m_selection = new Selection();
     m_commandManager = new CommandManager();
     m_store = new Store();
     m_workspaceManager = new WorkspaceManager();
+    m_componentRegistry = new ComponentRegistry();
     m_ui = new UiController();
-    m_messenger = new Messenger();
 }
 
 Application::~Application()
 {
     // take care of ordering
+    delete m_ui;
     delete m_selection;
     delete m_workspaceManager;
-    delete m_ui;
     delete m_commandManager;
     delete m_store;
+    delete m_componentRegistry;
     delete m_messenger;
 }
 
@@ -157,6 +160,16 @@ Messenger &Application::messenger()
 const Messenger &Application::messenger() const
 {
     return *m_messenger;
+}
+
+ComponentRegistry &Application::components()
+{
+    return *m_componentRegistry;
+}
+
+const ComponentRegistry &Application::components() const
+{
+    return *m_componentRegistry;
 }
 
 bool Application::start()

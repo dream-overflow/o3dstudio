@@ -20,7 +20,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class UiController: public QObject
+class O3S_API UiController: public QObject
 {
     Q_OBJECT
 

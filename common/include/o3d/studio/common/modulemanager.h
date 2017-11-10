@@ -13,6 +13,7 @@
 #include <QtCore/QMap>
 #include <QtCore/QLoggingCategory>
 
+#include "global.h"
 #include "module.h"
 
 namespace o3d {
@@ -21,7 +22,7 @@ namespace common {
 
 Q_DECLARE_LOGGING_CATEGORY(moduleLogger)
 
-class ModuleManager
+class O3S_API ModuleManager
 {
 public:  // singleton
 

@@ -21,7 +21,7 @@ namespace common {
 
 class O3DCanvasContent;
 
-class MasterScene : public O3DDrawer
+class O3S_API MasterScene : public O3DDrawer
 {
 public:
 

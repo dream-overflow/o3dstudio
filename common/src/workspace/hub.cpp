@@ -7,59 +7,45 @@
  */
 
 #include "o3d/studio/common/workspace/hub.h"
+#include "o3d/studio/common/workspace/fragment.h"
 #include "o3d/studio/common/workspace/project.h"
 
 using namespace o3d::studio::common;
 
 
-Hub::Hub(const QString &name, Project *project) :
-    m_project(project),
-    m_name(name),
-    m_ref()
+Hub::Hub(const QString &name, Fragment *fragment) :
+    Entity(fragment)
 {
-    m_ref = ObjectRef::buildRef(project, TypeRef());  // @todo hub ref type
+    m_ref = ObjectRef::buildRef(fragment->project(), TypeRef::hub());
 }
 
 Hub::~Hub()
 {
-
+    Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        delete hub;
+    }
 }
 
-void Hub::setProject(Project *project)
+void Hub::setFragment(Fragment *fragment)
 {
-    m_project = project;
+    m_parent = fragment;
 }
 
-Project *Hub::project()
+Fragment *Hub::fragment()
 {
-    return m_project;
+    return static_cast<Fragment*>(m_parent);
 }
 
-const Project *Hub::project() const
+const Fragment *Hub::fragment() const
 {
-    return m_project;
+    return static_cast<Fragment*>(m_parent);
 }
 
 void Hub::create()
 {
 
 }
-
-const ObjectRef &Hub::ref() const
-{
-    return m_ref;
-}
-
-void Hub::setRef(const ObjectRef &ref)
-{
-    m_ref = ref;
-}
-
-const QString &Hub::name() const
-{
-    return m_name;
-}
-
 bool Hub::load()
 {
     return true;

@@ -12,11 +12,13 @@
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
 
+#include "global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
 
-class Messenger : public QObject
+class O3S_API Messenger : public QObject
 {
     Q_OBJECT
 

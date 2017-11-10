@@ -12,6 +12,7 @@
 #include <QtCore/QLibrary>
 
 #include "module.h"
+#include "global.h"
 
 namespace o3d {
 namespace studio {
@@ -19,7 +20,7 @@ namespace common {
 
 typedef Module* (*PluginFunction)(const QString &, QLibrary *);
 
-class DynamicModule : public Module
+class O3S_API DynamicModule : public Module
 {
 public:
 

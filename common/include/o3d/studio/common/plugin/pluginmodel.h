@@ -20,7 +20,7 @@ namespace common {
 
 class PluginSection;
 
-class PluginModel : public QAbstractItemModel
+class O3S_API PluginModel : public QAbstractItemModel
 {
     Q_OBJECT
 

@@ -16,7 +16,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class DummyCommand : public Command
+class O3S_API DummyCommand : public Command
 {
     Q_DECLARE_TR_FUNCTIONS(DummyCommand)
 

@@ -9,11 +9,13 @@
 #ifndef _O3DS_COMMON_CAPACITYSETTING_H
 #define _O3DS_COMMON_CAPACITYSETTING_H
 
+#include "global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
 
-class CapacitySettings
+class O3S_API CapacitySettings
 {
 public:
 

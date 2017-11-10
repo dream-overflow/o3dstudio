@@ -10,10 +10,12 @@
 #define _O3DS_COMMON_PROJECT_H
 
 #include <QtCore/QString>
-#include <QtCore/QUuid>
+#include <QtCore/QMap>
 #include <QtCore/QDir>
 #include <QtCore/QException>
 #include <QtCore/QCoreApplication>
+
+#include "entity.h"
 
 #include "../exception.h"
 #include "../objectref.h"
@@ -29,11 +31,12 @@ class MasterScene;
 class O3DCanvasContent;
 class ProjectFile;
 class ProjectInfo;
+class Fragment;
 
 /**
  * @brief The Project final class
  */
-class Project
+class O3S_API Project : public Entity
 {
     Q_DECLARE_TR_FUNCTIONS(Project)
 
@@ -55,26 +58,21 @@ public:
      * @brief Initialize a new project at the specified path with name.
      * @param stream
      */
-    void create();
+    virtual void create() override;
 
-    void setRef(const ObjectRef &ref);
-
-    const QString& name() const;
     QString filename() const;
     const QDir& path() const;
-
-    const ObjectRef& ref() const;
 
     bool setLocation(const QDir &path);
 
     const ProjectInfo& info() const;
     ProjectInfo& info();
 
-    bool load();
-    bool save();
+    virtual bool load() override;
+    virtual bool save() override;
 
-    bool exists() const;
-    bool hasChanges();
+    virtual bool exists() const override;
+    virtual bool hasChanges() override;
 
     MasterScene* masterScene();
     const MasterScene* masterScene() const;
@@ -86,16 +84,16 @@ private:
     Workspace *m_workspace;    //!< Workspace where the projet is currently loaded
 
     QString m_filename;        //!< Project file name
-    QString m_name;            //!< Project display name
     QDir m_path;               //!< Project path
 
     ProjectFile *m_projectFile;
 
-    ObjectRef m_ref;
     qint64 m_nextId;
 
     ProjectInfo *m_info;
     MasterScene *m_masterScene;
+
+    QMap<qint64, Fragment*> m_fragments;
 };
 
 /**

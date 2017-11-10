@@ -14,6 +14,8 @@
 
 #include <o3d/engine/renderer.h>
 
+#include "../global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -23,7 +25,7 @@ namespace common {
  * @date 2017-11-01
  * @author Frederic SCHERMA (frederic.scherma@gmail.com)
  */
-class QtRenderer : public o3d::Renderer
+class O3S_API QtRenderer : public o3d::Renderer
 {
 public:
 

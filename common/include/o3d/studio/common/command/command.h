@@ -13,6 +13,8 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 
+#include "../global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -24,7 +26,7 @@ enum CommandState {
     COMMAND_REDONE = 3
 };
 
-class Command
+class O3S_API Command
 {
 public:
 

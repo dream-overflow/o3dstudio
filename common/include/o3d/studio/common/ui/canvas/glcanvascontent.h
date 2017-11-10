@@ -19,7 +19,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class GLCanvasContent : public QOpenGLWidget, public Content
+class O3S_API GLCanvasContent : public QOpenGLWidget, public Content
 {
 public:
 

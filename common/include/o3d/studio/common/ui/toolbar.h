@@ -16,7 +16,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class ToolBar : public Element
+class O3S_API ToolBar : public Element
 {
 public:
 

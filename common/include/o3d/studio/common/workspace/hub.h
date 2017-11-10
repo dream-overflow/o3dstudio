@@ -9,56 +9,50 @@
 #ifndef _O3DS_COMMON_HUB_H
 #define _O3DS_COMMON_HUB_H
 
-#include <QtCore/QString>
-#include <QtCore/QUuid>
+#include <QtCore/QMap>
 #include <QtCore/QException>
 #include <QtCore/QCoreApplication>
 
+#include "../global.h"
 #include "../exception.h"
 #include "../objectref.h"
+
+#include "entity.h"
 
 namespace o3d {
 namespace studio {
 namespace common {
 
-class Project;
+class Fragment;
 
 /**
  * @brief The Hub base class
  */
-class Hub
+class O3S_API Hub : public Entity
 {
     Q_DECLARE_TR_FUNCTIONS(Hub)
 
 public:
 
-    Hub(const QString &name, Project *project = nullptr);
+    Hub(const QString &name, Fragment *fragment = nullptr);
     virtual ~Hub();
 
-    void setProject(Project *project);
+    void setFragment(Fragment *fragment);
 
-    Project* project();
-    const Project* project() const;
+    Fragment* fragment();
+    const Fragment* fragment() const;
 
-    void create();
+    virtual void create() override;
 
-    void setRef(const ObjectRef &ref);
+    virtual bool load() override;
+    virtual bool save() override;
 
-    const ObjectRef& ref() const;
-    const QString& name() const;
-
-    bool load();
-    bool save();
-
-    bool exists() const;
-    bool hasChanges();
+    virtual bool exists() const override;
+    virtual bool hasChanges() override;
 
 private:
 
-    Project *m_project;        //!< Project where the hub is currently instancied
-
-    QString m_name;            //!< Project display name
-    ObjectRef m_ref;           //!< Unique projet identifier
+    QMap<qint64, Hub*> m_hubs;  //!< Child hubs
 };
 
 /**

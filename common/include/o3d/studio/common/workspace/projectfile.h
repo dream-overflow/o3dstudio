@@ -14,6 +14,8 @@
 #include <QtCore/QDir>
 #include <QtCore/QCoreApplication>
 
+#include "../global.h"
+
 class QDataStream;
 
 namespace o3d {
@@ -25,7 +27,7 @@ class Project;
 /**
  * @brief The Project file
  */
-class ProjectFile
+class O3S_API ProjectFile
 {
     Q_DECLARE_TR_FUNCTIONS(ProjectFile)
 

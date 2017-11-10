@@ -131,6 +131,8 @@ private slots:
     void onChangeMainTitle(const QString &title);
     void onMessage(QtMsgType msgType, const QString &message);
 
+    void onSelectionChanged();
+
 private:
 
     Ui::MainWindow ui;

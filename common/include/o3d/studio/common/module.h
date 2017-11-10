@@ -14,6 +14,7 @@
 
 class QLibrary;
 
+#include "global.h"
 #include "capacity.h"
 #include "moduleinfo.h"
 
@@ -21,7 +22,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class Module
+class O3S_API Module
 {
 public:
 

@@ -21,7 +21,7 @@ namespace common {
 class Project;
 // class Hub;
 
-class ProjectModel : public QAbstractItemModel
+class O3S_API ProjectModel : public QAbstractItemModel
 {
     Q_OBJECT
 

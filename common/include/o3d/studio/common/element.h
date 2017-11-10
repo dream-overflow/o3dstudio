@@ -10,12 +10,13 @@
 #define _O3DS_COMMON_ELEMENT_H
 
 #include <QtWidgets/QWidget>
+#include "global.h"
 
 namespace o3d {
 namespace studio {
 namespace common {
 
-class Element
+class O3S_API Element
 {
 public:
 

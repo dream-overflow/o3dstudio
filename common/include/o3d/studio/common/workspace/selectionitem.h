@@ -15,14 +15,15 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class SelectionItem
+class O3S_API SelectionItem
 {
 public:
 
     enum SelectionType
     {
         SELECTION_PROJECT = 0,
-        SELECTION_HUB = 1
+        SELECTION_FRAGMENT = 1,
+        SELECTION_HUB = 2
     };
 
     SelectionItem(SelectionType type, const LightRef &ref);

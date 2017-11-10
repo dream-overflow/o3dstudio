@@ -62,7 +62,11 @@ SOURCES += \
     src/workspace/selectionitem.cpp \
     src/workspace/hub.cpp \
     src/objectref.cpp \
-    src/workspace/projectinfo.cpp
+    src/workspace/projectinfo.cpp \
+    src/workspace/fragment.cpp \
+    src/workspace/entity.cpp \
+    src/component/component.cpp \
+    src/component/componentregistry.cpp
 
 
 HEADERS += \ 
@@ -111,7 +115,11 @@ HEADERS += \
     include/o3d/studio/common/objectref.h \
     include/o3d/studio/common/workspace/projectinfo.h \
     include/o3d/studio/common/global.h \
-    include/o3d/studio/common/messenger.h
+    include/o3d/studio/common/messenger.h \
+    include/o3d/studio/common/workspace/fragment.h \
+    include/o3d/studio/common/workspace/entity.h \
+    include/o3d/studio/common/component/component.h \
+    include/o3d/studio/common/component/componentregistry.h
 
 LIBS += -lobjective3d-dbg
 

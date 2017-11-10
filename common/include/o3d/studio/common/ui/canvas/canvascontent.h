@@ -20,7 +20,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class CanvasContent : public QWidget, public Content
+class O3S_API CanvasContent : public QWidget, public Content
 {
     Q_OBJECT
 

@@ -16,7 +16,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class Dock : public Element
+class O3S_API Dock : public Element
 {
 public:
 

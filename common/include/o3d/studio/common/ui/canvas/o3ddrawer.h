@@ -9,11 +9,13 @@
 #ifndef _O3DS_COMMON_O3DRAWER_H
 #define _O3DS_COMMON_O3DRAWER_H
 
+#include "../../global.h"
+
 namespace o3d {
 namespace studio {
 namespace common {
 
-class O3DDrawer
+class O3S_API O3DDrawer
 {
 public:
 

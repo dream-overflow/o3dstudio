@@ -21,7 +21,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class CommandManager : public QThread
+class O3S_API CommandManager : public QThread
 {
     Q_OBJECT
 

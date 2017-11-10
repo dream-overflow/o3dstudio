@@ -23,7 +23,7 @@ namespace common {
 
 class Hub;
 
-class Selection : public QObject
+class O3S_API Selection : public QObject
 {
     Q_OBJECT
 

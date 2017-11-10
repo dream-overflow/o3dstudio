@@ -12,6 +12,7 @@
 #include <QtCore/QString>
 #include <QtCore/QTranslator>
 
+#include "global.h"
 #include "settings.h"
 
 namespace o3d {
@@ -24,8 +25,9 @@ class CommandManager;
 class Store;
 class Selection;
 class Messenger;
+class ComponentRegistry;
 
-class Application
+class O3S_API Application
 {
 public:  // singleton
 
@@ -82,6 +84,9 @@ public:
     Messenger& messenger();
     const Messenger& messenger() const;
 
+    ComponentRegistry& components();
+    const ComponentRegistry& components() const;
+
 private:
 
     QString m_appDir;             //!< Absolute application base directory
@@ -95,6 +100,7 @@ private:
     Store *m_store;
     Selection *m_selection;
     Messenger *m_messenger;
+    ComponentRegistry *m_componentRegistry;
 
     bool m_started{false};        //!< Started application
 

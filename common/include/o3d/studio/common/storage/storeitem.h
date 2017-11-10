@@ -20,7 +20,7 @@ namespace common {
 
 class Project;
 
-class StoreItem
+class O3S_API StoreItem
 {
 public:
 
