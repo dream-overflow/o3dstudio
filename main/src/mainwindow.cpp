@@ -90,6 +90,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui.actionWindowFullscreen, SIGNAL(triggered(bool)), SLOT(onWindowFullScreen()));
 
+    connect(ui.actionPreviousContentView, SIGNAL(triggered(bool)), SLOT(onViewPreviousContentAction()));
+    connect(ui.actionNextContentView, SIGNAL(triggered(bool)), SLOT(onViewNextContentAction()));
+
     connect(ui.actionHelpIndex, SIGNAL(triggered(bool)), SLOT(onHelpIndex()));
     connect(ui.actionSystemInfo, SIGNAL(triggered(bool)), SLOT(onSystemInfo()));
     connect(ui.actionAboutPlugins, SIGNAL(triggered(bool)), SLOT(onAboutPlugin()));
@@ -236,8 +239,20 @@ bool MainWindow::setupDock(const QString &name, QDockWidget *dock, Qt::DockWidge
     m_docks.insert(dock->property("name").toString(), dock);
 
     // add view menu action
-    QAction *action = new QAction(dock->windowIcon(), dock->windowTitle());
+    int i = ui.menuDockViews->actions().size();
+    QString title = "";
+    if (i < 10) {
+        title = QString("&%1 | %2").arg(i).arg(dock->windowTitle());
+    } else {
+        title = QString("%1").arg(i).arg(dock->windowTitle());
+    }
+
+    QAction *action = new QAction(dock->windowIcon(), title);
     action->setProperty("name", name);
+
+    if (i < 10) {
+        action->setShortcut(QKeySequence(QString("Alt+Shift+%1").arg(i)));
+    }
 
     connect(action, SIGNAL(triggered(bool)), SLOT(onViewDock()));
 
@@ -290,8 +305,20 @@ bool MainWindow::setupToolBar(const QString &name, QToolBar *toolBar, Qt::ToolBa
     m_toolBars.insert(toolBar->property("name").toString(), toolBar);
 
     // add view menu action
-    QAction *action = new QAction(toolBar->windowIcon(), toolBar->windowTitle());
+    int i = ui.menuToolBarViews->actions().size();
+    QString title = "";
+    if (i < 10) {
+        title = QString("&%1 | %2").arg(i).arg(toolBar->windowTitle());
+    } else {
+        title = QString("%1").arg(i).arg(toolBar->windowTitle());
+    }
+
+    QAction *action = new QAction(toolBar->windowIcon(), title);
     action->setProperty("name", name);
+
+    if (i < 10) {
+        action->setShortcut(QKeySequence(QString("Ctrl+Alt+Shift+%1").arg(i)));
+    }
 
     connect(action, SIGNAL(triggered(bool)), SLOT(onViewToolBar()));
 
@@ -324,8 +351,20 @@ bool MainWindow::addContentWidget(const QString &name, QWidget *widget)
     m_contents.insert(name, widget);
 
     // add view menu action
-    QAction *action = new QAction(widget->windowIcon(), widget->windowTitle());
+    int i = ui.menuContentViews->actions().size();
+    QString title = "";
+    if (i < 10) {
+        title = QString("&%1 | %2").arg(i).arg(widget->windowTitle());
+    } else {
+        title = QString("%1").arg(i).arg(widget->windowTitle());
+    }
+
+    QAction *action = new QAction(widget->windowIcon(), title);
     action->setProperty("name", name);
+
+    if (i < 10) {
+        action->setShortcut(QKeySequence(QString("Alt+%1").arg(i)));
+    }
 
     connect(action, SIGNAL(triggered(bool)), SLOT(onViewContent()));
 
@@ -355,15 +394,39 @@ bool MainWindow::removeContentWidget(const QString &name)
         it.value()->setParent(nullptr);
         delete it.value();
 
-        // erase menu entry
-        QList<QAction*> actions = ui.menuContentViews->actions();
+        // erase menu entry, but we have to reprocess any because if leaks in position
+        ui.menuContentViews->actions().clear();
+
         QAction *action = nullptr;
-        foreach (action, actions) {
-            if (action->property("name").toString() == name) {
-                ui.menuContentViews->removeAction(action);
-                break;
+        QWidget *widget = nullptr;
+        int i = 0;
+        QString title = "";
+        foreach (widget, m_contents) {
+            if (i < 10) {
+                title = QString("&%1 | %2").arg(i).arg(widget->windowTitle());
+            } else {
+                title = QString("%1").arg(i).arg(widget->windowTitle());
             }
+
+            action = new QAction(widget->windowIcon(), title);
+            action->setProperty("name", widget->property("name").toString());
+
+            if (i < 10) {
+                action->setShortcut(QKeySequence(QString("Alt+%1").arg(i)));
+            }
+
+            connect(action, SIGNAL(triggered(bool)), SLOT(onViewContent()));
+            ui.menuContentViews->addAction(action);
         }
+
+//        QList<QAction*> actions = ui.menuContentViews->actions();
+//        QAction *action = nullptr;
+//        foreach (action, actions) {
+//            if (action->property("name").toString() == name) {
+//                ui.menuContentViews->removeAction(action);
+//                break;
+//            }
+//        }
 
         m_contents.erase(it);
 
@@ -917,6 +980,58 @@ void MainWindow::onUndoAction()
 void MainWindow::onRedoAction()
 {
     common::Application::instance()->command().redoLastCommand();
+}
+
+void MainWindow::onViewPreviousContentAction()
+{
+    if (m_contents.size() < 2) {
+        return;
+    }
+
+    if (m_currentContent == nullptr) {
+        return;
+    }
+    QString name = m_currentContent->property("name").toString();
+    auto it = m_contents.find(m_currentContent->property("name").toString());
+    if (it == m_contents.begin()) {
+        // loop back
+        it = m_contents.find(m_contents.lastKey());
+    } else {
+        --it;
+    }
+
+    common::UiController &uiCtrl = common::Application::instance()->ui();
+    common::Content *content = uiCtrl.content(it.value()->property("name").toString());
+
+    if (content) {
+        uiCtrl.setActiveContent(content, true);
+    }
+}
+
+void MainWindow::onViewNextContentAction()
+{
+    if (m_contents.size() < 2) {
+        return;
+    }
+
+    if (m_currentContent == nullptr) {
+        return;
+    }
+
+    auto it = m_contents.find(m_currentContent->property("name").toString());
+    ++it;
+
+    // loop back
+    if (it == m_contents.end()) {
+        it = m_contents.begin();
+    }
+
+    common::UiController &uiCtrl = common::Application::instance()->ui();
+    common::Content *content = uiCtrl.content(it.value()->property("name").toString());
+
+    if (content) {
+        uiCtrl.setActiveContent(content, true);
+    }
 }
 
 void MainWindow::onShowContent(QString name, QWidget *content, bool showHide)

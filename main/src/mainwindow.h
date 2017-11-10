@@ -112,6 +112,9 @@ private slots:
     void onUndoAction();
     void onRedoAction();
 
+    void onViewPreviousContentAction();
+    void onViewNextContentAction();
+
     void onShowContent(QString name, QWidget *content, bool showHide);
 
     void onCommandDone(QString name, QString label, bool done);

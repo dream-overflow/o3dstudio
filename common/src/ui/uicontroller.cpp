@@ -73,6 +73,10 @@ bool UiController::addContent(Content *content)
         return false;
     }
 
+    if (content->ui()) {
+        content->ui()->setProperty("name", content->elementName());
+    }
+
     m_contents.append(content);
     emit attachContent(content->elementName(), content->ui());
 
@@ -89,6 +93,10 @@ bool UiController::addDock(Dock *dock)
         return false;
     }
 
+    if (dock->ui()) {
+        dock->ui()->setProperty("name", dock->elementName());
+    }
+
     m_docks.append(dock);
     emit attachDock(dock->elementName(), dock->ui(), dock->dockWidgetArea());
 
@@ -103,6 +111,10 @@ bool UiController::addToolBar(ToolBar *toolBar)
 
     if (m_toolBars.indexOf(toolBar) >= 0) {
         return false;
+    }
+
+    if (toolBar->ui()) {
+        toolBar->ui()->setProperty("name", toolBar->elementName());
     }
 
     m_toolBars.append(toolBar);
@@ -127,6 +139,10 @@ bool UiController::removeContent(Content *content)
 
         emit detachContent(content->elementName(), content->ui());
 
+        if (content->ui()) {
+            content->ui()->setProperty("name", "");
+        }
+
         content->ui()->setParent(nullptr);
         return true;
     }
@@ -149,7 +165,12 @@ bool UiController::removeDock(Dock *dock)
     int index = -1;
     if ((index = m_docks.indexOf(dock)) >= 0) {
         m_docks.removeAt(index);
+
         emit detachDock(dock->elementName(), dock->ui());
+
+        if (dock->ui()) {
+            dock->ui()->setProperty("name", "");
+        }
 
         dock->ui()->setParent(nullptr);
         return true;
@@ -173,7 +194,12 @@ bool UiController::removeToolBar(ToolBar *toolBar)
     int index = -1;
     if ((index = m_toolBars.indexOf(toolBar)) >= 0) {
         m_toolBars.removeAt(index);
+
         emit detachToolBar(toolBar->elementName(), toolBar->ui());
+
+        if (toolBar->ui()) {
+            toolBar->ui()->setProperty("name", "");
+        }
 
         toolBar->ui()->setParent(nullptr);
         return true;
