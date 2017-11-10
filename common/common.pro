@@ -127,7 +127,8 @@ INCLUDEPATH += $$(PREFIX)/lib/objective3d-dbg/
 
 copyToDestdir($$TRANSLATIONS_FILES, languages)
 
-RESOURCES +=
+RESOURCES += \
+    rc/common.qrc
 
 
 FORMS +=
