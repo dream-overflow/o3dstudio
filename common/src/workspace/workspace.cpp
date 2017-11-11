@@ -220,11 +220,8 @@ bool Workspace::load()
 
 void Workspace::onSelectionChanged()
 {
-    const QSet<SelectionItem *> previousSelection = Application::instance()->selection().filterPrevious(
-                                              common::SelectionItem::SELECTION_PROJECT);
-
-    const QSet<SelectionItem *> currentSelection = Application::instance()->selection().filterCurrent(
-                                              common::SelectionItem::SELECTION_PROJECT);
+    const QSet<SelectionItem *> previousSelection = Application::instance()->selection().filterPrevious(1);
+    const QSet<SelectionItem *> currentSelection = Application::instance()->selection().filterCurrent(1);
 
     bool changeProject = false;
 

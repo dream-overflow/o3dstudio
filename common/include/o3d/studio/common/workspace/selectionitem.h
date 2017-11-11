@@ -19,22 +19,14 @@ class O3S_API SelectionItem
 {
 public:
 
-    enum SelectionType
-    {
-        SELECTION_PROJECT = 0,
-        SELECTION_FRAGMENT = 1,
-        SELECTION_HUB = 2
-    };
-
-    SelectionItem(SelectionType type, const LightRef &ref);
+    SelectionItem(const LightRef &ref);
     ~SelectionItem();
 
     const LightRef& ref() const;
-    SelectionType selectionType() const;
+    qint64 selectionType() const;
 
 private:
 
-    SelectionType m_type;
     LightRef m_ref;
 };
 

@@ -25,6 +25,8 @@ public:
     ComponentRegistry();
     virtual ~ComponentRegistry();
 
+signals:
+
 protected:
 
 

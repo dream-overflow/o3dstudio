@@ -48,8 +48,7 @@ public:
      */
     void beginSelection();
 
-    void appendSelection(Project *project);
-    void appendSelection(Hub *hub);
+    void appendSelection(Entity *entity);
 
     /**
      * @brief endSelection Validate the selection transaction and emit signal.
@@ -57,16 +56,10 @@ public:
     void endSelection();
 
     /**
-     * @brief select a single project and emit signal.
+     * @brief select a single entity (project, fragment, hub) and emit signal.
      * @param project
      */
-    void select(Project *project);
-
-    /**
-     * @brief select a single hub and emit signal.
-     * @param hub
-     */
-    void select(Hub *hub);
+    void select(Entity *entity);
 
     /**
      * @brief unselect all current and emit signal.
@@ -76,8 +69,8 @@ public:
     const QSet<SelectionItem*> previousSelection() const;
     const QSet<SelectionItem*> currentSelection() const;
 
-    const QSet<SelectionItem*> filterPrevious(SelectionItem::SelectionType type) const;    
-    const QSet<SelectionItem*> filterCurrent(SelectionItem::SelectionType type) const;
+    const QSet<SelectionItem*> filterPrevious(qint64 type) const;
+    const QSet<SelectionItem*> filterCurrent(qint64 type) const;
 
 public slots:
 
@@ -100,7 +93,7 @@ private:
     QSet<SelectionItem*> m_previousSelection;
 
     //! Current set of selected items
-    QMap<QUuid, SelectionItem*> m_selectingMap;
+    QSet<LightRef> m_selectingSet;
 };
 
 } // namespace common

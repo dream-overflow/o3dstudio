@@ -10,6 +10,7 @@
 #include "o3d/studio/common/storage/store.h"
 
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/fragment.h"
 #include "o3d/studio/common/workspace/projectinfo.h"
 #include "o3d/studio/common/workspace/projectfile.h"
 #include "o3d/studio/common/workspace/workspace.h"

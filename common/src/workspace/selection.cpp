@@ -53,12 +53,7 @@ void Selection::terminate()
 
         m_currentSelection.clear();
 
-        selectionItem = nullptr;
-        foreach (selectionItem, m_selectingMap) {
-            delete selectionItem;
-        }
-
-        m_selectingMap.clear();
+        m_selectingSet.clear();
         m_selecting = false;
 
         m_workspace = nullptr;
@@ -73,7 +68,21 @@ void Selection::beginSelection()
         return;
     }
 
-    m_selectingMap.clear();
+    m_selectingSet.clear();
+}
+
+void Selection::appendSelection(Entity *entity)
+{
+    if (!entity || !m_selecting) {
+        return;
+    }
+
+    if (m_selectingSet.find(entity->ref().light()) != m_selectingSet.end()) {
+        // already selected
+        return;
+    }
+
+    m_selectingSet.insert(entity->ref().light());
 }
 
 void Selection::endSelection()
@@ -92,16 +101,18 @@ void Selection::endSelection()
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
-    foreach (selectionItem, m_selectingMap) {
-        m_currentSelection.insert(selectionItem);
+    LightRef ref;
+    foreach (ref, m_selectingSet) {
+        m_currentSelection.insert(new SelectionItem(ref));
     }
 
-    m_selectingMap.clear();
+    m_selectingSet.clear();
+    m_selecting = false;
 
     emit selectionChanged();
 }
 
-void Selection::select(Project *project)
+void Selection::select(Entity *entity)
 {
     SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, m_previousSelection) {
@@ -111,8 +122,8 @@ void Selection::select(Project *project)
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
-    if (project) {
-        SelectionItem *selectionItem = new SelectionItem(SelectionItem::SELECTION_PROJECT, project->ref().light());
+    if (entity) {
+        SelectionItem *selectionItem = new SelectionItem(entity->ref().light());
         m_currentSelection.insert(selectionItem);
     }
 
@@ -142,13 +153,13 @@ const QSet<SelectionItem *> Selection::currentSelection() const
     return m_currentSelection;
 }
 
-const QSet<SelectionItem *> Selection::filterPrevious(SelectionItem::SelectionType type) const
+const QSet<SelectionItem *> Selection::filterPrevious(qint64 type) const
 {
     QSet<SelectionItem*> filtered;
 
     SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, m_previousSelection) {
-        if (selectionItem->selectionType() == type) {
+        if (selectionItem->ref().type() == type) {
             filtered.insert(selectionItem);
         }
     }
@@ -156,13 +167,13 @@ const QSet<SelectionItem *> Selection::filterPrevious(SelectionItem::SelectionTy
     return filtered;
 }
 
-const QSet<SelectionItem *> Selection::filterCurrent(SelectionItem::SelectionType type) const
+const QSet<SelectionItem *> Selection::filterCurrent(qint64 type) const
 {
     QSet<SelectionItem*> filtered;
 
     SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, m_currentSelection) {
-        if (selectionItem->selectionType() == type) {
+        if (selectionItem->ref().type() == type) {
             filtered.insert(selectionItem);
         }
     }

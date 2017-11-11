@@ -14,6 +14,7 @@
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/modulemanager.h"
+#include "o3d/studio/common/typeregistry.h"
 #include "o3d/studio/common/messenger.h"
 
 #include "o3d/studio/common/component/componentregistry.h"
@@ -37,6 +38,7 @@ Application::Application()
     m_appDir = QCoreApplication::applicationDirPath();
 
     // take care of ordering
+    m_typeRegistry = new TypeRegistry();
     m_messenger = new Messenger();
     m_selection = new Selection();
     m_commandManager = new CommandManager();
@@ -56,6 +58,7 @@ Application::~Application()
     delete m_store;
     delete m_componentRegistry;
     delete m_messenger;
+    delete m_typeRegistry;
 }
 
 // Singleton instantiation
@@ -170,6 +173,16 @@ ComponentRegistry &Application::components()
 const ComponentRegistry &Application::components() const
 {
     return *m_componentRegistry;
+}
+
+TypeRegistry &Application::types()
+{
+    return *m_typeRegistry;
+}
+
+const TypeRegistry &Application::types() const
+{
+    return *m_typeRegistry;
 }
 
 bool Application::start()

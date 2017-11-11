@@ -26,6 +26,7 @@ class Store;
 class Selection;
 class Messenger;
 class ComponentRegistry;
+class TypeRegistry;
 
 class O3S_API Application
 {
@@ -87,6 +88,9 @@ public:
     ComponentRegistry& components();
     const ComponentRegistry& components() const;
 
+    TypeRegistry& types();
+    const TypeRegistry& types() const;
+
 private:
 
     QString m_appDir;             //!< Absolute application base directory
@@ -101,6 +105,7 @@ private:
     Selection *m_selection;
     Messenger *m_messenger;
     ComponentRegistry *m_componentRegistry;
+    TypeRegistry *m_typeRegistry;
 
     bool m_started{false};        //!< Started application
 

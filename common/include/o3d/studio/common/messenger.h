@@ -25,7 +25,7 @@ class O3S_API Messenger : public QObject
 public:
 
     Messenger(QObject *parent = nullptr);
-    ~Messenger();
+    virtual ~Messenger();
 
     void message(QtMsgType msgType, const QString &message);
 

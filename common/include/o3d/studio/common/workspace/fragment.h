@@ -49,7 +49,7 @@ public:
     virtual bool save() override;
 
     virtual bool exists() const override;
-    virtual bool hasChanges()override ;
+    virtual bool hasChanges() override;
 
 private:
 

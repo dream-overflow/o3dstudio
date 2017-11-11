@@ -10,6 +10,7 @@
 #include "../mainwindow.h"
 
 #include "o3d/studio/common/application.h"
+#include "o3d/studio/common/typeregistry.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/project.h"
@@ -168,6 +169,9 @@ void WorkspaceDock::onSelectItem(const QModelIndex &index)
         if (m_lastSelected != nullptr && m_lastSelected == projectItem) {
             common::Project *project = projectItem->project();
             if (project) {
+                common::Workspace* workspace = common::Application::instance()->workspaces().current();
+                workspace->selectProject(project->ref().light());
+
                 common::Application::instance()->selection().select(project);
             }
         }
@@ -181,11 +185,10 @@ void WorkspaceDock::focusInEvent(QFocusEvent *event)
 
 void WorkspaceDock::onSelectManagerChange()
 {
-    const QSet<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPrevious(
-                                              common::SelectionItem::SELECTION_PROJECT);
+    common::TypeRef typeProject = common::Application::instance()->types().typeRef("o3s::project");
 
-    const QSet<common::SelectionItem *> currentSelection = common::Application::instance()->selection().filterCurrent(
-                                              common::SelectionItem::SELECTION_PROJECT);
+    const QSet<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPrevious(typeProject.id());
+    const QSet<common::SelectionItem *> currentSelection = common::Application::instance()->selection().filterCurrent(typeProject.id());
 
     common::SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, previousSelection) {

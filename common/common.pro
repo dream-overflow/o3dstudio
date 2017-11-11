@@ -66,7 +66,8 @@ SOURCES += \
     src/workspace/fragment.cpp \
     src/workspace/entity.cpp \
     src/component/component.cpp \
-    src/component/componentregistry.cpp
+    src/component/componentregistry.cpp \
+    src/typeregistry.cpp
 
 
 HEADERS += \ 
@@ -119,7 +120,8 @@ HEADERS += \
     include/o3d/studio/common/workspace/fragment.h \
     include/o3d/studio/common/workspace/entity.h \
     include/o3d/studio/common/component/component.h \
-    include/o3d/studio/common/component/componentregistry.h
+    include/o3d/studio/common/component/componentregistry.h \
+    include/o3d/studio/common/typeregistry.h
 
 LIBS += -lobjective3d-dbg
 

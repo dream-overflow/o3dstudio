@@ -14,17 +14,17 @@ using namespace o3d::studio::common;
 
 TypeRef TypeRef::TypeRef::project()
 {
-    return TypeRef(0, "o3s::project");
+    return TypeRef(1, "o3s::project");
 }
 
 TypeRef TypeRef::TypeRef::fragment()
 {
-    return TypeRef(1, "o3s::fragment");
+    return TypeRef(2, "o3s::fragment");
 }
 
 TypeRef TypeRef::TypeRef::hub()
 {
-    return TypeRef(2, "o3s::hub");
+    return TypeRef(3, "o3s::hub");
 }
 
 TypeRef::TypeRef() :

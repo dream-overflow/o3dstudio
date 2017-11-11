@@ -12,6 +12,7 @@
 #include <QtCore/QString>
 #include <QtCore/QUuid>
 #include <QtCore/QUrl>
+#include <QtCore/QHash>
 
 #include "global.h"
 
@@ -40,6 +41,11 @@ public:
     TypeRef(const TypeRef &dup);
 
     TypeRef& operator= (const TypeRef &dup);
+
+    inline bool isValid() const
+    {
+        return m_id > 0 && !m_name.isEmpty();
+    }
 
     inline bool operator <(const TypeRef &to) const
     {
@@ -87,7 +93,15 @@ private:
 
     qint64 m_id;
     QString m_name;
+
+public:
+
+    friend uint qHash(const TypeRef &key, uint seed = 0)
+    {
+        return qHash(key.id(), seed);
+    }
 };
+
 
 /**
  * @brief Permit the identification of an object internaly.
@@ -103,6 +117,15 @@ public:
     LightRef(const LightRef &dup);
 
     LightRef& operator= (const LightRef &dup);
+
+    inline bool isValid() const
+    {
+        if (m_projectId <= 0) {
+            return m_id > 0 && m_type == 1;
+        } else {
+            return m_id > 0 && m_type > 0;
+        }
+    }
 
     inline bool operator <(const LightRef &to) const
     {
@@ -170,7 +193,7 @@ public:
      * @brief Unique type of the object, registered value to the object registry.
      * @return
      */
-    inline int type() const { return m_type; }
+    inline qint64 type() const { return m_type; }
 
     /**
      * @brief id Unique per project 64 bits integer identifier.
@@ -191,9 +214,16 @@ public:
 
 private:
 
-    int m_type;
+    qint64 m_type;
     qint64 m_id;
     qint64 m_projectId;
+
+public:
+
+    friend uint qHash(const LightRef &key, uint seed = 0)
+    {
+        return qHash(key.projectId()*key.id(), seed);
+    }
 };
 
 /**
