@@ -74,7 +74,6 @@ public:
     virtual bool save() override;
 
     virtual bool exists() const override;
-    virtual bool hasChanges() override;
 
     MasterScene* masterScene();
     const MasterScene* masterScene() const;

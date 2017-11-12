@@ -379,6 +379,14 @@ public:
     static ObjectRef buildRef(Project *project, const TypeRef &type);
 
     /**
+     * @brief buildRef Build a new reference for an object into the project and force uuid values
+     * @param project
+     * @param type Reference on the type of the object to reference
+     * @return
+     */
+    static ObjectRef buildRef(Project *project, const TypeRef &type, const QUuid &uuid);
+
+    /**
      * @brief buildRef Build a new reference for an object into the project and force uuid and id values
      * @param project
      * @param type Reference on the type of the object to reference

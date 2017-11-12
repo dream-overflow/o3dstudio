@@ -59,10 +59,23 @@ bool Fragment::save()
 
 bool Fragment::exists() const
 {
-    return false;
+    return Entity::exists();
 }
 
-bool Fragment::hasChanges()
+bool Fragment::serializeContent(QDataStream &stream) const
 {
+    if (!Entity::serializeContent(stream)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Fragment::deserializeContent(QDataStream &stream)
+{
+    if (!Entity::deserializeContent(stream)) {
+        return false;
+    }
+
     return false;
 }

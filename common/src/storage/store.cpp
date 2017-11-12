@@ -28,7 +28,7 @@ Store::~Store()
     }
 }
 
-void Store::initProject(Project *project)
+void Store::initProject(Project *project, Version version)
 {
     if (!project) {
         return;
@@ -81,6 +81,75 @@ void Store::initProject(Project *project)
 }
 
 void Store::loadProject(Project *project)
+{
+    if (!project) {
+        return;
+    }
+
+    // check project structure, integrity
+    if (!project->path().exists()) {
+        throw StoreException(tr("Project directory doesn't exists"));
+    }
+
+    if (!project->path().exists("items")) {
+        throw StoreException("Project items directory is missing");
+    }
+
+    if (!project->path().exists("cache")) {
+        qWarning("Project cache directory is missing");
+
+        if (!project->path().mkdir("cache")) {
+            throw StoreException("Unable to create the project cache directory");
+        }
+    }
+
+    if (!project->path().exists("tmp")) {
+        qWarning("Project temporary directory is missing");
+
+        if (!project->path().mkdir("tmp")) {
+            throw StoreException("Unable to create the project temporary directory");
+        }
+    }
+
+    if (!project->path().exists("targets")) {
+        throw StoreException("Project targets directory is missing");
+    }
+
+    if (!project->path().exists("README.txt")) {
+        qWarning("Project readme file is missing");
+
+        QFile readmeFile(project->path().absoluteFilePath("README.txt"));
+        if (!readmeFile.open(QFile::WriteOnly | QFile::Text)) {
+            throw StoreException("Unable to create the project readme file");
+        }
+        readmeFile.write("TODO\n");
+        readmeFile.close();
+    }
+
+    if (!project->path().exists("LICENSE.txt")) {
+        qWarning("Project license file is missing");
+
+        QFile licenseFile(project->path().absoluteFilePath("LICENSE.txt"));
+        if (!licenseFile.open(QFile::WriteOnly | QFile::Text)) {
+            throw StoreException("Unable to create the project license file");
+        }
+        licenseFile.write("TODO\n");
+        licenseFile.close();
+    }
+
+    if (!project->path().exists("INFO.txt")) {
+        qWarning("Project information file is missing");
+
+        QFile infoFile(project->path().absoluteFilePath("INFO.txt"));
+        if (!infoFile.open(QFile::WriteOnly | QFile::Text)) {
+            throw StoreException("Unable to create the project information file");
+        }
+        infoFile.write("TODO\n");
+        infoFile.close();
+    }
+}
+
+void Store::saveProject(Project *project)
 {
     if (!project) {
         return;

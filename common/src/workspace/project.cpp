@@ -34,7 +34,7 @@ Project::Project(const QString &name, Workspace *workspace) :
     m_name = name;
     m_ref = ObjectRef::buildRef(workspace);
     m_masterScene = new MasterScene(this);
-    m_projectFile = new ProjectFile(this, ProjectFile::PF_100);
+    m_projectFile = new ProjectFile(this, ProjectFile::PROJECT_VERSION_1_0_0);
     m_info = new ProjectInfo();
 }
 
@@ -82,6 +82,9 @@ void Project::create()
 
     // and project file
     m_projectFile->create();
+
+    // never saved
+    setDirty();
 }
 
 QString Project::filename() const
@@ -124,10 +127,11 @@ bool Project::load()
     // project structure
     Application::instance()->store().loadProject(this);
 
-    // and project file
+    // project file
     m_projectFile->load();
 
-    // @todo save next id
+    // store indexe
+    // @todo
 
     return true;
 }
@@ -138,14 +142,14 @@ bool Project::save()
         throw ProjectException(tr("Project doesn't exists"));
     };
 
-    // project structure @todo
-    // Application::instance()->store().saveProject(this);
+    // project structure
+    Application::instance()->store().saveProject(this);
 
-    // @todo if changes only
     // and project file
     m_projectFile->save();
 
-    // @todo load next id
+    // store indexe
+    // @todo
 
     return true;
 }
@@ -153,12 +157,6 @@ bool Project::save()
 bool Project::exists() const
 {
     return m_path.exists() && m_path.exists("project.o3dstudio");
-}
-
-bool Project::hasChanges()
-{
-    // @todo
-    return true;
 }
 
 MasterScene *Project::masterScene()
@@ -211,7 +209,7 @@ void Project::removeHub(const LightRef &_ref)
     Hub *hub = it.value();
 
     delete hub;
-    m_hubs.erase(it);   
+    m_hubs.erase(it);
 
     // signal throught workspace
     emit workspace()->onProjectHubRemoved(hub->ref().light());

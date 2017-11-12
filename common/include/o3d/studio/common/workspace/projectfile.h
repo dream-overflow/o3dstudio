@@ -35,13 +35,12 @@ public:
 
     enum ProjectVersion
     {
-        PF_100 = 0x010000,
-        PF_101 = 0x010001,
-        PF_110 = 0x010100,
-        PF_111 = 0x010101
+        PROJECT_VERSION_1_0_0 = 0x010000,
+        PROJECT_VERSION_LATEST = PROJECT_VERSION_1_0_0
+
     };
 
-    ProjectFile(Project *project, ProjectVersion version = PF_100);
+    ProjectFile(Project *project, ProjectVersion version = PROJECT_VERSION_1_0_0);
     virtual ~ProjectFile();
 
     const QString& name() const;

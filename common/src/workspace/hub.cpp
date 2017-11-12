@@ -61,12 +61,7 @@ bool Hub::save()
 
 bool Hub::exists() const
 {
-    return false;
-}
-
-bool Hub::hasChanges()
-{
-    return false;
+    return Entity::exists();
 }
 
 void Hub::addHub(Hub *hub)
@@ -258,6 +253,30 @@ const Hub *Hub::findHub(qint64 id) const
 int Hub::numHubs() const
 {
     return m_hubs.size();
+}
+
+bool Hub::serializeContent(QDataStream &stream) const
+{
+    if (!Entity::serializeContent(stream)) {
+        return false;
+    }
+
+    // children
+    // @todo
+
+    return true;
+}
+
+bool Hub::deserializeContent(QDataStream &stream)
+{
+    if (!Entity::deserializeContent(stream)) {
+        return false;
+    }
+
+    // children
+    // @todo
+
+    return false;
 }
 
 HubException::HubException(const QString &message) :

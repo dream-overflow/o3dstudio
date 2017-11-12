@@ -59,10 +59,23 @@ bool Asset::save()
 
 bool Asset::exists() const
 {
-    return false;
+    return Entity::exists();
 }
 
-bool Asset::hasChanges()
+bool Asset::serializeContent(QDataStream &stream) const
 {
+    if (!Entity::serializeContent(stream)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool Asset::deserializeContent(QDataStream &stream)
+{
+    if (!Entity::deserializeContent(stream)) {
+        return false;
+    }
+
     return false;
 }

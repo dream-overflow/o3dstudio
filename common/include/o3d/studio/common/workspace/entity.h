@@ -12,6 +12,8 @@
 #include <QtCore/QString>
 #include <QtCore/QException>
 #include <QtCore/QCoreApplication>
+#include <QtCore/QBitArray>
+#include <QtCore/QDataStream>
 
 #include "../exception.h"
 #include "../objectref.h"
@@ -27,10 +29,13 @@ class O3S_API Entity
 {
 public:
 
+    enum Capacity
+    {
+        STATE_CHANGED = 32
+    };
+
     explicit Entity(const QString &name, Entity *parent = nullptr);
     virtual ~Entity();
-
-    virtual void create() = 0;
 
     void setRef(const ObjectRef &ref);
 
@@ -42,11 +47,30 @@ public:
 
     const TypeRef& typeRef() const;
 
+    virtual void create() = 0;
+
     virtual bool load() = 0;
     virtual bool save() = 0;
 
-    virtual bool exists() const = 0;
-    virtual bool hasChanges() = 0;
+    /**
+     * @brief By default it exists if the reference point to a project.
+     */
+    virtual bool exists() const;
+
+    /**
+     * @brief Has changes to saved since last save(). Default ready the STATE_CHANGED flag.
+     */
+    virtual bool hasChanges();
+
+    /**
+     * @brief Serialize the entity content.
+     */
+    virtual bool serializeContent(QDataStream &stream) const;
+
+    /**
+     * @brief Deserialize the entity content.
+     */
+    virtual bool deserializeContent(QDataStream &stream);
 
 protected:
 
@@ -56,6 +80,26 @@ protected:
     ObjectRef m_ref;
 
     Entity *m_parent;
+
+    QBitArray m_capacities{64};  //!< Flags and capacities
+
+    inline void setDirty() { m_capacities.setBit(STATE_CHANGED); }
+    inline void setClean() { m_capacities.clearBit(STATE_CHANGED); }
+    inline bool isDirty() const { return m_capacities.testBit(STATE_CHANGED); }
+
+public:
+
+    friend QDataStream& operator<<(QDataStream& stream, const Entity &entity)
+    {
+        entity.serializeContent(stream);
+        return stream;
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, Entity &entity)
+    {
+        entity.deserializeContent(stream);
+        return stream;
+    }
 };
 
 } // namespace common

@@ -145,6 +145,25 @@ ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type)
     return ref;
 }
 
+ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const QUuid &uuid)
+{
+    if (!project) {
+        throw;
+    }
+
+    ObjectRef ref;
+
+    ref.m_lightRef.m_id = project->generateId();
+    ref.m_lightRef.m_projectId = project->ref().light().id();
+    ref.m_lightRef.m_type = type.id();
+
+    ref.m_strongRef.m_uuid = uuid;
+    ref.m_strongRef.m_projectUuid = project->ref().strong().uuid();
+    ref.m_strongRef.m_type = type.name();
+
+    return ref;
+}
+
 ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const QUuid &uuid, qint64 id)
 {
     if (!project) {

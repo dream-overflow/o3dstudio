@@ -27,29 +27,42 @@ class O3S_API Store
 
 public:
 
+    enum Version
+    {
+        STORE_VERSION_1_0_0 = 0x010000,
+        STORE_VERSION_LATEST = STORE_VERSION_1_0_0
+    };
+
     Store();
     ~Store();
 
     /**
-     * @brief Init the storage for a new project.
+     * @brief Init the storage for a new project. Create project structure and initials files.
      * @param project
      * @return
      */
-    void initProject(Project *project);
+    void initProject(Project *project, Version version = STORE_VERSION_LATEST);
 
     /**
-     * @brief Setup storage for an existing project.
+     * @brief Setup storage for an existing project. Recreate missings directories and files as possible.
      * @param project
      * @return
      */
     void loadProject(Project *project);
 
     /**
-     * @brief Erase all project files and items.
+     * @brief Erase all project files and items. Delete project folder if empty (no user manualy created files).
      * @param project
      * @return
      */
     void deleteProject(Project *project);
+
+    /**
+     * @brief Save storage for an existing project. Recreate missings directories and files as possible.
+     * @param project
+     * @return
+     */
+    void saveProject(Project *project);
 
     StoreItem* item(const QUuid &uuid);
     const StoreItem* item(const QUuid &uuid) const;
