@@ -10,6 +10,7 @@
 #include "mainwindow.h"
 
 #include <QtWidgets/QLineEdit>
+#include <QtCore/QList>
 #include <QtGui/QPixmap>
 #include <QtGui/QImage>
 
@@ -26,6 +27,8 @@
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/selectionitem.h"
 
+#include "o3d/studio/common/ui/uiutils.h"
+
 using namespace o3d::studio::main;
 
 
@@ -36,6 +39,12 @@ MainToolBar::MainToolBar(QWidget *parent) :
     setupButtons();
 
     setWindowIcon(QIcon::fromTheme("applications-accessories"));
+
+    // initial setup of current workspace
+    common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
+    connect(workspaceManager, SIGNAL(onWorkspaceActivated(QString)), SLOT(onChangeCurrentWorkspace(QString)));
+
+    onChangeCurrentWorkspace(workspaceManager->current()->name());
 }
 
 MainToolBar::~MainToolBar()
@@ -58,6 +67,28 @@ Qt::ToolBarArea MainToolBar::toolBarArea() const
     return Qt::TopToolBarArea;
 }
 
+void MainToolBar::onProjectActivated(const common::LightRef &ref)
+{
+    if (ref.isValid()) {
+        QList<QAction*> actionsList = this->actions();
+        QAction *action = nullptr;
+        foreach (action, actionsList) {
+            action->setEnabled(true);
+        }
+    }
+}
+
+void MainToolBar::onProjectRemoved(const common::LightRef &ref)
+{
+    if (ref.isValid()) {
+        QList<QAction*> actionsList = this->actions();
+        QAction *action = nullptr;
+        foreach (action, actionsList) {
+            action->setEnabled(false);
+        }
+    }
+}
+
 void MainToolBar::onCreateFragment()
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
@@ -75,46 +106,54 @@ void MainToolBar::onCreateHub()
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         common::Project *project = workspace->activeProject();
-        if (project) {
+        common::Selection &selection = common::Application::instance()->selection();
+
+        // active project
+        if (!project) {
+            return;
+        }
+
+        const QSet<common::SelectionItem*> hubs = selection.filterCurrent(common::TypeRef::hub().id());
+        if (hubs.size() > 1) {
+            return;
+        }
+
+        // add as sub-hub
+        if (hubs.size() == 1) {
+            auto it = hubs.begin();
+            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), QString());
+            common::Application::instance()->command().addCommand(cmd);
+        } else {
             common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), QString());
             common::Application::instance()->command().addCommand(cmd);
         }
     }
 }
 
-QIcon MainToolBar::tintIcon(const QString &filename)
-{
-    QColor color = QApplication::palette(this).color(QPalette::Highlight);
-    QImage image = QImage(filename);
-
-    // Loop all the pixels
-    for(int y = 0; y < image.height(); y++) {
-        for(int x= 0; x < image.width(); x++) {
-            // Read the alpha value each pixel, keeping the RGB values of your color
-            color.setAlpha(image.pixelColor(x, y).alpha());
-
-            // Apply the pixel color
-            image.setPixelColor(x, y, color);
-        }
-    }
-
-    // Get the coloured pixmap
-    QPixmap pixmap = QPixmap::fromImage(image);
-    return QIcon(pixmap);
-}
-
 void MainToolBar::setupButtons()
 {
-    QAction *addFragment = new QAction(tintIcon(":/icons/fragment_flat.svg"), tr("Create a Fragment"));
+    QAction *addFragment = new QAction(common::UiUtils::tintIcon(":/icons/fragment_flat.svg"), tr("Create a Fragment"));
     connect(addFragment, SIGNAL(triggered(bool)), SLOT(onCreateFragment()));
+    addFragment->setEnabled(false);
     addAction(addFragment);
 
-    QAction *addhub= new QAction(tintIcon(":/icons/device_hub_black.svg"), tr("Create a Hub"));
+    QAction *addhub = new QAction(common::UiUtils::tintIcon(":/icons/device_hub_black.svg"), tr("Create a Hub"));
     connect(addhub, SIGNAL(triggered(bool)), SLOT(onCreateHub()));
+    addhub->setEnabled(false);
     addAction(addhub);
 
     addSeparator();
 
     addAction(QIcon::fromTheme("system-search"), tr("Search"));
     addWidget(new QLineEdit());
+}
+
+void MainToolBar::onChangeCurrentWorkspace(const QString &name)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        // connect(workspace, SIGNAL(onProjectAdded(const LightRef &)), SLOT(onProjectAdded(const LightRef &)));
+        connect(workspace, SIGNAL(onProjectActivated(const LightRef &)), SLOT(onProjectActivated(const LightRef &)));
+        connect(workspace, SIGNAL(onProjectRemoved(const LightRef &)), SLOT(onProjectRemoved(const LightRef &)));
+    }
 }

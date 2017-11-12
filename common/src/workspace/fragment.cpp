@@ -13,10 +13,10 @@
 using namespace o3d::studio::common;
 
 
-Fragment::Fragment(const QString &name, Project *project) :
-    Entity(name, project)
+Fragment::Fragment(const QString &name, Entity *parent) :
+    Entity(name, parent)
 {
-    m_ref = ObjectRef::buildRef(project, TypeRef::fragment());
+    m_ref = ObjectRef(TypeRef::fragment());
 }
 
 Fragment::~Fragment()

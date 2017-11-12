@@ -90,16 +90,69 @@ public:
      * @brief Set the current selected project.
      * @param name
      */
-    bool selectProject(const LightRef &ref);
+    bool setActiveProject(const LightRef &ref);
 
     bool save();
     bool load();
+
+    //
+    // Project entity
+    //
+
+    /**
+     * @brief Get a specific hub from a loaded project.
+     */
+    Hub* hub(const LightRef &ref);
+
+    /**
+     * @brief Get a specific hub from a loaded project (const version).
+     */
+    const Hub* hub(const LightRef &ref) const;
+
+    /**
+     * @brief Find a specific hub, recursively from a loaded project.
+     */
+    Hub* findHub(const LightRef &ref);
+
+    /**
+     * @brief Find a specific hub, recursively from a loaded project (const version).
+     */
+    const Hub* findHub(const LightRef &ref) const;
+
+    /**
+     * @brief Get a specific fragment from a loaded project.
+     */
+    Fragment* fragment(const LightRef &ref);
+
+    /**
+     * @brief Get a specific fragment from a loaded project (const version).
+     */
+    const Fragment* fragment(const LightRef &ref) const;
+
+    /**
+     * @brief Get a specific asset from a loaded project.
+     */
+    Asset* asset(const LightRef &ref);
+
+    /**
+     * @brief Get a specific asset from a loaded project (const version).
+     */
+    const Asset* asset(const LightRef &ref) const;
 
 signals:
 
     void onProjectAdded(const LightRef &ref);
     void onProjectActivated(const LightRef &ref);
     void onProjectRemoved(const LightRef &ref);
+
+    void onProjectHubAdded(const LightRef &ref);
+    void onProjectHubRemoved(const LightRef &ref);
+
+    void onProjectFragmentAdded(const LightRef &ref);
+    void onProjectFragmentRemoved(const LightRef &ref);
+
+    void onProjectAssetAdded(const LightRef &ref);
+    void onProjectAssetRemoved(const LightRef &ref);
 
 public slots:
 
@@ -114,7 +167,7 @@ private:
     QString m_name;            //!< Unique workspace name
 
     QStringList m_foundProjects;
-    QMap<LightRef, Project*> m_loadedProjects;
+    QMap<qint64, Project*> m_loadedProjects;
 
     Project *m_activeProject{nullptr};
 

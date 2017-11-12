@@ -30,13 +30,23 @@ public:
     TypeRegistry(QObject *parent = nullptr);
     virtual ~TypeRegistry();
 
-    bool registerType(const QString &name);
+    bool registerType(const TypeRef &baseType, const QString &name);
 
     bool unregisterType(const QString &name);
     bool unregisterType(qint64 id);
     bool unregisterType(const TypeRef &typeRef);
 
     TypeRef typeRef(const QString &name) const;
+
+    /**
+     * @brief Return the base type for a type ref
+     */
+    TypeRef baseTypeRef(const TypeRef &typeRef) const;
+
+    /**
+     * @brief Return the base type for a type ref
+     */
+    TypeRef baseTypeRef(qint64 type) const;
 
 signals:
 
@@ -45,7 +55,9 @@ signals:
 protected:
 
     qint64 m_nextId;
+
     QMap<QString, TypeRef> m_typeRefs;
+    QMap<qint64, TypeRef> m_typeRefsById;
 };
 
 } // namespace common

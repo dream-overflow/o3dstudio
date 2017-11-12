@@ -13,6 +13,7 @@
 #include <QtCore/QUuid>
 #include <QtCore/QUrl>
 #include <QtCore/QHash>
+#include <QtCore/QMetaType>
 
 #include "global.h"
 
@@ -23,9 +24,21 @@ namespace common {
 class Workspace;
 class Project;
 
-constexpr int PROJECT_TYPE_ID = 1;
-constexpr int FRAGMENT_TYPE_ID = 2;
-constexpr int HUB_TYPE_ID = 3;
+/**
+ * @brief Fixed entity type identifier.
+ */
+enum EntityType
+{
+    PROJECT_TYPE_ID = 1,
+    HUB_TYPE_ID = 2,
+    FRAGMENT_TYPE_ID = 3,
+    ASSET_TYPE_ID = 4
+};
+
+constexpr char PROJECT_TYPE_STRING[] = "o3s::project";
+constexpr char HUB_TYPE_STRING[] = "o3s::hub";
+constexpr char FRAGMENT_TYPE_STRING[] = "o3s::fragment";
+constexpr char ASSET_TYPE_STRING[] = "o3s::asset";
 
 /**
  * @brief Permit the identification of a type.
@@ -37,11 +50,12 @@ class O3S_API TypeRef final
 public:
 
     static TypeRef project();
-    static TypeRef fragment();
     static TypeRef hub();
+    static TypeRef fragment();
+    static TypeRef asset();
 
     TypeRef();
-    TypeRef(qint64 id, const QString &name);
+    TypeRef(qint64 baseType, qint64 id, const QString &name);
     TypeRef(const TypeRef &dup);
 
     TypeRef& operator= (const TypeRef &dup);
@@ -82,6 +96,12 @@ public:
     }
 
     /**
+     * @brief id of the TypeRef of the base type. Similar as id for a base type.
+     * @return
+     */
+    inline qint64 baseType() const { return m_baseType; }
+
+    /**
      * @brief id Unique per project 64 bits integer identifier.
      * @return
      */
@@ -95,6 +115,7 @@ public:
 
 private:
 
+    qint64 m_baseType;
     qint64 m_id;
     QString m_name;
 
@@ -347,6 +368,8 @@ public:
 
     ObjectRef();
 
+    ObjectRef(const TypeRef &ref);
+
     /**
      * @brief buildRef Build a new reference for an object into the project
      * @param project
@@ -354,6 +377,14 @@ public:
      * @return
      */
     static ObjectRef buildRef(Project *project, const TypeRef &type);
+
+    /**
+     * @brief buildRef Build a new reference for an object into the project and force uuid and id values
+     * @param project
+     * @param type Reference on the type of the object to reference
+     * @return
+     */
+    static ObjectRef buildRef(Project *project, const TypeRef &type, const QUuid &uuid, qint64 id);
 
     /**
      * @brief buildRef Build a new reference for a project into the workspace
@@ -390,5 +421,7 @@ private:
 } // namespace common
 } // namespace studio
 } // namespace o3d
+
+Q_DECLARE_METATYPE(o3d::studio::common::LightRef)
 
 #endif // _O3DS_COMMON_ELEMENT_H

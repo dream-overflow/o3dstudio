@@ -11,6 +11,9 @@
 #include "o3d/studio/common/exception.h"
 #include "o3d/studio/common/messenger.h"
 
+#include "o3d/studio/common/workspace/workspacemanager.h"
+#include "o3d/studio/common/workspace/workspace.h"
+
 using namespace o3d::studio::common;
 
 
@@ -35,6 +38,69 @@ CommandManager::~CommandManager()
     foreach (cmd, m_undoneCommandsQueue) {
         delete cmd;
     }
+}
+
+void CommandManager::initialize()
+{
+    // initial setup of current workspace
+    common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
+    connect(workspaceManager, SIGNAL(onWorkspaceActivated(QString)), SLOT(onChangeCurrentWorkspace(QString)));
+
+    onChangeCurrentWorkspace(workspaceManager->current()->name());
+
+}
+
+void CommandManager::onChangeCurrentWorkspace(const QString &name)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        connect(workspace, SIGNAL(onProjectRemoved(const LightRef &)), SLOT(onProjectRemoved(const LightRef &)));
+    }
+}
+
+void CommandManager::onProjectRemoved(const LightRef &ref)
+{
+    m_rwLock.lockForWrite();
+
+    // remove any command related to the project @todo
+    QList<QStack<Command*>::iterator> eraseList;
+    for (auto it = m_todoCommandsQueue.begin(); it != m_todoCommandsQueue.end(); ++it) {
+        if ((*it)->targetRef() == ref) {
+            eraseList.append(it);
+        }
+    }
+
+    QStack<Command*>::iterator it;
+    foreach (it, eraseList) {
+        delete *it;
+        m_todoCommandsQueue.erase(it);
+    }
+
+    eraseList.clear();
+    for (auto it = m_doneCommandsQueue.begin(); it != m_doneCommandsQueue.end(); ++it) {
+        if ((*it)->targetRef() == ref) {
+            eraseList.append(it);
+        }
+    }
+
+    foreach (it, eraseList) {
+        delete *it;
+        m_doneCommandsQueue.erase(it);
+    }
+
+    eraseList.clear();
+    for (auto it = m_undoneCommandsQueue.begin(); it != m_undoneCommandsQueue.end(); ++it) {
+        if ((*it)->targetRef() == ref) {
+            eraseList.append(it);
+        }
+    }
+
+    foreach (it, eraseList) {
+        delete *it;
+        m_undoneCommandsQueue.erase(it);
+    }
+
+    m_rwLock.unlock();
 }
 
 void CommandManager::addCommand(Command *cmd)

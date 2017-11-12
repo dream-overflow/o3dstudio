@@ -11,10 +11,13 @@
 
 #include <QtWidgets/QToolBar>
 #include "o3d/studio/common/ui/toolbar.h"
+#include "o3d/studio/common/objectref.h"
 
 namespace o3d {
 namespace studio {
 namespace main {
+
+using o3d::studio::common::LightRef;
 
 class MainToolBar : public QToolBar, public common::ToolBar
 {
@@ -34,6 +37,11 @@ signals:
 protected:
 
 private slots:
+
+    void onChangeCurrentWorkspace(const QString &name);
+
+    void onProjectActivated(const LightRef &ref);
+    void onProjectRemoved(const LightRef &ref);
 
     void onCreateFragment();
     void onCreateHub();

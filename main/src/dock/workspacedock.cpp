@@ -14,6 +14,9 @@
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/hub.h"
+#include "o3d/studio/common/workspace/fragment.h"
+#include "o3d/studio/common/workspace/asset.h"
 #include "o3d/studio/common/workspace/projectmodel.h"
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/selectionitem.h"
@@ -91,10 +94,8 @@ void WorkspaceDock::onRemoveProject(const common::LightRef &ref)
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
     common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
 
-    // add a new project item
-    if (project) {
-        projectModel->removeProject(project);
-    }
+    // remove a project item
+    projectModel->removeProject(ref);
 }
 
 void WorkspaceDock::onActivateProject(const common::LightRef &ref)
@@ -131,16 +132,17 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
     }
 
     if (current.isValid()) {
+        // @todo for multiple selection only
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
         m_lastSelected = projectItem;
 
         // projectItem->select();
 
-        common::Project *project = projectItem->project();
+        /*common::Project *project = projectItem->project();
         if (project) {
             common::Application::instance()->selection().select(project);
             // project->workspace()->selectProject(project->ref());
-        }
+        }*/
     }
 }
 
@@ -168,14 +170,98 @@ void WorkspaceDock::onSelectItem(const QModelIndex &index)
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(index.internalPointer());
         if (m_lastSelected != nullptr && m_lastSelected == projectItem) {
             common::Project *project = projectItem->project();
-            if (project) {
-                common::Workspace* workspace = common::Application::instance()->workspaces().current();
-                workspace->selectProject(project->ref().light());
+            common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().type());
 
+            if (!project) {
+                return;
+            }
+
+            // first set as active projet if not current
+            common::Workspace* workspace = common::Application::instance()->workspaces().current();
+            if (workspace->activeProject() != project) {
+                workspace->setActiveProject(project->ref().light());
+            }
+
+            if (baseType == common::TypeRef::hub()) {
+                common::Hub *hub = project->findHub(projectItem->ref().id());
+                if (hub) {
+                    common::Application::instance()->selection().select(hub);
+                }
+            } else if (baseType == common::TypeRef::fragment()) {
+                common::Fragment *fragment = project->fragment(projectItem->ref());
+                if (fragment) {
+                    common::Application::instance()->selection().select(fragment);
+                }
+            } else if (baseType == common::TypeRef::asset()) {
+                common::Asset *asset = project->asset(projectItem->ref());
+                if (asset) {
+                    common::Application::instance()->selection().select(asset);
+                }
+            } else if (baseType == common::TypeRef::project()) {
                 common::Application::instance()->selection().select(project);
             }
         }
     }
+}
+
+void WorkspaceDock::onProjectHubAdded(const common::LightRef &ref)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+    common::Hub *hub = workspace->findHub(ref);
+
+    // add a new project hub
+    if (hub) {
+        projectModel->addHub(hub);
+    }
+}
+
+void WorkspaceDock::onProjectHubRemoved(const common::LightRef &ref)
+{
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+
+    // remove a project hub
+    projectModel->removeHub(ref);
+}
+
+void WorkspaceDock::onProjectFragmentAdded(const o3d::studio::common::LightRef &ref)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+    common::Fragment *fragment = workspace->fragment(ref);
+
+    // add a new project fragment
+    if (fragment) {
+        projectModel->addFragment(fragment);
+    }
+}
+
+void WorkspaceDock::onProjectFragmentRemoved(const o3d::studio::common::LightRef &ref)
+{
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+
+    // remove a project fragment
+    projectModel->removeFragment(ref);
+}
+
+void WorkspaceDock::onProjectAssetAdded(const o3d::studio::common::LightRef &ref)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+    common::Asset *asset = workspace->asset(ref);
+
+    // add a new project asset
+    if (asset) {
+        projectModel->addAsset(asset);
+    }
+}
+
+void WorkspaceDock::onProjectAssetRemoved(const o3d::studio::common::LightRef &ref)
+{
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+
+    // remove a project asset
+    projectModel->removeAsset(ref);
 }
 
 void WorkspaceDock::focusInEvent(QFocusEvent *event)
@@ -223,10 +309,28 @@ void WorkspaceDock::setupUi()
 
 void WorkspaceDock::onChangeCurrentWorkspace(const QString &name)
 {
+    QAbstractItemModel *oldModel = m_treeView->model();
+    m_treeView->setModel(new common::ProjectModel());
+
+    if (oldModel) {
+        delete oldModel;
+    }
+
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
+        // workspace project
         connect(workspace, SIGNAL(onProjectAdded(const LightRef &)), SLOT(onAddProject(const LightRef &)));
         connect(workspace, SIGNAL(onProjectActivated(const LightRef &)), SLOT(onActivateProject(const LightRef &)));
         connect(workspace, SIGNAL(onProjectRemoved(const LightRef &)), SLOT(onRemoveProject(const LightRef &)));
+
+        // project entities
+        connect(workspace, SIGNAL(onProjectHubAdded(const LightRef &)), SLOT(onProjectHubAdded(const LightRef &)), Qt::QueuedConnection);
+        connect(workspace, SIGNAL(onProjectHubRemoved(const LightRef &)), SLOT(onProjectHubRemoved(const LightRef &)), Qt::QueuedConnection);
+
+        connect(workspace, SIGNAL(onProjectFragmentAdded(const LightRef &)), SLOT(onProjectFragmentAdded(const LightRef &)), Qt::QueuedConnection);
+        connect(workspace, SIGNAL(onProjectFragmentRemoved(const LightRef &)), SLOT(onProjectFragmentRemoved(const LightRef &)), Qt::QueuedConnection);
+
+        connect(workspace, SIGNAL(onProjectAssetAdded(const LightRef &)), SLOT(onProjectAssetAdded(const LightRef &)), Qt::QueuedConnection);
+        connect(workspace, SIGNAL(onProjectAssetRemoved(const LightRef &)), SLOT(onProjectAssetRemoved(const LightRef &)), Qt::QueuedConnection);
     }
 }

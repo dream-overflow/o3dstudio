@@ -13,6 +13,7 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 
+#include "../objectref.h"
 #include "../global.h"
 
 namespace o3d {
@@ -30,7 +31,7 @@ class O3S_API Command
 {
 public:
 
-    Command(const QString &name);
+    Command(const QString &name, const LightRef &targetRef);
     virtual ~Command();
 
     /**
@@ -66,11 +67,20 @@ public:
      */
     virtual bool redoCommand() = 0;
 
+    /**
+     * @brief Get a reference onto the principal target of the command
+     * @return
+     */
+    const LightRef& targetRef() const;
+
     void setDone();
     void setReDone();
     void setUndone();
 
 protected:
+
+    //! principal target of the command
+    LightRef m_targetRef;
 
     //! command name
     QString m_commandName;

@@ -123,11 +123,11 @@ MainWindow::MainWindow(QWidget *parent) :
             SIGNAL(settingChanged(const QString &, const QVariant &)),
             SLOT(onSettingChanged(const QString &, const QVariant &)));
 
-    // connections to command manager
+    // connections to command manager (async)
     connect(&common::Application::instance()->command(),
-            SIGNAL(commandDone(QString, QString, bool)), SLOT(onCommandDone(QString, QString, bool)));            
+            SIGNAL(commandDone(QString, QString, bool)), SLOT(onCommandDone(QString, QString, bool)), Qt::QueuedConnection);
     connect(&common::Application::instance()->command(),
-            SIGNAL(commandUpdate()), SLOT(onCommandUpdate()));
+            SIGNAL(commandUpdate()), SLOT(onCommandUpdate()), Qt::QueuedConnection);
 
     // connections to menu edit
     connect(ui.actionUndo, SIGNAL(triggered()), SLOT(onUndoAction()));
@@ -1336,7 +1336,7 @@ void MainWindow::openProject(const QString &location)
 
     messenger().info(tr("Project %1 successfuly open").arg(name));
 
-    workspace->selectProject(project->ref().light());
+    workspace->setActiveProject(project->ref().light());
 }
 
 void MainWindow::openResource(const QString &location)

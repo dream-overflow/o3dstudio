@@ -122,7 +122,7 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
         }
 
         project->setupMasterScene();
-        workspace->selectProject(project->ref().light());
+        workspace->setActiveProject(project->ref().light());
 
         common::Settings &settings = common::Application::instance()->settings();
         QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();

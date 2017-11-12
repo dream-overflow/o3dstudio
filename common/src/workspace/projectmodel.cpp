@@ -10,6 +10,11 @@
 #include "o3d/studio/common/workspace/projectitem.h"
 
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/hub.h"
+#include "o3d/studio/common/workspace/fragment.h"
+#include "o3d/studio/common/workspace/asset.h"
+
+#include "o3d/studio/common/ui/uiutils.h"
 
 using namespace o3d::studio::common;
 
@@ -175,20 +180,15 @@ ProjectItem *ProjectModel::addProject(Project *project)
     return item;
 }
 
-void ProjectModel::removeProject(Project *project)
+void ProjectModel::removeProject(const common::LightRef &ref)
 {
-    if (!project) {
+    if (!ref.isValid()) {
         return;
     }
 
     // find the project
-    ProjectItem *projectItem = m_rootItem->find(project->ref().light());
+    ProjectItem *projectItem = m_rootItem->find(ref);
     if (!projectItem) {
-        return;
-    }
-
-    Project *lproject = m_rootItem->project();
-    if (project != lproject) {
         return;
     }
 
@@ -198,6 +198,180 @@ void ProjectModel::removeProject(Project *project)
     m_rootItem->removeChild(n);
 
     delete projectItem;
+
+    endRemoveRows();
+}
+
+ProjectItem *ProjectModel::addHub(common::Hub *hub)
+{
+    if (!hub) {
+        return nullptr;
+    }
+
+    ProjectItem *parentItem = find(hub->parent()->ref().light());
+
+    if (!parentItem) {
+        return nullptr;
+    }
+
+    int n = parentItem->childCount();
+
+    QModelIndex parentIndex = createIndex(parentItem->row(), 0, parentItem);
+
+    beginInsertRows(parentIndex, n, n);
+
+    ProjectItem *item = new ProjectItem(hub->ref().light(),
+                                        hub->name(),
+                                        UiUtils::tintIcon(":/icons/device_hub_black.svg"),
+                                        parentItem);
+    parentItem->appendChild(item);
+
+    endInsertRows();
+
+    return item;
+}
+
+void ProjectModel::removeHub(const common::LightRef &ref)
+{
+    if (!ref.isValid()) {
+        return;
+    }
+
+    ProjectItem *hubItem = find(ref);
+    if (!hubItem) {
+        return;
+    }
+
+    // find the parent
+    ProjectItem *parentItem = hubItem->parentItem();
+    if (!parentItem) {
+        return;
+    }
+
+    QModelIndex parentIndex = createIndex(parentItem->row(), 0, parentItem);
+
+    int n = hubItem->row();
+
+    beginRemoveRows(parentIndex, n, n);
+    parentItem->removeChild(n);
+
+    delete hubItem;
+
+    endRemoveRows();
+}
+
+ProjectItem *ProjectModel::addFragment(common::Fragment *fragment)
+{
+    if (!fragment) {
+        return nullptr;
+    }
+
+    ProjectItem *parentItem = find(fragment->parent()->ref().light());
+
+    if (!parentItem) {
+        return nullptr;
+    }
+
+    int n = parentItem->childCount();
+
+    QModelIndex parentIndex = index(parentItem->row(), 0);  // @todo for n*subs fragments
+
+    beginInsertRows(parentIndex, n, n);
+
+    ProjectItem *item = new ProjectItem(fragment->ref().light(),
+                                        fragment->name(),
+                                        UiUtils::tintIcon(":/icons/fragment_flat.svg"),
+                                        parentItem);
+    parentItem->appendChild(item);
+
+    endInsertRows();
+
+    return item;
+}
+
+void ProjectModel::removeFragment(const common::LightRef &ref)
+{
+    if (!ref.isValid()) {
+        return;
+    }
+
+    ProjectItem *fragmentItem = find(ref);
+    if (!fragmentItem) {
+        return;
+    }
+
+    // find the parent
+    ProjectItem *parentItem = fragmentItem->parentItem();
+    if (!parentItem) {
+        return;
+    }
+
+    QModelIndex parentIndex = index(parentItem->row(), 0);  // @todo for n*subs fragments
+
+    int n = fragmentItem->row();
+
+    beginRemoveRows(parentIndex, n, n);
+    parentItem->removeChild(n);
+
+    delete fragmentItem;
+
+    endRemoveRows();
+}
+
+ProjectItem *ProjectModel::addAsset(common::Asset *asset)
+{
+    if (!asset) {
+        return nullptr;
+    }
+
+    ProjectItem *parentItem = find(asset->parent()->ref().light());
+
+    if (!parentItem) {
+        return nullptr;
+    }
+
+    int n = parentItem->childCount();
+
+    QModelIndex parentIndex = index(parentItem->row(), 0);  // @todo for n*subs asset
+
+    beginInsertRows(parentIndex, n, n);
+
+    ProjectItem *item = new ProjectItem(asset->ref().light(),
+                                        asset->name(),
+                                        UiUtils::tintIcon(":/icons/fragment_flat.svg"),
+                                        parentItem);
+    parentItem->appendChild(item);
+
+    endInsertRows();
+
+    return item;
+}
+
+void ProjectModel::removeAsset(const common::LightRef &ref)
+{
+    if (!ref.isValid()) {
+        return;
+    }
+
+    ProjectItem *assetItem = find(ref);
+    if (!assetItem) {
+        return;
+    }
+
+    // find the parent
+    ProjectItem *parentItem = assetItem->parentItem();
+    if (!parentItem) {
+        return;
+    }
+
+    QModelIndex parentIndex = index(parentItem->row(), 0);  // @todo for n*subs assets
+
+    int n = assetItem->row();
+
+    beginRemoveRows(parentIndex, n, n);
+    parentItem->removeChild(n);
+
+    delete assetItem;
 
     endRemoveRows();
 }

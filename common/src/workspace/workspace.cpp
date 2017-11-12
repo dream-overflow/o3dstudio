@@ -66,7 +66,10 @@ void Workspace::setUuid(const QUuid &uuid)
 
 Project *Workspace::project(const LightRef &ref)
 {
-    auto it = m_loadedProjects.find(ref);
+    // id can comes from a project reference or a entity of this project
+    qint64 id = ref.type() == PROJECT_TYPE_ID ? ref.id() : ref.projectId();
+
+    auto it = m_loadedProjects.find(id);
     if (it != m_loadedProjects.end()) {
         return it.value();
     }
@@ -76,7 +79,10 @@ Project *Workspace::project(const LightRef &ref)
 
 const Project *Workspace::project(const LightRef &ref) const
 {
-    auto cit = m_loadedProjects.find(ref);
+    // id can comes from a project reference or a entity of this project
+    qint64 id = ref.type() == PROJECT_TYPE_ID ? ref.id() : ref.projectId();
+
+    auto cit = m_loadedProjects.find(id);
     if (cit != m_loadedProjects.cend()) {
         return cit.value();
     }
@@ -110,13 +116,15 @@ bool Workspace::addProject(Project *project)
         return false;
     }
 
-    Q_ASSERT(m_loadedProjects.find(project->ref().light()) == m_loadedProjects.end());
-    if (m_loadedProjects.find(project->ref().light()) != m_loadedProjects.end()) {
+    auto it = m_loadedProjects.find(project->ref().light().id());
+    Q_ASSERT(it == m_loadedProjects.end());
+    if (it != m_loadedProjects.end()) {
         return false;
     }
 
-    m_loadedProjects.insert(project->ref().light(), project);
+    m_loadedProjects.insert(project->ref().light().id(), project);
 
+    // signal
     emit onProjectAdded(project->ref().light());
 
     return true;
@@ -124,7 +132,7 @@ bool Workspace::addProject(Project *project)
 
 bool Workspace::closeProject(const LightRef &ref)
 {
-    auto it = m_loadedProjects.find(ref);
+    auto it = m_loadedProjects.find(ref.id());
     if (it != m_loadedProjects.end()) {
         Project *project = it.value();
 
@@ -132,12 +140,13 @@ bool Workspace::closeProject(const LightRef &ref)
 
         if (project == m_activeProject) {
             m_activeProject = nullptr;
-            // @todo signal change active project
         }
 
         project->save();
-        delete project;
 
+        emit onProjectRemoved(ref);
+
+        delete project;
         return true;
     }
 
@@ -166,7 +175,10 @@ bool Workspace::hasProject(QString location) const
 
 bool Workspace::hasProject(const LightRef& ref) const
 {
-    auto cit = m_loadedProjects.find(ref);
+    // id can comes from a project reference or a entity of this project
+    qint64 id = ref.type() == PROJECT_TYPE_ID ? ref.id() : ref.projectId();
+
+    auto cit = m_loadedProjects.find(id);
     return cit != m_loadedProjects.cend();
 }
 
@@ -183,9 +195,12 @@ bool Workspace::hasChanges() const
     return false;
 }
 
-bool Workspace::selectProject(const LightRef &ref)
+bool Workspace::setActiveProject(const LightRef &ref)
 {
-    auto it = m_loadedProjects.find(ref);
+    // id can comes from a project reference or a entity of this project
+    qint64 id = ref.type() == PROJECT_TYPE_ID ? ref.id() : ref.projectId();
+
+    auto it = m_loadedProjects.find(id);
     if (it != m_loadedProjects.end()) {
         m_activeProject = it.value();
 
@@ -218,10 +233,117 @@ bool Workspace::load()
     return true;
 }
 
+Hub *Workspace::hub(const LightRef &ref)
+{
+    if (ref.type() == HUB_TYPE_ID) {
+        auto it = m_loadedProjects.find(ref.projectId());
+        if (it != m_loadedProjects.end()) {
+            Project *project = it.value();
+            return project->hub(ref.id());
+        }
+    }
+
+    return nullptr;
+}
+
+const Hub *Workspace::hub(const LightRef &ref) const
+{
+    if (ref.type() == HUB_TYPE_ID) {
+        auto cit = m_loadedProjects.constFind(ref.projectId());
+        if (cit != m_loadedProjects.cend()) {
+            const Project *project = cit.value();
+            return project->hub(ref.id());
+        }
+    }
+
+    return nullptr;
+}
+
+Hub *Workspace::findHub(const LightRef &ref)
+{
+    if (ref.type() == HUB_TYPE_ID) {
+        auto it = m_loadedProjects.find(ref.projectId());
+        if (it != m_loadedProjects.cend()) {
+            Project *project = it.value();
+            return project->findHub(ref.id());
+        }
+    }
+
+    return nullptr;
+}
+
+const Hub *Workspace::findHub(const LightRef &ref) const
+{
+    if (ref.type() == HUB_TYPE_ID) {
+        auto cit = m_loadedProjects.constFind(ref.projectId());
+        if (cit != m_loadedProjects.cend()) {
+            const Project *project = cit.value();
+            return project->findHub(ref.id());
+        }
+    }
+
+    return nullptr;
+}
+
+Fragment *Workspace::fragment(const LightRef &ref)
+{
+    if (ref.type() == FRAGMENT_TYPE_ID) {
+        auto it = m_loadedProjects.find(ref.projectId());
+        if (it != m_loadedProjects.end()) {
+            Project *project = it.value();
+            return project->fragment(ref.id());
+        }
+    }
+
+    return nullptr;
+}
+
+const Fragment *Workspace::fragment(const LightRef &ref) const
+{
+    if (ref.type() == FRAGMENT_TYPE_ID) {
+        auto cit = m_loadedProjects.constFind(ref.projectId());
+        if (cit != m_loadedProjects.cend()) {
+            const Project *project = cit.value();
+            return project->fragment(ref.id());
+        }
+    }
+
+    return nullptr;
+}
+
+Asset *Workspace::asset(const LightRef &ref)
+{
+    if (ref.type() == ASSET_TYPE_ID) {
+        auto it = m_loadedProjects.find(ref.projectId());
+        if (it != m_loadedProjects.end()) {
+            Project *project = it.value();
+            return project->asset(ref.id());
+        }
+    }
+
+    return nullptr;
+}
+
+const Asset *Workspace::asset(const LightRef &ref) const
+{
+    if (ref.type() == ASSET_TYPE_ID) {
+        auto cit = m_loadedProjects.constFind(ref.projectId());
+        if (cit != m_loadedProjects.cend()) {
+            const Project *project = cit.value();
+            return project->asset(ref.id());
+        }
+    }
+
+    return nullptr;
+}
+
 void Workspace::onSelectionChanged()
 {
-    const QSet<SelectionItem *> previousSelection = Application::instance()->selection().filterPrevious(1);
-    const QSet<SelectionItem *> currentSelection = Application::instance()->selection().filterCurrent(1);
+    // done by the UI depending of the context, the need, and the selection
+    return;
+
+    const QSet<SelectionItem *> previousSelection = Application::instance()->selection().filterPrevious(TypeRef::project().id());
+    const QSet<SelectionItem *> currentSelection = Application::instance()->selection().filterCurrent(TypeRef::project().id());
 
     bool changeProject = false;
 

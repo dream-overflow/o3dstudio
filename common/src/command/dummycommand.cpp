@@ -14,7 +14,7 @@ using namespace o3d::studio::common;
 
 
 DummyCommand::DummyCommand() :
-    Command("o3s::common::dummy")
+    Command("o3s::common::dummy", LightRef())
 {
 }
 

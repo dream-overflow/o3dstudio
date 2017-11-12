@@ -1,13 +1,13 @@
 /**
- * @brief Common fragment object
+ * @brief Common asset object
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@gmail.com)
- * @date 2017-11-10
+ * @date 2017-11-12
  * @details
  */
 
-#ifndef _O3DS_COMMON_FRAGMENT_H
-#define _O3DS_COMMON_FRAGMENT_H
+#ifndef _O3DS_COMMON_ASSET_H
+#define _O3DS_COMMON_ASSET_H
 
 #include <QtCore/QString>
 #include <QtCore/QMap>
@@ -24,19 +24,18 @@ namespace studio {
 namespace common {
 
 class Project;
-class Hub;
 
 /**
- * @brief The Fragment base class
+ * @brief The Asset base class
  */
-class O3S_API Fragment : public Entity
+class O3S_API Asset : public Entity
 {
-    Q_DECLARE_TR_FUNCTIONS(Fragment)
+    Q_DECLARE_TR_FUNCTIONS(Asset)
 
 public:
 
-    Fragment(const QString &name, Entity *parent = nullptr);
-    virtual ~Fragment();
+    Asset(const QString &name, Entity *parent = nullptr);
+    virtual ~Asset();
 
     void setProject(Project *project);
 
@@ -53,21 +52,21 @@ public:
 
 private:
 
-    QMap<qint64, Hub*> m_hubs;  //!< First level hubs
+    // @todo
 };
 
 /**
  * @brief The FragmentException class
  */
-class FragmentException : public BaseException
+class AssetException : public BaseException
 {
 public:
 
-    FragmentException(const QString &message);
+    AssetException(const QString &message);
 };
 
 } // namespace common
 } // namespace studio
 } // namespace o3d
 
-#endif // _O3DS_COMMON_FRAGMENT_H
+#endif // _O3DS_COMMON_ASSET_H

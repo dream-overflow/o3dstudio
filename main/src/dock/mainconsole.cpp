@@ -84,8 +84,9 @@ void MainConsole::onMessage(QtMsgType msgType, const QString &message)
 
 void MainConsole::setupUi()
 {
+    // @todo add a layout with some filters and a auto scroll button
     m_listWidget = new QListWidget();
-    m_listWidget->setAutoScroll(true);   // @todo add a layout with some filters and a auto scroll button
+    m_listWidget->setAutoScroll(true);
     m_listWidget->setIconSize(QSize(16, 16));
     setWidget(m_listWidget);
 }

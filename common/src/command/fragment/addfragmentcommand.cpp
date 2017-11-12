@@ -23,7 +23,7 @@ using namespace o3d::studio::common;
 
 
 AddFragmentCommand::AddFragmentCommand(const LightRef &project, const QString &name) :
-    Command("o3s::common::fragment::add"),
+    Command("o3s::common::fragment::add", project),
     m_project(project),
     m_fragmentName(name)
 {
@@ -50,9 +50,12 @@ bool AddFragmentCommand::doCommand()
         Project *project = workspace->project(m_project);
         if (project) {
             Fragment *fragment = new Fragment(m_fragmentName, project);
+            // with new ref id
+            fragment->setRef(ObjectRef::buildRef(project, TypeRef::fragment()));
+
             project->addFragment(fragment);
 
-            m_fragment = fragment->ref().light();
+            m_fragment = fragment->ref();
             return true;
         }
     }
@@ -81,9 +84,10 @@ bool AddFragmentCommand::redoCommand()
         Project *project = workspace->project(m_project);
         if (project) {
             Fragment *fragment = new Fragment(m_fragmentName, project);
-            project->addFragment(fragment);
+            // reuse ref id
+            fragment->setRef(m_fragment);
 
-            m_fragment = fragment->ref().light();
+            project->addFragment(fragment);
             return true;
         }
     }

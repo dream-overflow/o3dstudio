@@ -14,27 +14,34 @@ using namespace o3d::studio::common;
 
 TypeRef TypeRef::TypeRef::project()
 {
-    return TypeRef(1, "o3s::project");
-}
-
-TypeRef TypeRef::TypeRef::fragment()
-{
-    return TypeRef(2, "o3s::fragment");
+    return TypeRef(PROJECT_TYPE_ID, PROJECT_TYPE_ID, PROJECT_TYPE_STRING);
 }
 
 TypeRef TypeRef::TypeRef::hub()
 {
-    return TypeRef(3, "o3s::hub");
+    return TypeRef(HUB_TYPE_ID, HUB_TYPE_ID, HUB_TYPE_STRING);
+}
+
+TypeRef TypeRef::TypeRef::fragment()
+{
+    return TypeRef(FRAGMENT_TYPE_ID, FRAGMENT_TYPE_ID, FRAGMENT_TYPE_STRING);
+}
+
+TypeRef TypeRef::asset()
+{
+    return TypeRef(ASSET_TYPE_ID, ASSET_TYPE_ID, ASSET_TYPE_STRING);
 }
 
 TypeRef::TypeRef() :
+    m_baseType(0),
     m_id(0),
     m_name()
 {
 
 }
 
-TypeRef::TypeRef(qint64 id, const QString &name) :
+TypeRef::TypeRef(qint64 baseType, qint64 id, const QString &name) :
+    m_baseType(baseType),
     m_id(id),
     m_name(name)
 {
@@ -42,6 +49,7 @@ TypeRef::TypeRef(qint64 id, const QString &name) :
 }
 
 TypeRef::TypeRef(const TypeRef &dup) :
+    m_baseType(dup.m_baseType),
     m_id(dup.m_id),
     m_name(dup.m_name)
 {
@@ -50,6 +58,7 @@ TypeRef::TypeRef(const TypeRef &dup) :
 
 TypeRef &TypeRef::operator=(const TypeRef &dup)
 {
+    m_baseType = dup.m_baseType;
     m_id = dup.m_id;
     m_name = dup.m_name;
 
@@ -111,6 +120,12 @@ ObjectRef::ObjectRef()
 
 }
 
+ObjectRef::ObjectRef(const TypeRef &ref)
+{
+   m_lightRef.m_type = ref.id();
+   m_strongRef.m_type = ref.name();
+}
+
 ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type)
 {
     if (!project) {
@@ -130,6 +145,25 @@ ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type)
     return ref;
 }
 
+ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const QUuid &uuid, qint64 id)
+{
+    if (!project) {
+        throw;
+    }
+
+    ObjectRef ref;
+
+    ref.m_lightRef.m_id = id;
+    ref.m_lightRef.m_projectId = project->ref().light().id();
+    ref.m_lightRef.m_type = type.id();
+
+    ref.m_strongRef.m_uuid = uuid;
+    ref.m_strongRef.m_projectUuid = project->ref().strong().uuid();
+    ref.m_strongRef.m_type = type.name();
+
+    return ref;
+}
+
 ObjectRef ObjectRef::buildRef(Workspace *workspace)
 {
     if (!workspace) {
@@ -142,7 +176,7 @@ ObjectRef ObjectRef::buildRef(Workspace *workspace)
     ref.m_lightRef.m_type = PROJECT_TYPE_ID;
 
     ref.m_strongRef.m_uuid = QUuid::createUuid();
-    ref.m_strongRef.m_type = "o3s::project";
+    ref.m_strongRef.m_type = PROJECT_TYPE_STRING;
 
     return ref;
 }
@@ -159,7 +193,7 @@ ObjectRef ObjectRef::buildRef(Workspace *workspace, const QUuid &uuid)
     ref.m_lightRef.m_type = PROJECT_TYPE_ID;
 
     ref.m_strongRef.m_uuid = uuid;
-    ref.m_strongRef.m_type = "o3s::project";
+    ref.m_strongRef.m_type = PROJECT_TYPE_STRING;
 
     return ref;
 }

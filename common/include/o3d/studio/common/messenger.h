@@ -14,6 +14,7 @@
 #include <QtCore/QMutex>
 #include <QtCore/QMap>
 #include <QtCore/QStringList>
+#include <QtCore/QMetaType>
 
 #include "global.h"
 
@@ -63,5 +64,7 @@ protected:
 } // namespace common
 } // namespace studio
 } // namespace o3d
+
+Q_DECLARE_METATYPE(QtMsgType)
 
 #endif // _O3DS_COMMON_MESSENGER_H

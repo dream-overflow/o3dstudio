@@ -11,7 +11,8 @@
 using namespace o3d::studio::common;
 
 
-Command::Command(const QString& name) :
+Command::Command(const QString& name, const LightRef &targetRef) :
+    m_targetRef(targetRef),
     m_commandName(name),
     m_commandState(COMMAND_READY)
 {
@@ -35,6 +36,11 @@ CommandState Command::commandState() const
 QString Command::commandLabel() const
 {
     return m_commandName;
+}
+
+const LightRef &Command::targetRef() const
+{
+    return m_targetRef;
 }
 
 void Command::setDone()

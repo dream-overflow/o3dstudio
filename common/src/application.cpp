@@ -30,6 +30,9 @@ Application* Application::m_instance = nullptr;
 
 Application::Application()
 {
+    qRegisterMetaType<LightRef>("LightRef");
+    qRegisterMetaType<QtMsgType>();
+
     // avoid recursive call when ctor call himself
     m_instance = (Application*)this;
 
@@ -46,6 +49,9 @@ Application::Application()
     m_workspaceManager = new WorkspaceManager();
     m_componentRegistry = new ComponentRegistry();
     m_ui = new UiController();
+
+
+    m_commandManager->initialize();
 }
 
 Application::~Application()

@@ -12,6 +12,7 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/hub.h"
 #include "o3d/studio/common/workspace/fragment.h"
+#include "o3d/studio/common/workspace/asset.h"
 #include "o3d/studio/common/workspace/projectinfo.h"
 #include "o3d/studio/common/workspace/projectfile.h"
 #include "o3d/studio/common/workspace/workspace.h"
@@ -190,6 +191,10 @@ void Project::addHub(Hub *hub)
     }
 
     m_hubs.insert(hub->ref().light().id(), hub);
+    hub->setProject(this);
+
+    // signal throught workspace
+    emit workspace()->onProjectHubAdded(hub->ref().light());
 }
 
 void Project::removeHub(const LightRef &_ref)
@@ -203,9 +208,13 @@ void Project::removeHub(const LightRef &_ref)
         throw ProjectException(tr("Trying to remove an unknown reference"));
     }
 
-    // @todo command
-    delete it.value();
-    m_hubs.erase(it);
+    Hub *hub = it.value();
+
+    delete hub;
+    m_hubs.erase(it);   
+
+    // signal throught workspace
+    emit workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
 void Project::removeHub(qint64 id)
@@ -215,16 +224,24 @@ void Project::removeHub(qint64 id)
         throw ProjectException(tr("Trying to remove an unknown reference"));
     }
 
-    delete it.value();
+    Hub *hub = it.value();
+
+    delete hub;
     m_hubs.erase(it);
+
+    // signal throught workspace
+    emit workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
 void Project::removeHub(Hub *hub)
 {
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        if (it.value() == hub) {
+        if (it.value() == hub) {       
             delete it.value();
             m_hubs.erase(it);
+
+            // signal throught workspace
+            emit workspace()->onProjectHubRemoved(hub->ref().light());
 
             return;
         }
@@ -307,6 +324,41 @@ QList<const Hub*> Project::searchHub(const QString &name) const
     return results;
 }
 
+Hub *Project::findHub(qint64 id)
+{
+    // first level
+    Hub *result = nullptr;
+    Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        result = hub->findHub(id);
+        if (result != nullptr) {
+            return result;
+        }
+    }
+
+    return nullptr;
+}
+
+const Hub *Project::findHub(qint64 id) const
+{
+    // first level
+    const Hub *result = nullptr;
+    const Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        result = hub->findHub(id);
+        if (result != nullptr) {
+            return result;
+        }
+    }
+
+    return nullptr;
+}
+
+int Project::numHubs() const
+{
+    return m_hubs.size();
+}
+
 void Project::addFragment(Fragment *fragment)
 {
     // not created for this project
@@ -320,6 +372,9 @@ void Project::addFragment(Fragment *fragment)
     }
 
     m_fragments.insert(fragment->ref().light().id(), fragment);
+
+    // signal throught workspace
+    emit workspace()->onProjectFragmentAdded(fragment->ref().light());
 }
 
 void Project::removeFragment(const LightRef &_ref)
@@ -333,9 +388,13 @@ void Project::removeFragment(const LightRef &_ref)
         throw ProjectException(tr("Trying to remove an unknown reference"));
     }
 
-    // @todo command
-    delete it.value();
+    Fragment *fragment = it.value();
+
+    delete fragment;
     m_fragments.erase(it);
+
+    // signal throught workspace
+    emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
 }
 
 void Project::removeFragment(qint64 id)
@@ -345,8 +404,13 @@ void Project::removeFragment(qint64 id)
         throw ProjectException(tr("Trying to remove an unknown reference"));
     }
 
-    delete it.value();
+    Fragment *fragment = it.value();
+
+    delete fragment;
     m_fragments.erase(it);
+
+    // signal throught workspace
+    emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
 }
 
 void Project::removeFragment(Fragment *fragment)
@@ -355,6 +419,9 @@ void Project::removeFragment(Fragment *fragment)
         if (it.value() == fragment) {
             delete it.value();
             m_fragments.erase(it);
+
+            // signal throught workspace
+            emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
 
             return;
         }
@@ -431,6 +498,151 @@ QList<const Fragment *> Project::searchFragment(const QString &name) const
     foreach (fragment, m_fragments) {
         if (fragment->name() == name) {
             results.append(fragment);
+        }
+    }
+
+    return results;
+}
+
+void Project::addAsset(Asset *asset)
+{
+    // not created for this project
+    if (asset->ref().light().projectId() != ref().light().id()) {
+        throw ProjectException(tr("Trying to add an asset that is created for another project"));
+    }
+
+    // already exists
+    if (m_fragments.find(asset->ref().light().id()) != m_fragments.end()) {
+        throw ProjectException(tr("Trying to add a previously added asset, or with a similar id"));
+    }
+
+    m_assets.insert(asset->ref().light().id(), asset);
+
+    // signal throught workspace
+    emit workspace()->onProjectAssetAdded(asset->ref().light());
+}
+
+void Project::removeAsset(const LightRef &_ref)
+{
+    if (_ref.projectId() != ref().light().id()) {
+        throw ProjectException(tr("Trying to remove a reference for another project"));
+    }
+
+    auto it = m_assets.find(_ref.id());
+    if (it == m_assets.end()) {
+        throw ProjectException(tr("Trying to remove an unknown reference"));
+    }
+
+    Asset *asset = it.value();
+
+    delete asset;
+    m_assets.erase(it);
+
+    // signal throught workspace
+    emit workspace()->onProjectAssetRemoved(asset->ref().light());
+}
+
+void Project::removeAsset(qint64 id)
+{
+    auto it = m_assets.find(id);
+    if (it == m_assets.end()) {
+        throw ProjectException(tr("Trying to remove an unknown reference"));
+    }
+
+    Asset *asset = it.value();
+
+    delete asset;
+    m_assets.erase(it);
+
+    // signal throught workspace
+    emit workspace()->onProjectAssetRemoved(asset->ref().light());
+}
+
+void Project::removeAsset(Asset *asset)
+{
+    for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
+        if (it.value() == asset) {
+            delete it.value();
+            m_assets.erase(it);
+
+            // signal throught workspace
+            emit workspace()->onProjectAssetRemoved(asset->ref().light());
+
+            return;
+        }
+    }
+}
+
+Asset *Project::asset(const LightRef &_ref)
+{
+    if (_ref.projectId() != ref().light().id()) {
+        return nullptr;
+    }
+
+    auto it = m_assets.find(_ref.id());
+    if (it != m_assets.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Asset *Project::asset(const LightRef &_ref) const
+{
+    if (_ref.projectId() != ref().light().id()) {
+        return nullptr;
+    }
+
+    auto cit = m_assets.constFind(_ref.id());
+    if (cit != m_assets.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
+}
+
+Asset *Project::asset(qint64 id)
+{
+    auto it = m_assets.find(id);
+    if (it != m_assets.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Asset *Project::asset(qint64 id) const
+{
+    auto cit = m_assets.constFind(id);
+    if (cit != m_assets.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
+}
+
+QList<Asset *> Project::searchAsset(const QString &name)
+{
+    QList<Asset*> results;
+
+    Asset *asset;
+    foreach (asset, m_assets) {
+        if (asset->name() == name) {
+            results.append(asset);
+        }
+    }
+
+    return results;
+}
+
+QList<const Asset *> Project::searchAsset(const QString &name) const
+{
+    QList<const Asset*> results;
+
+    const Asset *asset;
+    foreach (asset, m_assets) {
+        if (asset->name() == name) {
+            results.append(asset);
         }
     }
 

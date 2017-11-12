@@ -34,13 +34,8 @@ class O3S_API Hub : public Entity
 
 public:
 
-    Hub(const QString &name, Project *project = nullptr);
+    explicit Hub(const QString &name, Entity *parent = nullptr);
     virtual ~Hub();
-
-//    void setFragment(Fragment *fragment);
-
-//    Fragment* fragment();
-//    const Fragment* fragment() const;
 
     void setProject(Project *project);
 
@@ -55,7 +50,40 @@ public:
     virtual bool exists() const override;
     virtual bool hasChanges() override;
 
+    //
+    // children hub
+    //
+
+    void addHub(Hub *hub);
+
+    void removeHub(const LightRef &ref);
+    void removeHub(qint64 id);
+    void removeHub(Hub *hub);
+
+    Hub* hub(const LightRef &ref);
+    const Hub* hub(const LightRef &ref) const;
+
+    Hub* hub(qint64 id);
+    const Hub* hub(qint64 id) const;
+
+    QList<Hub*> searchHub(const QString &name);
+    QList<const Hub*> searchHub(const QString &name) const;
+
+    /**
+     * @brief Recursively find for a hub instance.
+     */
+    Hub* findHub(qint64 id);
+
+    /**
+     * @brief Recursively find for a hub instance (const version).
+     */
+    const Hub* findHub(qint64 id) const;
+
+    int numHubs() const;
+
 private:
+
+    Project *m_project;         //!< Owner project;
 
     QMap<qint64, Hub*> m_hubs;  //!< Child hubs
 };

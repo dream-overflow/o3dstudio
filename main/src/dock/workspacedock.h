@@ -53,8 +53,14 @@ public slots:
     void onSelectionDetails(const QModelIndex &);
     void onSelectItem(const QModelIndex &index);
 
-    // void onAddHub(const QUuid &uuid);
-    // void onRemoveHub(const QUuid &uuid);
+    void onProjectHubAdded(const LightRef &ref);
+    void onProjectHubRemoved(const LightRef &ref);
+
+    void onProjectFragmentAdded(const LightRef &ref);
+    void onProjectFragmentRemoved(const LightRef &ref);
+
+    void onProjectAssetAdded(const LightRef &ref);
+    void onProjectAssetRemoved(const LightRef &ref);
 
     void onSelectManagerChange();
 

@@ -37,7 +37,7 @@ public:
 private:
 
     LightRef m_project;
-    LightRef m_fragment;
+    ObjectRef m_fragment;
 
     QString m_fragmentName;
 };

@@ -16,10 +16,13 @@
 #include <QtCore/QReadWriteLock>
 
 #include "command.h"
+#include "../objectref.h"
 
 namespace o3d {
 namespace studio {
 namespace common {
+
+using o3d::studio::common::LightRef;
 
 class O3S_API CommandManager : public QThread
 {
@@ -29,6 +32,11 @@ public:
 
     CommandManager();
     virtual ~CommandManager();
+
+    /**
+     * @brief Second step initialization.
+     */
+    void initialize();
 
     /**
      * @brief Add and execute or deferred execution of a new command.
@@ -82,6 +90,11 @@ public:
 
     void begin();
     void finish();
+
+public slots:
+
+    void onChangeCurrentWorkspace(const QString &name);
+    void onProjectRemoved(const LightRef &ref);
 
 signals:
 

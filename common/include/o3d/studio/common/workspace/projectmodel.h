@@ -19,7 +19,9 @@ namespace studio {
 namespace common {
 
 class Project;
-// class Hub;
+class Hub;
+class Fragment;
+class Asset;
 
 class O3S_API ProjectModel : public QAbstractItemModel
 {
@@ -47,9 +49,16 @@ public:
     ProjectItem *find(const LightRef &ref);
 
     ProjectItem *addProject(Project *project);
-    void removeProject(Project *project);
+    void removeProject(const common::LightRef &ref);
 
-    //ProjectItem *addHub(Hub *hub);
+    ProjectItem *addHub(common::Hub *hub);
+    void removeHub(const common::LightRef &ref);
+
+    ProjectItem *addFragment(common::Fragment *fragment);
+    void removeFragment(const common::LightRef &ref);
+
+    ProjectItem *addAsset(common::Asset *asset);
+    void removeAsset(const common::LightRef &ref);
 
 private:
 

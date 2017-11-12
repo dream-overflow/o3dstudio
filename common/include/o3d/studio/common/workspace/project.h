@@ -33,6 +33,7 @@ class ProjectFile;
 class ProjectInfo;
 class Hub;
 class Fragment;
+class Asset;
 
 /**
  * @brief The Project final class
@@ -99,6 +100,18 @@ public:
     QList<Hub*> searchHub(const QString &name);
     QList<const Hub*> searchHub(const QString &name) const;
 
+    /**
+     * @brief Recursively find for a hub instance.
+     */
+    Hub* findHub(qint64 id);
+
+    /**
+     * @brief Recursively find for a hub instance (const version).
+     */
+    const Hub* findHub(qint64 id) const;
+
+    int numHubs() const;
+
     //
     // fragment
     //
@@ -118,6 +131,25 @@ public:
     QList<Fragment*> searchFragment(const QString &name);
     QList<const Fragment*> searchFragment(const QString &name) const;
 
+    //
+    // asset
+    //
+
+    void addAsset(Asset *asset);
+
+    void removeAsset(const LightRef &ref);
+    void removeAsset(qint64 id);
+    void removeAsset(Asset *asset);
+
+    Asset* asset(const LightRef &ref);
+    const Asset* asset(const LightRef &ref) const;
+
+    Asset* asset(qint64 id);
+    const Asset* asset(qint64 id) const;
+
+    QList<Asset*> searchAsset(const QString &name);
+    QList<const Asset*> searchAsset(const QString &name) const;
+
 private:
 
     Workspace *m_workspace;    //!< Workspace where the projet is currently loaded
@@ -134,6 +166,7 @@ private:
 
     QMap<qint64, Fragment*> m_fragments;
     QMap<qint64, Hub*> m_hubs;
+    QMap<qint64, Asset*> m_assets;
 };
 
 /**
