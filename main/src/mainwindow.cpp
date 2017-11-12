@@ -62,6 +62,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui.setupUi(this);
 
+    // backup the original palette
+    m_originalPalette = qApp->palette();
+
     // message
     common::Messenger& messenger = common::Application::instance()->messenger();
     connect(&messenger, SIGNAL(onNewMessage(QtMsgType, const QString&)), SLOT(onMessage(QtMsgType, const QString&)));
@@ -122,7 +125,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // connections to command manager
     connect(&common::Application::instance()->command(),
-            SIGNAL(commandDone(QString, QString, bool)), SLOT(onCommandDone(QString, QString, bool)));
+            SIGNAL(commandDone(QString, QString, bool)), SLOT(onCommandDone(QString, QString, bool)));            
+    connect(&common::Application::instance()->command(),
+            SIGNAL(commandUpdate()), SLOT(onCommandUpdate()));
 
     // connections to menu edit
     connect(ui.actionUndo, SIGNAL(triggered()), SLOT(onUndoAction()));
@@ -132,8 +137,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // main toolbar
     MainToolBar *mainToolBar = new MainToolBar();
-    mainToolBar->addWidget(new QLabel(tr("Search")));
-    mainToolBar->addWidget(new QLineEdit());
     uiCtrl.addToolBar(mainToolBar);
 
     // quick toolbar
@@ -594,43 +597,40 @@ bool MainWindow::setThemeColor(const QString &theme)
         return true;
     }
 
-    if (theme == "dark") {
-    /*    qApp->setStyle(QStyleFactory::create("dark"));
+    if (theme == "darkblue") {
+        qApp->setStyle(QStyleFactory::create("darkblue"));
 
-        QPalette darkPalette;
-        darkPalette.setColor(QPalette::Window, QColor(53,53,53));
-        darkPalette.setColor(QPalette::WindowText, Qt::white);
-        darkPalette.setColor(QPalette::Base, QColor(53,53,53));   // and menu background
-        darkPalette.setColor(QPalette::AlternateBase, QColor(53,53,53));
-        darkPalette.setColor(QPalette::ToolTipBase, Qt::white);
-        darkPalette.setColor(QPalette::ToolTipText, Qt::white);
-        darkPalette.setColor(QPalette::Text, Qt::white);
-        darkPalette.setColor(QPalette::Button, QColor(53,53,53));
-        darkPalette.setColor(QPalette::ButtonText, Qt::white);
-        darkPalette.setColor(QPalette::BrightText, Qt::red);
-        darkPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+        QPalette palette;
+        palette.setColor(QPalette::Window, QColor(53,53,53));
+        palette.setColor(QPalette::WindowText, Qt::white);
+        palette.setColor(QPalette::Base, QColor(53,53,53));   // and menu background
+        palette.setColor(QPalette::AlternateBase, QColor(53,53,53));
+        palette.setColor(QPalette::ToolTipBase, Qt::white);
+        palette.setColor(QPalette::ToolTipText, Qt::white);
+        palette.setColor(QPalette::Text, Qt::white);
+        palette.setColor(QPalette::Button, QColor(53,53,53));
+        palette.setColor(QPalette::ButtonText, Qt::white);
+        palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setColor(QPalette::Link, QColor(42, 130, 218));
 
-        darkPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
-        darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+        palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        palette.setColor(QPalette::HighlightedText, Qt::black);
 
-        QPalette lightPalette = qApp->palette();
+        qApp->setPalette(palette);
 
-        qApp->setPalette(darkPalette);
-        qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
-*/
         QFile themeFile(":/style/darktheme.qss");
         themeFile.open(QIODevice::ReadOnly | QIODevice::Text);
         QByteArray content = themeFile.readAll();
 
         themeFile.close();
 
-        qApp->setStyle(QStyleFactory::create("dark"));  // "plastique");
+        qApp->setStyle(QStyleFactory::create("darkblue"));  // "plastique");
         qApp->setStyleSheet(content);
 
         m_currentTheme = theme;
         return true;
-    } else if (theme == "light") {
-        qApp->setStyle(QStyleFactory::create("light"));
+    } else if (theme == "default") {
+        qApp->setStyle(QStyleFactory::create("default"));
 
         qApp->setPalette(style()->standardPalette());
         qApp->setStyleSheet("");
@@ -641,6 +641,23 @@ bool MainWindow::setThemeColor(const QString &theme)
         m_currentTheme = theme;
         return true;
     } else if (theme == "darkorange") {
+        QPalette palette;
+        palette.setColor(QPalette::Window, QColor(53,53,53));
+        palette.setColor(QPalette::WindowText, Qt::white);
+        palette.setColor(QPalette::Base, QColor(53,53,53));   // and menu background
+        palette.setColor(QPalette::AlternateBase, QColor(53,53,53));
+        palette.setColor(QPalette::ToolTipBase, Qt::white);
+        palette.setColor(QPalette::ToolTipText, Qt::white);
+        palette.setColor(QPalette::Text, Qt::white);
+        palette.setColor(QPalette::Button, QColor(53,53,53));
+        palette.setColor(QPalette::ButtonText, Qt::white);
+        palette.setColor(QPalette::BrightText, Qt::red);
+        palette.setColor(QPalette::Link, QColor(42, 130, 218));
+        palette.setColor(QPalette::Highlight, QColor("#ffa02f"));
+        palette.setColor(QPalette::HighlightedText, Qt::black);
+
+        qApp->setPalette(palette);
+
         QFile themeFile(":/style/darkorangetheme.qss");
         themeFile.open(QIODevice::ReadOnly | QIODevice::Text);
         QByteArray content = themeFile.readAll();
@@ -689,6 +706,14 @@ void MainWindow::changeEvent(QEvent *event)
                     loadLanguage(locale);
                 }
             }
+                break;
+
+            case QEvent::StyleChange:
+                // @todo propagation for any concerned children
+                break;
+
+            case QEvent::PaletteChange:
+                // @todo propagation for any concerned children
                 break;
 
             default:
@@ -1049,28 +1074,39 @@ void MainWindow::onShowContent(QString name, QWidget *content, bool showHide)
     }
 }
 
+void MainWindow::onCommandUpdate()
+{
+    if (common::Application::instance()->command().hasDoneCommands()) {
+        ui.actionUndo->setEnabled(true);
+
+        const QString &nextCmd = common::Application::instance()->command().nextToUndo();
+        ui.actionUndo->setText(tr("Undo %1").arg(nextCmd));
+    } else {
+        ui.actionUndo->setEnabled(false);
+        ui.actionUndo->setText(tr("Undo"));
+    }
+
+    if (common::Application::instance()->command().hasUndoneCommands()) {
+        ui.actionRedo->setEnabled(true);
+
+        const QString &nextCmd = common::Application::instance()->command().nextToRedo();
+        ui.actionRedo->setText(tr("Redo %1").arg(nextCmd));
+    } else {
+        ui.actionRedo->setEnabled(false);
+        ui.actionRedo->setText(tr("Redo"));
+    }
+}
+
 void MainWindow::onCommandDone(QString name, QString label, bool done)
 {
     Q_UNUSED(name)
 
     if (done) {
+        // @todo move on CommandManager but need sync thread
         messenger().info(tr("%1 done").arg(label));
-        ui.actionUndo->setText(tr("Undo %1").arg(label));
     } else {
+        // @todo move on CommandManager but need sync thread
         messenger().info(tr("%1 undone").arg(label));
-        ui.actionRedo->setText(tr("Redo %1").arg(label));
-    }
-
-    if (common::Application::instance()->command().hasDoneCommands()) {
-        ui.actionUndo->setEnabled(true);
-    } else {
-        ui.actionUndo->setEnabled(false);
-    }
-
-    if (common::Application::instance()->command().hasUndoneCommands()) {
-        ui.actionRedo->setEnabled(true);
-    } else {
-        ui.actionRedo->setEnabled(false);
     }
 }
 

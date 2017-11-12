@@ -13,10 +13,10 @@
 using namespace o3d::studio::common;
 
 
-Hub::Hub(const QString &name, Fragment *fragment) :
-    Entity(fragment)
+Hub::Hub(const QString &name, Project *project) :
+    Entity(name, project)
 {
-    m_ref = ObjectRef::buildRef(fragment->project(), TypeRef::hub());
+    m_ref = ObjectRef::buildRef(project, TypeRef::hub());
 }
 
 Hub::~Hub()
@@ -27,19 +27,34 @@ Hub::~Hub()
     }
 }
 
-void Hub::setFragment(Fragment *fragment)
+//void Hub::setFragment(Fragment *fragment)
+//{
+//    m_parent = fragment;
+//}
+
+//Fragment *Hub::fragment()
+//{
+//    return static_cast<Fragment*>(m_parent);
+//}
+
+//const Fragment *Hub::fragment() const
+//{
+//    return static_cast<Fragment*>(m_parent);
+//}
+
+void Hub::setProject(Project *project)
 {
-    m_parent = fragment;
+    m_parent = project;
 }
 
-Fragment *Hub::fragment()
+Project *Hub::project()
 {
-    return static_cast<Fragment*>(m_parent);
+    return static_cast<Project*>(m_parent);
 }
 
-const Fragment *Hub::fragment() const
+const Project *Hub::project() const
 {
-    return static_cast<Fragment*>(m_parent);
+    return static_cast<Project*>(m_parent);
 }
 
 void Hub::create()

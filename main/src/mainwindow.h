@@ -117,6 +117,7 @@ private slots:
 
     void onShowContent(QString name, QWidget *content, bool showHide);
 
+    void onCommandUpdate();
     void onCommandDone(QString name, QString label, bool done);
 
     void onOpenRecentProject(bool);
@@ -146,6 +147,7 @@ private:
     // loads a language by the given language shortcurt (e.g. de, en)
     void loadLanguage(const QString& language);
 
+    QPalette m_originalPalette;
     QString m_currentTheme;                //!< current active theme name
     QString m_currentLanguage;             //!< current active language 2 letters code
 

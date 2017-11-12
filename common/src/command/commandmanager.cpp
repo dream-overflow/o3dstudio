@@ -7,12 +7,15 @@
  */
 
 #include "o3d/studio/common/command/commandmanager.h"
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/exception.h"
+#include "o3d/studio/common/messenger.h"
 
 using namespace o3d::studio::common;
 
 
 CommandManager::CommandManager() :
-    m_running{false}
+    m_running(false)
 {
 }
 
@@ -36,9 +39,26 @@ CommandManager::~CommandManager()
 
 void CommandManager::addCommand(Command *cmd)
 {
+    bool update = false;
+
     m_rwLock.lockForWrite();
-    m_todoCommandsQueue.enqueue(cmd);
+    m_todoCommandsQueue.push(cmd);
+
+    if (m_undoneCommandsQueue.size()) {
+        // clear redo history
+        for (auto it = m_undoneCommandsQueue.begin(); it != m_undoneCommandsQueue.end(); ++it) {
+            delete *it;
+        }
+
+        m_undoneCommandsQueue.clear();
+        update = true;
+    }
+
     m_rwLock.unlock();
+
+    if (update) {
+        emit commandUpdate();
+    }
 }
 
 void CommandManager::undoLastCommand()
@@ -55,10 +75,12 @@ void CommandManager::undoLastCommand()
 
     m_rwLock.lockForWrite();
 
-    Command *lastCmd = m_doneCommandsQueue.dequeue();
-    m_waitingCommandsQueue.enqueue(lastCmd);
+    Command *lastCmd = m_doneCommandsQueue.pop();
+    m_waitingCommandsQueue.push(lastCmd);
 
     m_rwLock.unlock();
+
+    emit commandUpdate();
 }
 
 void CommandManager::undoNCommands(int num)
@@ -80,20 +102,24 @@ void CommandManager::redoLastCommand()
 
     m_rwLock.lockForWrite();
 
-    Command *lastUndone = m_undoneCommandsQueue.dequeue();
-    m_waitingCommandsQueue.enqueue(lastUndone);
+    Command *lastUndone = m_undoneCommandsQueue.pop();
+    m_waitingCommandsQueue.push(lastUndone);
 
     m_rwLock.unlock();
+
+    emit commandUpdate();
 }
 
 void CommandManager::redoNCommands(int num)
 {
-
+    // @todo
+    // emit commandUpdate();
 }
 
 void CommandManager::setCommandDone(Command *cmd)
 {
     // @todo
+    //emit commandUpdate();
 }
 
 bool CommandManager::hasPendingCommands() const
@@ -170,9 +196,37 @@ QStringList CommandManager::redoableCommandList() const
     return cmds;
 }
 
+QString CommandManager::nextToUndo() const
+{
+    QString label;
+
+    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    if (m_doneCommandsQueue.size()) {
+        label = m_doneCommandsQueue.top()->commandLabel();
+    }
+    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+
+    return label;
+}
+
+QString CommandManager::nextToRedo() const
+{
+    QString label;
+
+    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    if (m_undoneCommandsQueue.size()) {
+        label = m_undoneCommandsQueue.top()->commandLabel();
+    }
+    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+
+    return label;
+}
+
 void CommandManager::run()
 {
     bool run = true;
+    bool error = false;
+    Messenger& messenger = Application::instance()->messenger();
 
     while (1) {
         Command *nextCmd = nullptr;
@@ -183,65 +237,95 @@ void CommandManager::run()
 
         // first look in wait list, if empty look in todo list
         if (!m_waitingCommandsQueue.isEmpty()) {
-            nextCmd = m_waitingCommandsQueue.dequeue();
+            nextCmd = m_waitingCommandsQueue.pop();
         } else if (!m_todoCommandsQueue.isEmpty()) {
-            nextCmd = m_todoCommandsQueue.dequeue();
+            nextCmd = m_todoCommandsQueue.pop();
         }
 
         if (nextCmd != nullptr) {
-            m_waitingCommandsQueue.enqueue(nextCmd);
+            m_waitingCommandsQueue.push(nextCmd);
         }
 
         m_rwLock.unlock();
 
         if (nextCmd != nullptr) {
-            if (nextCmd->commandState() == COMMAND_READY) {
-                // never executed, then execute
-                if (nextCmd->doCommand()) {
-                    nextCmd->setDone();
+            error = false;
 
-                    emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
-                }
-            } else if (nextCmd->commandState() == COMMAND_REDONE) {
-                // previously redone, then undo
-                if (nextCmd->undoCommand()) {
-                    nextCmd->setUndone();
+            try {
+                if (nextCmd->commandState() == COMMAND_READY) {
+                    // never executed, then execute
+                    if (nextCmd->doCommand()) {
+                        nextCmd->setDone();
 
-                    emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
-                }
-            } else if (nextCmd->commandState() == COMMAND_DONE) {
-                // previously executed, then undo
-                if (nextCmd->undoCommand()) {
-                    nextCmd->setUndone();
+                        emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
+                    }
+                } else if (nextCmd->commandState() == COMMAND_REDONE) {
+                    // previously redone, then undo
+                    if (nextCmd->undoCommand()) {
+                        nextCmd->setUndone();
 
-                    emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
-                }
-            } else if (nextCmd->commandState() == COMMAND_UNDONE) {
-                // previously undone, then redo
-                if (nextCmd->redoCommand()) {
-                    nextCmd->setReDone();
+                        emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
+                    }
+                } else if (nextCmd->commandState() == COMMAND_DONE) {
+                    // previously executed, then undo
+                    if (nextCmd->undoCommand()) {
+                        nextCmd->setUndone();
 
-                    emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
+                        emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
+                    }
+                } else if (nextCmd->commandState() == COMMAND_UNDONE) {
+                    // previously undone, then redo
+                    if (nextCmd->redoCommand()) {
+                        nextCmd->setReDone();
+
+                        emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
+                    }
                 }
+            } catch (BaseException &e) {
+                messenger.critical(e.message());
+
+                error = true;
             }
 
             m_rwLock.lockForWrite();
 
-            if (nextCmd->commandState() == COMMAND_READY) {
-                // error, may not arrives
-            } else if (nextCmd->commandState() == COMMAND_REDONE) {
-                // in done queue, can be later undone
-                m_doneCommandsQueue.enqueue(nextCmd);
-            } else if (nextCmd->commandState() == COMMAND_DONE) {
-                // in done queue, can be later undone
-                m_doneCommandsQueue.enqueue(nextCmd);
-            } else if (nextCmd->commandState() == COMMAND_UNDONE) {
-                // in undone queue, can be later redone
-                m_undoneCommandsQueue.enqueue(nextCmd);
+            if (error) {
+                nextCmd = nullptr;
+
+                // cannot terminate current command batch, so delete them
+                for (auto it = m_waitingCommandsQueue.begin(); it != m_waitingCommandsQueue.end(); ++it) {
+                    delete *it;
+                }
+
+                m_waitingCommandsQueue.clear();
+
+                // and cannot performs next pending commands because of the possible coherency, so delete them to
+                for (auto it = m_todoCommandsQueue.begin(); it != m_todoCommandsQueue.end(); ++it) {
+                    delete *it;
+                }
+
+                m_todoCommandsQueue.clear();
+            } else {
+                if (nextCmd->commandState() == COMMAND_READY) {
+                    // error, may not arrives
+                } else if (nextCmd->commandState() == COMMAND_REDONE) {
+                    // in done queue, can be later undone
+                    m_doneCommandsQueue.push(nextCmd);
+                } else if (nextCmd->commandState() == COMMAND_DONE) {
+                    // in done queue, can be later undone
+                    m_doneCommandsQueue.push(nextCmd);
+                } else if (nextCmd->commandState() == COMMAND_UNDONE) {
+                    // in undone queue, can be later redone
+                    m_undoneCommandsQueue.push(nextCmd);
+                }
+
+                m_waitingCommandsQueue.pop();
             }
 
-            m_waitingCommandsQueue.dequeue();
             m_rwLock.unlock();
+
+            // commands lists updated
+            emit commandUpdate();
         } else {
             msleep(2);
         }

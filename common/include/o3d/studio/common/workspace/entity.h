@@ -27,7 +27,7 @@ class O3S_API Entity
 {
 public:
 
-    explicit Entity(Entity *parent = nullptr);
+    explicit Entity(const QString &name, Entity *parent = nullptr);
     virtual ~Entity();
 
     virtual void create() = 0;

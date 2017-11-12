@@ -10,6 +10,9 @@
 #define _O3DS_COMMON_MESSENGER_H
 
 #include <QtCore/QObject>
+#include <QtCore/QDateTime>
+#include <QtCore/QMutex>
+#include <QtCore/QMap>
 #include <QtCore/QStringList>
 
 #include "global.h"
@@ -18,6 +21,9 @@ namespace o3d {
 namespace studio {
 namespace common {
 
+/**
+ * @brief Thread protected messenger reveicer and dispatcher.
+ */
 class O3S_API Messenger : public QObject
 {
     Q_OBJECT
@@ -41,7 +47,17 @@ signals:
 
 protected:
 
-    // QList<Message>
+    class Message
+    {
+    public:
+
+        QDateTime dateTime;
+        QtMsgType msgType;
+        QString message;
+    };
+
+    QMutex m_mutex;
+    QMap<QDateTime, Message> m_messages;
 };
 
 } // namespace common

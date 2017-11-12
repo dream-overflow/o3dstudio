@@ -34,13 +34,18 @@ class O3S_API Hub : public Entity
 
 public:
 
-    Hub(const QString &name, Fragment *fragment = nullptr);
+    Hub(const QString &name, Project *project = nullptr);
     virtual ~Hub();
 
-    void setFragment(Fragment *fragment);
+//    void setFragment(Fragment *fragment);
 
-    Fragment* fragment();
-    const Fragment* fragment() const;
+//    Fragment* fragment();
+//    const Fragment* fragment() const;
+
+    void setProject(Project *project);
+
+    Project* project();
+    const Project* project() const;
 
     virtual void create() override;
 

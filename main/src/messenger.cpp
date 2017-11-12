@@ -24,8 +24,16 @@ Messenger::~Messenger()
 
 void Messenger::message(QtMsgType msgType, const QString &message)
 {
-    // @todo list
-    emit onNewMessage(msgType, message);
+    Message lmessage;
+    lmessage.dateTime = QDateTime::currentDateTime();
+    lmessage.msgType = msgType;
+    lmessage.message = message;
+
+    m_mutex.lock();
+    m_messages.insert(lmessage.dateTime, lmessage);
+    m_mutex.unlock();
+
+    emit onNewMessage(lmessage.msgType, lmessage.message);
 }
 
 void Messenger::debug(const QString &message)

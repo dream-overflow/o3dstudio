@@ -16,11 +16,11 @@ TypeRegistry::TypeRegistry(QObject *parent) :
     m_nextId(1)
 {
     // reserved
-    m_typeRefs["o3s::project"] = TypeRef(1, "o3s::project");
-    m_typeRefs["o3s::fragment"] = TypeRef(2, "o3s::fragment");
-    m_typeRefs["o3s::hub"] = TypeRef(3, "o3s::hub");
+    m_typeRefs["o3s::project"] = TypeRef(PROJECT_TYPE_ID, "o3s::project");
+    m_typeRefs["o3s::fragment"] = TypeRef(FRAGMENT_TYPE_ID, "o3s::fragment");
+    m_typeRefs["o3s::hub"] = TypeRef(HUB_TYPE_ID, "o3s::hub");
 
-    m_nextId = 4;
+    m_nextId = 1024;
 }
 
 TypeRegistry::~TypeRegistry()

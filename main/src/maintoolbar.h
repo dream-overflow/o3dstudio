@@ -35,9 +35,13 @@ protected:
 
 private slots:
 
+    void onCreateFragment();
+    void onCreateHub();
+
 private:
 
     void setupButtons();
+    QIcon tintIcon(const QString &filename);
 };
 
 } // namespace main

@@ -10,6 +10,7 @@
 #include "o3d/studio/common/storage/store.h"
 
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/hub.h"
 #include "o3d/studio/common/workspace/fragment.h"
 #include "o3d/studio/common/workspace/projectinfo.h"
 #include "o3d/studio/common/workspace/projectfile.h"
@@ -174,6 +175,266 @@ void Project::setupMasterScene()
     if (m_masterScene) {
         m_masterScene->initialize();
     }
+}
+
+void Project::addHub(Hub *hub)
+{
+    // not created for this project
+    if (hub->ref().light().projectId() != ref().light().id()) {
+        throw ProjectException(tr("Trying to add a hub that is created for another project"));
+    }
+
+    // already exists
+    if (m_hubs.find(hub->ref().light().id()) != m_hubs.end()) {
+        throw ProjectException(tr("Trying to add a previously added hub, or with a similar id"));
+    }
+
+    m_hubs.insert(hub->ref().light().id(), hub);
+}
+
+void Project::removeHub(const LightRef &_ref)
+{
+    if (_ref.projectId() != ref().light().id()) {
+        throw ProjectException(tr("Trying to remove a reference for another project"));
+    }
+
+    auto it = m_hubs.find(_ref.id());
+    if (it == m_hubs.end()) {
+        throw ProjectException(tr("Trying to remove an unknown reference"));
+    }
+
+    // @todo command
+    delete it.value();
+    m_hubs.erase(it);
+}
+
+void Project::removeHub(qint64 id)
+{
+    auto it = m_hubs.find(id);
+    if (it == m_hubs.end()) {
+        throw ProjectException(tr("Trying to remove an unknown reference"));
+    }
+
+    delete it.value();
+    m_hubs.erase(it);
+}
+
+void Project::removeHub(Hub *hub)
+{
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        if (it.value() == hub) {
+            delete it.value();
+            m_hubs.erase(it);
+
+            return;
+        }
+    }
+}
+
+Hub* Project::hub(const LightRef &_ref)
+{
+    if (_ref.projectId() != ref().light().id()) {
+        return nullptr;
+    }
+
+    auto it = m_hubs.find(_ref.id());
+    if (it != m_hubs.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Hub* Project::hub(const LightRef &_ref) const
+{
+    if (_ref.projectId() != ref().light().id()) {
+        return nullptr;
+    }
+
+    auto cit = m_hubs.constFind(_ref.id());
+    if (cit != m_hubs.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
+}
+
+Hub* Project::hub(qint64 id)
+{
+    auto it = m_hubs.find(id);
+    if (it != m_hubs.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Hub* Project::hub(qint64 id) const
+{
+    auto cit = m_hubs.constFind(id);
+    if (cit != m_hubs.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
+}
+
+QList<Hub*> Project::searchHub(const QString &name)
+{
+    QList<Hub*> results;
+
+    Hub *hub;
+    foreach (hub, m_hubs) {
+        if (hub->name() == name) {
+            results.append(hub);
+        }
+    }
+
+    return results;
+}
+
+QList<const Hub*> Project::searchHub(const QString &name) const
+{
+    QList<const Hub*> results;
+
+    const Hub *hub;
+    foreach (hub, m_hubs) {
+        if (hub->name() == name) {
+            results.append(hub);
+        }
+    }
+
+    return results;
+}
+
+void Project::addFragment(Fragment *fragment)
+{
+    // not created for this project
+    if (fragment->ref().light().projectId() != ref().light().id()) {
+        throw ProjectException(tr("Trying to add a fragment that is created for another project"));
+    }
+
+    // already exists
+    if (m_fragments.find(fragment->ref().light().id()) != m_fragments.end()) {
+        throw ProjectException(tr("Trying to add a previously added fragment, or with a similar id"));
+    }
+
+    m_fragments.insert(fragment->ref().light().id(), fragment);
+}
+
+void Project::removeFragment(const LightRef &_ref)
+{
+    if (_ref.projectId() != ref().light().id()) {
+        throw ProjectException(tr("Trying to remove a reference for another project"));
+    }
+
+    auto it = m_fragments.find(_ref.id());
+    if (it == m_fragments.end()) {
+        throw ProjectException(tr("Trying to remove an unknown reference"));
+    }
+
+    // @todo command
+    delete it.value();
+    m_fragments.erase(it);
+}
+
+void Project::removeFragment(qint64 id)
+{
+    auto it = m_fragments.find(id);
+    if (it == m_fragments.end()) {
+        throw ProjectException(tr("Trying to remove an unknown reference"));
+    }
+
+    delete it.value();
+    m_fragments.erase(it);
+}
+
+void Project::removeFragment(Fragment *fragment)
+{
+    for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {
+        if (it.value() == fragment) {
+            delete it.value();
+            m_fragments.erase(it);
+
+            return;
+        }
+    }
+}
+
+Fragment *Project::fragment(const LightRef &_ref)
+{
+    if (_ref.projectId() != ref().light().id()) {
+        return nullptr;
+    }
+
+    auto it = m_fragments.find(_ref.id());
+    if (it != m_fragments.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Fragment *Project::fragment(const LightRef &_ref) const
+{
+    if (_ref.projectId() != ref().light().id()) {
+        return nullptr;
+    }
+
+    auto cit = m_fragments.constFind(_ref.id());
+    if (cit != m_fragments.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
+}
+
+Fragment *Project::fragment(qint64 id)
+{
+    auto it = m_fragments.find(id);
+    if (it != m_fragments.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Fragment *Project::fragment(qint64 id) const
+{
+    auto cit = m_fragments.constFind(id);
+    if (cit != m_fragments.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
+}
+
+QList<Fragment *> Project::searchFragment(const QString &name)
+{
+    QList<Fragment*> results;
+
+    Fragment *fragment;
+    foreach (fragment, m_fragments) {
+        if (fragment->name() == name) {
+            results.append(fragment);
+        }
+    }
+
+    return results;
+}
+
+QList<const Fragment *> Project::searchFragment(const QString &name) const
+{
+    QList<const Fragment*> results;
+
+    const Fragment *fragment;
+    foreach (fragment, m_fragments) {
+        if (fragment->name() == name) {
+            results.append(fragment);
+        }
+    }
+
+    return results;
 }
 
 ProjectException::ProjectException(const QString &message) :

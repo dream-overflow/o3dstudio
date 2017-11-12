@@ -31,6 +31,7 @@ class MasterScene;
 class O3DCanvasContent;
 class ProjectFile;
 class ProjectInfo;
+class Hub;
 class Fragment;
 
 /**
@@ -79,6 +80,44 @@ public:
 
     void setupMasterScene();
 
+    //
+    // hub
+    //
+
+    void addHub(Hub *hub);
+
+    void removeHub(const LightRef &ref);
+    void removeHub(qint64 id);
+    void removeHub(Hub *hub);
+
+    Hub* hub(const LightRef &ref);
+    const Hub* hub(const LightRef &ref) const;
+
+    Hub* hub(qint64 id);
+    const Hub* hub(qint64 id) const;
+
+    QList<Hub*> searchHub(const QString &name);
+    QList<const Hub*> searchHub(const QString &name) const;
+
+    //
+    // fragment
+    //
+
+    void addFragment(Fragment *fragment);
+
+    void removeFragment(const LightRef &ref);
+    void removeFragment(qint64 id);
+    void removeFragment(Fragment *fragment);
+
+    Fragment* fragment(const LightRef &ref);
+    const Fragment* fragment(const LightRef &ref) const;
+
+    Fragment* fragment(qint64 id);
+    const Fragment* fragment(qint64 id) const;
+
+    QList<Fragment*> searchFragment(const QString &name);
+    QList<const Fragment*> searchFragment(const QString &name) const;
+
 private:
 
     Workspace *m_workspace;    //!< Workspace where the projet is currently loaded
@@ -94,6 +133,7 @@ private:
     MasterScene *m_masterScene;
 
     QMap<qint64, Fragment*> m_fragments;
+    QMap<qint64, Hub*> m_hubs;
 };
 
 /**

@@ -23,6 +23,10 @@ namespace common {
 class Workspace;
 class Project;
 
+constexpr int PROJECT_TYPE_ID = 1;
+constexpr int FRAGMENT_TYPE_ID = 2;
+constexpr int HUB_TYPE_ID = 3;
+
 /**
  * @brief Permit the identification of a type.
  */
@@ -121,7 +125,7 @@ public:
     inline bool isValid() const
     {
         if (m_projectId <= 0) {
-            return m_id > 0 && m_type == 1;
+            return m_id > 0 && m_type == PROJECT_TYPE_ID;
         } else {
             return m_id > 0 && m_type > 0;
         }

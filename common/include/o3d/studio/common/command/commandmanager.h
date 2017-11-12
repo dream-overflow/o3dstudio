@@ -9,7 +9,7 @@
 #ifndef _O3DS_COMMON_COMMANDMANAGER_H
 #define _O3DS_COMMON_COMMANDMANAGER_H
 
-#include <QtCore/QQueue>
+#include <QtCore/QStack>
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 #include <QtCore/QThread>
@@ -71,6 +71,9 @@ public:
     QStringList undoableCommandList() const;
     QStringList redoableCommandList() const;
 
+    QString nextToUndo() const;
+    QString nextToRedo() const;
+
     //
     // Thread management
     //
@@ -82,21 +85,29 @@ public:
 
 signals:
 
+    /**
+     * @brief Update commands list (todo, undoable, redoable)
+     */
+    void commandUpdate();
+
+    /**
+     * @brief Command done, undone or redone
+     */
     void commandDone(QString name, QString label, bool done);
 
 protected:
 
     //! queue to commands to be executed, to be executable
-    QQueue<Command*> m_todoCommandsQueue;
+    QStack<Command*> m_todoCommandsQueue;
 
     //! queue to commands to be terminated, when execute, redo, undo many commands at once
-    QQueue<Command*> m_waitingCommandsQueue;
+    QStack<Command*> m_waitingCommandsQueue;
 
     //! queue for done commands, to be undoable
-    QQueue<Command*> m_doneCommandsQueue;
+    QStack<Command*> m_doneCommandsQueue;
 
     //! queue for undone commands, to be redoable
-    QQueue<Command*> m_undoneCommandsQueue;
+    QStack<Command*> m_undoneCommandsQueue;
 
     bool m_running;
 

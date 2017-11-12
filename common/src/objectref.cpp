@@ -139,6 +139,8 @@ ObjectRef ObjectRef::buildRef(Workspace *workspace)
     ObjectRef ref;
 
     ref.m_lightRef.m_id = workspace->generateId();
+    ref.m_lightRef.m_type = PROJECT_TYPE_ID;
+
     ref.m_strongRef.m_uuid = QUuid::createUuid();
     ref.m_strongRef.m_type = "o3s::project";
 
@@ -154,6 +156,8 @@ ObjectRef ObjectRef::buildRef(Workspace *workspace, const QUuid &uuid)
     ObjectRef ref;
 
     ref.m_lightRef.m_id = workspace->generateId();
+    ref.m_lightRef.m_type = PROJECT_TYPE_ID;
+
     ref.m_strongRef.m_uuid = uuid;
     ref.m_strongRef.m_type = "o3s::project";
 

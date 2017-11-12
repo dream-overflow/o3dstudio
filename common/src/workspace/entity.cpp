@@ -11,7 +11,8 @@
 using namespace o3d::studio::common;
 
 
-Entity::Entity(Entity *parent) :
+Entity::Entity(const QString &name, Entity *parent) :
+    m_name(name),
     m_parent(parent)
 {
 

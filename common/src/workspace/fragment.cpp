@@ -14,9 +14,8 @@ using namespace o3d::studio::common;
 
 
 Fragment::Fragment(const QString &name, Project *project) :
-    Entity(project)
+    Entity(name, project)
 {
-    m_name = name;
     m_ref = ObjectRef::buildRef(project, TypeRef::fragment());
 }
 

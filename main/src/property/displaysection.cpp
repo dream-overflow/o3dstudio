@@ -23,7 +23,7 @@ DisplaySection::DisplaySection(QWidget *parent) :
     ui.setupUi(this);
 
     m_properties["language"] = common::Application::instance()->settings().get("o3s::main::language", QVariant("default")).toString();
-    m_properties["themeColor"] = common::Application::instance()->settings().get("o3s::main::theme::color", QVariant("dark")).toString();
+    m_properties["themeColor"] = common::Application::instance()->settings().get("o3s::main::theme::color", QVariant("darkorange")).toString();
 
     // languages
     ui.language->addItem(tr("Default system"), QVariant("default"));
@@ -31,8 +31,8 @@ DisplaySection::DisplaySection(QWidget *parent) :
     ui.language->addItem(tr("French"), QVariant("fr"));
 
     // theme colors
-    ui.themeColor->addItem(tr("Light theme"), QVariant("light"));
-    ui.themeColor->addItem(tr("Dark theme"), QVariant("dark"));
+    ui.themeColor->addItem(tr("Default system"), QVariant("default"));
+    ui.themeColor->addItem(tr("Dark blue theme"), QVariant("darkblue"));
     ui.themeColor->addItem(tr("Dark orange theme"), QVariant("darkorange"));
 }
 
