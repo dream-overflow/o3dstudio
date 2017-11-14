@@ -18,13 +18,13 @@
 using namespace o3d::studio::common;
 
 
-MasterScene::MasterScene(Project *project) :
-    m_project(project),
+MasterScene::MasterScene(Entity *parent) :
+    m_parent(parent),
     m_content(nullptr),
     m_renderer(nullptr),
     m_scene(nullptr)
 {
-
+    Q_ASSERT(m_parent != nullptr);
 }
 
 MasterScene::~MasterScene()
@@ -45,14 +45,24 @@ MasterScene::~MasterScene()
     }
 }
 
+const Entity *MasterScene::parent() const
+{
+    return m_parent;
+}
+
+Entity *MasterScene::parent()
+{
+    return m_parent;
+}
+
 const Project *MasterScene::project() const
 {
-    return m_project;
+    return m_parent->project();
 }
 
 Project *MasterScene::project()
 {
-    return m_project;
+    return m_parent->project();
 }
 
 QtRenderer *MasterScene::renderer()
@@ -73,7 +83,7 @@ void MasterScene::initialize()
 
     // master OpenGL canvas content
     // @todo debug options
-    m_content = new common::O3DCanvasContent(m_project->ref().light(), false);
+    m_content = new common::O3DCanvasContent(project()->ref().light(), false);
     m_renderer = new common::QtRenderer(m_content);
     m_content->setDrawer(this);
     m_content->setRenderer(m_renderer);
@@ -125,8 +135,8 @@ void MasterScene::terminateDrawer()
 
 void MasterScene::initializeDrawer()
 {
-    if (!m_scene && m_renderer && m_project) {
+    if (!m_scene && m_renderer && m_parent && project()) {
         // once GL context is ready
-        m_scene = new o3d::Scene(nullptr, m_project->path().absolutePath().toStdWString().c_str(), m_renderer);
+        m_scene = new o3d::Scene(nullptr, project()->path().absolutePath().toStdWString().c_str(), m_renderer);
     }
 }

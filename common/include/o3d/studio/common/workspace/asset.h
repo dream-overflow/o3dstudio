@@ -39,8 +39,8 @@ public:
 
     void setProject(Project *project);
 
-    Project* project();
-    const Project* project() const;
+    virtual Project* project() override;
+    virtual const Project* project() const override;
 
     virtual void create() override;
 

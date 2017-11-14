@@ -67,6 +67,8 @@ bool ProjectSection::cleanupSection(QWidget *parent)
     this->setParent(nullptr);
 
     hide();
+
+    return true;
 }
 
 void ProjectSection::commit()

@@ -25,6 +25,7 @@ namespace common {
 
 class Project;
 class Hub;
+class MasterScene;
 
 /**
  * @brief The Fragment base class
@@ -40,8 +41,13 @@ public:
 
     void setProject(Project *project);
 
-    Project* project();
-    const Project* project() const;
+    virtual Project* project() override;
+    virtual const Project* project() const override;
+
+    MasterScene* masterScene();
+    const MasterScene* masterScene() const;
+
+    void setupMasterScene();
 
     virtual void create() override;
 
@@ -50,12 +56,20 @@ public:
 
     virtual bool exists() const override;
 
+    void linkToHub(Hub *hub);
+
+    Hub* hub();
+    const Hub* hub() const;
+
     virtual bool serializeContent(QDataStream &stream) const;
     virtual bool deserializeContent(QDataStream &stream);
 
 private:
 
-    QMap<qint64, Hub*> m_hubs;  //!< First level hubs
+    ObjectRef m_hubRef;     //! Related hub ref
+    Hub *m_hub;             //! Related hub
+
+    MasterScene *m_masterScene;
 };
 
 /**

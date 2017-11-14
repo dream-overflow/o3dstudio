@@ -25,8 +25,11 @@ class O3S_API MasterScene : public O3DDrawer
 {
 public:
 
-    MasterScene(Project *project);
+    MasterScene(Entity *parent);
     virtual ~MasterScene();
+
+    const Entity* parent() const;
+    Entity* parent();
 
     const Project* project() const;
     Project* project();
@@ -44,7 +47,7 @@ public:
 
 private:
 
-    Project *m_project;           //!< Owner project
+    Entity *m_parent;             //!< Parent entity (project, fragment)
 
     O3DCanvasContent *m_content;  //!< Attached widget
     QtRenderer *m_renderer;       //!< Attached renderer

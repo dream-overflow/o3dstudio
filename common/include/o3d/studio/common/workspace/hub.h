@@ -39,8 +39,8 @@ public:
 
     void setProject(Project *project);
 
-    Project* project();
-    const Project* project() const;
+    virtual Project* project() override;
+    virtual const Project* project() const override;
 
     virtual void create() override;
 
@@ -80,6 +80,17 @@ public:
      * @brief Recursively find for a hub instance (const version).
      */
     const Hub* findHub(qint64 id) const;
+
+    /**
+     * @brief Recursively find for a hub instance.
+     */
+    Hub* findHub(const QUuid &uuid);
+
+    /**
+     * @brief Recursively find for a hub instance (const version).
+     */
+    const Hub* findHub(const QUuid &uuid) const;
+
 
     int numHubs() const;
 

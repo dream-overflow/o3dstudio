@@ -21,6 +21,7 @@ Hub::Hub(const QString &name, Entity *parent) :
     Entity(name, parent),
     m_project(nullptr)
 {
+    m_typeRef = TypeRef::hub();
     m_ref = ObjectRef(TypeRef::hub());
 }
 
@@ -245,6 +246,46 @@ const Hub *Hub::findHub(qint64 id) const
     const Hub *hub = nullptr;
     foreach (hub, m_hubs) {
         result = hub->findHub(id);
+        if (result) {
+            return result;
+        }
+    }
+
+    return nullptr;
+}
+
+Hub *Hub::findHub(const QUuid &uuid)
+{
+    // himself
+    if (uuid == m_ref.uuid()) {
+        return this;
+    }
+
+    // recurse on children
+    Hub *result = nullptr;
+    Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        result = hub->findHub(uuid);
+        if (result) {
+            return result;
+        }
+    }
+
+    return nullptr;
+}
+
+const Hub *Hub::findHub(const QUuid &uuid) const
+{
+    // himself
+    if (uuid == m_ref.uuid()) {
+        return this;
+    }
+
+    // recurse on children
+    const Hub *result = nullptr;
+    const Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        result = hub->findHub(uuid);
         if (result) {
             return result;
         }

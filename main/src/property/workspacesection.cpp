@@ -62,6 +62,8 @@ bool WorkspaceSection::cleanupSection(QWidget *parent)
     this->setParent(nullptr);
 
     hide();
+
+    return true;
 }
 
 void WorkspaceSection::commit()

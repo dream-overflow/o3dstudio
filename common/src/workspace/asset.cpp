@@ -16,6 +16,7 @@ using namespace o3d::studio::common;
 Asset::Asset(const QString &name, Entity *parent) :
     Entity(name, parent)
 {
+    m_typeRef = TypeRef::asset();
     m_ref = ObjectRef(TypeRef::asset());
 }
 

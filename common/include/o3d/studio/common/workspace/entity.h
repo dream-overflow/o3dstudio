@@ -53,6 +53,16 @@ public:
     virtual bool save() = 0;
 
     /**
+     * @brief Project related to the entity.
+     */
+    virtual Project* project() = 0;
+
+    /**
+     * @brief Project related to the entity (const version).
+     */
+    virtual const Project* project() const = 0;
+
+    /**
      * @brief By default it exists if the reference point to a project.
      */
     virtual bool exists() const;

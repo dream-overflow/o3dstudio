@@ -9,22 +9,24 @@
 #include "o3d/studio/common/workspace/fragment.h"
 #include "o3d/studio/common/workspace/hub.h"
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/masterscene.h"
 
 using namespace o3d::studio::common;
 
 
 Fragment::Fragment(const QString &name, Entity *parent) :
-    Entity(name, parent)
+    Entity(name, parent),
+    m_masterScene(nullptr)
 {
+    m_typeRef = TypeRef::fragment();
     m_ref = ObjectRef(TypeRef::fragment());
+
+    m_masterScene = new MasterScene(this);
 }
 
 Fragment::~Fragment()
 {
-    Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
-        delete hub;
-    }
+    delete m_masterScene;
 }
 
 void Fragment::setProject(Project *project)
@@ -40,6 +42,23 @@ Project *Fragment::project()
 const Project *Fragment::project() const
 {
     return static_cast<Project*>(m_parent);
+}
+
+MasterScene *Fragment::masterScene()
+{
+    return m_masterScene;
+}
+
+const MasterScene *Fragment::masterScene() const
+{
+    return m_masterScene;
+}
+
+void Fragment::setupMasterScene()
+{
+    if (m_masterScene) {
+        m_masterScene->initialize();
+    }
 }
 
 void Fragment::create()
@@ -62,11 +81,29 @@ bool Fragment::exists() const
     return Entity::exists();
 }
 
+void Fragment::linkToHub(Hub *hub)
+{
+    m_hub = hub;
+    m_hubRef = hub->ref();
+}
+
+Hub *Fragment::hub()
+{
+    return m_hub;
+}
+
+const Hub *Fragment::hub() const
+{
+    return m_hub;
+}
+
 bool Fragment::serializeContent(QDataStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
         return false;
     }
+
+    stream << m_hubRef.uuid();
 
     return true;
 }
@@ -77,5 +114,19 @@ bool Fragment::deserializeContent(QDataStream &stream)
         return false;
     }
 
-    return false;
+    QUuid uuid;
+    stream >> uuid;
+
+    if (!uuid.isNull()) {
+        // @todo could create a entity map during import based on the index... optimized...
+        m_hub = project()->findHub(uuid);
+
+        if (m_hub) {
+            m_hubRef = m_hub->ref();
+        } else {
+            return false;
+        }
+    }
+
+    return true;
 }

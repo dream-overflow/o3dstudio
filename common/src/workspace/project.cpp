@@ -44,10 +44,31 @@ Project::~Project()
     delete m_projectFile;
     delete m_info;
 
+    // first the fragments
     Fragment *fragment = nullptr;
     foreach (fragment, m_fragments) {
         delete fragment;
     }
+
+    Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        delete hub;
+    }
+
+    Asset *asset = nullptr;
+    foreach (asset, m_assets) {
+        delete asset;
+    }
+}
+
+Project *Project::project()
+{
+    return this;
+}
+
+const Project *Project::project() const
+{
+    return this;
 }
 
 void Project::setWorkspace(Workspace *workspace)
@@ -359,6 +380,36 @@ const Hub *Project::findHub(qint64 id) const
     const Hub *hub = nullptr;
     foreach (hub, m_hubs) {
         result = hub->findHub(id);
+        if (result != nullptr) {
+            return result;
+        }
+    }
+
+    return nullptr;
+}
+
+Hub *Project::findHub(const QUuid &uuid)
+{
+    // first level
+    Hub *result = nullptr;
+    Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        result = hub->findHub(uuid);
+        if (result != nullptr) {
+            return result;
+        }
+    }
+
+    return nullptr;
+}
+
+const Hub *Project::findHub(const QUuid &uuid) const
+{
+    // first level
+    const Hub *result = nullptr;
+    const Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        result = hub->findHub(uuid);
         if (result != nullptr) {
             return result;
         }
