@@ -83,6 +83,18 @@ public:
 
     int numHubs() const;
 
+    /**
+     * @brief List of children hubs.
+     * @param recurse Default false, returns only projet level hubs, true recurse over all children.
+     */
+    QList<Hub*> hubs(bool recurse = false);
+
+    /**
+     * @brief List of children hubs (const version).
+     * @param recurse Default false, returns only projet level hubs, true recurse over all children.
+     */
+    QList<const Hub*> hubs(bool recurse = false) const;
+
 private:
 
     Project *m_project;         //!< Owner project;

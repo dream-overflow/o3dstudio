@@ -175,6 +175,33 @@ ProjectItem *ProjectModel::addProject(Project *project)
     ProjectItem *item = new ProjectItem(project->ref().light(), project->name(), QIcon::fromTheme("document-open"), m_rootItem);
     m_rootItem->appendChild(item);
 
+    // and add the initial structure of hubs
+    {
+        QList<Hub*> hubs = project->hubs(true);
+        Hub *hub = nullptr;
+        foreach (hub, hubs) {
+            addHub(hub);
+        }
+    }
+
+    // ...fragments
+    {
+        QList<Fragment*> fragments = project->fragments();
+        Fragment *fragment = nullptr;
+        foreach (fragment, fragments) {
+            addFragment(fragment);
+        }
+    }
+
+    // ...assets
+    {
+        QList<Asset*> assets = project->assets();
+        Asset *asset = nullptr;
+        foreach (asset, assets) {
+            addAsset(asset);
+        }
+    }
+
     endInsertRows();
 
     return item;

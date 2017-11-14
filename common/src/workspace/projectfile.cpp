@@ -131,9 +131,10 @@ void ProjectFile::load()
         // @todo ComponentFactory
         hub = new Hub("", m_project);
         hub->setRef(ObjectRef::buildRef(m_project, Application::instance()->types().typeRef(typeName), uuid));
+        hub->setProject(m_project);
+
         stream >> *hub;
 
-        hub->setProject(m_project);
         m_project->m_hubs.insert(hub->ref().light().id(), hub);
     }
 
@@ -196,7 +197,7 @@ void ProjectFile::save()
                << *asset;
     }
 
-    // save hubs
+    // save hubs recursively
     num = m_project->m_hubs.size();
     stream << num;
 

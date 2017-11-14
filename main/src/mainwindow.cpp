@@ -1297,6 +1297,8 @@ void MainWindow::openProject(const QString &location)
     recentsProject.removeOne(location);
     settings().set("o3s::main::project::recents", QVariant(recentsProject));
 
+    initRecentProjectsMenu();
+
     QStringList parts = location.split(QDir::separator());
     if (parts.length() == 0) {
         return;

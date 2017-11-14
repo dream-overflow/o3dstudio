@@ -11,6 +11,9 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/workspace.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/typeregistry.h"
+
 using namespace o3d::studio::common;
 
 
@@ -255,14 +258,62 @@ int Hub::numHubs() const
     return m_hubs.size();
 }
 
+QList<Hub *> Hub::hubs(bool recurse)
+{
+    // first level
+    QList<Hub*> results;
+    Hub *hub = nullptr;
+
+    if (recurse) {
+        foreach (hub, m_hubs) {
+            results.append(hub);
+            results += hub->hubs(recurse);
+        }
+    } else {
+        foreach (hub, m_hubs) {
+            results += hub;
+        }
+    }
+
+    return results;
+}
+
+QList<const Hub *> Hub::hubs(bool recurse) const
+{
+    QList<const Hub*> results;
+    const Hub *hub = nullptr;
+
+    if (recurse) {
+        foreach (hub, m_hubs) {
+            results.append(hub);
+            results += hub->hubs(recurse);
+        }
+    } else {
+        foreach (hub, m_hubs) {
+            results += hub;
+        }
+    }
+
+    return results;
+}
+
 bool Hub::serializeContent(QDataStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
         return false;
     }
 
-    // children
-    // @todo
+    qint32 num = m_hubs.size();
+    stream << num;
+
+    // children recursively
+    const Hub *hub = nullptr;
+    foreach (hub, m_hubs) {
+        // uuid and type ref, for instanciation
+        stream << ref().uuid()
+               << ref().strong().type()
+               << *hub;
+    }
 
     return true;
 }
@@ -273,10 +324,29 @@ bool Hub::deserializeContent(QDataStream &stream)
         return false;
     }
 
-    // children
-    // @todo
+    Hub *hub = nullptr;
 
-    return false;
+    QString typeName;
+    QUuid uuid;
+    qint32 num = 0;
+    stream >> num;
+
+    for (qint32 i = 0; i < num; ++i) {
+        stream >> uuid
+               >> typeName;
+
+        // @todo ComponentFactory
+        hub = new Hub("", this);
+        hub->setRef(ObjectRef::buildRef(m_project, Application::instance()->types().typeRef(typeName), uuid));
+        hub->setProject(m_project);
+
+        stream >> *hub;
+
+        hub->setProject(m_project);
+        m_hubs.insert(hub->ref().light().id(), hub);
+    }
+
+    return true;
 }
 
 HubException::HubException(const QString &message) :

@@ -104,6 +104,9 @@ const ProjectInfo &Project::info() const
 
 ProjectInfo &Project::info()
 {
+    // potentialy changed
+    setDirty();
+
     return *m_info;
 }
 
@@ -191,6 +194,9 @@ void Project::addHub(Hub *hub)
     m_hubs.insert(hub->ref().light().id(), hub);
     hub->setProject(this);
 
+    // structure change
+    setDirty();
+
     // signal throught workspace
     emit workspace()->onProjectHubAdded(hub->ref().light());
 }
@@ -211,6 +217,9 @@ void Project::removeHub(const LightRef &_ref)
     delete hub;
     m_hubs.erase(it);
 
+    // structure change
+    setDirty();
+
     // signal throught workspace
     emit workspace()->onProjectHubRemoved(hub->ref().light());
 }
@@ -227,6 +236,9 @@ void Project::removeHub(qint64 id)
     delete hub;
     m_hubs.erase(it);
 
+    // structure change
+    setDirty();
+
     // signal throught workspace
     emit workspace()->onProjectHubRemoved(hub->ref().light());
 }
@@ -237,6 +249,9 @@ void Project::removeHub(Hub *hub)
         if (it.value() == hub) {       
             delete it.value();
             m_hubs.erase(it);
+
+            // structure change
+            setDirty();
 
             // signal throught workspace
             emit workspace()->onProjectHubRemoved(hub->ref().light());
@@ -357,6 +372,46 @@ int Project::numHubs() const
     return m_hubs.size();
 }
 
+QList<Hub*> Project::hubs(bool recurse)
+{
+    // first level
+    QList<Hub*> results;
+    Hub *hub = nullptr;
+
+    if (recurse) {
+        foreach (hub, m_hubs) {
+            results.append(hub);
+            results += hub->hubs(recurse);
+        }
+    } else {
+        foreach (hub, m_hubs) {
+            results += hub;
+        }
+    }
+
+    return results;
+}
+
+QList<const Hub *> Project::hubs(bool recurse) const
+{
+    // first level
+    QList<const Hub*> results;
+    const Hub *hub = nullptr;
+
+    if (recurse) {
+        foreach (hub, m_hubs) {
+            results.append(hub);
+            results += hub->hubs(recurse);
+        }
+    } else {
+        foreach (hub, m_hubs) {
+            results += hub;
+        }
+    }
+
+    return results;
+}
+
 void Project::addFragment(Fragment *fragment)
 {
     // not created for this project
@@ -370,6 +425,9 @@ void Project::addFragment(Fragment *fragment)
     }
 
     m_fragments.insert(fragment->ref().light().id(), fragment);
+
+    // structure change
+    setDirty();
 
     // signal throught workspace
     emit workspace()->onProjectFragmentAdded(fragment->ref().light());
@@ -391,6 +449,9 @@ void Project::removeFragment(const LightRef &_ref)
     delete fragment;
     m_fragments.erase(it);
 
+    // structure change
+    setDirty();
+
     // signal throught workspace
     emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
 }
@@ -407,6 +468,9 @@ void Project::removeFragment(qint64 id)
     delete fragment;
     m_fragments.erase(it);
 
+    // structure change
+    setDirty();
+
     // signal throught workspace
     emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
 }
@@ -417,6 +481,9 @@ void Project::removeFragment(Fragment *fragment)
         if (it.value() == fragment) {
             delete it.value();
             m_fragments.erase(it);
+
+            // structure change
+            setDirty();
 
             // signal throught workspace
             emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
@@ -502,6 +569,32 @@ QList<const Fragment *> Project::searchFragment(const QString &name) const
     return results;
 }
 
+QList<Fragment *> Project::fragments()
+{
+    // first level
+    QList<Fragment*> results;
+    Fragment *fragment = nullptr;
+
+    foreach (fragment, m_fragments) {
+        results.append(fragment);
+    }
+
+    return results;
+}
+
+QList<const Fragment *> Project::fragments() const
+{
+    // first level
+    QList<const Fragment*> results;
+    const Fragment *fragment = nullptr;
+
+    foreach (fragment, m_fragments) {
+        results.append(fragment);
+    }
+
+    return results;
+}
+
 void Project::addAsset(Asset *asset)
 {
     // not created for this project
@@ -515,6 +608,9 @@ void Project::addAsset(Asset *asset)
     }
 
     m_assets.insert(asset->ref().light().id(), asset);
+
+    // structure change
+    setDirty();
 
     // signal throught workspace
     emit workspace()->onProjectAssetAdded(asset->ref().light());
@@ -536,6 +632,9 @@ void Project::removeAsset(const LightRef &_ref)
     delete asset;
     m_assets.erase(it);
 
+    // structure change
+    setDirty();
+
     // signal throught workspace
     emit workspace()->onProjectAssetRemoved(asset->ref().light());
 }
@@ -552,6 +651,9 @@ void Project::removeAsset(qint64 id)
     delete asset;
     m_assets.erase(it);
 
+    // structure change
+    setDirty();
+
     // signal throught workspace
     emit workspace()->onProjectAssetRemoved(asset->ref().light());
 }
@@ -562,6 +664,9 @@ void Project::removeAsset(Asset *asset)
         if (it.value() == asset) {
             delete it.value();
             m_assets.erase(it);
+
+            // structure change
+            setDirty();
 
             // signal throught workspace
             emit workspace()->onProjectAssetRemoved(asset->ref().light());
@@ -642,6 +747,32 @@ QList<const Asset *> Project::searchAsset(const QString &name) const
         if (asset->name() == name) {
             results.append(asset);
         }
+    }
+
+    return results;
+}
+
+QList<Asset *> Project::assets()
+{
+    // first level
+    QList<Asset*> results;
+    Asset *asset= nullptr;
+
+    foreach (asset, m_assets) {
+        results.append(asset);
+    }
+
+    return results;
+}
+
+QList<const Asset *> Project::assets() const
+{
+    // first level
+    QList<const Asset*> results;
+    const Asset *asset = nullptr;
+
+    foreach (asset, m_assets) {
+        results.append(asset);
     }
 
     return results;

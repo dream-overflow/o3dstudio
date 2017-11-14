@@ -125,6 +125,7 @@ void WorkspaceDock::onActivateProject(const common::LightRef &ref)
 void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     if (previous.isValid()) {
+        // @todo for multiple selection
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(previous.internalPointer());
         m_lastSelected = nullptr;
 
@@ -132,17 +133,41 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
     }
 
     if (current.isValid()) {
-        // @todo for multiple selection only
+        // @todo for multiple selection
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
         m_lastSelected = projectItem;
 
-        // projectItem->select();
+        common::Project *project = projectItem->project();
+        common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().type());
 
-        /*common::Project *project = projectItem->project();
-        if (project) {
+        if (!project) {
+            return;
+        }
+
+        // first set as active projet if not current
+        common::Workspace* workspace = common::Application::instance()->workspaces().current();
+        if (workspace->activeProject() != project) {
+            workspace->setActiveProject(project->ref().light());
+        }
+
+        if (baseType == common::TypeRef::hub()) {
+            common::Hub *hub = project->findHub(projectItem->ref().id());
+            if (hub) {
+                common::Application::instance()->selection().select(hub);
+            }
+        } else if (baseType == common::TypeRef::fragment()) {
+            common::Fragment *fragment = project->fragment(projectItem->ref());
+            if (fragment) {
+                common::Application::instance()->selection().select(fragment);
+            }
+        } else if (baseType == common::TypeRef::asset()) {
+            common::Asset *asset = project->asset(projectItem->ref());
+            if (asset) {
+                common::Application::instance()->selection().select(asset);
+            }
+        } else if (baseType == common::TypeRef::project()) {
             common::Application::instance()->selection().select(project);
-            // project->workspace()->selectProject(project->ref());
-        }*/
+        }
     }
 }
 
@@ -163,7 +188,8 @@ void WorkspaceDock::onSelectItem(const QModelIndex &index)
 {
     // @todo should be unset when selection change
     // onSelectionChanged(index, index);
-
+    return;
+/*
     // on click second time, to reselect
     // @todo should only arrives after a lost of focus or a change of selection...
     if (index.isValid()) {
@@ -201,7 +227,7 @@ void WorkspaceDock::onSelectItem(const QModelIndex &index)
                 common::Application::instance()->selection().select(project);
             }
         }
-    }
+    }*/
 }
 
 void WorkspaceDock::onProjectHubAdded(const common::LightRef &ref)

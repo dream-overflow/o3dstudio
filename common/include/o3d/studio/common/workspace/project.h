@@ -111,6 +111,18 @@ public:
 
     int numHubs() const;
 
+    /**
+     * @brief List of hubs of the project
+     * @param recurse Default false, returns only projet level hubs, true recurse over all children.
+     */
+    QList<Hub*> hubs(bool recurse = false);
+
+    /**
+     * @brief List of hubs of the project (const version).
+     * @param recurse Default false, returns only projet level hubs, true recurse over all children.
+     */
+    QList<const Hub*> hubs(bool recurse = false) const;
+
     //
     // fragment
     //
@@ -130,6 +142,9 @@ public:
     QList<Fragment*> searchFragment(const QString &name);
     QList<const Fragment*> searchFragment(const QString &name) const;
 
+    QList<Fragment*> fragments();
+    QList<const Fragment*> fragments() const;
+
     //
     // asset
     //
@@ -148,6 +163,9 @@ public:
 
     QList<Asset*> searchAsset(const QString &name);
     QList<const Asset*> searchAsset(const QString &name) const;
+
+    QList<Asset*> assets();
+    QList<const Asset*> assets() const;
 
 private:
 
