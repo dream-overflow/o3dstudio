@@ -10,19 +10,28 @@
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
+
 #include "o3d/studio/common/workspace/project.h"
+#include "o3d/studio/common/workspace/hub.h"
+#include "o3d/studio/common/workspace/fragment.h"
+#include "o3d/studio/common/workspace/asset.h"
 
 #include <QtCore/qobjectdefs.h>
 
 using namespace o3d::studio::common;
 
 
-ProjectItem::ProjectItem(const LightRef &ref, const QString &name, const QIcon &icon, ProjectItem *parentItem) :
+ProjectItem::ProjectItem(Entity *entity,
+                         const LightRef &ref,
+                         const QString &name,
+                         const QIcon &icon,
+                         ProjectItem *parentItem) :
     m_path(""),
     m_name(name),
-    m_ref(ref),
     m_icon(icon),
-    m_parentItem(parentItem)
+    m_ref(ref),
+    m_parentItem(parentItem),
+    m_entity(entity)
 {
     if (parentItem) {
         m_path = parentItem->m_path + "::" + ref.longId();
@@ -151,14 +160,144 @@ const LightRef& ProjectItem::ref() const
     return m_ref;
 }
 
+const Entity *ProjectItem::entity() const
+{
+    return m_entity;
+}
+
+Entity *ProjectItem::entity()
+{
+    return m_entity;
+}
+
+bool ProjectItem::isProject() const
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::project().id()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ProjectItem::isHub() const
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::hub().id()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ProjectItem::isFragment() const
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::fragment().id()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool ProjectItem::isAsset() const
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::asset().id()) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 const Project *ProjectItem::project() const
 {
-    Workspace *workspace = Application::instance()->workspaces().current();
-    return workspace->project(m_ref);
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::project().id()) {
+        const Workspace *workspace = Application::instance()->workspaces().current();
+        if (workspace->project(m_ref) == m_entity) {
+            return static_cast<const Project*>(m_entity);
+        }
+    }
+
+    return nullptr;
 }
 
 Project *ProjectItem::project()
 {
-    Workspace *workspace = Application::instance()->workspaces().current();
-    return workspace->project(m_ref);
+    if (m_ref.isValid() && m_entity && m_entity->typeRef() == TypeRef::project()) {
+        Workspace *workspace = Application::instance()->workspaces().current();
+        if (workspace->project(m_ref) == m_entity) {
+            return static_cast<Project*>(m_entity);
+        }
+    }
+
+    return nullptr;
+}
+
+const Hub *ProjectItem::hub() const
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::hub().id()) {
+        const Workspace *workspace = Application::instance()->workspaces().current();
+        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
+                return static_cast<const Hub*>(m_entity);
+        }
+    }
+
+    return nullptr;
+}
+
+Hub *ProjectItem::hub()
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::hub().id()) {
+        const Workspace *workspace = Application::instance()->workspaces().current();
+        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
+                return static_cast<Hub*>(m_entity);
+        }
+    }
+
+    return nullptr;
+}
+
+const Fragment *ProjectItem::fragment() const
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::fragment().id()) {
+        const Workspace *workspace = Application::instance()->workspaces().current();
+        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
+                return static_cast<const Fragment*>(m_entity);
+        }
+    }
+
+    return nullptr;
+}
+
+Fragment *ProjectItem::fragment()
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::fragment().id()) {
+        const Workspace *workspace = Application::instance()->workspaces().current();
+        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
+                return static_cast<Fragment*>(m_entity);
+        }
+    }
+
+    return nullptr;
+}
+
+const Asset *ProjectItem::asset() const
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::asset().id()) {
+        const Workspace *workspace = Application::instance()->workspaces().current();
+        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
+                return static_cast<const Asset*>(m_entity);
+        }
+    }
+
+    return nullptr;
+}
+
+Asset *ProjectItem::asset()
+{
+    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::asset().id()) {
+        const Workspace *workspace = Application::instance()->workspaces().current();
+        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
+                return static_cast<Asset*>(m_entity);
+        }
+    }
+
+    return nullptr;
 }

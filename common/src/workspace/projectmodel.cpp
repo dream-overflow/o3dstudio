@@ -21,7 +21,7 @@ using namespace o3d::studio::common;
 ProjectModel::ProjectModel(QObject *parent) :
     QAbstractItemModel(parent)
 {
-    m_rootItem = new ProjectItem(LightRef(), "o3s::workspace", QIcon());
+    m_rootItem = new ProjectItem(nullptr, LightRef(), "o3s::workspace", QIcon());
 }
 
 ProjectModel::~ProjectModel()
@@ -172,7 +172,11 @@ ProjectItem *ProjectModel::addProject(Project *project)
 
     beginInsertRows(QModelIndex(), n, n);
 
-    ProjectItem *item = new ProjectItem(project->ref().light(), project->name(), QIcon::fromTheme("document-open"), m_rootItem);
+    ProjectItem *item = new ProjectItem(project,
+                                        project->ref().light(),
+                                        project->name(),
+                                        QIcon::fromTheme("document-open"),
+                                        m_rootItem);
     m_rootItem->appendChild(item);
 
     // and add the initial structure of hubs
@@ -247,7 +251,8 @@ ProjectItem *ProjectModel::addHub(common::Hub *hub)
 
     beginInsertRows(parentIndex, n, n);
 
-    ProjectItem *item = new ProjectItem(hub->ref().light(),
+    ProjectItem *item = new ProjectItem(hub,
+                                        hub->ref().light(),
                                         hub->name(),
                                         UiUtils::tintIcon(":/icons/device_hub_black.svg"),
                                         parentItem);
@@ -305,7 +310,8 @@ ProjectItem *ProjectModel::addFragment(common::Fragment *fragment)
 
     beginInsertRows(parentIndex, n, n);
 
-    ProjectItem *item = new ProjectItem(fragment->ref().light(),
+    ProjectItem *item = new ProjectItem(fragment,
+                                        fragment->ref().light(),
                                         fragment->name(),
                                         UiUtils::tintIcon(":/icons/fragment_flat.svg"),
                                         parentItem);
@@ -363,7 +369,8 @@ ProjectItem *ProjectModel::addAsset(common::Asset *asset)
 
     beginInsertRows(parentIndex, n, n);
 
-    ProjectItem *item = new ProjectItem(asset->ref().light(),
+    ProjectItem *item = new ProjectItem(asset,
+                                        asset->ref().light(),
                                         asset->name(),
                                         UiUtils::tintIcon(":/icons/fragment_flat.svg"),
                                         parentItem);

@@ -22,16 +22,17 @@
 using namespace o3d::studio::common;
 
 
-AddHubCommand::AddHubCommand(const LightRef &parent, const QString &name) :
+AddHubCommand::AddHubCommand(const LightRef &parent, const TypeRef &parentTypeRef, const QString &name) :
     Command("o3s::common::hub::add", parent),
-    m_parent(parent),
+    m_parentTypeRef(parentTypeRef),
+    m_parentRef(parent),
     m_hubName(name)
 {
     if (m_hubName.isEmpty()) {
         m_hubName = "Unamed hub";
     }
 
-    Q_ASSERT(m_parent.isValid());
+    Q_ASSERT(m_parentRef.isValid());
 }
 
 AddHubCommand::~AddHubCommand()
@@ -47,10 +48,13 @@ bool AddHubCommand::doCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        Project *project = workspace->project(m_parent);
+        Project *project = workspace->project(m_parentRef);
+
+        // @todo type is not suffisant need to compare with baseType
+        // @todo similar for AddFragmentCommand
 
         // first level hub, direct to project
-        if (project && m_parent.type() == TypeRef::project().id()) {
+        if (project && m_parentTypeRef.baseType() == TypeRef::project().id()) {
             Hub *hub = new Hub(m_hubName, project);
             // with new ref id
             hub->setRef(ObjectRef::buildRef(project, TypeRef::hub()));
@@ -59,8 +63,8 @@ bool AddHubCommand::doCommand()
 
             m_hub = hub->ref();
             return true;
-        } else if (project && m_parent.type() == TypeRef::hub().id()) {
-            Hub *parentHub = workspace->findHub(m_parent);
+        } else if (project && m_parentTypeRef.baseType() == TypeRef::hub().id()) {
+            Hub *parentHub = workspace->findHub(m_parentRef);
             if (parentHub) {
                 Hub *hub = new Hub(m_hubName, parentHub);
                 // with new ref id
@@ -81,14 +85,14 @@ bool AddHubCommand::undoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        Project *project = workspace->project(m_parent);
+        Project *project = workspace->project(m_parentRef);
 
         // first level hub, direct to project
-        if (project && m_parent.type() == TypeRef::project().id()) {
+        if (project && m_parentTypeRef.baseType() == TypeRef::project().id()) {
             project->removeHub(m_hub.light());
             return true;
-        } else if (project && m_parent.type() == TypeRef::hub().id()) {
-            Hub *parentHub = workspace->findHub(m_parent);
+        } else if (project && m_parentTypeRef.baseType() == TypeRef::hub().id()) {
+            Hub *parentHub = workspace->findHub(m_parentRef);
             if (parentHub) {
                 parentHub->removeHub(m_hub.light());
                 return true;
@@ -103,18 +107,18 @@ bool AddHubCommand::redoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        Project *project = workspace->project(m_parent);
+        Project *project = workspace->project(m_parentRef);
 
         // first level hub, direct to project
-        if (project && m_parent.type() == TypeRef::project().id()) {
+        if (project && m_parentTypeRef.baseType() == TypeRef::project().id()) {
             Hub *hub = new Hub(m_hubName, project);
             // reuse ref id
             hub->setRef(m_hub);
 
             project->addHub(hub);
             return true;
-        } else if (project && m_parent.type() == TypeRef::hub().id()) {
-            Hub *parentHub = workspace->findHub(m_parent);
+        } else if (project && m_parentTypeRef.baseType() == TypeRef::hub().id()) {
+            Hub *parentHub = workspace->findHub(m_parentRef);
             if (parentHub) {
                 Hub *hub = new Hub(m_hubName, parentHub);
                 // reuse ref id

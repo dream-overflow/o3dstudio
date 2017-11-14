@@ -1,13 +1,13 @@
 /**
- * @brief Add hub command
+ * @brief Remove hub command
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@gmail.com)
- * @date 2017-11-11
+ * @date 2017-11-14
  * @details
  */
 
-#ifndef _O3DS_COMMON_ADDHUBCOMMAND_H
-#define _O3DS_COMMON_ADDHUBCOMMAND_H
+#ifndef _O3DS_COMMON_REMOVEHUBCOMMAND_H
+#define _O3DS_COMMON_REMOVEHUBCOMMAND_H
 
 #include "../command.h"
 #include "../../objectref.h"
@@ -18,16 +18,14 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class Project;
-
-class O3S_API AddHubCommand : public Command
+class O3S_API RemoveHubCommand : public Command
 {
-    Q_DECLARE_TR_FUNCTIONS(AddHubCommand)
+    Q_DECLARE_TR_FUNCTIONS(RemoveHubCommand)
 
 public:
 
-    AddHubCommand(const LightRef &parent, const TypeRef &parentTypeRef, const QString &name);
-    virtual ~AddHubCommand();
+    RemoveHubCommand(const LightRef &hubRef, const LightRef &parentRef, const TypeRef &parentTypeRef);
+    virtual ~RemoveHubCommand();
 
     virtual QString commandLabel() const override;
     virtual bool doCommand() override;
@@ -36,16 +34,17 @@ public:
 
 private:
 
+    LightRef m_parent;
+    LightRef m_hub;
+
     TypeRef m_parentTypeRef;
 
-    LightRef m_parentRef;
-    ObjectRef m_hub;
-
-    QString m_hubName;
+    QByteArray m_data;
+    ObjectRef m_storedHubRef;
 };
 
 } // namespace common
 } // namespace studio
 } // namespace o3d
 
-#endif // _O3DS_COMMON_ADDHUBCOMMAND_H
+#endif // _O3DS_COMMON_REMOVEHUBCOMMAND_H

@@ -121,10 +121,10 @@ void MainToolBar::onCreateHub()
         // add as sub-hub
         if (hubs.size() == 1) {
             auto it = hubs.begin();
-            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), QString());
+            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), (*it)->typeRef(), QString());
             common::Application::instance()->command().addCommand(cmd);
         } else {
-            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), QString());
+            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), project->typeRef(), QString());
             common::Application::instance()->command().addCommand(cmd);
         }
     }

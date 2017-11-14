@@ -20,14 +20,22 @@ namespace o3d {
 namespace studio {
 namespace common {
 
+class Entity;
 class Project;
-// class Hub;
+class Hub;
+class Fragment;
+class Asset;
 
 class O3S_API ProjectItem
 {
 public:
 
-    ProjectItem(const LightRef &ref, const QString &name, const QIcon &icon, ProjectItem *parentItem = nullptr);
+    ProjectItem(Entity *entity,
+                const LightRef &ref,
+                const QString &name,
+                const QIcon &icon,
+                ProjectItem *parentItem = nullptr);
+
     virtual ~ProjectItem();
 
     void appendChild(ProjectItem *child);
@@ -48,22 +56,41 @@ public:
     const QString& name() const;
     const LightRef& ref() const;
 
+    const Entity* entity() const;
+    Entity* entity();
+
+    bool isProject() const;
+    bool isHub() const;
+    bool isFragment() const;
+    bool isAsset() const;
+
+    TypeRef typeRef() const;
+
     const Project* project() const;
     Project* project();
 
-//    const Hub* hub() const;
-//    Hub* hub();
+    const Hub* hub() const;
+    Hub* hub();
+
+    const Fragment* fragment() const;
+    Fragment* fragment();
+
+    const Asset* asset() const;
+    Asset* asset();
 
 private:
 
     QString m_path;
-    QString m_name;
-    LightRef m_ref;
+    QString m_name;   
     QIcon m_icon;
+
+    LightRef m_ref;
 
     // QDataWidgetMapper
     QList<ProjectItem*> m_childItems;
     ProjectItem *m_parentItem;
+
+    Entity *m_entity;
 };
 
 } // namespace common

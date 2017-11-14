@@ -10,7 +10,22 @@
 
 using namespace o3d::studio::common;
 
-SelectionItem::SelectionItem(const LightRef &ref) :
+SelectionItem::SelectionItem(const LightRef &ref, const TypeRef &typeRef) :
+    m_parentTypeRef(),
+    m_parentRef(),
+    m_ref(ref),
+    m_typeRef(typeRef)
+{
+
+}
+
+SelectionItem::SelectionItem(const LightRef &ref,
+                             const TypeRef &typeRef,
+                             const LightRef &parentRef,
+                             const TypeRef &parentTypeRef) :
+    m_parentTypeRef(parentTypeRef),
+    m_parentRef(parentRef),
+    m_typeRef(typeRef),
     m_ref(ref)
 {
 
@@ -19,11 +34,6 @@ SelectionItem::SelectionItem(const LightRef &ref) :
 SelectionItem::~SelectionItem()
 {
 
-}
-
-const LightRef& SelectionItem::ref() const
-{
-    return m_ref;
 }
 
 qint64 SelectionItem::selectionType() const

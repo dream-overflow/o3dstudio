@@ -36,6 +36,7 @@ public:
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
     virtual void focusInEvent(QFocusEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
 
 signals:
 

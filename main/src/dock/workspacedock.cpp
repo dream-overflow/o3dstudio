@@ -24,6 +24,11 @@
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
+#include "o3d/studio/common/command/commandmanager.h"
+#include "o3d/studio/common/command/hub/removehubcommand.h"
+#include "o3d/studio/common/command/fragment/removefragmentcommand.h"
+// #include "o3d/studio/common/command/asset/removeassetcommand.h"
+
 #include <QtWidgets/QTreeView>
 
 using namespace o3d::studio::main;
@@ -137,15 +142,16 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
         m_lastSelected = projectItem;
 
-        common::Project *project = projectItem->project();
         common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().type());
+
+        // first set as active projet if not current
+        common::Workspace* workspace = common::Application::instance()->workspaces().current();
+        common::Project *project = workspace->project(projectItem->ref());
 
         if (!project) {
             return;
         }
 
-        // first set as active projet if not current
-        common::Workspace* workspace = common::Application::instance()->workspaces().current();
         if (workspace->activeProject() != project) {
             workspace->setActiveProject(project->ref().light());
         }
@@ -293,6 +299,40 @@ void WorkspaceDock::onProjectAssetRemoved(const o3d::studio::common::LightRef &r
 void WorkspaceDock::focusInEvent(QFocusEvent *event)
 {
     QDockWidget::focusInEvent(event);
+}
+
+void WorkspaceDock::keyPressEvent(QKeyEvent *event)
+{
+    QModelIndex currentIndex = m_treeView->currentIndex();
+
+    if (m_treeView->hasFocus() && currentIndex.isValid()) {
+        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(currentIndex.internalPointer());
+
+        if (projectItem->isHub()) {
+            common::Hub* hub = projectItem->hub();
+            if (event->key() == Qt::Key_Delete) {
+                common::RemoveHubCommand *cmd = new common::RemoveHubCommand(projectItem->ref(), hub->parent()->ref().light(), hub->parent()->typeRef());
+                common::Application::instance()->command().addCommand(cmd);
+            }
+        } else if (projectItem->isFragment()) {
+            common::Fragment* fragment = projectItem->fragment();
+
+            if (event->key() == Qt::Key_Delete) {
+                // common::RemoveFragmentCommand *cmd = new common::RemoveFragmentCommand(fragment);
+                // common::Application::instance()->command().addCommand(cmd);
+            }
+        } else if (projectItem->isAsset()) {
+            common::Asset* asset = projectItem->asset();
+
+            if (event->key() == Qt::Key_Delete) {
+                // common::RemoveAssetCommand *cmd = new common::RemoveAssetCommand(asset);
+                // common::Application::instance()->command().addCommand(cmd);
+            }
+        }
+
+    }
+
+    return QDockWidget::keyPressEvent(event);
 }
 
 void WorkspaceDock::onSelectManagerChange()

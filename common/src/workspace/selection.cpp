@@ -77,12 +77,12 @@ void Selection::appendSelection(Entity *entity)
         return;
     }
 
-    if (m_selectingSet.find(entity->ref().light()) != m_selectingSet.end()) {
+    if (m_selectingSet.find(entity) != m_selectingSet.end()) {
         // already selected
         return;
     }
 
-    m_selectingSet.insert(entity->ref().light());
+    m_selectingSet.insert(entity);
 }
 
 void Selection::endSelection()
@@ -101,9 +101,17 @@ void Selection::endSelection()
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
-    LightRef ref;
-    foreach (ref, m_selectingSet) {
-        m_currentSelection.insert(new SelectionItem(ref));
+    Entity *entity = nullptr;
+    foreach (entity, m_selectingSet) {
+        if (entity->parent()) {
+            m_currentSelection.insert(new SelectionItem(
+                entity->ref().light(),
+                entity->typeRef(),
+                entity->parent()->ref().light(),
+                entity->parent()->typeRef()));
+        } else {
+            m_currentSelection.insert(new SelectionItem(entity->ref().light(), entity->typeRef()));
+        }
     }
 
     m_selectingSet.clear();
@@ -123,8 +131,18 @@ void Selection::select(Entity *entity)
     m_currentSelection.clear();
 
     if (entity) {
-        SelectionItem *selectionItem = new SelectionItem(entity->ref().light());
-        m_currentSelection.insert(selectionItem);
+        if (entity->parent()) {
+            SelectionItem *selectionItem = new SelectionItem(
+                entity->ref().light(),
+                entity->typeRef(),
+                entity->parent()->ref().light(),
+                entity->parent()->typeRef());
+
+            m_currentSelection.insert(selectionItem);
+        } else {
+            SelectionItem *selectionItem = new SelectionItem(entity->ref().light(), entity->typeRef());
+            m_currentSelection.insert(selectionItem);
+        }
     }
 
     emit selectionChanged();

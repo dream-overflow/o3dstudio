@@ -93,7 +93,7 @@ private:
     QSet<SelectionItem*> m_previousSelection;
 
     //! Current set of selected items
-    QSet<LightRef> m_selectingSet;
+    QSet<Entity*> m_selectingSet;
 };
 
 } // namespace common
