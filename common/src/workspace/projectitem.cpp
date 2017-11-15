@@ -172,7 +172,7 @@ Entity *ProjectItem::entity()
 
 bool ProjectItem::isProject() const
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::project().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::project())) {
         return true;
     } else {
         return false;
@@ -181,7 +181,7 @@ bool ProjectItem::isProject() const
 
 bool ProjectItem::isHub() const
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::hub().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::hub())) {
         return true;
     } else {
         return false;
@@ -190,7 +190,7 @@ bool ProjectItem::isHub() const
 
 bool ProjectItem::isFragment() const
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::fragment().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::fragment())) {
         return true;
     } else {
         return false;
@@ -199,7 +199,7 @@ bool ProjectItem::isFragment() const
 
 bool ProjectItem::isAsset() const
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::asset().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
         return true;
     } else {
         return false;
@@ -208,10 +208,21 @@ bool ProjectItem::isAsset() const
 
 const Project *ProjectItem::project() const
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::project().id()) {
-        const Workspace *workspace = Application::instance()->workspaces().current();
-        if (workspace->project(m_ref) == m_entity) {
-            return static_cast<const Project*>(m_entity);
+    if (m_entity && m_ref.isValid()) {
+        if (m_ref.baseTypeOf(TypeRef::project())) {
+            // entity is a project
+            const Workspace *workspace = Application::instance()->workspaces().current();
+            if (workspace->project(m_ref) == m_entity) {
+                return static_cast<const Project*>(m_entity);
+            }
+        } else {
+            // get the project of the entity
+            const Workspace *workspace = Application::instance()->workspaces().current();
+            const Project *project = workspace->project(m_ref);
+
+            if (m_entity->project() == project) {
+                return project;
+            }
         }
     }
 
@@ -220,10 +231,21 @@ const Project *ProjectItem::project() const
 
 Project *ProjectItem::project()
 {
-    if (m_ref.isValid() && m_entity && m_entity->typeRef() == TypeRef::project()) {
-        Workspace *workspace = Application::instance()->workspaces().current();
-        if (workspace->project(m_ref) == m_entity) {
-            return static_cast<Project*>(m_entity);
+    if (m_entity && m_ref.isValid()) {
+        if (m_ref.baseTypeOf(TypeRef::project())) {
+            // entity is a project
+            Workspace *workspace = Application::instance()->workspaces().current();
+            if (workspace->project(m_ref) == m_entity) {
+                return static_cast<Project*>(m_entity);
+            }
+        } else {
+            // get the project of the entity
+            Workspace *workspace = Application::instance()->workspaces().current();
+            Project *project = workspace->project(m_ref);
+
+            if (m_entity->project() == project) {
+                return project;
+            }
         }
     }
 
@@ -232,7 +254,7 @@ Project *ProjectItem::project()
 
 const Hub *ProjectItem::hub() const
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::hub().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::hub())) {
         const Workspace *workspace = Application::instance()->workspaces().current();
         if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
                 return static_cast<const Hub*>(m_entity);
@@ -244,7 +266,7 @@ const Hub *ProjectItem::hub() const
 
 Hub *ProjectItem::hub()
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::hub().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::hub())) {
         const Workspace *workspace = Application::instance()->workspaces().current();
         if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
                 return static_cast<Hub*>(m_entity);
@@ -256,7 +278,7 @@ Hub *ProjectItem::hub()
 
 const Fragment *ProjectItem::fragment() const
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::fragment().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::fragment())) {
         const Workspace *workspace = Application::instance()->workspaces().current();
         if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
                 return static_cast<const Fragment*>(m_entity);
@@ -268,7 +290,7 @@ const Fragment *ProjectItem::fragment() const
 
 Fragment *ProjectItem::fragment()
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::fragment().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::fragment())) {
         const Workspace *workspace = Application::instance()->workspaces().current();
         if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
                 return static_cast<Fragment*>(m_entity);
@@ -280,7 +302,7 @@ Fragment *ProjectItem::fragment()
 
 const Asset *ProjectItem::asset() const
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::asset().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
         const Workspace *workspace = Application::instance()->workspaces().current();
         if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
                 return static_cast<const Asset*>(m_entity);
@@ -292,7 +314,7 @@ const Asset *ProjectItem::asset() const
 
 Asset *ProjectItem::asset()
 {
-    if (m_entity && m_ref.isValid() && m_entity->typeRef().baseType() == TypeRef::asset().id()) {
+    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
         const Workspace *workspace = Application::instance()->workspaces().current();
         if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
                 return static_cast<Asset*>(m_entity);

@@ -812,8 +812,9 @@ void MainWindow::onFileMenuQuit()
 {
     common::Workspace *workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        // @todo if non-saved projects ask
-        workspace->save();
+        if (workspace->hasChanges()) {
+            workspace->save();
+        }
     }
 
     close();

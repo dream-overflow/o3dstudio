@@ -52,6 +52,8 @@ void CommandManager::initialize()
 
 void CommandManager::onChangeCurrentWorkspace(const QString &name)
 {
+    Q_UNUSED(name)
+
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         connect(workspace, SIGNAL(onProjectRemoved(const LightRef &)), SLOT(onProjectRemoved(const LightRef &)));
@@ -151,7 +153,27 @@ void CommandManager::undoLastCommand()
 
 void CommandManager::undoNCommands(int num)
 {
+    int size = 0;
 
+    m_rwLock.lockForRead();
+    size = m_doneCommandsQueue.size();
+    m_rwLock.unlock();
+
+    if (size == 0) {
+        return;
+    }
+
+    m_rwLock.lockForWrite();
+
+    Command *lastCmd = nullptr;
+    for (int i = 0; i < std::min(size, num); ++i) {
+        lastCmd = m_doneCommandsQueue.pop();
+        m_waitingCommandsQueue.push(lastCmd);
+    }
+
+    m_rwLock.unlock();
+
+    emit commandUpdate();
 }
 
 void CommandManager::redoLastCommand()
@@ -178,14 +200,27 @@ void CommandManager::redoLastCommand()
 
 void CommandManager::redoNCommands(int num)
 {
-    // @todo
-    // emit commandUpdate();
-}
+    int size = 0;
 
-void CommandManager::setCommandDone(Command *cmd)
-{
-    // @todo
-    //emit commandUpdate();
+    m_rwLock.lockForRead();
+    size = m_undoneCommandsQueue.size();
+    m_rwLock.unlock();
+
+    if (size == 0) {
+        return;
+    }
+
+    m_rwLock.lockForWrite();
+
+    Command *lastUndone = nullptr;
+    for (int i = 0; i < std::min(size, num); ++i) {
+        lastUndone = m_undoneCommandsQueue.pop();
+        m_waitingCommandsQueue.push(lastUndone);
+    }
+
+    m_rwLock.unlock();
+
+    emit commandUpdate();
 }
 
 bool CommandManager::hasPendingCommands() const

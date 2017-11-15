@@ -45,7 +45,7 @@ const Project *Asset::project() const
 
 void Asset::create()
 {
-
+    setDirty();
 }
 
 bool Asset::load()

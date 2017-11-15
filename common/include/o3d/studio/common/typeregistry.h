@@ -30,10 +30,10 @@ public:
     TypeRegistry(QObject *parent = nullptr);
     virtual ~TypeRegistry();
 
-    bool registerType(const TypeRef &baseType, const QString &name);
+    bool registerType(EntityBaseType baseType, const QString &name);
 
     bool unregisterType(const QString &name);
-    bool unregisterType(qint64 id);
+    bool unregisterType(quint32 id);
     bool unregisterType(const TypeRef &typeRef);
 
     TypeRef typeRef(const QString &name) const;
@@ -44,9 +44,9 @@ public:
     TypeRef baseTypeRef(const TypeRef &typeRef) const;
 
     /**
-     * @brief Return the base type for a type ref
+     * @brief Return the base type for a type ref id
      */
-    TypeRef baseTypeRef(qint64 type) const;
+    TypeRef baseTypeRef(quint32 id) const;
 
 signals:
 
@@ -54,10 +54,10 @@ signals:
 
 protected:
 
-    qint64 m_nextId;
+    quint32 m_nextId;
 
     QMap<QString, TypeRef> m_typeRefs;
-    QMap<qint64, TypeRef> m_typeRefsById;
+    QMap<quint32, TypeRef> m_typeRefsById;
 };
 
 } // namespace common

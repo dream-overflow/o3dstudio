@@ -100,7 +100,9 @@ void WorkspaceDock::onRemoveProject(const common::LightRef &ref)
     common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
 
     // remove a project item
-    projectModel->removeProject(ref);
+    if (project) {
+        projectModel->removeProject(ref);
+    }
 }
 
 void WorkspaceDock::onActivateProject(const common::LightRef &ref)
@@ -142,7 +144,7 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
         m_lastSelected = projectItem;
 
-        common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().type());
+        common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().typeId());
 
         // first set as active projet if not current
         common::Workspace* workspace = common::Application::instance()->workspaces().current();
@@ -156,22 +158,22 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
             workspace->setActiveProject(project->ref().light());
         }
 
-        if (baseType == common::TypeRef::hub()) {
+        if (projectItem->ref().baseTypeOf(common::TypeRef::hub())) {
             common::Hub *hub = project->findHub(projectItem->ref().id());
             if (hub) {
                 common::Application::instance()->selection().select(hub);
             }
-        } else if (baseType == common::TypeRef::fragment()) {
+        } else if (projectItem->ref().baseTypeOf(common::TypeRef::fragment())) {
             common::Fragment *fragment = project->fragment(projectItem->ref());
             if (fragment) {
                 common::Application::instance()->selection().select(fragment);
             }
-        } else if (baseType == common::TypeRef::asset()) {
+        } else if (projectItem->ref().baseTypeOf(common::TypeRef::asset())) {
             common::Asset *asset = project->asset(projectItem->ref());
             if (asset) {
                 common::Application::instance()->selection().select(asset);
             }
-        } else if (baseType == common::TypeRef::project()) {
+        } else if (projectItem->ref().baseTypeOf(common::TypeRef::project())) {
             common::Application::instance()->selection().select(project);
         }
     }
@@ -309,21 +311,16 @@ void WorkspaceDock::keyPressEvent(QKeyEvent *event)
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(currentIndex.internalPointer());
 
         if (projectItem->isHub()) {
-            common::Hub* hub = projectItem->hub();
             if (event->key() == Qt::Key_Delete) {
-                common::RemoveHubCommand *cmd = new common::RemoveHubCommand(projectItem->ref(), hub->parent()->ref().light(), hub->parent()->typeRef());
+                common::RemoveHubCommand *cmd = new common::RemoveHubCommand(projectItem->ref(), projectItem->parentItem()->ref());
                 common::Application::instance()->command().addCommand(cmd);
             }
         } else if (projectItem->isFragment()) {
-            common::Fragment* fragment = projectItem->fragment();
-
             if (event->key() == Qt::Key_Delete) {
-                // common::RemoveFragmentCommand *cmd = new common::RemoveFragmentCommand(fragment);
-                // common::Application::instance()->command().addCommand(cmd);
+                common::RemoveFragmentCommand *cmd = new common::RemoveFragmentCommand(projectItem->ref(), projectItem->parentItem()->ref());
+                common::Application::instance()->command().addCommand(cmd);
             }
         } else if (projectItem->isAsset()) {
-            common::Asset* asset = projectItem->asset();
-
             if (event->key() == Qt::Key_Delete) {
                 // common::RemoveAssetCommand *cmd = new common::RemoveAssetCommand(asset);
                 // common::Application::instance()->command().addCommand(cmd);
@@ -337,10 +334,8 @@ void WorkspaceDock::keyPressEvent(QKeyEvent *event)
 
 void WorkspaceDock::onSelectManagerChange()
 {
-    common::TypeRef typeProject = common::Application::instance()->types().typeRef("o3s::project");
-
-    const QSet<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPrevious(typeProject.id());
-    const QSet<common::SelectionItem *> currentSelection = common::Application::instance()->selection().filterCurrent(typeProject.id());
+    const QSet<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPreviousByBaseType(common::TypeRef::project());
+    const QSet<common::SelectionItem *> currentSelection = common::Application::instance()->selection().filterCurrentByBaseType(common::TypeRef::project());
 
     common::SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, previousSelection) {
@@ -375,6 +370,8 @@ void WorkspaceDock::setupUi()
 
 void WorkspaceDock::onChangeCurrentWorkspace(const QString &name)
 {
+    Q_UNUSED(name)
+
     QAbstractItemModel *oldModel = m_treeView->model();
     m_treeView->setModel(new common::ProjectModel());
 

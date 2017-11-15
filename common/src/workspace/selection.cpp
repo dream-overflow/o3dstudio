@@ -103,15 +103,7 @@ void Selection::endSelection()
 
     Entity *entity = nullptr;
     foreach (entity, m_selectingSet) {
-        if (entity->parent()) {
-            m_currentSelection.insert(new SelectionItem(
-                entity->ref().light(),
-                entity->typeRef(),
-                entity->parent()->ref().light(),
-                entity->parent()->typeRef()));
-        } else {
-            m_currentSelection.insert(new SelectionItem(entity->ref().light(), entity->typeRef()));
-        }
+        m_currentSelection.insert(new SelectionItem(entity));
     }
 
     m_selectingSet.clear();
@@ -131,18 +123,7 @@ void Selection::select(Entity *entity)
     m_currentSelection.clear();
 
     if (entity) {
-        if (entity->parent()) {
-            SelectionItem *selectionItem = new SelectionItem(
-                entity->ref().light(),
-                entity->typeRef(),
-                entity->parent()->ref().light(),
-                entity->parent()->typeRef());
-
-            m_currentSelection.insert(selectionItem);
-        } else {
-            SelectionItem *selectionItem = new SelectionItem(entity->ref().light(), entity->typeRef());
-            m_currentSelection.insert(selectionItem);
-        }
+        m_currentSelection.insert(new SelectionItem(entity));
     }
 
     emit selectionChanged();
@@ -171,13 +152,13 @@ const QSet<SelectionItem *> Selection::currentSelection() const
     return m_currentSelection;
 }
 
-const QSet<SelectionItem *> Selection::filterPrevious(qint64 type) const
+const QSet<SelectionItem *> Selection::filterPrevious(const TypeRef &typeRef) const
 {
     QSet<SelectionItem*> filtered;
 
     SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, m_previousSelection) {
-        if (selectionItem->ref().type() == type) {
+        if (selectionItem->ref().typeId() == typeRef.id()) {
             filtered.insert(selectionItem);
         }
     }
@@ -185,13 +166,41 @@ const QSet<SelectionItem *> Selection::filterPrevious(qint64 type) const
     return filtered;
 }
 
-const QSet<SelectionItem *> Selection::filterCurrent(qint64 type) const
+const QSet<SelectionItem *> Selection::filterCurrent(const TypeRef &typeRef) const
 {
     QSet<SelectionItem*> filtered;
 
     SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, m_currentSelection) {
-        if (selectionItem->ref().type() == type) {
+        if (selectionItem->ref().typeId() == typeRef.id()) {
+            filtered.insert(selectionItem);
+        }
+    }
+
+    return filtered;
+}
+
+const QSet<SelectionItem *> Selection::filterPreviousByBaseType(const TypeRef &typeRef) const
+{
+    QSet<SelectionItem*> filtered;
+
+    SelectionItem *selectionItem = nullptr;
+    foreach (selectionItem, m_previousSelection) {
+        if (selectionItem->ref().baseTypeOf(typeRef)) {
+            filtered.insert(selectionItem);
+        }
+    }
+
+    return filtered;
+}
+
+const QSet<SelectionItem *> Selection::filterCurrentByBaseType(const TypeRef &typeRef) const
+{
+    QSet<SelectionItem*> filtered;
+
+    SelectionItem *selectionItem = nullptr;
+    foreach (selectionItem, m_currentSelection) {
+        if (selectionItem->ref().baseTypeOf(typeRef)) {
             filtered.insert(selectionItem);
         }
     }

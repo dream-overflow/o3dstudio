@@ -63,7 +63,7 @@ void Fragment::setupMasterScene()
 
 void Fragment::create()
 {
-
+    setDirty();
 }
 
 bool Fragment::load()
@@ -85,6 +85,8 @@ void Fragment::linkToHub(Hub *hub)
 {
     m_hub = hub;
     m_hubRef = hub->ref();
+
+    setDirty();
 }
 
 Hub *Fragment::hub()

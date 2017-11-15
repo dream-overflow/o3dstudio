@@ -41,7 +41,7 @@ public:
     const QString& name() const;
     const QString& filename() const;
 
-    qint64 generateId();
+    quint32 generateProjectId();
 
     void setUuid(const QUuid &uuid);
 
@@ -161,13 +161,13 @@ public slots:
 private:
 
     QUuid m_uuid;
-    qint64 m_nextId;
+    quint32 m_nextId;
 
     QString m_filename;        //!< Related workspace file name
     QString m_name;            //!< Unique workspace name
 
     QStringList m_foundProjects;
-    QMap<qint64, Project*> m_loadedProjects;
+    QMap<quint32, Project*> m_loadedProjects;
 
     Project *m_activeProject{nullptr};
 

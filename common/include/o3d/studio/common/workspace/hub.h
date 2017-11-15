@@ -59,14 +59,14 @@ public:
     void addHub(Hub *hub);
 
     void removeHub(const LightRef &ref);
-    void removeHub(qint64 id);
+    void removeHub(quint64 id);
     void removeHub(Hub *hub);
 
     Hub* hub(const LightRef &ref);
     const Hub* hub(const LightRef &ref) const;
 
-    Hub* hub(qint64 id);
-    const Hub* hub(qint64 id) const;
+    Hub* hub(quint64 id);
+    const Hub* hub(quint64 id) const;
 
     QList<Hub*> searchHub(const QString &name);
     QList<const Hub*> searchHub(const QString &name) const;
@@ -74,12 +74,12 @@ public:
     /**
      * @brief Recursively find for a hub instance.
      */
-    Hub* findHub(qint64 id);
+    Hub* findHub(quint64 id);
 
     /**
      * @brief Recursively find for a hub instance (const version).
      */
-    const Hub* findHub(qint64 id) const;
+    const Hub* findHub(quint64 id) const;
 
     /**
      * @brief Recursively find for a hub instance.
@@ -108,9 +108,9 @@ public:
 
 private:
 
-    Project *m_project;         //!< Owner project;
+    Project *m_project;           //!< Owner project;
 
-    QMap<qint64, Hub*> m_hubs;  //!< Child hubs
+    QMap<quint64, Hub*> m_hubs;    //!< Child hubs
 };
 
 /**

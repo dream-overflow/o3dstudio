@@ -50,7 +50,7 @@ const Project *Hub::project() const
 
 void Hub::create()
 {
-
+    setDirty();
 }
 
 bool Hub::load()
@@ -83,6 +83,8 @@ void Hub::addHub(Hub *hub)
     m_hubs.insert(hub->ref().light().id(), hub);
     hub->setProject(project());
 
+    setDirty();
+
     // signal throught project->workspace
     emit project()->workspace()->onProjectHubAdded(hub->ref().light());
 }
@@ -103,11 +105,13 @@ void Hub::removeHub(const LightRef &_ref)
     delete hub;
     m_hubs.erase(it);
 
+    setDirty();
+
     // signal throught project->workspace
     emit project()->workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
-void Hub::removeHub(qint64 id)
+void Hub::removeHub(quint64 id)
 {
     auto it = m_hubs.find(id);
     if (it == m_hubs.end()) {
@@ -119,6 +123,8 @@ void Hub::removeHub(qint64 id)
     delete hub;
     m_hubs.erase(it);
 
+    setDirty();
+
     // signal throught project->workspace
     emit project()->workspace()->onProjectHubRemoved(hub->ref().light());
 }
@@ -129,6 +135,8 @@ void Hub::removeHub(Hub *hub)
         if (it.value() == hub) {
             delete it.value();
             m_hubs.erase(it);
+
+            setDirty();
 
             // signal throught project->workspace
             emit project()->workspace()->onProjectHubRemoved(hub->ref().light());
@@ -166,7 +174,7 @@ const Hub* Hub::hub(const LightRef &_ref) const
     return nullptr;
 }
 
-Hub* Hub::hub(qint64 id)
+Hub* Hub::hub(quint64 id)
 {
     auto it = m_hubs.find(id);
     if (it != m_hubs.end()) {
@@ -176,7 +184,7 @@ Hub* Hub::hub(qint64 id)
     return nullptr;
 }
 
-const Hub* Hub::hub(qint64 id) const
+const Hub* Hub::hub(quint64 id) const
 {
     auto cit = m_hubs.constFind(id);
     if (cit != m_hubs.cend()) {
@@ -214,7 +222,7 @@ QList<const Hub*> Hub::searchHub(const QString &name) const
     return results;
 }
 
-Hub *Hub::findHub(qint64 id)
+Hub *Hub::findHub(quint64 id)
 {
     // himself
     if (id == m_ref.light().id()) {
@@ -234,7 +242,7 @@ Hub *Hub::findHub(qint64 id)
     return nullptr;
 }
 
-const Hub *Hub::findHub(qint64 id) const
+const Hub *Hub::findHub(quint64 id) const
 {
     // himself
     if (id == m_ref.light().id()) {
@@ -352,7 +360,7 @@ bool Hub::serializeContent(QDataStream &stream) const
     foreach (hub, m_hubs) {
         // uuid and type ref, for instanciation
         stream << ref().uuid()
-               << ref().strong().type()
+               << ref().strong().typeName()
                << *hub;
     }
 

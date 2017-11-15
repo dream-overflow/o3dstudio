@@ -86,10 +86,26 @@ const Workspace *Project::workspace() const
     return m_workspace;
 }
 
-qint64 Project::generateId()
+quint64 Project::generateEntityId()
 {
-    qint64 nextId = m_nextId++;
+    quint64 nextId = m_nextId++;
     return nextId;
+}
+
+bool Project::hasChanges() const
+{
+    if (isDirty()) {
+        return true;
+    }
+
+    Entity *entity = nullptr;
+    foreach (entity, m_entitiesById) {
+        if (entity->hasChanges()) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void Project::create()
@@ -175,6 +191,7 @@ bool Project::save()
     // store indexe
     // @todo
 
+    setClean();
     return true;
 }
 
@@ -198,6 +215,50 @@ void Project::setupMasterScene()
     if (m_masterScene) {
         m_masterScene->initialize();
     }
+}
+
+Entity *Project::lookup(const LightRef &ref)
+{
+    if (ref.projectId() == ref.id()) {
+        auto it = m_entitiesById.find(ref.id());
+        if (it != m_entitiesById.end()) {
+            return it.value();
+        }
+    }
+
+    return nullptr;
+}
+
+const Entity *Project::lookup(const LightRef &ref) const
+{
+    if (ref.projectId() == ref.id()) {
+        auto cit = m_entitiesById.constFind(ref.id());
+        if (cit != m_entitiesById.cend()) {
+            return cit.value();
+        }
+    }
+
+    return nullptr;
+}
+
+Entity *Project::lookup(const QUuid &uuid)
+{
+    auto it = m_entitiesByUuid.find(uuid);
+    if (it != m_entitiesByUuid.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Entity *Project::lookup(const QUuid &uuid) const
+{
+    auto cit = m_entitiesByUuid.constFind(uuid);
+    if (cit != m_entitiesByUuid.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
 }
 
 void Project::addHub(Hub *hub)
@@ -358,7 +419,7 @@ QList<const Hub*> Project::searchHub(const QString &name) const
     return results;
 }
 
-Hub *Project::findHub(qint64 id)
+Hub *Project::findHub(quint64 id)
 {
     // first level
     Hub *result = nullptr;
@@ -373,7 +434,7 @@ Hub *Project::findHub(qint64 id)
     return nullptr;
 }
 
-const Hub *Project::findHub(qint64 id) const
+const Hub *Project::findHub(quint64 id) const
 {
     // first level
     const Hub *result = nullptr;
@@ -507,7 +568,7 @@ void Project::removeFragment(const LightRef &_ref)
     emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
 }
 
-void Project::removeFragment(qint64 id)
+void Project::removeFragment(quint64 id)
 {
     auto it = m_fragments.find(id);
     if (it == m_fragments.end()) {
@@ -572,7 +633,7 @@ const Fragment *Project::fragment(const LightRef &_ref) const
     return nullptr;
 }
 
-Fragment *Project::fragment(qint64 id)
+Fragment *Project::fragment(quint64 id)
 {
     auto it = m_fragments.find(id);
     if (it != m_fragments.end()) {
@@ -582,7 +643,7 @@ Fragment *Project::fragment(qint64 id)
     return nullptr;
 }
 
-const Fragment *Project::fragment(qint64 id) const
+const Fragment *Project::fragment(quint64 id) const
 {
     auto cit = m_fragments.constFind(id);
     if (cit != m_fragments.cend()) {
@@ -690,7 +751,7 @@ void Project::removeAsset(const LightRef &_ref)
     emit workspace()->onProjectAssetRemoved(asset->ref().light());
 }
 
-void Project::removeAsset(qint64 id)
+void Project::removeAsset(quint64 id)
 {
     auto it = m_assets.find(id);
     if (it == m_assets.end()) {
@@ -755,7 +816,7 @@ const Asset *Project::asset(const LightRef &_ref) const
     return nullptr;
 }
 
-Asset *Project::asset(qint64 id)
+Asset *Project::asset(quint64 id)
 {
     auto it = m_assets.find(id);
     if (it != m_assets.end()) {
@@ -765,7 +826,7 @@ Asset *Project::asset(qint64 id)
     return nullptr;
 }
 
-const Asset *Project::asset(qint64 id) const
+const Asset *Project::asset(quint64 id) const
 {
     auto cit = m_assets.constFind(id);
     if (cit != m_assets.cend()) {

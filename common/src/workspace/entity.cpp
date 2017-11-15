@@ -17,6 +17,7 @@ Entity::Entity(const QString &name, Entity *parent) :
     m_capacities()
 {
     m_capacities.resize(64);
+    setDirty();
 }
 
 Entity::~Entity()
@@ -27,6 +28,7 @@ Entity::~Entity()
 void Entity::setRef(const ObjectRef &ref)
 {
     m_ref = ref;
+    setDirty();
 }
 
 Entity *Entity::parent()
@@ -37,6 +39,12 @@ Entity *Entity::parent()
 const Entity *Entity::parent() const
 {
     return m_parent;
+}
+
+void Entity::setName(const QString &name)
+{
+    m_name = name;
+    setDirty();
 }
 
 const QString &Entity::name() const
@@ -59,7 +67,7 @@ bool Entity::exists() const
     return m_ref.light().isValid();
 }
 
-bool Entity::hasChanges()
+bool Entity::hasChanges() const
 {
     return isDirty();
 }
@@ -68,7 +76,7 @@ bool Entity::serializeContent(QDataStream &stream) const
 {
     stream << m_name
            << m_parent->ref().uuid()
-           << m_parent->ref().strong().type();
+           << m_parent->ref().strong().typeName();
 
     return true;
 }

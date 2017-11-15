@@ -153,6 +153,8 @@ PropertyItem* createItem(const QString &section, const QString &label, PropertyS
 
 void PropertyModel::setupModelData(const QList<PropertySection *> &data, PropertyItem *parent)
 {
+    Q_UNUSED(parent)
+
     PropertyItem *rootItem = m_rootItem;
 
     PropertySection *propertySection = nullptr;

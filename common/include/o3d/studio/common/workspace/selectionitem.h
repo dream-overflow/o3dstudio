@@ -15,28 +15,24 @@ namespace o3d {
 namespace studio {
 namespace common {
 
+class Entity;
+
 class O3S_API SelectionItem
 {
 public:
 
-    SelectionItem(const LightRef &ref, const TypeRef &typeRef);
-    SelectionItem(const LightRef &ref, const TypeRef &typeRef, const LightRef &parentRef, const TypeRef &parentTypeRef);
+    SelectionItem(const Entity *entity);
+    SelectionItem(const LightRef &ref);
+    SelectionItem(const LightRef &ref, const LightRef &parentRef);
 
     ~SelectionItem();
 
     inline const LightRef& ref() const { return m_ref; }
-    inline const TypeRef& typeRef() const { return m_typeRef; }
     inline const LightRef& parentRef() const { return m_parentRef; }
-    inline const TypeRef& parentTypeRef() const { return m_parentTypeRef; }
-
-    qint64 selectionType() const;
 
 private:
 
-    TypeRef m_parentTypeRef;
     LightRef m_parentRef;
-
-    TypeRef m_typeRef;
     LightRef m_ref;
 };
 

@@ -66,11 +66,6 @@ public:
      */
     void redoNCommands(int num);
 
-    /**
-     * @brief Internal command result.
-     */
-    void setCommandDone(Command *cmd);
-
     bool hasPendingCommands() const;
     bool hasRunningCommands() const;
     bool hasDoneCommands() const;

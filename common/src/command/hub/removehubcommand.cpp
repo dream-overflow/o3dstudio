@@ -15,19 +15,15 @@
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/project.h"
-#include "o3d/studio/common/workspace/fragment.h"
 #include "o3d/studio/common/workspace/hub.h"
-#include "o3d/studio/common/workspace/selection.h"
-#include "o3d/studio/common/workspace/selectionitem.h"
 
 using namespace o3d::studio::common;
 
 
-RemoveHubCommand::RemoveHubCommand(const LightRef &hubRef, const LightRef &parentRef, const TypeRef &parentTypeRef) :
+RemoveHubCommand::RemoveHubCommand(const LightRef &hubRef, const LightRef &parentRef) :
     Command("o3s::common::hub::remove", hubRef),
     m_parent(parentRef),
-    m_hub(hubRef),
-    m_parentTypeRef(parentTypeRef)
+    m_hub(hubRef)
 {
     Q_ASSERT(m_parent.isValid());
     Q_ASSERT(m_hub.isValid());
@@ -49,7 +45,7 @@ bool RemoveHubCommand::doCommand()
         Project *project = workspace->project(m_parent);
 
         // first level hub, direct to project
-        if (project && m_parentTypeRef.baseType() == TypeRef::project().id()) {
+        if (project && m_parent.baseTypeOf(TypeRef::project())) {
             Hub *hub = project->hub(m_hub);
             if (hub) {
                 // backup
@@ -60,7 +56,7 @@ bool RemoveHubCommand::doCommand()
                 project->removeHub(m_hub);
                 return true;
             }
-        } else if (project && m_parentTypeRef.baseType() == TypeRef::hub().id()) {
+        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 Hub *hub = parentHub->hub(m_hub);
@@ -87,8 +83,9 @@ bool RemoveHubCommand::undoCommand()
         Project *project = workspace->project(m_parent);
 
         // first level hub, direct to project
-        if (project && m_parentTypeRef.baseType() == TypeRef::project().id()) {
+        if (project && m_parent.baseTypeOf(TypeRef::project())) {
             Hub *hub = new Hub("", project);
+            hub->setProject(project);
 
             // restore content
             QDataStream stream(&m_data, QIODevice::ReadOnly);
@@ -98,11 +95,20 @@ bool RemoveHubCommand::undoCommand()
             m_data.clear();
 
             project->addHub(hub);
+
+            // iterator over children
+            common::Hub *node = nullptr;
+            foreach (node, hub->hubs(true)) {
+                // signal throught project->workspace
+                emit project->workspace()->onProjectHubAdded(node->ref().light());
+            }
+
             return true;
-        } else if (project && m_parentTypeRef.baseType() == TypeRef::hub().id()) {
+        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 Hub *hub = new Hub("", parentHub);
+                hub->setProject(project);
 
                 // restore content
                 QDataStream stream(&m_data, QIODevice::ReadOnly);
@@ -112,6 +118,14 @@ bool RemoveHubCommand::undoCommand()
                 m_data.clear();
 
                 parentHub->addHub(hub);
+
+                // iterator over children
+                common::Hub *node = nullptr;
+                foreach (node, hub->hubs(true)) {
+                    // signal throught project->workspace
+                    emit project->workspace()->onProjectHubAdded(node->ref().light());
+                }
+
                 return true;
             }
         }
@@ -127,7 +141,7 @@ bool RemoveHubCommand::redoCommand()
         Project *project = workspace->project(m_parent);
 
         // first level hub, direct to project
-        if (project && m_parentTypeRef.baseType() == TypeRef::project().id()) {
+        if (project && m_parent.baseTypeOf(TypeRef::project())) {
             Hub *hub = project->hub(m_hub);
             if (hub) {
                 // backup
@@ -138,7 +152,7 @@ bool RemoveHubCommand::redoCommand()
                 project->removeHub(m_hub);
                 return true;
             }
-        } else if (project && m_parentTypeRef.baseType() == TypeRef::hub().id()) {
+        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 Hub *hub = parentHub->hub(m_hub);

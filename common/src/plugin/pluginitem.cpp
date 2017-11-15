@@ -14,8 +14,8 @@ using namespace o3d::studio::common;
 
 
 PluginItem::PluginItem(const QString &section, const QString &name, const QList<QVariant> &data, PluginItem *parentItem) :
-    m_name(name),
     m_path(""),
+    m_name(name),
     m_itemData(data),
     m_parentItem(parentItem)
 {

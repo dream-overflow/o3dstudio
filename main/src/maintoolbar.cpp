@@ -113,7 +113,7 @@ void MainToolBar::onCreateHub()
             return;
         }
 
-        const QSet<common::SelectionItem*> hubs = selection.filterCurrent(common::TypeRef::hub().id());
+        const QSet<common::SelectionItem*> hubs = selection.filterCurrentByBaseType(common::TypeRef::hub());
         if (hubs.size() > 1) {
             return;
         }
@@ -121,10 +121,10 @@ void MainToolBar::onCreateHub()
         // add as sub-hub
         if (hubs.size() == 1) {
             auto it = hubs.begin();
-            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), (*it)->typeRef(), QString());
+            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), QString());
             common::Application::instance()->command().addCommand(cmd);
         } else {
-            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), project->typeRef(), QString());
+            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), QString());
             common::Application::instance()->command().addCommand(cmd);
         }
     }
@@ -150,6 +150,8 @@ void MainToolBar::setupButtons()
 
 void MainToolBar::onChangeCurrentWorkspace(const QString &name)
 {
+    Q_UNUSED(name)
+
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         // connect(workspace, SIGNAL(onProjectAdded(const LightRef &)), SLOT(onProjectAdded(const LightRef &)));

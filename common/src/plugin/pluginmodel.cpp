@@ -167,6 +167,8 @@ PluginItem* createItem(const QString &section, const QString &name, const QStrin
 
 void PluginModel::setupModelData(const QList<PluginSection *> &data, PluginItem *parent)
 {
+    Q_UNUSED(parent)
+
     PluginItem *rootItem = m_rootItem;
 
     PluginSection *section = nullptr;

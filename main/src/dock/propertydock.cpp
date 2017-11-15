@@ -55,8 +55,10 @@ Qt::DockWidgetArea PropertyDock::dockWidgetArea() const
 
 void PropertyDock::onSelectionChanged()
 {
-    const QSet<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPrevious(1);
-    const QSet<common::SelectionItem *> currentSelection = common::Application::instance()->selection().filterCurrent(1);
+    const QSet<common::SelectionItem *> previousSelection =
+            common::Application::instance()->selection().filterPreviousByBaseType(common::TypeRef::project());
+    const QSet<common::SelectionItem *> currentSelection =
+            common::Application::instance()->selection().filterCurrentByBaseType(common::TypeRef::project());
 
     common::SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, previousSelection) {

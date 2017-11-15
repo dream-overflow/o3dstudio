@@ -103,11 +103,15 @@ Workspace *WorkspaceManager::addWorkspace(const QString &name)
 
 Workspace *WorkspaceManager::workspace(const QString &name)
 {
+    Q_UNUSED(name)
+
     return nullptr;
 }
 
 const Workspace *WorkspaceManager::workspace(const QString &name) const
 {
+    Q_UNUSED(name)
+
     return nullptr;
 }
 

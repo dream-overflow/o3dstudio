@@ -42,7 +42,9 @@ public:
     Entity* parent();
     const Entity* parent() const;
 
+    void setName(const QString& name);
     const QString& name() const;
+
     const ObjectRef& ref() const;
 
     const TypeRef& typeRef() const;
@@ -70,7 +72,7 @@ public:
     /**
      * @brief Has changes to saved since last save(). Default ready the STATE_CHANGED flag.
      */
-    virtual bool hasChanges();
+    virtual bool hasChanges() const;
 
     /**
      * @brief Serialize the entity content.

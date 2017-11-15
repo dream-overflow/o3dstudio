@@ -193,7 +193,7 @@ void ProjectFile::save()
     Asset *asset = nullptr;
     foreach (asset, m_project->m_assets) {
         stream << asset->ref().uuid()
-               << asset->ref().strong().type()
+               << asset->ref().strong().typeName()
                << *asset;
     }
 
@@ -204,7 +204,7 @@ void ProjectFile::save()
     Hub *hub = nullptr;
     foreach (hub, m_project->m_hubs) {
         stream << hub->ref().uuid()
-               << hub->ref().strong().type()
+               << hub->ref().strong().typeName()
                << *hub;
     }
 
@@ -215,7 +215,7 @@ void ProjectFile::save()
     Fragment *fragment = nullptr;
     foreach (fragment, m_project->m_fragments) {
         stream << fragment->ref().uuid()
-               << fragment->ref().strong().type()
+               << fragment->ref().strong().typeName()
                << *fragment;
     }
 

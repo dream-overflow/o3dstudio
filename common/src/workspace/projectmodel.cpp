@@ -258,6 +258,11 @@ ProjectItem *ProjectModel::addHub(common::Hub *hub)
                                         parentItem);
     parentItem->appendChild(item);
 
+//    // iterator over children
+//    common::Hub *node = nullptr;
+//    foreach (node, hub->hubs(true)) {
+//        addHub(node);
+//    }
     endInsertRows();
 
     return item;

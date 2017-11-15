@@ -32,6 +32,8 @@ public:
 
 QValidator::State ProjectNameValidator::validate(QString &input, int &pos) const
 {
+    Q_UNUSED(pos)
+
     for (int i = 0 ; i < input.length(); ++i) {
         if (!input[i].isLetterOrNumber() && input[i] != '-' && input[i] != "_") {
             input.remove(i, 1);

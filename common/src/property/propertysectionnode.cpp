@@ -41,11 +41,13 @@ QString PropertySectionNode::label()
 
 bool PropertySectionNode::setupSection(QWidget *parent)
 {
+    Q_UNUSED(parent)
     return true;
 }
 
 bool PropertySectionNode::cleanupSection(QWidget *parent)
 {
+    Q_UNUSED(parent)
     return true;
 }
 

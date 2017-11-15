@@ -61,6 +61,8 @@ QSize CanvasContent::minimumSizeHint() const
 
 void CanvasContent::paintEvent(QPaintEvent *event)
 {
+    Q_UNUSED(event)
+
 //    static const QPoint points[4] = {
 //        QPoint(10, 80),
 //        QPoint(20, 10),

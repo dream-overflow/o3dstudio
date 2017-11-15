@@ -31,6 +31,8 @@ QtRenderer::~QtRenderer()
 
 void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug)
 {
+    Q_UNUSED(appWindow)
+
     if (!m_glWidget) {
         return;
     }
@@ -67,6 +69,8 @@ void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug)
 
 void QtRenderer::share(o3d::Renderer *sharing, o3d::AppWindow *appWindow, o3d::Bool debug)
 {
+    Q_UNUSED(appWindow)
+
     // @todo
     throw;
 }
@@ -129,6 +133,8 @@ o3d::Bool QtRenderer::isVerticalRefresh() const
     if (m_glWidget) {
         return m_glWidget->format().swapInterval() > 0;
     }
+
+    return false;
 }
 
 QOpenGLWidget *QtRenderer::ui()

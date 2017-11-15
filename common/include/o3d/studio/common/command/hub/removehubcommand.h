@@ -24,7 +24,7 @@ class O3S_API RemoveHubCommand : public Command
 
 public:
 
-    RemoveHubCommand(const LightRef &hubRef, const LightRef &parentRef, const TypeRef &parentTypeRef);
+    RemoveHubCommand(const LightRef &hubRef, const LightRef &parentRef);
     virtual ~RemoveHubCommand();
 
     virtual QString commandLabel() const override;
@@ -36,8 +36,6 @@ private:
 
     LightRef m_parent;
     LightRef m_hub;
-
-    TypeRef m_parentTypeRef;
 
     QByteArray m_data;
     ObjectRef m_storedHubRef;

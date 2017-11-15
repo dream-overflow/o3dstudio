@@ -69,8 +69,11 @@ public:
     const QSet<SelectionItem*> previousSelection() const;
     const QSet<SelectionItem*> currentSelection() const;
 
-    const QSet<SelectionItem*> filterPrevious(qint64 type) const;
-    const QSet<SelectionItem*> filterCurrent(qint64 type) const;
+    const QSet<SelectionItem*> filterPrevious(const TypeRef &typeRef) const;
+    const QSet<SelectionItem*> filterCurrent(const TypeRef &typeRef) const;
+
+    const QSet<SelectionItem*> filterPreviousByBaseType(const TypeRef &typeRef) const;
+    const QSet<SelectionItem*> filterCurrentByBaseType(const TypeRef &typeRef) const;
 
 public slots:
 

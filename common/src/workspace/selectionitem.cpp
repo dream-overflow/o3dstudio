@@ -7,25 +7,32 @@
  */
 
 #include "o3d/studio/common/workspace/selectionitem.h"
+#include "o3d/studio/common/workspace/entity.h"
 
 using namespace o3d::studio::common;
 
-SelectionItem::SelectionItem(const LightRef &ref, const TypeRef &typeRef) :
-    m_parentTypeRef(),
+SelectionItem::SelectionItem(const Entity *entity)
+{
+    Q_ASSERT(entity != nullptr);
+
+    if (entity) {
+        if (entity->parent()) {
+            m_parentRef = entity->parent()->ref().light();
+        }
+
+        m_ref = entity->ref().light();
+    }
+}
+
+SelectionItem::SelectionItem(const LightRef &ref) :
     m_parentRef(),
-    m_ref(ref),
-    m_typeRef(typeRef)
+    m_ref(ref)
 {
 
 }
 
-SelectionItem::SelectionItem(const LightRef &ref,
-                             const TypeRef &typeRef,
-                             const LightRef &parentRef,
-                             const TypeRef &parentTypeRef) :
-    m_parentTypeRef(parentTypeRef),
+SelectionItem::SelectionItem(const LightRef &ref, const LightRef &parentRef) :
     m_parentRef(parentRef),
-    m_typeRef(typeRef),
     m_ref(ref)
 {
 
@@ -34,9 +41,4 @@ SelectionItem::SelectionItem(const LightRef &ref,
 SelectionItem::~SelectionItem()
 {
 
-}
-
-qint64 SelectionItem::selectionType() const
-{
-    return m_ref.type();
 }

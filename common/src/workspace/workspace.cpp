@@ -18,7 +18,7 @@
 using namespace o3d::studio::common;
 
 Workspace::Workspace(const QString &name, QObject *parent) :
-    QObject(),
+    QObject(parent),
     m_nextId(1),
     m_name(name)
 {
@@ -38,9 +38,9 @@ Workspace::~Workspace()
     }
 }
 
-qint64 Workspace::generateId()
+quint32 Workspace::generateProjectId()
 {
-    qint64 nextId = m_nextId++;
+    quint64 nextId = m_nextId++;
     return nextId;
 }
 
@@ -67,7 +67,7 @@ void Workspace::setUuid(const QUuid &uuid)
 Project *Workspace::project(const LightRef &ref)
 {
     // id can comes from a project reference or a entity of this project
-    qint64 id = ref.type() == PROJECT_TYPE_ID ? ref.id() : ref.projectId();
+    quint64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
 
     auto it = m_loadedProjects.find(id);
     if (it != m_loadedProjects.end()) {
@@ -80,7 +80,7 @@ Project *Workspace::project(const LightRef &ref)
 const Project *Workspace::project(const LightRef &ref) const
 {
     // id can comes from a project reference or a entity of this project
-    qint64 id = ref.type() == PROJECT_TYPE_ID ? ref.id() : ref.projectId();
+    quint64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
 
     auto cit = m_loadedProjects.find(id);
     if (cit != m_loadedProjects.cend()) {
@@ -176,7 +176,7 @@ bool Workspace::hasProject(QString location) const
 bool Workspace::hasProject(const LightRef& ref) const
 {
     // id can comes from a project reference or a entity of this project
-    qint64 id = ref.type() == PROJECT_TYPE_ID ? ref.id() : ref.projectId();
+    qint64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
 
     auto cit = m_loadedProjects.find(id);
     return cit != m_loadedProjects.cend();
@@ -198,7 +198,7 @@ bool Workspace::hasChanges() const
 bool Workspace::setActiveProject(const LightRef &ref)
 {
     // id can comes from a project reference or a entity of this project
-    qint64 id = ref.type() == PROJECT_TYPE_ID ? ref.id() : ref.projectId();
+    quint64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
 
     auto it = m_loadedProjects.find(id);
     if (it != m_loadedProjects.end()) {
@@ -235,7 +235,7 @@ bool Workspace::load()
 
 Hub *Workspace::hub(const LightRef &ref)
 {
-    if (ref.type() == HUB_TYPE_ID) {
+    if (ref.baseTypeOf(TypeRef::hub())) {
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.end()) {
             Project *project = it.value();
@@ -248,7 +248,7 @@ Hub *Workspace::hub(const LightRef &ref)
 
 const Hub *Workspace::hub(const LightRef &ref) const
 {
-    if (ref.type() == HUB_TYPE_ID) {
+    if (ref.baseTypeOf(TypeRef::hub())) {
         auto cit = m_loadedProjects.constFind(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
             const Project *project = cit.value();
@@ -261,7 +261,7 @@ const Hub *Workspace::hub(const LightRef &ref) const
 
 Hub *Workspace::findHub(const LightRef &ref)
 {
-    if (ref.type() == HUB_TYPE_ID) {
+    if (ref.baseTypeOf(TypeRef::hub())) {
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.cend()) {
             Project *project = it.value();
@@ -274,7 +274,7 @@ Hub *Workspace::findHub(const LightRef &ref)
 
 const Hub *Workspace::findHub(const LightRef &ref) const
 {
-    if (ref.type() == HUB_TYPE_ID) {
+    if (ref.baseTypeOf(TypeRef::hub())) {
         auto cit = m_loadedProjects.constFind(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
             const Project *project = cit.value();
@@ -287,7 +287,7 @@ const Hub *Workspace::findHub(const LightRef &ref) const
 
 Fragment *Workspace::fragment(const LightRef &ref)
 {
-    if (ref.type() == FRAGMENT_TYPE_ID) {
+    if (ref.baseTypeOf(TypeRef::fragment())) {
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.end()) {
             Project *project = it.value();
@@ -300,7 +300,7 @@ Fragment *Workspace::fragment(const LightRef &ref)
 
 const Fragment *Workspace::fragment(const LightRef &ref) const
 {
-    if (ref.type() == FRAGMENT_TYPE_ID) {
+    if (ref.baseTypeOf(TypeRef::fragment())) {
         auto cit = m_loadedProjects.constFind(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
             const Project *project = cit.value();
@@ -313,7 +313,7 @@ const Fragment *Workspace::fragment(const LightRef &ref) const
 
 Asset *Workspace::asset(const LightRef &ref)
 {
-    if (ref.type() == ASSET_TYPE_ID) {
+    if (ref.baseTypeOf(TypeRef::asset())) {
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.end()) {
             Project *project = it.value();
@@ -326,7 +326,7 @@ Asset *Workspace::asset(const LightRef &ref)
 
 const Asset *Workspace::asset(const LightRef &ref) const
 {
-    if (ref.type() == ASSET_TYPE_ID) {
+    if (ref.baseTypeOf(TypeRef::asset())) {
         auto cit = m_loadedProjects.constFind(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
             const Project *project = cit.value();
@@ -342,8 +342,10 @@ void Workspace::onSelectionChanged()
     // done by the UI depending of the context, the need, and the selection
     return;
 
-    const QSet<SelectionItem *> previousSelection = Application::instance()->selection().filterPrevious(TypeRef::project().id());
-    const QSet<SelectionItem *> currentSelection = Application::instance()->selection().filterCurrent(TypeRef::project().id());
+    const QSet<SelectionItem *> previousSelection =
+            Application::instance()->selection().filterPreviousByBaseType(TypeRef::project());
+    const QSet<SelectionItem *> currentSelection =
+            Application::instance()->selection().filterCurrentByBaseType(TypeRef::project());
 
     bool changeProject = false;
 

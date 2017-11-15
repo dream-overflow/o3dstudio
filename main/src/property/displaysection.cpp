@@ -72,6 +72,8 @@ bool DisplaySection::cleanupSection(QWidget *parent)
     this->setParent(nullptr);
 
     hide();
+
+    return true;
 }
 
 void DisplaySection::commit()
