@@ -1,7 +1,7 @@
 /**
  * @brief Workspace current workspace current selection management.
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-08
  * @details
  */

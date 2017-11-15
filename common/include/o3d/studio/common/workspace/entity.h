@@ -1,7 +1,7 @@
 /**
  * @brief Common entity object
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-10
  * @details
  */
@@ -37,16 +37,16 @@ public:
     explicit Entity(const QString &name, Entity *parent = nullptr);
     virtual ~Entity();
 
-    void setRef(const ObjectRef &ref);
-
     Entity* parent();
     const Entity* parent() const;
 
     void setName(const QString& name);
     const QString& name() const;
 
+    void setRef(const ObjectRef &ref);
     const ObjectRef& ref() const;
 
+    void setTypeRef(const TypeRef &typeRef);
     const TypeRef& typeRef() const;
 
     virtual void create() = 0;

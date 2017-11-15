@@ -1,7 +1,7 @@
 /**
  * @brief Common interface for object that have capacity to draw inside an O3DCanvasContent object
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-01
  * @details
  */

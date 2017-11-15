@@ -1,7 +1,7 @@
 /**
  * @brief Common application singleton
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-10-19
  * @details
  */
@@ -40,7 +40,7 @@ Application::Application()
     m_workingDir = QDir::currentPath();
     m_appDir = QCoreApplication::applicationDirPath();
 
-    // take care of ordering
+    // instanciate, take care of ordering
     m_typeRegistry = new TypeRegistry();
     m_messenger = new Messenger();
     m_selection = new Selection();
@@ -50,7 +50,7 @@ Application::Application()
     m_componentRegistry = new ComponentRegistry();
     m_ui = new UiController();
 
-
+    // initialize
     m_commandManager->initialize();
 }
 

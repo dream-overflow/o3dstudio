@@ -1,7 +1,7 @@
 /**
  * @brief Common component base abstract class
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-10
  * @details
  */
@@ -34,4 +34,14 @@ const TypeRef &Component::typeRef() const
 const QString &Component::name() const
 {
     return m_name;
+}
+
+const QString &Component::hubName() const
+{
+    return m_hubName;
+}
+
+const TypeRef &Component::hubTypeRef() const
+{
+    return m_hubTypeRef;
 }

@@ -1,7 +1,7 @@
 /**
  * @brief Common type(ref) registry
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-10
  * @details
  */
@@ -20,11 +20,12 @@ TypeRegistry::TypeRegistry(QObject *parent) :
     m_typeRefs[HUB_TYPE_STRING] = TypeRef::hub();
     m_typeRefs[FRAGMENT_TYPE_STRING] = TypeRef::fragment();
     m_typeRefs[ASSET_TYPE_STRING] = TypeRef::asset();
+    m_typeRefs[COMPONENT_TYPE_STRING] = TypeRef::component();
 
     m_typeRefsById[TypeRef::project().id()] = TypeRef::project();
     m_typeRefsById[TypeRef::hub().id()] = TypeRef::hub();
     m_typeRefsById[TypeRef::fragment().id()] = TypeRef::fragment();
-    m_typeRefsById[TypeRef::asset().id()] = TypeRef::asset();
+    m_typeRefsById[TypeRef::component().id()] = TypeRef::component();
 
     m_nextId = MAX_TYPE_ID + 1;
 }
@@ -37,7 +38,7 @@ TypeRegistry::~TypeRegistry()
 bool TypeRegistry::registerType(EntityBaseType baseType, const QString &name)
 {
     // unknown base type
-    if (baseType < PROJECT_TYPE_ID || baseType > ASSET_TYPE_ID) {
+    if (baseType < MIN_TYPE_ID || baseType > MAX_TYPE_ID) {
         return false;
     }
 

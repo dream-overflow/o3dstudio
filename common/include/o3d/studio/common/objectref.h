@@ -1,7 +1,7 @@
 /**
  * @brief Common object reference for public and protected usages
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-09
  * @details
  */
@@ -30,16 +30,19 @@ class Project;
 enum EntityBaseType
 {
     PROJECT_TYPE_ID = 1,
+    MIN_TYPE_ID = PROJECT_TYPE_ID,
     HUB_TYPE_ID = 2,
     FRAGMENT_TYPE_ID = 3,
     ASSET_TYPE_ID = 4,
-    MAX_TYPE_ID = ASSET_TYPE_ID
+    COMPONENT_TYPE_ID = 5,
+    MAX_TYPE_ID = COMPONENT_TYPE_ID
 };
 
 constexpr char PROJECT_TYPE_STRING[] = "o3s::project";
 constexpr char HUB_TYPE_STRING[] = "o3s::hub";
 constexpr char FRAGMENT_TYPE_STRING[] = "o3s::fragment";
 constexpr char ASSET_TYPE_STRING[] = "o3s::asset";
+constexpr char COMPONENT_TYPE_STRING[] = "o3s::component";
 
 /**
  * @brief Permit the identification of a type.
@@ -54,6 +57,7 @@ public:
     static const TypeRef& hub();
     static const TypeRef& fragment();
     static const TypeRef& asset();
+    static const TypeRef& component();
 
     TypeRef();
     TypeRef(EntityBaseType baseType, quint32 id, const QString &name);

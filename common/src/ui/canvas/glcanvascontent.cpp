@@ -1,7 +1,7 @@
 /**
  * @brief Common OpenGL 4.5 canvas content
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-10-29
  * @details
  */

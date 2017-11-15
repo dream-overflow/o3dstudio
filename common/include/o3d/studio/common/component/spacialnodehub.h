@@ -1,0 +1,4 @@
+#ifndef SPACIALNODEHUB_H
+#define SPACIALNODEHUB_H
+
+#endif // SPACIALNODEHUB_H

@@ -1,7 +1,7 @@
 /**
  * @file qtrenderer.cpp
  * @brief Specialisation of the O3D renderer supporting Qt OpenGLWidget.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-01
  * @copyright Copyright (c) 2001-2017 Dream Overflow. All rights reserved.
  * @details

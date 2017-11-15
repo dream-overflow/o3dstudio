@@ -73,7 +73,12 @@ SOURCES += \
     src/workspace/asset.cpp \
     src/ui/uiutils.cpp \
     src/command/hub/removehubcommand.cpp \
-    src/command/fragment/removefragmentcommand.cpp
+    src/command/fragment/removefragmentcommand.cpp \
+    src/component/viewporthub.cpp \
+    src/component/spacialnodehub.cpp \
+    src/component/camerahub.cpp \
+    src/component/meshhub.cpp \
+    src/component/dummyhub.cpp
 
 
 HEADERS += \ 
@@ -133,7 +138,12 @@ HEADERS += \
     include/o3d/studio/common/workspace/asset.h \
     include/o3d/studio/common/ui/uiutils.h \
     include/o3d/studio/common/command/hub/removehubcommand.h \
-    include/o3d/studio/common/command/fragment/removefragmentcommand.h
+    include/o3d/studio/common/command/fragment/removefragmentcommand.h \
+    include/o3d/studio/common/component/viewporthub.h \
+    include/o3d/studio/common/component/spacialnodehub.h \
+    include/o3d/studio/common/component/camerahub.h \
+    include/o3d/studio/common/component/meshhub.h \
+    include/o3d/studio/common/component/dummyhub.h
 
 LIBS += -lobjective3d-dbg
 

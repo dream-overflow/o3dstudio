@@ -1,7 +1,7 @@
 /**
  * @brief Common object reference for public and protected usages
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-09
  * @details
  */
@@ -33,6 +33,12 @@ const TypeRef& TypeRef::TypeRef::fragment()
 const TypeRef& TypeRef::asset()
 {
     static TypeRef projectTypeRef = TypeRef(ASSET_TYPE_ID, ASSET_TYPE_ID, ASSET_TYPE_STRING);
+    return projectTypeRef;
+}
+
+const TypeRef &TypeRef::component()
+{
+    static TypeRef projectTypeRef = TypeRef(COMPONENT_TYPE_ID, COMPONENT_TYPE_ID, COMPONENT_TYPE_STRING);
     return projectTypeRef;
 }
 

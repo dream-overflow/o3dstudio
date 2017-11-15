@@ -1,7 +1,7 @@
 /**
  * @brief Common entity object
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
- * @author Frederic SCHERMA (frederic.scherma@gmail.com)
+ * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-10
  * @details
  */
@@ -55,6 +55,11 @@ const QString &Entity::name() const
 const ObjectRef &Entity::ref() const
 {
     return m_ref;
+}
+
+void Entity::setTypeRef(const TypeRef &typeRef)
+{
+    m_typeRef = typeRef;
 }
 
 const TypeRef& Entity::typeRef() const
