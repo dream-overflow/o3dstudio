@@ -28,14 +28,24 @@ ComponentRegistry::~ComponentRegistry()
     TypeRegistry &types = Application::instance()->types();
 
     m_componentsById.clear();
+    m_componentsByTargetName.clear();
 
     Component *component = nullptr;
     foreach (component, m_components) {
         types.unregisterType(component->typeRef());
-        types.unregisterType(component->hubTypeRef());
+        types.unregisterType(component->targetTypeRef());
 
         delete component;
     }
+}
+
+#include "o3d/studio/common/component/dummyhub.h"
+#include "o3d/studio/common/component/viewporthub.h"
+
+void ComponentRegistry::initialize()
+{
+    registerComponent(new DummyHubComponent());
+    registerComponent(new ViewportComponent());
 }
 
 void ComponentRegistry::registerComponent(Component *component)
@@ -53,12 +63,16 @@ void ComponentRegistry::registerComponent(Component *component)
         }
 
         // and its related hub type
-        if (!types.registerType(HUB_TYPE_ID, component->hubName())) {
-            throw ComponentException(tr("Hub type {0} cannot by registered").arg(component->hubName()));
+        if (!types.registerType(HUB_TYPE_ID, component->targetName())) {
+            throw ComponentException(tr("Hub type {0} cannot by registered").arg(component->targetName()));
         }
+
+        component->setTypeRef(types.typeRef(component->name()));
+        component->setTargetTypeRef(types.typeRef(component->targetName()));
 
         m_components.insert(component->name(), component);
         m_componentsById.insert(component->typeRef().id(), component);
+        m_componentsByTargetName.insert(component->targetName(), component);
 
         component->setup();
 
@@ -79,9 +93,14 @@ bool ComponentRegistry::unregisterComponent(const QString &name)
             m_componentsById.erase(it2);
         }
 
+        auto it3 = m_componentsByTargetName.find(component->targetName());
+        if (it3 != m_componentsByTargetName.end()) {
+            m_componentsByTargetName.erase(it3);
+        }
+
         TypeRegistry &types = Application::instance()->types();
         types.unregisterType(component->typeRef());
-        types.unregisterType(component->hubTypeRef());
+        types.unregisterType(component->targetTypeRef());
 
         emit onComponentUnregistered(name);
 
@@ -98,15 +117,21 @@ bool ComponentRegistry::unregisterComponent(quint64 id)
         Component *component = it2.value();
         QString name = component->name();
 
+        m_componentsById.erase(it2);
+
         auto it = m_components.find(component->name());
         if (it != m_components.end()) {
             m_components.erase(it);
         }
-        m_componentsById.erase(it2);
+
+        auto it3 = m_componentsByTargetName.find(component->targetName());
+        if (it3 != m_componentsByTargetName.end()) {
+            m_componentsByTargetName.erase(it3);
+        }
 
         TypeRegistry &types = Application::instance()->types();
         types.unregisterType(component->typeRef());
-        types.unregisterType(component->hubTypeRef());
+        types.unregisterType(component->targetTypeRef());
 
         delete component;
 
@@ -157,6 +182,26 @@ const Component *ComponentRegistry::component(const TypeRef &ref) const
 {
     auto cit = m_componentsById.constFind(ref.id());
     if (cit != m_componentsById.cend()) {
+        return cit.value();
+    }
+
+    return nullptr;
+}
+
+Component *ComponentRegistry::componentByTarget(const QString &name)
+{
+    auto it = m_componentsByTargetName.find(name);
+    if (it != m_componentsByTargetName.end()) {
+        return it.value();
+    }
+
+    return nullptr;
+}
+
+const Component *ComponentRegistry::componentByTarget(const QString &name) const
+{
+    auto cit = m_componentsByTargetName.constFind(name);
+    if (cit != m_componentsByTargetName.cend()) {
         return cit.value();
     }
 

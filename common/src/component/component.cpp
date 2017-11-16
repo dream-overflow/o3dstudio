@@ -21,7 +21,7 @@ Component::~Component()
 
 }
 
-void Component::setTypeRef(TypeRef &typeRef)
+void Component::setTypeRef(const TypeRef &typeRef)
 {
     m_typeRef = typeRef;
 }
@@ -36,12 +36,17 @@ const QString &Component::name() const
     return m_name;
 }
 
-const QString &Component::hubName() const
+const QString &Component::targetName() const
 {
-    return m_hubName;
+    return m_targetName;
 }
 
-const TypeRef &Component::hubTypeRef() const
+void Component::setTargetTypeRef(const  TypeRef &typeRef)
 {
-    return m_hubTypeRef;
+    m_targetTypeRef = typeRef;
+}
+
+const TypeRef &Component::targetTypeRef() const
+{
+    return m_targetTypeRef;
 }

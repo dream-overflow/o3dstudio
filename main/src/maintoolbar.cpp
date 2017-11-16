@@ -26,6 +26,8 @@
 #include "o3d/studio/common/workspace/hub.h"
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/selectionitem.h"
+#include "o3d/studio/common/component/componentregistry.h"
+#include "o3d/studio/common/component/component.h"
 
 #include "o3d/studio/common/ui/uiutils.h"
 
@@ -118,13 +120,18 @@ void MainToolBar::onCreateHub()
             return;
         }
 
+        const common::Component *component = common::Application::instance()->components().component("o3s::common::component::dummyhub");
+        if (!component) {
+            return;
+        }
+
         // add as sub-hub
         if (hubs.size() == 1) {
             auto it = hubs.begin();
-            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), QString());
+            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), component->typeRef(), QString());
             common::Application::instance()->command().addCommand(cmd);
         } else {
-            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), QString());
+            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), component->typeRef(), QString());
             common::Application::instance()->command().addCommand(cmd);
         }
     }

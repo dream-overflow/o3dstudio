@@ -26,7 +26,7 @@ class O3S_API AddHubCommand : public Command
 
 public:
 
-    AddHubCommand(const LightRef &parent, const QString &name);
+    AddHubCommand(const LightRef &parent, const TypeRef& componentType, const QString &name);
     virtual ~AddHubCommand();
 
     virtual QString commandLabel() const override;
@@ -35,6 +35,8 @@ public:
     virtual bool redoCommand() override;
 
 private:
+
+    TypeRef m_componentType;
 
     LightRef m_parent;
     ObjectRef m_storedHubRef;

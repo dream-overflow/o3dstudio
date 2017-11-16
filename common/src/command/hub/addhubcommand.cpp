@@ -19,11 +19,16 @@
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/selectionitem.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/component/component.h"
+#include "o3d/studio/common/component/componentregistry.h"
+
 using namespace o3d::studio::common;
 
 
-AddHubCommand::AddHubCommand(const LightRef &parent, const QString &name) :
+AddHubCommand::AddHubCommand(const LightRef &parent, const TypeRef& componentType, const QString &name) :
     Command("o3s::common::hub::add", parent),
+    m_componentType(componentType),
     m_parent(parent),
     m_hubName(name)
 {
@@ -49,14 +54,16 @@ bool AddHubCommand::doCommand()
     if (workspace) {
         Project *project = workspace->project(m_parent);
 
-        // @todo type is not suffisant need to compare with baseType
-        // @todo similar for AddFragmentCommand
+        Component *component = Application::instance()->components().component(m_componentType);
+        if (!component) {
+            return false;
+        }
 
         // first level hub, direct to project
         if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Hub *hub = new Hub(m_hubName, project);
+            Hub *hub = component->buildHub(m_hubName, project, project);
             // with new ref id
-            hub->setRef(ObjectRef::buildRef(project, TypeRef::hub()));
+            hub->setRef(ObjectRef::buildRef(project, hub->typeRef()));
 
             project->addHub(hub);
 
@@ -65,9 +72,9 @@ bool AddHubCommand::doCommand()
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
-                Hub *hub = new Hub(m_hubName, parentHub);
+                Hub *hub = component->buildHub(m_hubName, project, parentHub);
                 // with new ref id
-                hub->setRef(ObjectRef::buildRef(project, TypeRef::hub()));
+                hub->setRef(ObjectRef::buildRef(project, hub->typeRef()));
 
                 parentHub->addHub(hub);
 
@@ -108,9 +115,14 @@ bool AddHubCommand::redoCommand()
     if (workspace) {
         Project *project = workspace->project(m_parent);
 
+        Component *component = Application::instance()->components().component(m_componentType);
+        if (!component) {
+            return false;
+        }
+
         // first level hub, direct to project
         if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Hub *hub = new Hub(m_hubName, project);
+            Hub *hub = component->buildHub(m_hubName, project, project);
             // reuse ref id
             hub->setRef(m_storedHubRef);
 
@@ -119,7 +131,7 @@ bool AddHubCommand::redoCommand()
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
-                Hub *hub = new Hub(m_hubName, parentHub);
+                Hub *hub = component->buildHub(m_hubName, project, parentHub);
                 // reuse ref id
                 hub->setRef(m_storedHubRef);
 

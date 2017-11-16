@@ -22,6 +22,9 @@
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/typeregistry.h"
 
+#include "o3d/studio/common/component/componentregistry.h"
+#include "o3d/studio/common/component/component.h"
+
 using namespace o3d::studio::common;
 
 const char ProjectFile::PROJECT_MAGIC[] = "O3DSTUDIO";
@@ -123,17 +126,32 @@ void ProjectFile::load()
     // read hubs
     stream >> num;
 
+    ComponentRegistry &components = Application::instance()->components();
+    Component *component = nullptr;
+
     Hub *hub = nullptr;
     for (qint32 i = 0; i < num; ++i) {
         stream >> uuid
                >> typeName;
 
         // @todo ComponentFactory
-        hub = new Hub("", m_project);
-        hub->setRef(ObjectRef::buildRef(m_project, Application::instance()->types().typeRef(typeName), uuid));
-        hub->setProject(m_project);
+        component = components.componentByTarget(typeName);
+        if (component) {
+            hub = component->buildHub("", m_project, m_project);
+            hub->setRef(ObjectRef::buildRef(m_project, component->targetTypeRef(), uuid));
+            hub->setProject(m_project);
 
-        stream >> *hub;
+            stream >> *hub;
+        } else {
+            hub = new Hub("", m_project);
+            hub->setRef(ObjectRef::buildRef(m_project, TypeRef::hub(), uuid));
+            hub->setProject(m_project);
+
+            stream >> *hub;
+
+            // and pass the extra data
+            // stream.skipRawData(hubSize...) // @todo
+        }
 
         m_project->m_hubs.insert(hub->ref().light().id(), hub);
     }

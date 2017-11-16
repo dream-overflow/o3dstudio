@@ -18,6 +18,7 @@ namespace common {
 
 class Entity;
 class Project;
+class Hub;
 
 class O3S_API Component
 {
@@ -26,7 +27,7 @@ public:
     Component();
     virtual ~Component();
 
-    void setTypeRef(TypeRef& typeRef);
+    void setTypeRef(const TypeRef &typeRef);
     const TypeRef& typeRef() const;
 
     /**
@@ -37,12 +38,17 @@ public:
     /**
      * @brief Unique hub type string name.
      */
-    const QString& hubName() const;
+    const QString& targetName() const;
 
     /**
-     * @brief Hub type ref.
+     * @brief Set the target type ref.
      */
-    const TypeRef& hubTypeRef() const;
+    void setTargetTypeRef(const TypeRef& typeRef);
+
+    /**
+     * @brief Target type ref.
+     */
+    const TypeRef& targetTypeRef() const;
 
     // @todo soit ComponentUi object or directly label, icon.. action ?
     // const QString& label() const;
@@ -58,15 +64,15 @@ public:
      * @param parent Parent of the new hub
      * @return
      */
-    virtual Entity* instanciate(const QString &name, Project *project, Entity *parent) = 0;
+    virtual Hub* buildHub(const QString &name, Project *project, Entity *parent) = 0;
 
 protected:
 
     TypeRef m_typeRef;
     QString m_name;
 
-    TypeRef m_hubTypeRef;
-    QString m_hubName;
+    TypeRef m_targetTypeRef;
+    QString m_targetName;
 };
 
 } // namespace common

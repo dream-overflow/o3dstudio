@@ -14,7 +14,8 @@ using namespace o3d::studio::common;
 
 ViewportComponent::ViewportComponent()
 {
-
+    m_name = "o3s::common::component::viewporthub";
+    m_targetName = "o3s::common::hub::viewport";
 }
 
 ViewportComponent::~ViewportComponent()
@@ -27,7 +28,7 @@ void ViewportComponent::setup()
 
 }
 
-Entity *ViewportComponent::instanciate(const QString &name, Project *project, Entity *parent)
+Hub *ViewportComponent::buildHub(const QString &name, Project *project, Entity *parent)
 {
     if (!project) {
         return nullptr;
@@ -39,16 +40,19 @@ Entity *ViewportComponent::instanciate(const QString &name, Project *project, En
 
     ViewportHub *viewportHub = new ViewportHub(name, parent);
     viewportHub->setProject(project);
-    viewportHub->setTypeRef(m_hubTypeRef);
+    viewportHub->setTypeRef(m_targetTypeRef);
 
     if (parent->ref().light().baseTypeOf(TypeRef::project())) {
         project->addHub(viewportHub);
     } else if (parent->ref().light().baseTypeOf(TypeRef::hub())) {
         Hub *parentHub = static_cast<Hub*>(parent);
         parentHub->addHub(viewportHub);
+    } else {
+        delete viewportHub;
+        return nullptr;
     }
 
-    return nullptr;
+    return viewportHub;
 }
 
 ViewportHub::ViewportHub(const QString &name, Entity *parent) :
@@ -88,7 +92,7 @@ bool ViewportHub::exists() const
 
 bool ViewportHub::serializeContent(QDataStream &stream) const
 {
-    if (!Entity::serializeContent(stream)) {
+    if (!Hub::serializeContent(stream)) {
         return false;
     }
 
@@ -97,7 +101,7 @@ bool ViewportHub::serializeContent(QDataStream &stream) const
 
 bool ViewportHub::deserializeContent(QDataStream &stream)
 {
-    if (!Entity::deserializeContent(stream)) {
+    if (!Hub::deserializeContent(stream)) {
         return false;
     }
 

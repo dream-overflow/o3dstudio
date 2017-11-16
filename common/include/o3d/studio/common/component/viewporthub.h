@@ -30,7 +30,7 @@ public:
     virtual ~ViewportComponent();
 
     virtual void setup() override;
-    virtual Entity* instanciate(const QString &name, Project *project, Entity *parent) override;
+    virtual Hub* buildHub(const QString &name, Project *project, Entity *parent) override;
 
 protected:
 };
@@ -55,7 +55,7 @@ public:
     virtual bool serializeContent(QDataStream &stream) const;
     virtual bool deserializeContent(QDataStream &stream);
 
-private:
+protected:
 
     QPointF m_pos;
     QSizeF m_size;

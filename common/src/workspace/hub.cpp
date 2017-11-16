@@ -14,6 +14,9 @@
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/typeregistry.h"
 
+#include "o3d/studio/common/component/componentregistry.h"
+#include "o3d/studio/common/component/component.h"
+
 using namespace o3d::studio::common;
 
 
@@ -380,18 +383,31 @@ bool Hub::deserializeContent(QDataStream &stream)
     qint32 num = 0;
     stream >> num;
 
+    ComponentRegistry &components = Application::instance()->components();
+    Component *component = nullptr;
+
     for (qint32 i = 0; i < num; ++i) {
         stream >> uuid
                >> typeName;
 
-        // @todo ComponentFactory
-        hub = new Hub("", this);
-        hub->setRef(ObjectRef::buildRef(m_project, Application::instance()->types().typeRef(typeName), uuid));
-        hub->setProject(m_project);
+        component = components.componentByTarget(typeName);
+        if (component) {
+            hub = component->buildHub("", m_project, this);
+            hub->setRef(ObjectRef::buildRef(m_project, component->targetTypeRef(), uuid));
+            hub->setProject(m_project);
 
-        stream >> *hub;
+            stream >> *hub;
+        } else {
+            hub = new Hub("", this);
+            hub->setRef(ObjectRef::buildRef(m_project, TypeRef::hub(), uuid));
+            hub->setProject(m_project);
 
-        hub->setProject(m_project);
+            stream >> *hub;
+
+            // and pass the extra data
+            // stream.skipRawData(hubSize...) // @todo
+        }
+
         m_hubs.insert(hub->ref().light().id(), hub);
     }
 

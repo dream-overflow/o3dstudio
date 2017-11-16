@@ -32,6 +32,11 @@ public:
     virtual ~ComponentRegistry();
 
     /**
+     * @brief Register the default common components.
+     */
+    void initialize();
+
+    /**
      * @brief Register a component, that comes from a plugin or from the common.
      * @param component Valid component and must have a unique signature.
      */
@@ -47,6 +52,9 @@ public:
     Component* component(const TypeRef &ref);
     const Component* component(const TypeRef &ref) const;
 
+    Component* componentByTarget(const QString &name);
+    const Component* componentByTarget(const QString &name) const;
+
 signals:
 
     void onComponentRegistered(QString name);
@@ -56,6 +64,7 @@ protected:
 
     QMap<QString, Component*> m_components;
     QMap<quint64, Component*> m_componentsById;
+    QMap<QString, Component*> m_componentsByTargetName;
 };
 
 /**

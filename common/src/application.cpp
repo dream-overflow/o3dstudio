@@ -52,6 +52,7 @@ Application::Application()
 
     // initialize
     m_commandManager->initialize();
+    m_componentRegistry->initialize();
 }
 
 Application::~Application()
