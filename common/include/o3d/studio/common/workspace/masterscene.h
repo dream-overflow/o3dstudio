@@ -12,14 +12,17 @@
 #include <QtCore/QString>
 
 #include "o3d/studio/common/workspace/workspace.h"
-#include "o3d/studio/common/ui/qtrenderer.h"
 #include "o3d/studio/common/ui/canvas/o3ddrawer.h"
 
 namespace o3d {
+
+class Scene;
+
 namespace studio {
 namespace common {
 
 class O3DCanvasContent;
+class QtRenderer;
 
 class O3S_API MasterScene : public O3DDrawer
 {
@@ -36,6 +39,12 @@ public:
 
     QtRenderer* renderer();
     O3DCanvasContent* widget();
+
+    o3d::Scene* scene();
+    const o3d::Scene* scene() const;
+
+    O3DCanvasContent *content();
+    const O3DCanvasContent *content() const;
 
     virtual void initialize();
 

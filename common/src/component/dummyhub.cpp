@@ -94,3 +94,18 @@ bool DummyHub::deserializeContent(QDataStream &stream)
 
     return true;
 }
+
+void DummyHub::createToScene(MasterScene *masterScene)
+{
+
+}
+
+void DummyHub::removeFromScene(MasterScene *masterScene)
+{
+
+}
+
+void DummyHub::syncWithScene(MasterScene *masterScene)
+{
+
+}

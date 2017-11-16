@@ -17,6 +17,10 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/hub.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/component/component.h"
+#include "o3d/studio/common/component/componentregistry.h"
+
 using namespace o3d::studio::common;
 
 
@@ -82,9 +86,14 @@ bool RemoveHubCommand::undoCommand()
     if (workspace) {
         Project *project = workspace->project(m_parent);
 
+        Component *component = Application::instance()->components().componentByTarget(m_storedHubRef.strong().typeName());
+        if (!component) {
+            return false;
+        }
+
         // first level hub, direct to project
         if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Hub *hub = new Hub("", project);
+            Hub *hub = component->buildHub("", project, project);
             hub->setProject(project);
 
             // restore content
@@ -107,7 +116,7 @@ bool RemoveHubCommand::undoCommand()
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
-                Hub *hub = new Hub("", parentHub);
+                Hub *hub = component->buildHub("", project, parentHub);
                 hub->setProject(project);
 
                 // restore content

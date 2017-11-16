@@ -20,9 +20,9 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class O3S_API Component;
+class Component;
 
-class ComponentRegistry : public QObject
+class O3S_API ComponentRegistry : public QObject
 {
     Q_OBJECT
 

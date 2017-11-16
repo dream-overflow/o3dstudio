@@ -24,6 +24,7 @@
 
 #include "o3d/studio/common/component/componentregistry.h"
 #include "o3d/studio/common/component/component.h"
+#include "o3d/studio/common/component/dummyhub.h"
 
 using namespace o3d::studio::common;
 
@@ -143,8 +144,8 @@ void ProjectFile::load()
 
             stream >> *hub;
         } else {
-            hub = new Hub("", m_project);
-            hub->setRef(ObjectRef::buildRef(m_project, TypeRef::hub(), uuid));
+            hub = new DummyHub("", m_project);
+            hub->setRef(ObjectRef::buildRef(m_project, hub->typeRef(), uuid));
             hub->setProject(m_project);
 
             stream >> *hub;

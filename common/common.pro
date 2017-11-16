@@ -78,7 +78,9 @@ SOURCES += \
     src/component/spacialnodehub.cpp \
     src/component/camerahub.cpp \
     src/component/meshhub.cpp \
-    src/component/dummyhub.cpp
+    src/component/dummyhub.cpp \
+    src/importer/importer.cpp \
+    src/builder/builder.cpp
 
 
 HEADERS += \ 
@@ -143,7 +145,9 @@ HEADERS += \
     include/o3d/studio/common/component/spacialnodehub.h \
     include/o3d/studio/common/component/camerahub.h \
     include/o3d/studio/common/component/meshhub.h \
-    include/o3d/studio/common/component/dummyhub.h
+    include/o3d/studio/common/component/dummyhub.h \
+    include/o3d/studio/common/importer/importer.h \
+    include/o3d/studio/common/builder/builder.h
 
 LIBS += -lobjective3d-dbg
 

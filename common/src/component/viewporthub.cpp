@@ -107,3 +107,18 @@ bool ViewportHub::deserializeContent(QDataStream &stream)
 
     return true;
 }
+
+void ViewportHub::createToScene(MasterScene *masterScene)
+{
+
+}
+
+void ViewportHub::removeFromScene(MasterScene *masterScene)
+{
+
+}
+
+void ViewportHub::syncWithScene(MasterScene *masterScene)
+{
+
+}

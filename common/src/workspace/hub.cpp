@@ -16,6 +16,7 @@
 
 #include "o3d/studio/common/component/componentregistry.h"
 #include "o3d/studio/common/component/component.h"
+#include "o3d/studio/common/component/dummyhub.h"
 
 using namespace o3d::studio::common;
 
@@ -398,8 +399,8 @@ bool Hub::deserializeContent(QDataStream &stream)
 
             stream >> *hub;
         } else {
-            hub = new Hub("", this);
-            hub->setRef(ObjectRef::buildRef(m_project, TypeRef::hub(), uuid));
+            hub = new DummyHub("", this);
+            hub->setRef(ObjectRef::buildRef(m_project, hub->typeRef(), uuid));
             hub->setProject(m_project);
 
             stream >> *hub;

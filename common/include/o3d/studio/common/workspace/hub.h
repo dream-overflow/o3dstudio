@@ -24,6 +24,7 @@ namespace studio {
 namespace common {
 
 class Fragment;
+class MasterScene;
 
 /**
  * @brief The Hub base class
@@ -106,9 +107,28 @@ public:
      */
     QList<const Hub*> hubs(bool recurse = false) const;
 
+    //
+    // engine proxy
+    //
+
+    /**
+     * @brief Create the related entities into the engine scene.
+     */
+    virtual void createToScene(MasterScene *masterScene) = 0;
+
+    /**
+     * @brief Destroy the related entities fomr the engine scene.
+     */
+    virtual void removeFromScene(MasterScene *masterScene) = 0;
+
+    /**
+     * @brief Bi-directionnal synchronization with the engine scene.
+     */
+    virtual void syncWithScene(MasterScene *masterScene) = 0;
+
 private:
 
-    Project *m_project;           //!< Owner project;
+    Project *m_project;            //!< Owner project;
 
     QMap<quint64, Hub*> m_hubs;    //!< Child hubs
 };

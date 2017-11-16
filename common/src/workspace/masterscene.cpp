@@ -75,6 +75,26 @@ O3DCanvasContent* MasterScene::widget()
     return m_content;
 }
 
+o3d::Scene *MasterScene::scene()
+{
+    return m_scene;
+}
+
+const o3d::Scene *MasterScene::scene() const
+{
+    return m_scene;
+}
+
+O3DCanvasContent *MasterScene::content()
+{
+    return m_content;
+}
+
+const O3DCanvasContent *MasterScene::content() const
+{
+    return m_content;
+}
+
 void MasterScene::initialize()
 {
     if (m_content || m_scene || m_renderer) {
