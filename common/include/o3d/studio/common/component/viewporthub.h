@@ -18,6 +18,7 @@ namespace common {
 
 class Entity;
 class Project;
+class CameraHub;
 
 /**
  * @brief The ViewportComponent class
@@ -61,6 +62,8 @@ protected:
     QSizeF m_size;
 
     bool m_sizeInPercent;
+
+    CameraHub *m_cameraHub;
 };
 
 } // namespace common
