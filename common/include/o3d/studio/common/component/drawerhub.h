@@ -46,8 +46,8 @@ public:
     {
         DRAW_FORWARD_RENDERING = 0,
         DRAW_FORWARD_RENDERING_SHADOW_VOLUME = 1,
-        DRAW_DEFERED_RENDERING = 2,
-    }
+        DRAW_DEFERED_RENDERING = 2
+    };
 
     explicit DrawerHub(const QString &name, Entity *parent = nullptr);
     virtual ~DrawerHub();

@@ -24,7 +24,7 @@ SceneHubCommand::SceneHubCommand(Hub *hub, SceneHubCommand::CommandType cmdType)
     Q_ASSERT(hub != nullptr);
 
     if (m_hub) {
-        m_ref = m_hub->ref();
+        m_ref = m_hub->ref().light();
     }
 }
 

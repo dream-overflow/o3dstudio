@@ -39,7 +39,7 @@ public:
 /**
  * @brief The SceneHubCommand class
  */
-class O3S_API SceneHubCommand
+class O3S_API SceneHubCommand : public SceneCommand
 {
 public:
 
@@ -48,7 +48,7 @@ public:
         CREATE = 0,
         DELETE = 1,
         SYNC = 2
-    }
+    };
 
     SceneHubCommand(Hub *hub, CommandType cmdType);
     virtual ~SceneHubCommand();

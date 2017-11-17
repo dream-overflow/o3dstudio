@@ -71,8 +71,7 @@ ViewPortHub::ViewPortHub(const QString &name, Entity *parent) :
     m_percent(True),
     m_isActive(True),
     m_camera(nullptr),
-    m_drawer(nullptr),
-    m_duration(0.0f)
+    m_drawer(nullptr)
 {
 
 }

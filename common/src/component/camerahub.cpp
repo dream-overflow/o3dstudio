@@ -81,6 +81,7 @@ CameraHub::~CameraHub()
     // and it need to be per instance, but it also need for somes to setup the context before
     // so we need a sort of pull list to be done during sync when the renderer is activated for
     // example
+
     for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
         o3d::Camera *camera = it.value();
         delete camera;

@@ -23,6 +23,7 @@ namespace common {
 
 class O3DCanvasContent;
 class QtRenderer;
+class SceneCommand;
 
 class O3S_API MasterScene : public O3DDrawer
 {

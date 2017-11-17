@@ -54,7 +54,7 @@ public:
     {
         VIEWPORT_ENGINE = 0,   //!< Use the engine management for the viewport
         VIEWPORT_NATIVE = 1    //!< Use the capacity of the material to managed viewport in addition of the engine capacity
-    }
+    };
 
     explicit ViewPortHub(const QString &name, Entity *parent = nullptr);
     virtual ~ViewPortHub();
@@ -91,8 +91,8 @@ protected:
 
     qint32 m_nWidth, m_nHeight;  //!< real view-port size
 
-    CameraHub *m_cameraHub;
-    DrawerHub *m_drawerHub;
+    CameraHub *m_camera;
+    DrawerHub *m_drawer;
 };
 
 } // namespace common

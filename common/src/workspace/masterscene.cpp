@@ -12,6 +12,7 @@
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 #include "o3d/studio/common/ui/qtrenderer.h"
 #include "o3d/studio/common/ui/uicontroller.h"
+#include "o3d/studio/common/workspace/scenecommand.h"
 
 #include <o3d/engine/scene/scene.h>
 
