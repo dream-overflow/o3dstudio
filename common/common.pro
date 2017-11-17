@@ -80,7 +80,9 @@ SOURCES += \
     src/component/meshhub.cpp \
     src/component/dummyhub.cpp \
     src/importer/importer.cpp \
-    src/builder/builder.cpp
+    src/builder/builder.cpp \
+    src/component/drawerhub.cpp \
+    src/workspace/scenecommand.cpp
 
 
 HEADERS += \ 
@@ -147,7 +149,9 @@ HEADERS += \
     include/o3d/studio/common/component/meshhub.h \
     include/o3d/studio/common/component/dummyhub.h \
     include/o3d/studio/common/importer/importer.h \
-    include/o3d/studio/common/builder/builder.h
+    include/o3d/studio/common/builder/builder.h \
+    include/o3d/studio/common/component/drawerhub.h \
+    include/o3d/studio/common/workspace/scenecommand.h
 
 LIBS += -lobjective3d-dbg
 

@@ -6,29 +6,36 @@
  * @details
  */
 
+#include <o3d/engine/scene/scene.h>
+#include <o3d/engine/object/camera.h>
+#include <o3d/engine/scene/scenedrawer.h>
+#include <o3d/engine/screenviewport.h>
+#include <o3d/engine/feedbackviewport.h>
+#include <o3d/engine/viewportmanager.h>
+
 #include "o3d/studio/common/component/viewporthub.h"
 #include "o3d/studio/common/workspace/project.h"
 
 using namespace o3d::studio::common;
 
 
-ViewportComponent::ViewportComponent()
+ViewPortComponent::ViewPortComponent()
 {
     m_name = "o3s::common::component::viewporthub";
     m_targetName = "o3s::common::hub::viewport";
 }
 
-ViewportComponent::~ViewportComponent()
+ViewPortComponent::~ViewPortComponent()
 {
 
 }
 
-void ViewportComponent::setup()
+void ViewPortComponent::setup()
 {
 
 }
 
-Hub *ViewportComponent::buildHub(const QString &name, Project *project, Entity *parent)
+Hub *ViewPortComponent::buildHub(const QString &name, Project *project, Entity *parent)
 {
     if (!project) {
         return nullptr;
@@ -38,7 +45,7 @@ Hub *ViewportComponent::buildHub(const QString &name, Project *project, Entity *
         return nullptr;
     }
 
-    ViewportHub *viewportHub = new ViewportHub(name, parent);
+    ViewPortHub *viewportHub = new ViewPortHub(name, parent);
     viewportHub->setProject(project);
     viewportHub->setTypeRef(m_targetTypeRef);
 
@@ -55,42 +62,48 @@ Hub *ViewportComponent::buildHub(const QString &name, Project *project, Entity *
     return viewportHub;
 }
 
-ViewportHub::ViewportHub(const QString &name, Entity *parent) :
+ViewPortHub::ViewPortHub(const QString &name, Entity *parent) :
     Hub(name, parent),
-    m_pos(0.f, 0.f),
-    m_size(1.f, 1.f),
-    m_sizeInPercent(true)
+    m_xpos(0.f),
+    m_ypos(0.f),
+    m_width(1.f),
+    m_height(1.f),
+    m_percent(True),
+    m_isActive(True),
+    m_camera(nullptr),
+    m_drawer(nullptr),
+    m_duration(0.0f)
 {
 
 }
 
-ViewportHub::~ViewportHub()
+ViewPortHub::~ViewPortHub()
 {
 
 }
 
-void ViewportHub::create()
+void ViewPortHub::create()
 {
 
 }
 
-bool ViewportHub::load()
+bool ViewPortHub::load()
 {
     return Hub::load();
 }
 
-bool ViewportHub::save()
+bool ViewPortHub::save()
 {
     return Hub::save();
 }
 
-bool ViewportHub::exists() const
+bool ViewPortHub::exists() const
 {
     // @todo O3D
     return Entity::exists();
 }
 
-bool ViewportHub::serializeContent(QDataStream &stream) const
+bool ViewPortHub::serializeContent(QDataStream &stream) const
 {
     if (!Hub::serializeContent(stream)) {
         return false;
@@ -99,7 +112,7 @@ bool ViewportHub::serializeContent(QDataStream &stream) const
     return true;
 }
 
-bool ViewportHub::deserializeContent(QDataStream &stream)
+bool ViewPortHub::deserializeContent(QDataStream &stream)
 {
     if (!Hub::deserializeContent(stream)) {
         return false;
@@ -108,17 +121,17 @@ bool ViewportHub::deserializeContent(QDataStream &stream)
     return true;
 }
 
-void ViewportHub::createToScene(MasterScene *masterScene)
+void ViewPortHub::createToScene(MasterScene *masterScene)
 {
 
 }
 
-void ViewportHub::removeFromScene(MasterScene *masterScene)
+void ViewPortHub::removeFromScene(MasterScene *masterScene)
 {
 
 }
 
-void ViewportHub::syncWithScene(MasterScene *masterScene)
+void ViewPortHub::syncWithScene(MasterScene *masterScene)
 {
 
 }

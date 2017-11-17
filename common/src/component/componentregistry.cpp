@@ -45,7 +45,7 @@ ComponentRegistry::~ComponentRegistry()
 void ComponentRegistry::initialize()
 {
     registerComponent(new DummyHubComponent());
-    registerComponent(new ViewportComponent());
+    registerComponent(new ViewPortComponent());
 }
 
 void ComponentRegistry::registerComponent(Component *component)

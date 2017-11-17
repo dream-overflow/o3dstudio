@@ -19,16 +19,17 @@ namespace common {
 class Entity;
 class Project;
 class CameraHub;
+class DrawerHub;
 
 /**
- * @brief The ViewportComponent class
+ * @brief The ViewPortComponent class
  */
-class O3S_API ViewportComponent : public Component
+class O3S_API ViewPortComponent : public Component
 {
 public:
 
-    ViewportComponent();
-    virtual ~ViewportComponent();
+    ViewPortComponent();
+    virtual ~ViewPortComponent();
 
     virtual void setup() override;
     virtual Hub* buildHub(const QString &name, Project *project, Entity *parent) override;
@@ -37,14 +38,26 @@ protected:
 };
 
 /**
- * @brief The ViewportHub class
+ * @brief The ViewPortHub class
  */
-class O3S_API ViewportHub : public Hub
+class O3S_API ViewPortHub : public Hub
 {
 public:
 
-    explicit ViewportHub(const QString &name, Entity *parent = nullptr);
-    virtual ~ViewportHub();
+    enum ViewPortMode
+    {
+        VIEWPORT_SCREEN = 0,    //!< Viewport redirecting to the screen.
+        VIEWPORT_FEEDBACK = 1,  //!< Viewport redirecting to a off-screen buffer.
+    };
+
+    enum ViewPortImpl
+    {
+        VIEWPORT_ENGINE = 0,   //!< Use the engine management for the viewport
+        VIEWPORT_NATIVE = 1    //!< Use the capacity of the material to managed viewport in addition of the engine capacity
+    }
+
+    explicit ViewPortHub(const QString &name, Entity *parent = nullptr);
+    virtual ~ViewPortHub();
 
     virtual void create() override;
 
@@ -60,14 +73,26 @@ public:
     virtual void removeFromScene(MasterScene *masterScene) override;
     virtual void syncWithScene(MasterScene *masterScene) override;
 
+    //
+    // Properties
+    //
+
+    // @todo
+
 protected:
 
-    QPointF m_pos;
-    QSizeF m_size;
+    qint32 m_priority;
 
-    bool m_sizeInPercent;
+    float m_xpos, m_ypos;        //!< position
+    float m_width, m_height;     //!< size (can be in percent)
+
+    bool m_percent;              //!< is using size in percent
+    bool m_isActive;             //!< is active
+
+    qint32 m_nWidth, m_nHeight;  //!< real view-port size
 
     CameraHub *m_cameraHub;
+    DrawerHub *m_drawerHub;
 };
 
 } // namespace common

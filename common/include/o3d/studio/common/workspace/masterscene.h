@@ -61,6 +61,10 @@ private:
     O3DCanvasContent *m_content;  //!< Attached widget
     QtRenderer *m_renderer;       //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
+
+    //! Ordered list of command to process during the moment where the context is set to current.
+    //! In others words it is the pass of synchronization that will be executed here.
+    QList<SceneCommand*> m_commands;
 };
 
 } // namespace common

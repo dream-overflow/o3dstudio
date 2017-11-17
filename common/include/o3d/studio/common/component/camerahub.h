@@ -70,6 +70,12 @@ public:
     virtual void removeFromScene(MasterScene *masterScene) override;
     virtual void syncWithScene(MasterScene *masterScene) override;
 
+    //
+    // Properties
+    //
+
+    // @todo
+
 protected:
 
     float m_left, m_right;   //!< Orthonormal 2d projection coordinates

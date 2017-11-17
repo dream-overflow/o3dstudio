@@ -1,8 +1,8 @@
 /**
- * @brief Common dummy component offering a dummy hub.
+ * @brief Common drawer component offering a drawer hub.
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
- * @date 2017-11-16
+ * @date 2017-11-17
  * @details
  */
 
@@ -20,14 +20,14 @@ class Project;
 class Hub;
 
 /**
- * @brief The DummyHubComponent class
+ * @brief The DrawerHubComponent class
  */
-class O3S_API DummyHubComponent : public Component
+class O3S_API DrawerHubComponent : public Component
 {
 public:
 
-    DummyHubComponent();
-    virtual ~DummyHubComponent();
+    DrawerHubComponent();
+    virtual ~DrawerHubComponent();
 
     virtual void setup() override;
     virtual Hub* buildHub(const QString &name, Project *project, Entity *parent) override;
@@ -36,14 +36,21 @@ protected:
 };
 
 /**
- * @brief The DummyHub class
+ * @brief The DrawerHub class
  */
-class O3S_API DummyHub : public Hub
+class O3S_API DrawerHub : public Hub
 {
 public:
 
-    explicit DummyHub(const QString &name, Entity *parent = nullptr);
-    virtual ~DummyHub();
+    enum DrawerType
+    {
+        DRAW_FORWARD_RENDERING = 0,
+        DRAW_FORWARD_RENDERING_SHADOW_VOLUME = 1,
+        DRAW_DEFERED_RENDERING = 2,
+    }
+
+    explicit DrawerHub(const QString &name, Entity *parent = nullptr);
+    virtual ~DrawerHub();
 
     virtual void create() override;
 
@@ -58,6 +65,12 @@ public:
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;
     virtual void syncWithScene(MasterScene *masterScene) override;
+
+    //
+    // Properties
+    //
+
+    // @todo
 
 protected:
 };
