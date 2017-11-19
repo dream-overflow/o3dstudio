@@ -9,8 +9,7 @@
 #ifndef _O3DS_COMMON_UICONTROLLER_H
 #define _O3DS_COMMON_UICONTROLLER_H
 
-#include <QtCore/QString>
-#include <QtCore/QVariant>
+#include <o3d/core/baseobject.h>
 
 #include "content.h"
 #include "dock.h"
@@ -20,57 +19,57 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class O3S_API UiController: public QObject
+class O3S_API UiController: public BaseObject
 {
-    Q_OBJECT
-
 public:
 
     UiController();
     virtual ~UiController();
 
-    bool addContent(Content *content);
-    bool addDock(Dock *dock);
-    bool addToolBar(ToolBar *toolBar);
+    Bool addContent(Content *content);
+    Bool addDock(Dock *dock);
+    Bool addToolBar(ToolBar *toolBar);
 
-    bool removeContent(Content *content);
-    bool removeDock(Dock *dock);
-    bool removeToolBar(ToolBar *toolBar);
+    Bool removeContent(Content *content);
+    Bool removeDock(Dock *dock);
+    Bool removeToolBar(ToolBar *toolBar);
 
-    bool removeContent(const QString &name);
-    bool removeDock(const QString &name);
-    bool removeToolBar(const QString &name);
+    Bool removeContent(const String &name);
+    Bool removeDock(const String &name);
+    Bool removeToolBar(const String &name);
 
-    bool setActiveContent(Content *content, bool showHide);
+    Bool setActiveContent(Content *content, Bool showHide);
+    Content *activeContent();
+    const Content *activeContent() const;
 
-    Content* content(const QString &name);
-    const Content* content(const QString &name) const;
+    Content* content(const String &name);
+    const Content* content(const String &name) const;
 
-    Dock* dock(const QString &name);
-    const Dock* dock(const QString &name) const;
+    Dock* dock(const String &name);
+    const Dock* dock(const String &name) const;
 
-    ToolBar* toolBar(const QString &name);
-    const ToolBar* toolBar(const QString &name) const;
+    ToolBar* toolBar(const String &name);
+    const ToolBar* toolBar(const String &name) const;
 
-signals:
+public /*signals*/:
 
-    void attachContent(QString name, QWidget *content);
-    void attachDock(QString name, QDockWidget *dock, Qt::DockWidgetArea area);
-    void attachToolBar(QString name, QToolBar *toolbar, Qt::ToolBarArea area);
+    Signal<String /*name*/, Content* /*content*/> attachContent{this};
+    Signal<String /*name*/, Dock* /*content*/> attachDock{this};
+    Signal<String /*name*/, ToolBar* /*content*/> attachToolBar{this};
 
-    void detachContent(QString name, QWidget *content);
-    void detachDock(QString name, QDockWidget *dock);
-    void detachToolBar(QString name, QToolBar *toolbar);
+    Signal<String /*name*/, Content* /*content*/> detachContent{this};
+    Signal<String /*name*/, Dock* /*content*/> detachDock{this};
+    Signal<String /*name*/, ToolBar* /*content*/> detachToolBar{this};
 
-    void showContent(QString name, QWidget *content, bool showHide);
+    Signal<String /*name*/, Content* /*content*/, Bool /*showHide*/> showContent{this};
 
 private:
 
     Content* m_activeContent;
 
-    QList<Content*> m_contents;
-    QList<Dock*> m_docks;
-    QList<ToolBar*> m_toolBars;
+    std::list<Content*> m_contents;
+    std::list<Dock*> m_docks;
+    std::list<ToolBar*> m_toolBars;
 
     //! Non copyable
     UiController(const UiController&);

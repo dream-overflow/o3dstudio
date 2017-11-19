@@ -76,12 +76,12 @@ void Hub::addHub(Hub *hub)
 {
     // not created for this project
     if (hub->ref().light().projectId() != project()->ref().light().id()) {
-        throw HubException(tr("Trying to add a hub that is created for another project"));
+        throw E_HubException(fromQString(tr("Trying to add a hub that is created for another project")));
     }
 
     // already exists
     if (m_hubs.find(hub->ref().light().id()) != m_hubs.end()) {
-        throw HubException(tr("Trying to add a previously added hub, or with a similar id"));
+        throw E_HubException(fromQString(tr("Trying to add a previously added hub, or with a similar id")));
     }
 
     m_hubs.insert(hub->ref().light().id(), hub);
@@ -96,12 +96,12 @@ void Hub::addHub(Hub *hub)
 void Hub::removeHub(const LightRef &_ref)
 {
     if (_ref.projectId() != project()->ref().light().id()) {
-        throw HubException(tr("Trying to remove a reference for another project"));
+        throw E_HubException(fromQString(tr("Trying to remove a reference for another project")));
     }
 
     auto it = m_hubs.find(_ref.id());
     if (it == m_hubs.end()) {
-        throw HubException(tr("Trying to remove an unknown reference"));
+        throw E_HubException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
     Hub *hub = it.value();
@@ -119,7 +119,7 @@ void Hub::removeHub(quint64 id)
 {
     auto it = m_hubs.find(id);
     if (it == m_hubs.end()) {
-        throw HubException(tr("Trying to remove an unknown reference"));
+        throw E_HubException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
     Hub *hub = it.value();
@@ -413,10 +413,4 @@ bool Hub::deserializeContent(QDataStream &stream)
     }
 
     return true;
-}
-
-HubException::HubException(const QString &message) :
-    BaseException(message)
-{
-
 }

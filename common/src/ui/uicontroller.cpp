@@ -6,10 +6,9 @@
  * @details
  */
 
-#include <QtCore/QSettings>
-#include <QtCore/QCoreApplication>
-
 #include "o3d/studio/common/ui/uicontroller.h"
+
+#include <algorithm>
 
 using namespace o3d::studio::common;
 
@@ -18,7 +17,7 @@ Element::~Element()
 }
 
 UiController::UiController() :
-    QObject(),
+    BaseObject(),
     m_activeContent(nullptr)
 {
 
@@ -63,198 +62,212 @@ UiController::~UiController()
     }
 }
 
-bool UiController::addContent(Content *content)
+o3d::Bool UiController::addContent(Content *content)
 {
     if (content == nullptr) {
-        return false;
+        return False;
     }
 
-    if (m_contents.indexOf(content) >= 0) {
-        return false;
+    auto it = std::find(m_contents.begin(), m_contents.end(), content);
+    if (it != m_contents.end()) {
+        return False;
     }
 
     if (content->ui()) {
-        content->ui()->setProperty("name", content->elementName());
+        content->ui()->setProperty("name", toQString(content->elementName()));
     }
 
-    m_contents.append(content);
-    emit attachContent(content->elementName(), content->ui());
+    m_contents.push_back(content);
 
-    return true;
+    // emit
+    attachContent(content->elementName(), content);
+
+    return True;
 }
 
-bool UiController::addDock(Dock *dock)
+o3d::Bool UiController::addDock(Dock *dock)
 {
     if (dock == nullptr) {
-        return false;
+        return False;
     }
 
-    if (m_docks.indexOf(dock) >= 0) {
-        return false;
+    auto it = std::find(m_docks.begin(), m_docks.end(), dock);
+    if (it != m_docks.end()) {
+        return False;
     }
 
     if (dock->ui()) {
-        dock->ui()->setProperty("name", dock->elementName());
+        dock->ui()->setProperty("name", toQString(dock->elementName()));
     }
 
-    m_docks.append(dock);
-    emit attachDock(dock->elementName(), dock->ui(), dock->dockWidgetArea());
+    m_docks.push_back(dock);
+    attachDock(dock->elementName(), dock);
 
-    return true;
+    return True;
 }
 
-bool UiController::addToolBar(ToolBar *toolBar)
+o3d::Bool UiController::addToolBar(ToolBar *toolBar)
 {
     if (toolBar == nullptr) {
-        return false;
+        return False;
     }
 
-    if (m_toolBars.indexOf(toolBar) >= 0) {
-        return false;
+    auto it = std::find(m_toolBars.begin(), m_toolBars.end(), toolBar);
+    if (it != m_toolBars.end()) {
+        return False;
     }
 
     if (toolBar->ui()) {
-        toolBar->ui()->setProperty("name", toolBar->elementName());
+        toolBar->ui()->setProperty("name", toQString(toolBar->elementName()));
     }
 
-    m_toolBars.append(toolBar);
-    emit attachToolBar(toolBar->elementName(), toolBar->ui(), toolBar->toolBarArea());
+    m_toolBars.push_back(toolBar);
+    attachToolBar(toolBar->elementName(), toolBar);
 
-    return true;
+    return True;
 }
 
-bool UiController::removeContent(Content *content)
+o3d::Bool UiController::removeContent(Content *content)
 {
     if (content == nullptr) {
-        return false;
+        return False;
     }
 
-    int index = -1;
-    if ((index = m_contents.indexOf(content)) >= 0) {
-        m_contents.removeAt(index);
+    auto it = std::find(m_contents.begin(), m_contents.end(), content);
+    if (it != m_contents.end()) {
+        m_contents.erase(it);
 
         if (m_activeContent == content) {
             m_activeContent = nullptr;
         }
 
-        emit detachContent(content->elementName(), content->ui());
+        detachContent(content->elementName(), content);
 
         if (content->ui()) {
             content->ui()->setProperty("name", "");
         }
 
         content->ui()->setParent(nullptr);
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-bool UiController::removeContent(const QString &name)
+o3d::Bool UiController::removeContent(const String &name)
 {
     Content *lcontent = content(name);
     return removeContent(lcontent);
 }
 
-bool UiController::removeDock(Dock *dock)
+o3d::Bool UiController::removeDock(Dock *dock)
 {
     if (dock == nullptr) {
-        return false;
+        return False;
     }
 
-    int index = -1;
-    if ((index = m_docks.indexOf(dock)) >= 0) {
-        m_docks.removeAt(index);
+    auto it = std::find(m_docks.begin(), m_docks.end(), dock);
+    if (it != m_docks.end()) {
+        m_docks.erase(it);
 
-        emit detachDock(dock->elementName(), dock->ui());
+        detachDock(dock->elementName(), dock);
 
         if (dock->ui()) {
             dock->ui()->setProperty("name", "");
         }
 
         dock->ui()->setParent(nullptr);
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-bool UiController::removeDock(const QString &name)
+o3d::Bool UiController::removeDock(const String &name)
 {
     Dock *ldock = dock(name);
     return removeDock(ldock);
 }
 
-bool UiController::removeToolBar(ToolBar *toolBar)
+o3d::Bool UiController::removeToolBar(ToolBar *toolBar)
 {
     if (toolBar == nullptr) {
-        return false;
+        return False;
     }
 
-    int index = -1;
-    if ((index = m_toolBars.indexOf(toolBar)) >= 0) {
-        m_toolBars.removeAt(index);
+    auto it = std::find(m_toolBars.begin(), m_toolBars.end(), toolBar);
+    if (it != m_toolBars.end()) {
+        m_toolBars.erase(it);
 
-        emit detachToolBar(toolBar->elementName(), toolBar->ui());
+        detachToolBar(toolBar->elementName(), toolBar);
 
         if (toolBar->ui()) {
             toolBar->ui()->setProperty("name", "");
         }
 
         toolBar->ui()->setParent(nullptr);
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-bool UiController::removeToolBar(const QString &name)
+o3d::Bool UiController::removeToolBar(const String &name)
 {
     ToolBar *ltoolBar = toolBar(name);
     return removeToolBar(ltoolBar);
 }
 
-bool UiController::setActiveContent(Content *content, bool showHide)
+o3d::Bool UiController::setActiveContent(Content *content, o3d::Bool showHide)
 {
     if (content == nullptr) {
-        return false;
+        return False;
     }
 
-    int index = -1;
-    if ((index = m_contents.indexOf(content)) >= 0) {
+    auto it = std::find(m_contents.begin(), m_contents.end(), content);
+    if (it != m_contents.end()) {
         if (showHide) {
             if (m_activeContent == content) {
-                return true;
+                return True;
             } else {
                 m_activeContent = content;
-                emit showContent(content->elementName(), content->ui(), true);
+                showContent(content->elementName(), content, true);
             }
         } else {
             if (m_activeContent != content) {
-                return true;
+                return True;
             } else {
                 m_activeContent = nullptr;
-                emit showContent(content->elementName(), content->ui(), false);
+                showContent(content->elementName(), content, false);
 
                 // uses the last in the list
-                if (!m_contents.isEmpty()) {
+                if (!m_contents.empty()) {
                     m_activeContent = m_contents.back();
 
-                    emit showContent(m_activeContent->elementName(), m_activeContent->ui(), true);
+                    showContent(m_activeContent->elementName(), m_activeContent, true);
                 }
             }
         }
 
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-Content *UiController::content(const QString &name)
+Content *UiController::activeContent()
 {
-    Content *content = nullptr;
-    foreach(content, m_contents) {
+    return m_activeContent;
+}
+
+const Content *UiController::activeContent() const
+{
+    return m_activeContent;
+}
+
+Content *UiController::content(const String &name)
+{
+    for (Content *content : m_contents) {
         if (content->elementName() == name) {
             return content;
         }
@@ -263,10 +276,9 @@ Content *UiController::content(const QString &name)
     return nullptr;
 }
 
-const Content *UiController::content(const QString &name) const
+const Content *UiController::content(const String &name) const
 {
-    const Content *content = nullptr;
-    foreach(content, m_contents) {
+    for (const Content *content : m_contents) {
         if (content->elementName() == name) {
             return content;
         }
@@ -275,10 +287,9 @@ const Content *UiController::content(const QString &name) const
     return nullptr;
 }
 
-Dock *UiController::dock(const QString &name)
+Dock *UiController::dock(const String &name)
 {
-    Dock *dock = nullptr;
-    foreach(dock, m_docks) {
+    for (Dock *dock: m_docks) {
         if (dock->elementName() == name) {
             return dock;
         }
@@ -287,10 +298,9 @@ Dock *UiController::dock(const QString &name)
     return nullptr;
 }
 
-const Dock *UiController::dock(const QString &name) const
+const Dock *UiController::dock(const String &name) const
 {
-    const Dock *dock = nullptr;
-    foreach(dock, m_docks) {
+    for (const Dock *dock: m_docks) {
         if (dock->elementName() == name) {
             return dock;
         }
@@ -299,10 +309,9 @@ const Dock *UiController::dock(const QString &name) const
     return nullptr;
 }
 
-ToolBar *UiController::toolBar(const QString &name)
+ToolBar *UiController::toolBar(const String &name)
 {
-    ToolBar *toolBar = nullptr;
-    foreach(toolBar, m_toolBars) {
+    for (ToolBar *toolBar: m_toolBars) {
         if (toolBar->elementName() == name) {
             return toolBar;
         }
@@ -311,10 +320,9 @@ ToolBar *UiController::toolBar(const QString &name)
     return nullptr;
 }
 
-const ToolBar *UiController::toolBar(const QString &name) const
+const ToolBar *UiController::toolBar(const String &name) const
 {
-    const ToolBar *toolBar = nullptr;
-    foreach(toolBar, m_toolBars) {
+    for (const ToolBar *toolBar: m_toolBars) {
         if (toolBar->elementName() == name) {
             return toolBar;
         }

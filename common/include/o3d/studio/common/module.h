@@ -9,16 +9,18 @@
 #ifndef _O3DS_COMMON_MODULE_H
 #define _O3DS_COMMON_MODULE_H
 
-#include <QtCore/QString>
-#include <QtCore/QBitArray>
-
-class QLibrary;
+#include <o3d/core/templatebitset.h>
+#include <o3d/core/string.h>
+#include <o3d/core/stringlist.h>
 
 #include "global.h"
 #include "capacity.h"
 #include "moduleinfo.h"
 
 namespace o3d {
+
+class DynamicLibrary;
+
 namespace studio {
 namespace common {
 
@@ -26,24 +28,24 @@ class O3S_API Module
 {
 public:
 
-    Module(const QString &name);
+    Module(const String &name);
     virtual ~Module();
 
-    const QString& name() const;
-    bool started() const;
+    const String& name() const;
+    Bool started() const;
 
     ModuleInfo provideInfo() const;
 
-    virtual QLibrary* library();
+    virtual DynamicLibrary* library();
 
-    const QBitArray& capacities() const;
+    const BitSet64& capacities() const;
 
-    bool hasCapacity(Capacity cap) const;
+    Bool hasCapacity(Capacity cap) const;
 
-    virtual bool start();
-    virtual bool stop();
+    virtual Bool start();
+    virtual Bool stop();
 
-    const QStringList& report() const;
+    const T_StringList& report() const;
 
     /**
      * @brief Restart the module if loaded, and previously started.
@@ -53,14 +55,14 @@ public:
 
 protected:
 
-    QString m_name;                         //!< Unique module name
-    QMap<QString, QVariant> m_properties;   //!< Module info and user properties
+    String m_name;                //!< Unique module name
+    std::map<String, String> m_properties;   //!< Module info and user properties
 
-    QBitArray m_capacities{64};   //!< List of exposed and supported capacities
+    BitSet64 m_capacities;        //!< List of exposed and supported capacities
 
-    bool m_started{false};        //!< Started module capacities
+    Bool m_started{false};        //!< Started module capacities
 
-    QStringList m_report;         //!< report of starting module
+    T_StringList m_report;        //!< report of starting module
 };
 
 } // namespace common

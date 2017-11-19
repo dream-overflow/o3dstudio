@@ -11,6 +11,7 @@
 #include<QtCore/QThread>
 #include<QtCore/QCoreApplication>
 #include<QtCore/QLibraryInfo>
+#include<QtCore/QLocale>
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/modulemanager.h"
@@ -24,11 +25,15 @@
 #include "o3d/studio/common/storage/store.h"
 #include "o3d/studio/common/workspace/selection.h"
 
+#include <o3d/core/application.h>
+#include <o3d/core/filemanager.h>
+
 using namespace o3d::studio::common;
 
 Application* Application::m_instance = nullptr;
 
-Application::Application()
+Application::Application() :
+    m_started(False)
 {
     qRegisterMetaType<LightRef>("LightRef");
     qRegisterMetaType<QtMsgType>();
@@ -37,8 +42,8 @@ Application::Application()
     m_instance = (Application*)this;
 
     // get working directory as path
-    m_workingDir = QDir::currentPath();
-    m_appDir = QCoreApplication::applicationDirPath();
+    m_workingDir = FileManager::instance()->getWorkingDirectory();
+    m_appDir = o3d::Application::getAppPath();
 
     // instanciate, take care of ordering
     m_typeRegistry = new TypeRegistry();
@@ -78,7 +83,7 @@ Application* Application::instance()
     return m_instance;
 }
 
-bool Application::hasInstance()
+o3d::Bool Application::hasInstance()
 {
     return m_instance != nullptr;
 }
@@ -92,12 +97,12 @@ void Application::destroy()
     }
 }
 
-const QString &Application::appDir() const
+const o3d::String &Application::appDir() const
 {
     return m_appDir;
 }
 
-const QString& Application::workingDir() const
+const o3d::String& Application::workingDir() const
 {
     return m_workingDir;
 }
@@ -192,12 +197,12 @@ const TypeRegistry &Application::types() const
     return *m_typeRegistry;
 }
 
-bool Application::start()
+o3d::Bool Application::start()
 {
     m_settings.loadAll();
 
-    ModuleManager::instance()->setPluginsPath(m_settings.get("o3s::plugin::path").toUrl().toLocalFile());
-    ModuleManager::instance()->setPluginsFilters(m_settings.get("o3s::plugin::exts").toStringList());
+    ModuleManager::instance()->setPluginsPath(fromQString(m_settings.get("o3s::plugin::path").toUrl().toLocalFile()));
+    ModuleManager::instance()->setPluginsFilters(fromQString(m_settings.get("o3s::plugin::exts").toString()));
     ModuleManager::instance()->searchModules();
 
     m_commandManager->begin();
@@ -208,11 +213,11 @@ bool Application::start()
         o3sdummy->start();
     }
 
-    m_started = true;
-    return true;
+    m_started = True;
+    return True;
 }
 
-bool Application::stop()
+o3d::Bool Application::stop()
 {
     m_settings.saveAll();
 
@@ -225,8 +230,8 @@ bool Application::stop()
     ModuleManager::instance()->unloadAll();
     ModuleManager::destroy();
 
-    m_started = false;
-    return true;
+    m_started = False;
+    return True;
 }
 
 void switchTranslator(QTranslator& translator, const QString& filename, QString path = QString())
@@ -244,14 +249,14 @@ void switchTranslator(QTranslator& translator, const QString& filename, QString 
     }
 }
 
-void Application::loadLanguage(const QString &language)
+void Application::loadLanguage(const String &language)
 {
     if (m_currentLanguage != language) {
         QLocale locale = QLocale::system();
-        QString languageCode = language;
+        QString languageCode = toQString(language);
 
         if (language != "default") {
-            locale = QLocale(language);
+            locale = QLocale(toQString(language));
         } else {
             languageCode = locale.name().split("_").at(0);
         }

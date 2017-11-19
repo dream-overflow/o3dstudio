@@ -26,7 +26,7 @@ public:
     virtual ~BrowserContent();
 
     virtual QWidget* ui() override;
-    virtual QString elementName() const override;
+    virtual String elementName() const override;
 
     virtual QSize minimumSizeHint() const override;
     virtual QSize sizeHint() const override;

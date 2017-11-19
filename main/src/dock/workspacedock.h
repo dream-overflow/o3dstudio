@@ -32,7 +32,7 @@ public:
     virtual ~WorkspaceDock();
 
     virtual QDockWidget* ui() override;
-    virtual QString elementName() const override;
+    virtual String elementName() const override;
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
     virtual void focusInEvent(QFocusEvent *event) override;

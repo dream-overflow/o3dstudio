@@ -52,9 +52,9 @@ GLCanvasContent::~GLCanvasContent()
 
 }
 
-QString GLCanvasContent::elementName() const
+o3d::String GLCanvasContent::elementName() const
 {
-    return "o3s::main::glcanvascontent::" + m_ref.longId();
+    return String("o3s::main::glcanvascontent::") + m_ref.longId();
 }
 
 QWidget *GLCanvasContent::ui()

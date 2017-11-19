@@ -19,8 +19,8 @@ class O3S_API CapacitySettings
 {
 public:
 
-    virtual bool applySettings() = 0;
-    virtual bool commitSettings() = 0;
+    virtual Bool applySettings() = 0;
+    virtual Bool commitSettings() = 0;
 };
 
 } // namespace common

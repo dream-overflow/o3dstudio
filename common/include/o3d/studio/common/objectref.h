@@ -261,9 +261,9 @@ public:
         return TypeRef::hasBaseTypeId(m_typeId, baseTypeRef.id());
     }
 
-    QString longId() const
+    String longId() const
     {
-        return QString("%1:%2").arg(m_projectId).arg(m_id);
+        return String::print("%i:%i", m_projectId, m_id);
     }
 
 private:

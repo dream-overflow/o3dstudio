@@ -16,6 +16,11 @@
 #include <QtCore/QStringList>
 #include <QtCore/QMetaType>
 
+#include <o3d/core/baseobject.h>
+#include <o3d/core/mutex.h>
+#include <o3d/core/datetime.h>
+#include <o3d/core/evt.h>
+
 #include "global.h"
 
 namespace o3d {
@@ -25,26 +30,33 @@ namespace common {
 /**
  * @brief Thread protected messenger reveicer and dispatcher.
  */
-class O3S_API Messenger : public QObject
+class O3S_API Messenger : public BaseObject
 {
-    Q_OBJECT
+public:
+
+    enum MessageType
+    {
+        DEBUG_MSG = 0,
+        WARNING_MSG,
+        CRITICAL_MSG,
+        FATAL_MSG,
+        INFO_MSG
+    };
+
+    Messenger(BaseObject *parent = nullptr);
+    virtual ~Messenger();
+
+    void message(UInt32 msgType, const String &message);
+
+    void debug(const String &message);
+    void info(const String &message);
+    void warning(const String &message);
+    void fatal(const String &message);
+    void critical(const String &message);
 
 public:
 
-    Messenger(QObject *parent = nullptr);
-    virtual ~Messenger();
-
-    void message(QtMsgType msgType, const QString &message);
-
-    void debug(const QString &message);
-    void info(const QString &message);
-    void warning(const QString &message);
-    void fatal(const QString &message);
-    void critical(const QString &message);
-
-signals:
-
-    void onNewMessage(QtMsgType msgType, const QString &message);
+    o3d::Signal<UInt32, const String&> onNewMessage{this};
 
 protected:
 
@@ -52,13 +64,13 @@ protected:
     {
     public:
 
-        QDateTime dateTime;
-        QtMsgType msgType;
-        QString message;
+        DateTime dateTime;
+        UInt32 msgType;
+        String message;
     };
 
-    QMutex m_mutex;
-    QMap<QDateTime, Message> m_messages;
+    FastMutex m_mutex;
+    std::map<DateTime, Message> m_messages;
 };
 
 } // namespace common

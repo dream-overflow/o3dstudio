@@ -177,11 +177,13 @@ private:
 /**
  * @brief The WorkspaceException class
  */
-class WorkspaceException : public BaseException
+class E_WorkspaceException : public E_CommonException
 {
-public:
+    O3D_E_DEF_CLASS(E_WorkspaceException)
 
-    WorkspaceException(const QString &message);
+    //! Ctor
+    E_WorkspaceException(const String& msg) throw() : E_CommonException(msg)
+        O3D_E_DEF(E_WorkspaceException, "Objective-3D Studio workspace exception")
 };
 
 } // namespace common

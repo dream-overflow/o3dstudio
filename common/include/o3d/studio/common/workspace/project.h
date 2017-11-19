@@ -243,11 +243,13 @@ private:
 /**
  * @brief The ProjectException class
  */
-class ProjectException : public BaseException
+class E_ProjectException : public E_CommonException
 {
-public:
+    O3D_E_DEF_CLASS(E_ProjectException)
 
-    ProjectException(const QString &message);
+    //! Ctor
+    E_ProjectException(const String& msg) throw() : E_CommonException(msg)
+        O3D_E_DEF(E_ProjectException, "Objective-3D Studio project exception")
 };
 
 } // namespace common

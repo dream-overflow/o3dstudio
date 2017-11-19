@@ -9,7 +9,6 @@
 #ifndef _O3DS_COMMON_APPLICATION_H
 #define _O3DS_COMMON_APPLICATION_H
 
-#include <QtCore/QString>
 #include <QtCore/QTranslator>
 
 #include "global.h"
@@ -36,7 +35,7 @@ public:  // singleton
     static Application* instance();
 
     //! Has a singleton instance.
-    static bool hasInstance();
+    static Bool hasInstance();
 
     //! Delete the singleton instance.
     static void destroy();
@@ -47,18 +46,18 @@ public:
     // Properties
     //
 
-    const QString& appDir() const;
-    const QString& workingDir() const;
+    const String& appDir() const;
+    const String& workingDir() const;
 
     // loads a language by the given language shortcurt (e.g. de, en)
-    void loadLanguage(const QString& language);
+    void loadLanguage(const String& language);
 
     //
     // Startup
     //
 
-    bool start();
-    bool stop();
+    Bool start();
+    Bool stop();
 
     //
     // Controllers
@@ -93,8 +92,8 @@ public:
 
 private:
 
-    QString m_appDir;             //!< Absolute application base directory
-    QString m_workingDir;         //!< Absolute application working directory
+    String m_appDir;             //!< Absolute application base directory
+    String m_workingDir;         //!< Absolute application working directory
 
     Settings m_settings;          //!< Setting manager
 
@@ -107,12 +106,12 @@ private:
     ComponentRegistry *m_componentRegistry;
     TypeRegistry *m_typeRegistry;
 
-    bool m_started{false};        //!< Started application
+    Bool m_started;               //!< Started application
 
     QTranslator m_translator;     //!< contains the translations for o3scommon
     QTranslator m_translatorQt;   //!< contains the translations for qt
 
-    QString m_currentLanguage;
+    String m_currentLanguage;
 
 private:  // singleton
 

@@ -28,7 +28,7 @@ public:
     virtual ~PropertyDock();
 
     virtual QDockWidget* ui() override;
-    virtual QString elementName() const override;
+    virtual String elementName() const override;
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
 signals:

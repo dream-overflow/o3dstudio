@@ -17,9 +17,13 @@
 #include "o3d/studio/common/modulemanager.h"
 #include "o3d/studio/common/dynamicmodule.h"
 
-using namespace o3d::studio::common;
+#include <o3d/core/debug.h>
+#include <o3d/core/dynamiclibrary.h>
+#include <o3d/core/diskdir.h>
 
-Q_LOGGING_CATEGORY(o3d::studio::common::moduleLogger, "o3d::studio::common:module")
+#include <algorithm>
+
+using namespace o3d::studio::common;
 
 ModuleManager* ModuleManager::m_instance = nullptr;
 
@@ -39,8 +43,8 @@ ModuleManager::ModuleManager()
         settings.set("o3s::plugin::exts", QStringList(QString(MODULE_EXT)));
     }
 
-    m_path = settings.get("o3s::plugin::path").toUrl().toLocalFile();
-    m_filters = settings.get("o3s::plugin::exts").toStringList();
+    m_path = fromQString(settings.get("o3s::plugin::path").toUrl().toLocalFile());
+    m_filters = fromQString(settings.get("o3s::plugin::exts").toString());
 }
 
 ModuleManager::~ModuleManager()
@@ -51,8 +55,10 @@ ModuleManager::~ModuleManager()
 // Singleton instantiation
 ModuleManager* ModuleManager::instance()
 {
-    if (!m_instance)
+    if (!m_instance) {
         m_instance = new ModuleManager();
+    }
+
     return m_instance;
 }
 
@@ -66,17 +72,23 @@ void ModuleManager::destroy()
     }
 }
 
-QStringList ModuleManager::getModuleList() const
+o3d::T_StringList ModuleManager::moduleList() const
 {
-    return m_foundModules.keys();
+    T_StringList values;
+
+    for (auto it = m_foundModules.begin(); it != m_foundModules.end(); ++it) {
+        values.push_back(it->first);
+    }
+
+    return values;
 }
 
-void ModuleManager::setPluginsPath(const QString &path)
+void ModuleManager::setPluginsPath(const String &path)
 {
     m_path = path;
 }
 
-void ModuleManager::setPluginsFilters(const QStringList &filters)
+void ModuleManager::setPluginsFilters(const String &filters)
 {
     m_filters = filters;
 }
@@ -84,74 +96,72 @@ void ModuleManager::setPluginsFilters(const QStringList &filters)
 void ModuleManager::searchModules()
 {
     // lookup for plugins directory
-    QDir dir(m_path);
-    if (dir.isRelative()) {
-        dir.setPath(QCoreApplication::applicationDirPath() + QDir::separator() + m_path);
+    DiskDir dir(m_path);
+    if (!dir.isAbsolute()) {
+        dir.makeAbsolute();
     }
 
-    dir.setNameFilters(m_filters);
-
-    QStringList plugins = dir.entryList(QDir::Files, QDir::Name);
-    QString plugin;
-    foreach (plugin, plugins) {
-        QString name(plugin);
+    Int32 pos = 0;
+    T_StringList plugins = dir.findFiles(m_filters, o3d::FILE_FILE);
+    for (String plugin : plugins) {
+        String name(plugin);
 
         if (name.startsWith("lib")) {
-            name.replace("lib", "");
+            name.remove(0, 3);
         }
 
-        name = name.split(".")[0];
-
-        m_foundModules.insert(name, dir.path() + QDir::separator() + plugin);
+        pos = name.reverseFind('.');
+        if (pos > 0) {
+            name.truncate(pos);
+            m_foundModules[name] = dir.getPathName() + '/' + plugin;
+        }
     }
 }
 
-bool ModuleManager::hasModule(const QString &name) const
+o3d::Bool ModuleManager::hasModule(const String &name) const
 {
     auto cit = m_foundModules.find(name);
-    return cit != m_foundModules.constEnd();
+    return cit != m_foundModules.cend();
 }
 
-Module *ModuleManager::getModule(const QString &name) const
+Module *ModuleManager::module(const String &name) const
 {
     auto cit = m_loadedModules.find(name);
-    if (cit != m_loadedModules.constEnd()) {
-        return cit.value();
+    if (cit != m_loadedModules.cend()) {
+        return cit->second;
     } else {
         return nullptr;
     }
 }
 
-Module *ModuleManager::load(const QString &name)
+Module *ModuleManager::load(const String &name)
 {
     auto moduleEntry = m_foundModules.find(name);
     if (moduleEntry != m_foundModules.end()) {
-        QLibrary *library = new QLibrary(moduleEntry.value());
+        DynamicLibrary *library = nullptr;
 
-        if (!library->load()) {
-            delete library;
+        try {
+            library = DynamicLibrary::load(moduleEntry->second);
+        } catch (E_DynamicLibraryException &e) {
             return nullptr;
         }
 
-        QFunctionPointer fptr = library->resolve("o3dstudioPlugin");
+        PluginFunction *fptr = (PluginFunction*)library->getFunctionPtr("o3dstudioPlugin");
         if (!fptr) {
-            library->unload();
-            delete library;
-
+            DynamicLibrary::unload(library);
             return nullptr;
         }
 
         Module *module = ((PluginFunction)fptr)(name, library);
         if (!module) {
-            library->unload();
-            delete library;
-
+            DynamicLibrary::unload(library);
             return nullptr;
         }
 
-        m_loadedModules.insert(name, module);
+        m_loadedModules[name] = module;
 
-        qCInfo(moduleLogger) << "Loaded module :" << name << "from" << library->fileName();
+        O3D_MESSAGE(String("Loaded module: " + name + " from " + library->getName()));
+
         return module;
     }
 
@@ -161,46 +171,17 @@ Module *ModuleManager::load(const QString &name)
 void ModuleManager::unloadAll()
 {
     for (auto it = m_loadedModules.begin(); it != m_loadedModules.end(); ++it) {
-        Module *module = it.value();
-        QLibrary *library = module->library();
+        Module *module = it->second;
+        DynamicLibrary *library = module->library();
 
-        qCInfo(moduleLogger) << "Unload module :" << it.key() << "from" << library->fileName();
+        O3D_MESSAGE(String("Unload module: " + it->first + " from " + library->getName()));
+
         delete module;
 
         if (library) {
-            if (library->isLoaded()) {
-                library->unload();
-                delete library;
-            }
+            DynamicLibrary::unload(library);
         }
     }
 
     m_loadedModules.clear();
 }
-/*
-void ModuleManager::loadLanguage(const QString &language)
-{
-    if (m_currentLanguage != language) {
-        QLocale locale = QLocale::system();
-        QString languageCode = language;
-
-        if (language != "default") {
-            locale = QLocale(language);
-        } else {
-            languageCode = locale.name().split("_").at(0);
-        }
-
-        QLocale::setDefault(locale);
-        QString languageName = QLocale::languageToString(locale.language());
-
-        switchTranslator(m_translator, QString("o3smain_%1.qm").arg(languageCode));
-        switchTranslator(m_translator, QString("o3scommon_%1.qm").arg(languageCode));
-        switchTranslator(m_translatorQt, QString("qt_%1.qm").arg(languageCode));
-
-        // @todo and logger status bar message at certain levels
-        statusBar()->showMessage(tr("Current language changed to %1").arg(languageName));
-
-        m_currentLanguage = language;
-    }
-}
-*/

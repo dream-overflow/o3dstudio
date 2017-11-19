@@ -124,3 +124,6 @@ defineTest(copyToDestdir) {
     }
     export(QMAKE_POST_LINK)
 }
+
+# o3d in debug @todo for both
+INCLUDEPATH += $$(PREFIX)/lib/objective3d-dbg/

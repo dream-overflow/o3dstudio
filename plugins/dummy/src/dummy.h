@@ -20,11 +20,11 @@ class Dummy : public studio::common::DynamicModule
 {
 public:
 
-    Dummy(const QString &name, QLibrary *library);
+    Dummy(const String &name, DynamicLibrary *library);
     virtual ~Dummy();
 
-    virtual bool start();
-    virtual bool stop();
+    virtual Bool start();
+    virtual Bool stop();
 
 private:
 

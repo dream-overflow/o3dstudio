@@ -75,7 +75,7 @@ private:
 /**
  * @brief The FragmentException class
  */
-class FragmentException : public BaseException
+class FragmentException : public E_CommonException
 {
 public:
 

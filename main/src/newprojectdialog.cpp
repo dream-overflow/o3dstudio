@@ -109,17 +109,17 @@ void NewProjectDialog::onButtonBox(QAbstractButton *btn)
 
         try {
             project->create();
-        } catch(common::ProjectException &e) {
+        } catch(common::E_ProjectException &e) {
             delete project;
-            QMessageBox::warning(this, tr("Project warning"), e.message());
+            QMessageBox::warning(this, tr("Project warning"), toQString(e.getMsg()));
             return;
         }
 
         try {
             workspace->addProject(project);
-        } catch(common::WorkspaceException &e) {
+        } catch(common::E_WorkspaceException &e) {
             delete project;
-            QMessageBox::warning(this, tr("Project warning"), e.message());
+            QMessageBox::warning(this, tr("Project warning"), toQString(e.getMsg()));
             return;
         }
 

@@ -9,7 +9,6 @@
 #ifndef _O3DS_COMMON_ELEMENT_H
 #define _O3DS_COMMON_ELEMENT_H
 
-#include <QtWidgets/QWidget>
 #include "global.h"
 
 namespace o3d {
@@ -22,7 +21,7 @@ public:
 
     virtual ~Element() = 0;
 
-    virtual QString elementName() const = 0;
+    virtual String elementName() const = 0;
 };
 
 } // namespace common

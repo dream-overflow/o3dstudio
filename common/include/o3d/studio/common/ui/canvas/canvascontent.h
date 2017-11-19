@@ -29,7 +29,7 @@ public:
     CanvasContent(const QString &name, QWidget *parent = nullptr);
     virtual ~CanvasContent();
 
-    virtual QString elementName() const override;
+    virtual String elementName() const override;
     virtual QWidget* ui() override;
 
     virtual QSize minimumSizeHint() const override;

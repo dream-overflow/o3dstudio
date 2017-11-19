@@ -34,7 +34,7 @@ ProjectItem::ProjectItem(Entity *entity,
     m_entity(entity)
 {
     if (parentItem) {
-        m_path = parentItem->m_path + "::" + ref.longId();
+        m_path = parentItem->m_path + "::" + toQString(ref.longId());
     } else {
         m_path = name;
     }

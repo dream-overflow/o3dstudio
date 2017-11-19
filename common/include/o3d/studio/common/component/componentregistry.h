@@ -70,11 +70,13 @@ protected:
 /**
  * @brief The ComponentException class
  */
-class ComponentException : public BaseException
+class E_ComponentException : public E_CommonException
 {
-public:
+    O3D_E_DEF_CLASS(E_ComponentException)
 
-    ComponentException(const QString &message);
+    //! Ctor
+    E_ComponentException(const String& msg) throw() : E_CommonException(msg)
+        O3D_E_DEF(E_ComponentException, "Objective-3D Studio component exception")
 };
 
 } // namespace common

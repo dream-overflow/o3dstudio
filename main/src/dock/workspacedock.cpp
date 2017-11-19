@@ -73,9 +73,9 @@ QDockWidget *WorkspaceDock::ui()
     return this;
 }
 
-QString WorkspaceDock::elementName() const
+o3d::String WorkspaceDock::elementName() const
 {
-    return("o3s::main::workspace");
+    return "o3s::main::workspace";
 }
 
 Qt::DockWidgetArea WorkspaceDock::dockWidgetArea() const
@@ -122,7 +122,7 @@ void WorkspaceDock::onActivateProject(const common::LightRef &ref)
     }
 
     common::O3DCanvasContent *content = static_cast<common::O3DCanvasContent*>(
-        uiCtrl.content(QString("o3s::main::o3dcanvascontent::") + project->ref().light().longId()));
+        uiCtrl.content("o3s::main::o3dcanvascontent::" + project->ref().light().longId()));
 
     if (content) {
         uiCtrl.setActiveContent(content, true);

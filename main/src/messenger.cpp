@@ -11,8 +11,8 @@
 using namespace o3d::studio::common;
 
 
-Messenger::Messenger(QObject *parent) :
-    QObject(parent)
+Messenger::Messenger(BaseObject *parent) :
+    BaseObject(parent)
 {
 
 }
@@ -22,41 +22,41 @@ Messenger::~Messenger()
 
 }
 
-void Messenger::message(QtMsgType msgType, const QString &message)
+void Messenger::message(UInt32 msgType, const String &message)
 {
     Message lmessage;
-    lmessage.dateTime = QDateTime::currentDateTime();
+    lmessage.dateTime = DateTime(True);
     lmessage.msgType = msgType;
     lmessage.message = message;
 
     m_mutex.lock();
-    m_messages.insert(lmessage.dateTime, lmessage);
+    m_messages[lmessage.dateTime] = lmessage;
     m_mutex.unlock();
 
-    emit onNewMessage(lmessage.msgType, lmessage.message);
+    onNewMessage(lmessage.msgType, lmessage.message);
 }
 
-void Messenger::debug(const QString &message)
+void Messenger::debug(const String &message)
 {
-    this->message(QtDebugMsg, message);
+    this->message(DEBUG_MSG, message);
 }
 
-void Messenger::info(const QString &message)
+void Messenger::info(const String &message)
 {
-    this->message(QtInfoMsg, message);
+    this->message(INFO_MSG, message);
 }
 
-void Messenger::warning(const QString &message)
+void Messenger::warning(const String &message)
 {
-    this->message(QtWarningMsg, message);
+    this->message(WARNING_MSG, message);
 }
 
-void Messenger::fatal(const QString &message)
+void Messenger::fatal(const String &message)
 {
-    this->message(QtFatalMsg, message);
+    this->message(FATAL_MSG, message);
 }
 
-void Messenger::critical(const QString &message)
+void Messenger::critical(const String &message)
 {
-    this->message(QtCriticalMsg, message);
+    this->message(CRITICAL_MSG, message);
 }

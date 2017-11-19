@@ -60,7 +60,7 @@ private:
 /**
  * @brief The FragmentException class
  */
-class AssetException : public BaseException
+class AssetException : public E_CommonException
 {
 public:
 

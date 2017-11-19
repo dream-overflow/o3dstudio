@@ -111,7 +111,7 @@ bool Project::hasChanges() const
 void Project::create()
 {
     if (exists()) {
-        throw ProjectException(tr("Project already exists"));
+        throw E_ProjectException(fromQString(tr("Project already exists")));
     };
 
     // project structure
@@ -161,7 +161,7 @@ bool Project::setLocation(const QDir &path)
 bool Project::load()
 {
     if (!exists()) {
-        throw ProjectException(tr("Project doesn't exists"));
+        throw E_ProjectException(fromQString(tr("Project doesn't exists")));
     };
 
     // project structure
@@ -179,7 +179,7 @@ bool Project::load()
 bool Project::save()
 {
     if (!exists()) {
-        throw ProjectException(tr("Project doesn't exists"));
+        throw E_ProjectException(fromQString(tr("Project doesn't exists")));
     };
 
     // project structure
@@ -265,12 +265,12 @@ void Project::addHub(Hub *hub)
 {
     // not created for this project
     if (hub->ref().light().projectId() != ref().light().id()) {
-        throw ProjectException(tr("Trying to add a hub that is created for another project"));
+        throw E_ProjectException(fromQString(tr("Trying to add a hub that is created for another project")));
     }
 
     // already exists
     if (m_hubs.find(hub->ref().light().id()) != m_hubs.end()) {
-        throw ProjectException(tr("Trying to add a previously added hub, or with a similar id"));
+        throw E_ProjectException(fromQString(tr("Trying to add a previously added hub, or with a similar id")));
     }
 
     m_hubs.insert(hub->ref().light().id(), hub);
@@ -286,12 +286,12 @@ void Project::addHub(Hub *hub)
 void Project::removeHub(const LightRef &_ref)
 {
     if (_ref.projectId() != ref().light().id()) {
-        throw ProjectException(tr("Trying to remove a reference for another project"));
+        throw E_ProjectException(fromQString(tr("Trying to remove a reference for another project")));
     }
 
     auto it = m_hubs.find(_ref.id());
     if (it == m_hubs.end()) {
-        throw ProjectException(tr("Trying to remove an unknown reference"));
+        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
     Hub *hub = it.value();
@@ -310,7 +310,7 @@ void Project::removeHub(qint64 id)
 {
     auto it = m_hubs.find(id);
     if (it == m_hubs.end()) {
-        throw ProjectException(tr("Trying to remove an unknown reference"));
+        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
     Hub *hub = it.value();
@@ -528,12 +528,12 @@ void Project::addFragment(Fragment *fragment)
 {
     // not created for this project
     if (fragment->ref().light().projectId() != ref().light().id()) {
-        throw ProjectException(tr("Trying to add a fragment that is created for another project"));
+        throw E_ProjectException(fromQString(tr("Trying to add a fragment that is created for another project")));
     }
 
     // already exists
     if (m_fragments.find(fragment->ref().light().id()) != m_fragments.end()) {
-        throw ProjectException(tr("Trying to add a previously added fragment, or with a similar id"));
+        throw E_ProjectException(fromQString(tr("Trying to add a previously added fragment, or with a similar id")));
     }
 
     m_fragments.insert(fragment->ref().light().id(), fragment);
@@ -548,12 +548,12 @@ void Project::addFragment(Fragment *fragment)
 void Project::removeFragment(const LightRef &_ref)
 {
     if (_ref.projectId() != ref().light().id()) {
-        throw ProjectException(tr("Trying to remove a reference for another project"));
+        throw E_ProjectException(fromQString(tr("Trying to remove a reference for another project")));
     }
 
     auto it = m_fragments.find(_ref.id());
     if (it == m_fragments.end()) {
-        throw ProjectException(tr("Trying to remove an unknown reference"));
+        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
     Fragment *fragment = it.value();
@@ -572,7 +572,7 @@ void Project::removeFragment(quint64 id)
 {
     auto it = m_fragments.find(id);
     if (it == m_fragments.end()) {
-        throw ProjectException(tr("Trying to remove an unknown reference"));
+        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
     Fragment *fragment = it.value();
@@ -711,12 +711,12 @@ void Project::addAsset(Asset *asset)
 {
     // not created for this project
     if (asset->ref().light().projectId() != ref().light().id()) {
-        throw ProjectException(tr("Trying to add an asset that is created for another project"));
+        throw E_ProjectException(fromQString(tr("Trying to add an asset that is created for another project")));
     }
 
     // already exists
     if (m_fragments.find(asset->ref().light().id()) != m_fragments.end()) {
-        throw ProjectException(tr("Trying to add a previously added asset, or with a similar id"));
+        throw E_ProjectException(fromQString(tr("Trying to add a previously added asset, or with a similar id")));
     }
 
     m_assets.insert(asset->ref().light().id(), asset);
@@ -731,12 +731,12 @@ void Project::addAsset(Asset *asset)
 void Project::removeAsset(const LightRef &_ref)
 {
     if (_ref.projectId() != ref().light().id()) {
-        throw ProjectException(tr("Trying to remove a reference for another project"));
+        throw E_ProjectException(fromQString(tr("Trying to remove a reference for another project")));
     }
 
     auto it = m_assets.find(_ref.id());
     if (it == m_assets.end()) {
-        throw ProjectException(tr("Trying to remove an unknown reference"));
+        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
     Asset *asset = it.value();
@@ -755,7 +755,7 @@ void Project::removeAsset(quint64 id)
 {
     auto it = m_assets.find(id);
     if (it == m_assets.end()) {
-        throw ProjectException(tr("Trying to remove an unknown reference"));
+        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
     Asset *asset = it.value();
@@ -888,10 +888,4 @@ QList<const Asset *> Project::assets() const
     }
 
     return results;
-}
-
-ProjectException::ProjectException(const QString &message) :
-    BaseException(message)
-{
-
 }

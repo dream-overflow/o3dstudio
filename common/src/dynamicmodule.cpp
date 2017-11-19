@@ -10,7 +10,7 @@
 
 using namespace o3d::studio::common;
 
-DynamicModule::DynamicModule(const QString &name, QLibrary *library) :
+DynamicModule::DynamicModule(const String &name, DynamicLibrary *library) :
     Module(name),
     m_library(library)
 {
@@ -20,22 +20,22 @@ DynamicModule::~DynamicModule()
 {
 }
 
-bool DynamicModule::start()
+o3d::Bool DynamicModule::start()
 {
-    return false;
+    return False;
 }
 
-bool DynamicModule::stop()
+o3d::Bool DynamicModule::stop()
 {
-    return false;
+    return False;
 }
 
-QString DynamicModule::getFileName() const
+o3d::String DynamicModule::fileName() const
 {
-    return m_library->fileName();
+    return m_library->getName();
 }
 
-QLibrary *DynamicModule::library()
+o3d::DynamicLibrary *DynamicModule::library()
 {
     return m_library;
 }

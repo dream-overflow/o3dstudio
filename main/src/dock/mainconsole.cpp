@@ -15,33 +15,53 @@
 using namespace o3d::studio::main;
 
 
-MainConsole::MainConsole(QWidget *parent) :
+QtMainConsole::QtMainConsole(QWidget *parent) :
     QDockWidget(tr("Main console"), parent),
-    common::Dock(),
     m_listWidget(nullptr)
 {
     setMinimumWidth(150);
     setMinimumHeight(150);
 
     setupUi();
+}
+
+QtMainConsole::~QtMainConsole()
+{
+
+}
+
+void QtMainConsole::setupUi()
+{
+    // @todo add a layout with some filters and a auto scroll button
+    m_listWidget = new QListWidget();
+    m_listWidget->setAutoScroll(true);
+    m_listWidget->setIconSize(QSize(16, 16));
+    setWidget(m_listWidget);
+}
+
+MainConsole::MainConsole(o3d::BaseObject *parent) :
+    BaseObject(parent),
+    m_qtMainConsole(nullptr)
+{
+    m_qtMainConsole = new QtMainConsole();
 
     common::Messenger& messenger = common::Application::instance()->messenger();
-    connect(&messenger, SIGNAL(onNewMessage(QtMsgType, const QString&)), SLOT(onMessage(QtMsgType, const QString&)));
+    messenger.onNewMessage.connect(this, &MainConsole::onMessage);
 }
 
 MainConsole::~MainConsole()
 {
-
+    // deletePtr(m_qtMainConsole);
 }
 
 QDockWidget *MainConsole::ui()
 {
-    return this;
+    return m_qtMainConsole;
 }
 
-QString MainConsole::elementName() const
+o3d::String MainConsole::elementName() const
 {
-    return("o3s::main::mainconsole");
+    return "o3s::main::mainconsole";
 }
 
 Qt::DockWidgetArea MainConsole::dockWidgetArea() const
@@ -49,7 +69,7 @@ Qt::DockWidgetArea MainConsole::dockWidgetArea() const
     return Qt::BottomDockWidgetArea;
 }
 
-void MainConsole::onMessage(QtMsgType msgType, const QString &message)
+void MainConsole::onMessage(UInt32 msgType, const String &message)
 {
     QIcon icon = QIcon::fromTheme("dialog-question");
 
@@ -75,18 +95,9 @@ void MainConsole::onMessage(QtMsgType msgType, const QString &message)
 
     QListWidgetItem *item = new QListWidgetItem();
 
-    item->setText(message);
+    item->setText(toQString(message));
     item->setIcon(icon);
-    item->setToolTip(message);
+    item->setToolTip(toQString(message));
 
-    m_listWidget->addItem(item);
-}
-
-void MainConsole::setupUi()
-{
-    // @todo add a layout with some filters and a auto scroll button
-    m_listWidget = new QListWidget();
-    m_listWidget->setAutoScroll(true);
-    m_listWidget->setIconSize(QSize(16, 16));
-    setWidget(m_listWidget);
+    m_qtMainConsole->m_listWidget->addItem(item);
 }

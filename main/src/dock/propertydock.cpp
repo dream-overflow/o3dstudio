@@ -43,9 +43,9 @@ QDockWidget *PropertyDock::ui()
     return this;
 }
 
-QString PropertyDock::elementName() const
+o3d::String PropertyDock::elementName() const
 {
-    return("o3s::main::property");
+    return "o3s::main::property";
 }
 
 Qt::DockWidgetArea PropertyDock::dockWidgetArea() const

@@ -9,8 +9,7 @@
 #ifndef _O3DS_COMMON_EXCEPTION_H
 #define _O3DS_COMMON_EXCEPTION_H
 
-#include <QtCore/QException>
-#include <QtCore/QCoreApplication>
+#include <o3d/core/error.h>
 
 #include "global.h"
 
@@ -19,22 +18,15 @@ namespace studio {
 namespace common {
 
 /**
- * @brief The StoreException class
+ * @brief The BaseException class
  */
-class O3S_API BaseException : public QException
+class O3S_API E_CommonException : public E_BaseException
 {
-public:
+    O3D_E_DEF_CLASS(E_CommonException)
 
-    BaseException(const QString &message);
-
-    void raise() const override;
-    BaseException *clone() const override;
-
-    const QString& message() const;
-
-protected:
-
-    QString m_message;
+    //! Ctor
+    E_CommonException(const String& msg) throw() : E_BaseException(msg)
+        O3D_E_DEF(E_CommonException, "Objective-3D Studio base exception")
 };
 
 } // namespace common

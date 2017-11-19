@@ -39,9 +39,9 @@ CanvasContent::~CanvasContent()
 
 }
 
-QString CanvasContent::elementName() const
+o3d::String CanvasContent::elementName() const
 {
-    return "o3s::common::canvascontent" + property("name").toString();
+    return fromQString("o3s::common::canvascontent" + property("name").toString());
 }
 
 QWidget *CanvasContent::ui()

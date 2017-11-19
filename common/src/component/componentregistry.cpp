@@ -53,18 +53,18 @@ void ComponentRegistry::registerComponent(Component *component)
     if (component) {
         auto it = m_components.find(component->name());
         if (it != m_components.end()) {
-            throw ComponentException(tr("Component {0} already registred").arg(component->name()));
+            throw E_ComponentException(fromQString(tr("Component {0} already registred").arg(component->name())));
         }
 
         // register the component type
         TypeRegistry &types = Application::instance()->types();
         if (!types.registerType(COMPONENT_TYPE_ID, component->name())) {
-            throw ComponentException(tr("Component type {0} cannot by registered").arg(component->name()));
+            throw E_ComponentException(fromQString(tr("Component type {0} cannot by registered").arg(component->name())));
         }
 
         // and its related hub type
         if (!types.registerType(HUB_TYPE_ID, component->targetName())) {
-            throw ComponentException(tr("Hub type {0} cannot by registered").arg(component->targetName()));
+            throw E_ComponentException(fromQString(tr("Hub type {0} cannot by registered").arg(component->targetName())));
         }
 
         component->setTypeRef(types.typeRef(component->name()));
@@ -206,10 +206,4 @@ const Component *ComponentRegistry::componentByTarget(const QString &name) const
     }
 
     return nullptr;
-}
-
-ComponentException::ComponentException(const QString &message) :
-    BaseException(message)
-{
-
 }

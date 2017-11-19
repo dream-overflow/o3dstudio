@@ -10,7 +10,7 @@
 
 using namespace o3d::studio::common;
 
-ModuleInfo::ModuleInfo(const QString &name, const QMap<QString, QVariant> &properties) :
+ModuleInfo::ModuleInfo(const String &name, const std::map<String, String> &properties) :
     m_properties(properties),
     m_name(name)
 {
@@ -21,48 +21,48 @@ ModuleInfo::~ModuleInfo()
 
 }
 
-const QString &ModuleInfo::name() const
+const o3d::String &ModuleInfo::name() const
 {
     return m_name;
 }
 
-QString ModuleInfo::verbose() const
+o3d::String ModuleInfo::verbose() const
 {
-    return property("verbose", QString(m_name)).toString();
+    return property("verbose", m_name);
 }
 
-QString ModuleInfo::version() const
+o3d::String ModuleInfo::version() const
 {
-    return property("version", QString("0.0.1")).toString();
+    return property("version", "0.0.1");
 }
 
-QString ModuleInfo::vendor() const
+o3d::String ModuleInfo::vendor() const
 {
-    return property("vendor", QString("Unknown vendor")).toString();
+    return property("vendor", "Unknown vendor");
 }
 
-QString ModuleInfo::description() const
+o3d::String ModuleInfo::description() const
 {
-    return property("vendor", QString("")).toString();
+    return property("description", "");
 }
 
-QString ModuleInfo::section() const
+o3d::String ModuleInfo::section() const
 {
     // default to o3dstudio section
-    return property("section", QString("o3s::plugin::o3dstudio")).toString();
+    return property("section", "o3s::plugin::o3dstudio");
 }
 
-QVariant ModuleInfo::property(const QString &name, const QVariant &defaut) const
+o3d::String ModuleInfo::property(const String &name, const String &defaut) const
 {
     auto cit = m_properties.find(name);
     if (cit != m_properties.end()) {
-        return cit.value();
+        return cit->second;
     }
 
     return defaut;
 }
 
-const QMap<QString, QVariant> ModuleInfo::properties() const
+const std::map<o3d::String, o3d::String> ModuleInfo::properties() const
 {
     return m_properties;
 }

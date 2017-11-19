@@ -136,11 +136,13 @@ private:
 /**
  * @brief The HubException class
  */
-class HubException : public BaseException
+class E_HubException : public E_CommonException
 {
-public:
+    O3D_E_DEF_CLASS(E_HubException)
 
-    HubException(const QString &message);
+    //! Ctor
+    E_HubException(const String& msg) throw() : E_CommonException(msg)
+        O3D_E_DEF(E_HubException, "Objective-3D Studio hub exception")
 };
 
 } // namespace common

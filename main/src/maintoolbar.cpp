@@ -59,9 +59,9 @@ QToolBar *MainToolBar::ui()
     return this;
 }
 
-QString MainToolBar::elementName() const
+o3d::String MainToolBar::elementName() const
 {
-    return("o3s::main::maintoolbar");
+    return "o3s::main::maintoolbar";
 }
 
 Qt::ToolBarArea MainToolBar::toolBarArea() const

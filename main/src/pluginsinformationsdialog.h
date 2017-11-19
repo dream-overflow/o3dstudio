@@ -11,6 +11,9 @@
 
 #include <QtWidgets/QDialog>
 
+#include <o3d/core/string.h>
+#include <map>
+
 #include "ui_pluginsinformationsdialog.h"
 
 namespace o3d {
@@ -44,7 +47,7 @@ private:
     Ui::PluginsInformationsDialog ui;
 
     void setupCategories();
-    void showDetailsDialog(const QString &name, QMap<QString, QVariant> properties);
+    void showDetailsDialog(const String &name, std::map<String, String> properties);
 };
 
 } // namespace main

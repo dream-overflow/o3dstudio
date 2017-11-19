@@ -17,48 +17,106 @@
 #include "o3d/studio/common/messenger.h"
 #include "o3d/studio/common/objectref.h"
 
+#include "o3d/studio/common/ui/content.h"
+#include "o3d/studio/common/ui/dock.h"
+#include "o3d/studio/common/ui/toolbar.h"
+
+#include <o3d/core/appwindow.h>
+
 #include "ui_mainwindow.h"
 
 namespace o3d {
 namespace studio {
 namespace main {
 
+class QtMainWindow;
+
 using o3d::studio::common::LightRef;
 
-class MainWindow : public QMainWindow, public common::CapacitySettings
+/**
+ * @brief The MainWindow class
+ * For the momoent it is the O3D adaptor from Qt main window. But could replace the QtMainWindow later.
+ */
+class MainWindow : public AppWindow, public common::CapacitySettings
 {
-    Q_OBJECT
-
 public:
 
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(BaseObject *parent = nullptr);
     virtual ~MainWindow();
 
-    QDockWidget* createDock(const QString &title, const QString &name, Qt::DockWidgetArea area);
-    bool setupDock(const QString &name, QDockWidget *dock, Qt::DockWidgetArea area);
-    bool removeDock(const QString &name);
-
-    QToolBar* createToolBar(const QString &title, const QString &name, Qt::ToolBarArea area);
-    bool setupToolBar(const QString &name, QToolBar *toolBar, Qt::ToolBarArea area);
-    bool removeToolBarWidget(const QString &name);
-
-    bool addContentWidget(const QString &name, QWidget *widget);
-    bool removeContentWidget(const QString &name);
-    bool setCurrentContentWidget(const QString &name);
-    QWidget* contentWidget(const QString &name);
-    const QWidget* contentWidget(const QString &name) const;
-
-    bool setThemeColor(const QString &theme);
-
-    const QString& language() const;
-    const QString& theme() const;
+    QMainWindow *mainWindow();
+    const QMainWindow *mainWindow() const;
 
     //
     // CapacitySettings
     //
 
-    virtual bool applySettings() override;
-    virtual bool commitSettings() override;
+    virtual Bool applySettings() override;
+    virtual Bool commitSettings() override;
+
+    //
+    // Widgets
+    //
+
+    Bool setupDock(const String &name, common::Dock *dock, Qt::DockWidgetArea area);
+    Bool removeDock(const String &name);
+
+    Bool setupToolBar(const String &name, common::ToolBar *toolBar, Qt::ToolBarArea area);
+    Bool removeToolBarWidget(const String &name);
+
+    Bool addContentWidget(const String &name, common::Content *widget);
+    Bool removeContentWidget(const String &name);
+    Bool setCurrentContentWidget(const String &name);
+    common::Content* contentWidget(const String &name);
+    const common::Content *contentWidget(const String &name) const;
+
+private /*slots*/:
+
+    void onMessage(UInt32 msgType, const String &message);
+
+    void onAttachContent(String, common::Content*);
+    void onAttachDock(String, common::Dock*);
+    void onAttachToolBar(String, common::ToolBar*);
+
+    void onDetachContent(String, common::Content*);
+    void onDetachDock(String, common::Dock*);
+    void onDetachToolBar(String, common::ToolBar*);
+
+    void onShowContent(String name, common::Content *content, Bool showHide);
+
+private:
+
+    QtMainWindow *m_qtMainWindow;
+
+    String m_currentTheme;                //!< current active theme name
+    String m_currentLanguage;             //!< current active language 2 letters code
+
+//    QStatusBar *m_statusBar{nullptr};    //!< unique bottom status bar
+    common::Content *m_currentContent{nullptr};      //!< current active content widget
+
+    std::map<o3d::String, common::Content*> m_contents;   //!< existings content widget (only once activated)
+    std::map<o3d::String, common::ToolBar*> m_toolBars;   //!< existings toolbars (many can be activated)
+    std::map<o3d::String, common::Dock*> m_docks;         //!< existings docks (many can be activated)
+
+    common::Settings& settings();
+    common::Messenger& messenger();
+};
+
+class QtMainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+    friend class MainWindow;
+
+public:
+
+    QtMainWindow(QWidget *parent = nullptr);
+    virtual ~QtMainWindow();
+
+    Bool setThemeColor(const String &theme);
+
+    const String &language() const;
+    const String& theme() const;
 
 protected:
 
@@ -99,38 +157,28 @@ private slots:
     void onAboutPlugin();
     void onAbout();
 
-    void onSettingChanged(const QString &key, const QVariant &value);
-
-    void onAttachContent(QString, QWidget*);
-    void onAttachDock(QString, QDockWidget*, Qt::DockWidgetArea area);
-    void onAttachToolBar(QString, QToolBar*, Qt::ToolBarArea area);
-
-    void onDetachContent(QString, QWidget*);
-    void onDetachDock(QString, QDockWidget*);
-    void onDetachToolBar(QString, QToolBar*);
-
-    void onUndoAction();
-    void onRedoAction();
-
-    void onViewPreviousContentAction();
-    void onViewNextContentAction();
-
-    void onShowContent(QString name, QWidget *content, bool showHide);
-
-    void onCommandUpdate();
-    void onCommandDone(QString name, QString label, bool done);
-
     void onOpenRecentProject(bool);
     void onClearAllRecentProjects(bool);
 
     void onOpenRecentResources(bool);
     void onClearAllRecentResources(bool);
 
+    void onViewPreviousContentAction();
+    void onViewNextContentAction();
+
+    // @todo
+    void onSettingChanged(const QString &key, const QVariant &value);
+
+    void onUndoAction();
+    void onRedoAction();
+
+    void onCommandUpdate();
+    void onCommandDone(QString name, QString label, bool done);
+
     void onChangeCurrentWorkspace(const QString &name);
     void onProjectAdded(const LightRef &ref);
 
     void onChangeMainTitle(const QString &title);
-    void onMessage(QtMsgType msgType, const QString &message);
 
     void onSelectionChanged();
 
@@ -138,26 +186,18 @@ private:
 
     Ui::MainWindow ui;
 
-    bool m_darkTheme{false};
-
     QTranslator m_translator;     //!< contains the translations for o3smain
 
     void closeWorkspace();
 
     // loads a language by the given language shortcurt (e.g. de, en)
-    void loadLanguage(const QString& language);
+    void loadLanguage(const String &language);
 
     QPalette m_originalPalette;
-    QString m_currentTheme;                //!< current active theme name
-    QString m_currentLanguage;             //!< current active language 2 letters code
+    String m_currentTheme;                 //!< current active theme name
+    String m_currentLanguage;              //!< current active language 2 letters code
 
     QStatusBar *m_statusBar{nullptr};      //!< unique bottom status bar
-    QWidget *m_currentContent{nullptr};    //!< current active content widget
-
-    QMap<QString, QWidget*> m_contents;    //!< existings content widget (only once activated)
-
-    QMap<QString, QToolBar*> m_toolBars;   //!< existings toolbars (many can be activated)
-    QMap<QString, QDockWidget*> m_docks;   //!< existings docks (many can be activated)
 
     common::Settings& settings();
 
@@ -168,6 +208,8 @@ private:
     void openResource(const QString &location);
 
     common::Messenger& messenger();
+
+    void setup();
 };
 
 } // namespace main

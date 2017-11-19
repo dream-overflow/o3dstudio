@@ -9,7 +9,7 @@
 #ifndef _O3DS_COMMON_DYNAMICMODULE_H
 #define _O3DS_COMMON_DYNAMICMODULE_H
 
-#include <QtCore/QLibrary>
+#include <o3d/core/dynamiclibrary.h>
 
 #include "module.h"
 #include "global.h"
@@ -18,25 +18,25 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-typedef Module* (*PluginFunction)(const QString &, QLibrary *);
+typedef Module* (*PluginFunction)(const String &, DynamicLibrary *library);
 
 class O3S_API DynamicModule : public Module
 {
 public:
 
-    DynamicModule(const QString &name, QLibrary *library);
+    DynamicModule(const String &name, DynamicLibrary *library);
     virtual ~DynamicModule();
 
-    virtual bool start();
-    virtual bool stop();
+    virtual Bool start();
+    virtual Bool stop();
 
-    QString getFileName() const;
+    String fileName() const;
 
-    virtual QLibrary* library();
+    virtual DynamicLibrary* library();
 
 private:
 
-    QLibrary *m_library;           //!< Related library instance
+    DynamicLibrary *m_library;           //!< Related library instance
 };
 
 } // namespace common

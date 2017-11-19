@@ -35,46 +35,46 @@ void Store::initProject(Project *project, Version version)
     }
 
     if (project->path().exists()) {
-        throw StoreException(tr("Project path exists"));
+        throw E_StoreException(fromQString(tr("Project path exists")));
     }
 
     if (!Application::instance()->workspaces().defaultProjectsPath().mkdir(project->name())) {
-        throw StoreException("Unable to create the project directory");
+        throw E_StoreException("Unable to create the project directory");
     }
 
     if (!project->path().mkdir("items")) {
-        throw StoreException("Unable to create the project items directory");
+        throw E_StoreException("Unable to create the project items directory");
     }
 
     if (!project->path().mkdir("cache")) {
-        throw StoreException("Unable to create the project cache directory");
+        throw E_StoreException("Unable to create the project cache directory");
     }
 
     if (!project->path().mkdir("tmp")) {
-        throw StoreException("Unable to create the project temporary directory");
+        throw E_StoreException("Unable to create the project temporary directory");
     }
 
     if (!project->path().mkdir("targets")) {
-        throw StoreException("Unable to create the project targets path");
+        throw E_StoreException("Unable to create the project targets path");
     }
 
     QFile readmeFile(project->path().absoluteFilePath("README.txt"));
     if (!readmeFile.open(QFile::WriteOnly | QFile::Text)) {
-        throw StoreException("Unable to create the project readme file");
+        throw E_StoreException("Unable to create the project readme file");
     }
     readmeFile.write("TODO\n");
     readmeFile.close();
 
     QFile licenseFile(project->path().absoluteFilePath("LICENSE.txt"));
     if (!licenseFile.open(QFile::WriteOnly | QFile::Text)) {
-        throw StoreException("Unable to create the project licnse file");
+        throw E_StoreException("Unable to create the project licnse file");
     }
     licenseFile.write("TODO\n");
     licenseFile.close();
 
     QFile infoFile(project->path().absoluteFilePath("INFO.txt"));
     if (!infoFile.open(QFile::WriteOnly | QFile::Text)) {
-        throw StoreException("Unable to create the project information file");
+        throw E_StoreException("Unable to create the project information file");
     }
     infoFile.write("TODO\n");
     infoFile.close();
@@ -88,18 +88,18 @@ void Store::loadProject(Project *project)
 
     // check project structure, integrity
     if (!project->path().exists()) {
-        throw StoreException(tr("Project directory doesn't exists"));
+        throw E_StoreException(fromQString(tr("Project directory doesn't exists")));
     }
 
     if (!project->path().exists("items")) {
-        throw StoreException("Project items directory is missing");
+        throw E_StoreException("Project items directory is missing");
     }
 
     if (!project->path().exists("cache")) {
         qWarning("Project cache directory is missing");
 
         if (!project->path().mkdir("cache")) {
-            throw StoreException("Unable to create the project cache directory");
+            throw E_StoreException("Unable to create the project cache directory");
         }
     }
 
@@ -107,12 +107,12 @@ void Store::loadProject(Project *project)
         qWarning("Project temporary directory is missing");
 
         if (!project->path().mkdir("tmp")) {
-            throw StoreException("Unable to create the project temporary directory");
+            throw E_StoreException("Unable to create the project temporary directory");
         }
     }
 
     if (!project->path().exists("targets")) {
-        throw StoreException("Project targets directory is missing");
+        throw E_StoreException("Project targets directory is missing");
     }
 
     if (!project->path().exists("README.txt")) {
@@ -120,7 +120,7 @@ void Store::loadProject(Project *project)
 
         QFile readmeFile(project->path().absoluteFilePath("README.txt"));
         if (!readmeFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw StoreException("Unable to create the project readme file");
+            throw E_StoreException("Unable to create the project readme file");
         }
         readmeFile.write("TODO\n");
         readmeFile.close();
@@ -131,7 +131,7 @@ void Store::loadProject(Project *project)
 
         QFile licenseFile(project->path().absoluteFilePath("LICENSE.txt"));
         if (!licenseFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw StoreException("Unable to create the project license file");
+            throw E_StoreException("Unable to create the project license file");
         }
         licenseFile.write("TODO\n");
         licenseFile.close();
@@ -142,7 +142,7 @@ void Store::loadProject(Project *project)
 
         QFile infoFile(project->path().absoluteFilePath("INFO.txt"));
         if (!infoFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw StoreException("Unable to create the project information file");
+            throw E_StoreException("Unable to create the project information file");
         }
         infoFile.write("TODO\n");
         infoFile.close();
@@ -157,18 +157,18 @@ void Store::saveProject(Project *project)
 
     // check project structure, integrity
     if (!project->path().exists()) {
-        throw StoreException(tr("Project directory doesn't exists"));
+        throw E_StoreException(fromQString(tr("Project directory doesn't exists")));
     }
 
     if (!project->path().exists("items")) {
-        throw StoreException("Project items directory is missing");
+        throw E_StoreException("Project items directory is missing");
     }
 
     if (!project->path().exists("cache")) {
         qWarning("Project cache directory is missing");
 
         if (!project->path().mkdir("cache")) {
-            throw StoreException("Unable to create the project cache directory");
+            throw E_StoreException("Unable to create the project cache directory");
         }
     }
 
@@ -176,12 +176,12 @@ void Store::saveProject(Project *project)
         qWarning("Project temporary directory is missing");
 
         if (!project->path().mkdir("tmp")) {
-            throw StoreException("Unable to create the project temporary directory");
+            throw E_StoreException("Unable to create the project temporary directory");
         }
     }
 
     if (!project->path().exists("targets")) {
-        throw StoreException("Project targets directory is missing");
+        throw E_StoreException("Project targets directory is missing");
     }
 
     if (!project->path().exists("README.txt")) {
@@ -189,7 +189,7 @@ void Store::saveProject(Project *project)
 
         QFile readmeFile(project->path().absoluteFilePath("README.txt"));
         if (!readmeFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw StoreException("Unable to create the project readme file");
+            throw E_StoreException("Unable to create the project readme file");
         }
         readmeFile.write("TODO\n");
         readmeFile.close();
@@ -200,7 +200,7 @@ void Store::saveProject(Project *project)
 
         QFile licenseFile(project->path().absoluteFilePath("LICENSE.txt"));
         if (!licenseFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw StoreException("Unable to create the project license file");
+            throw E_StoreException("Unable to create the project license file");
         }
         licenseFile.write("TODO\n");
         licenseFile.close();
@@ -211,7 +211,7 @@ void Store::saveProject(Project *project)
 
         QFile infoFile(project->path().absoluteFilePath("INFO.txt"));
         if (!infoFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw StoreException("Unable to create the project information file");
+            throw E_StoreException("Unable to create the project information file");
         }
         infoFile.write("TODO\n");
         infoFile.close();
@@ -227,7 +227,7 @@ void Store::deleteProject(Project *project)
     QDir path(project->path());
 
     if (!path.exists()) {
-        throw StoreException(tr("Project directory doesn't exists"));
+        throw E_StoreException(fromQString(tr("Project directory doesn't exists")));
     }
 
     // items
@@ -337,10 +337,4 @@ QList<StoreItem *> Store::removedItems(Project *project)
     QList<StoreItem*> items;
 
     return items;
-}
-
-StoreException::StoreException(const QString &message) :
-    BaseException(message)
-{
-
 }

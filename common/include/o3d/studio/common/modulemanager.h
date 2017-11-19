@@ -9,9 +9,9 @@
 #ifndef _O3DS_COMMON_MODULEMANAGER_H
 #define _O3DS_COMMON_MODULEMANAGER_H
 
-#include <QtCore/QStringList>
-#include <QtCore/QMap>
-#include <QtCore/QLoggingCategory>
+#include <map>
+
+#include <o3d/core/stringlist.h>
 
 #include "global.h"
 #include "module.h"
@@ -19,8 +19,6 @@
 namespace o3d {
 namespace studio {
 namespace common {
-
-Q_DECLARE_LOGGING_CATEGORY(moduleLogger)
 
 class O3S_API ModuleManager
 {
@@ -38,19 +36,19 @@ public:
      * @brief Return the list of found modules names.
      * @return
      */
-    QStringList getModuleList() const;
+    T_StringList moduleList() const;
 
     /**
      * @brief setPluginsPath
      * @param path
      */
-    void setPluginsPath(const QString &path);
+    void setPluginsPath(const String &path);
 
     /**
      * @brief setPluginsFilters
-     * @param filters
+     * @param filters extensions separated by |
      */
-    void setPluginsFilters(const QStringList &filters);
+    void setPluginsFilters(const String &filters);
 
     /**
      * @brief Refresh the list of modules.
@@ -62,21 +60,21 @@ public:
      * @param name
      * @return
      */
-    bool hasModule(const QString &name) const;
+    Bool hasModule(const String &name) const;
 
     /**
      * @brief Get a previously loaded module.
      * @param name Name of the module
      * @return Module or nullptr.
      */
-    Module* getModule(const QString &name) const;
+    Module* module(const String &name) const;
 
     /**
      * @brief load a dynamic module.
      * @param name Module name.
      * @return Instance of the module.
      */
-    Module* load(const QString &name);
+    Module* load(const String &name);
 
     /**
      * @brief unload a previously dynamic module and delete the object.
@@ -97,11 +95,11 @@ public:
 
 private:
 
-    QString m_path;
-    QStringList m_filters;
+    String m_path;
+    String m_filters;   //! extensions separated by |
 
-    QMap<QString, QString> m_foundModules;
-    QMap<QString, Module*> m_loadedModules;
+    std::map<String, String> m_foundModules;
+    std::map<String, Module*> m_loadedModules;
 
 private:  // singleton
 

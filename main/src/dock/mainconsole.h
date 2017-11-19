@@ -11,32 +11,47 @@
 
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QListWidget>
+
 #include "o3d/studio/common/ui/dock.h"
+
+#include <o3d/core/baseobject.h>
 
 namespace o3d {
 namespace studio {
 namespace main {
 
-class MainConsole : public QDockWidget, public common::Dock
-{
-    Q_OBJECT
+class QtMainConsole;
 
+class MainConsole : public BaseObject, public common::Dock
+{
 public:
 
-    MainConsole(QWidget *parent = nullptr);
+    MainConsole(BaseObject *parent = nullptr);
     virtual ~MainConsole();
 
     virtual QDockWidget* ui() override;
-    virtual QString elementName() const override;
+    virtual String elementName() const override;
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
-signals:
+public /*slots*/:
 
-protected:
+    void onMessage(UInt32 msgType, const String &message);
 
-public slots:
+private:
 
-    void onMessage(QtMsgType msgType, const QString &message);
+    QtMainConsole *m_qtMainConsole;
+};
+
+class QtMainConsole : public QDockWidget
+{
+    Q_OBJECT
+
+    friend class MainConsole;
+
+public:
+
+    QtMainConsole(QWidget *parent = nullptr);
+    virtual ~QtMainConsole();
 
 private:
 

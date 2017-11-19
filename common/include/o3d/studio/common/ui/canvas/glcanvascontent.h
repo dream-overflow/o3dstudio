@@ -26,7 +26,7 @@ public:
     explicit GLCanvasContent(const LightRef &ref, QWidget *parent = nullptr);
     virtual ~GLCanvasContent();
 
-    virtual QString elementName() const override;
+    virtual String elementName() const override;
     virtual QWidget* ui() override;
 
     virtual QSize minimumSizeHint() const override;

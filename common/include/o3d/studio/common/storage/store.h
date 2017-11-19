@@ -88,11 +88,13 @@ protected:
 /**
  * @brief The StoreException class
  */
-class StoreException : public BaseException
+class E_StoreException : public E_CommonException
 {
-public:
+    O3D_E_DEF_CLASS(E_StoreException)
 
-    StoreException(const QString &message);
+    //! Ctor
+    E_StoreException(const String& msg) throw() : E_CommonException(msg)
+        O3D_E_DEF(E_StoreException, "Objective-3D Studio store exception")
 };
 
 } // namespace common

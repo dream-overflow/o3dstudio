@@ -21,7 +21,7 @@ BrowserContent:: BrowserContent(QWidget *parent) :
     setWindowTitle(tr("Home page"));
     setWindowIcon(QIcon::fromTheme("go-home"));
 
-    setSearchPaths(QStringList(common::Application::instance()->appDir() + QDir::separator() + "share/html"));
+    setSearchPaths(QStringList(toQString(common::Application::instance()->appDir()) + QDir::separator() + "share/html"));
     setSource(QUrl::fromLocalFile("index.html"));
 }
 
@@ -35,7 +35,7 @@ QWidget* BrowserContent::ui()
     return this;
 }
 
-QString BrowserContent::elementName() const
+o3d::String BrowserContent::elementName() const
 {
     return "o3s::main::browsercontent";
 }

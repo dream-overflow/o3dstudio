@@ -109,7 +109,7 @@ void PluginsInformationsDialog::onPluginDetails(const QModelIndex &index)
     common::ModuleManager *moduleManager = common::ModuleManager::instance();
     common::PluginItem *pluginItem = static_cast<common::PluginItem*>(index.internalPointer());
 
-    const common::Module* module = moduleManager->getModule(pluginItem->name());
+    const common::Module* module = moduleManager->module(fromQString(pluginItem->name()));
     if (module == nullptr) {
         return;
     }
@@ -133,12 +133,12 @@ void PluginsInformationsDialog::onPluginErrorDetailsClicked()
     common::ModuleManager *moduleManager = common::ModuleManager::instance();
     common::PluginItem *pluginItem = static_cast<common::PluginItem*>(index.internalPointer());
 
-    const common::Module* module = moduleManager->getModule(pluginItem->name());
+    const common::Module* module = moduleManager->module(fromQString(pluginItem->name()));
     if (module == nullptr) {
         return;
     }
 
-    const QStringList &report = module->report();
+    const T_StringList &report = module->report();
     if (report.size() > 0) {
         // @todo open error details dialog
     }
@@ -159,7 +159,7 @@ void PluginsInformationsDialog::onPluginDetailsClicked()
     common::ModuleManager *moduleManager = common::ModuleManager::instance();
     common::PluginItem *pluginItem = static_cast<common::PluginItem*>(index.internalPointer());
 
-    const common::Module* module = moduleManager->getModule(pluginItem->name());
+    const common::Module* module = moduleManager->module(fromQString(pluginItem->name()));
     if (module == nullptr) {
         return;
     }
@@ -231,19 +231,19 @@ void PluginsInformationsDialog::setupCategories()
     common::PluginItem *itemParent = nullptr;
     common::PluginItem *rootItem = static_cast<common::PluginItem*>(model->index(0, 0, QModelIndex()).internalPointer());
 
-    foreach (moduleName, moduleManager->getModuleList()) {
-        const common::Module* module = moduleManager->getModule(moduleName);
+    for (String moduleName : moduleManager->moduleList()) {
+        const common::Module* module = moduleManager->module(moduleName);
         const common::ModuleInfo info = module->provideInfo();
 
         QList<QVariant> data;
-        data << info.verbose() << module->started() << info.version() << info.vendor();
+        data << toQString(info.verbose()) << module->started() << toQString(info.version()) << toQString(info.vendor());
 
-        itemParent = rootItem->find(info.section());
+        itemParent = rootItem->find(toQString(info.section()));
         if (itemParent == nullptr) {
             // @todo generic or create
         }
 
-        common::PluginItem *pluginModel = new common::PluginItem(info.section(), moduleName, data, itemParent);
+        common::PluginItem *pluginModel = new common::PluginItem(toQString(info.section()), toQString(moduleName), data, itemParent);
         itemParent->appendChild(pluginModel);
     }
 
@@ -252,7 +252,7 @@ void PluginsInformationsDialog::setupCategories()
     connect(ui.pluginsTree, SIGNAL(doubleClicked(const QModelIndex &)), SLOT(onPluginDetails(const QModelIndex &)));
 }
 
-void PluginsInformationsDialog::showDetailsDialog(const QString &name, QMap<QString, QVariant> properties)
+void PluginsInformationsDialog::showDetailsDialog(const String &name, std::map<String, String> properties)
 {
     // @todo
 }

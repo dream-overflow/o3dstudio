@@ -9,8 +9,7 @@
 #ifndef _O3DS_COMMON_MODULEINFO_H
 #define _O3DS_COMMON_MODULEINFO_H
 
-#include <QtCore/QString>
-#include <QtCore/QVariant>
+#include <map>
 
 #include "global.h"
 
@@ -22,24 +21,24 @@ class O3S_API ModuleInfo
 {
 public:
 
-    ModuleInfo(const QString &name, const QMap<QString, QVariant> &properties);
+    ModuleInfo(const String &name, const std::map<String, String> &properties);
     ~ModuleInfo();
 
-    const QString& name() const;
-    QString verbose() const;
-    QString version() const;
-    QString vendor() const;
-    QString description() const;
-    QString section() const;
+    const String &name() const;
+    String verbose() const;
+    String version() const;
+    String vendor() const;
+    String description() const;
+    String section() const;
 
-    QVariant property(const QString &name, const QVariant &defaut = QVariant()) const;
+    String property(const String &name, const String &defaut = "") const;
 
-    const QMap<QString, QVariant> properties() const;
+    const std::map<String, String> properties() const;
 
 protected:
 
-    QMap<QString, QVariant> m_properties;
-    QString m_name;               //!< Unique module name
+    std::map<String, String> m_properties;
+    String m_name;               //!< Unique module name
 };
 
 } // namespace common

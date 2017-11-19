@@ -382,8 +382,8 @@ void CommandManager::run()
                         emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
                     }
                 }
-            } catch (BaseException &e) {
-                messenger.critical(e.message());
+            } catch (E_CommonException &e) {
+                messenger.critical(e.getMsg());
 
                 error = true;
             }

@@ -214,7 +214,7 @@ bool Workspace::setActiveProject(const LightRef &ref)
 
 bool Workspace::save()
 {
-    messenger().info(tr("Saving current workspace..."));
+    messenger().info(fromQString(tr("Saving current workspace...")));
 
     Project *project = nullptr;
     foreach (project, m_loadedProjects) {
@@ -223,7 +223,7 @@ bool Workspace::save()
         }
     }
 
-    messenger().info(tr("Current workspace saved !"));
+    messenger().info(fromQString(tr("Current workspace saved !")));
 
     return true;
 }
@@ -384,10 +384,4 @@ void Workspace::onSelectionChanged()
 Messenger &Workspace::messenger()
 {
     return Application::instance()->messenger();
-}
-
-WorkspaceException::WorkspaceException(const QString &message) :
-    BaseException(message)
-{
-
 }

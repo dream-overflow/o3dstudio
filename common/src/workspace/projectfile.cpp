@@ -67,7 +67,7 @@ void ProjectFile::load()
 {
     QFile file(m_project->path().absoluteFilePath("project.o3dstudio"));
     if (!file.exists()) {
-        throw ProjectException(tr("Missing project file for %1").arg(m_project->name()));
+        throw E_ProjectException(fromQString(tr("Missing project file for %1").arg(m_project->name())));
     }
 
     file.open(QFile::ReadOnly);
@@ -75,7 +75,7 @@ void ProjectFile::load()
     QDataStream stream(&file);
 
     if (stream.status() != QDataStream::Ok) {
-        throw ProjectException(tr("Project file streaming output not ok"));
+        throw E_ProjectException(fromQString(tr("Project file streaming output not ok")));
     }
 
     // header
@@ -85,7 +85,7 @@ void ProjectFile::load()
 
     int size = stream.readRawData(lmagic, magicLen);
     if ((size != magicLen) || (memcmp(lmagic, PROJECT_MAGIC, magicLen) != 0)) {
-        throw ProjectException(tr("Invalid project file format"));
+        throw E_ProjectException(fromQString(tr("Invalid project file format")));
     }
 
     QUuid uuid;
@@ -97,7 +97,7 @@ void ProjectFile::load()
     m_project->setRef(ObjectRef::buildRef(m_project->workspace(), uuid));
 
     if (m_project->name() != name) {
-        throw ProjectException(tr("Invalid project name"));
+        throw E_ProjectException(fromQString(tr("Invalid project name")));
     }
 
     // id generator
@@ -184,7 +184,7 @@ void ProjectFile::save()
     QDataStream stream(&file);
 
     if (stream.status() != QDataStream::Ok) {
-        throw ProjectException(tr("Project file streaming output not ok"));
+        throw E_ProjectException(fromQString(tr("Project file streaming output not ok")));
     }
 
     // header

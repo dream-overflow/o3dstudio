@@ -29,7 +29,7 @@ public:
     virtual ~MainToolBar();
 
     virtual QToolBar* ui() override;
-    virtual QString elementName() const override;
+    virtual String elementName() const override;
     virtual Qt::ToolBarArea toolBarArea() const override;
 
 signals:

@@ -25,7 +25,7 @@ ProjectSection::ProjectSection(const common::LightRef &ref, QWidget *parent) :
     QWidget(parent)
 {
     // m_properties["ref"] = ref; conversion to QVariant ?
-    m_properties["longId"] = ref.longId();
+    m_properties["longId"] = toQString(ref.longId());
     m_properties["name"] = tr("undefined");
 
     common::Workspace* workspace = common::Application::instance()->workspaces().current();

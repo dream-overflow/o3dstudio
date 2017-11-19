@@ -9,26 +9,3 @@
 #include "o3d/studio/common/exception.h"
 
 using namespace o3d::studio::common;
-
-
-BaseException::BaseException(const QString &message) :
-    QException(),
-    m_message(message)
-{
-
-}
-
-void BaseException::raise() const
-{
-    throw *this;
-}
-
-BaseException *BaseException::clone() const
-{
-    return new BaseException(*this);
-}
-
-const QString &BaseException::message() const
-{
-    return m_message;
-}

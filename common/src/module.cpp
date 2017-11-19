@@ -6,13 +6,13 @@
  * @details
  */
 
-#include <QtCore/QLibrary>
+#include <o3d/core/dynamiclibrary.h>
 
 #include "o3d/studio/common/module.h"
 
 using namespace o3d::studio::common;
 
-Module::Module(const QString &name) :
+Module::Module(const String &name) :
     m_name(name)
 {
 
@@ -23,12 +23,12 @@ Module::~Module()
 
 }
 
-const QString &Module::name() const
+const o3d::String &Module::name() const
 {
     return m_name;
 }
 
-bool Module::started() const
+o3d::Bool Module::started() const
 {
     return m_started;
 }
@@ -38,48 +38,48 @@ ModuleInfo Module::provideInfo() const
     return ModuleInfo(m_name, m_properties);
 }
 
-QLibrary *Module::library()
+o3d::DynamicLibrary *Module::library()
 {
     return nullptr;
 }
 
-const QBitArray& Module::capacities() const
+const o3d::BitSet64& Module::capacities() const
 {
     return m_capacities;
 }
 
-bool Module::hasCapacity(Capacity cap) const
+o3d::Bool Module::hasCapacity(Capacity cap) const
 {
-    return m_capacities.testBit(cap);
+    return m_capacities.getBit(cap);
 }
 
-bool Module::start()
+o3d::Bool Module::start()
 {
     return false;
 }
 
-bool Module::stop()
+o3d::Bool Module::stop()
 {
     m_report.clear();
     return false;
 }
 
-const QStringList &Module::report() const
+const o3d::T_StringList &Module::report() const
 {
     return m_report;
 }
 
-bool Module::restart()
+o3d::Bool Module::restart()
 {
     if (m_started) {
         if (!stop()) {
-            return false;
+            return False;
         }
     }
 
     if (!m_started) {
         if (!start()) {
-            return false;
+            return False;
         }
     }
 

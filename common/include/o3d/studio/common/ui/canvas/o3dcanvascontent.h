@@ -27,7 +27,7 @@ public:
     explicit O3DCanvasContent(const LightRef &ref, bool debug = false, QWidget *parent = nullptr);
     virtual ~O3DCanvasContent();
 
-    virtual QString elementName() const override;
+    virtual String elementName() const override;
 
     void setRenderer(QtRenderer *renderer);
 

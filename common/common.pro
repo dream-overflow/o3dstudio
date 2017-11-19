@@ -155,7 +155,7 @@ HEADERS += \
 
 LIBS += -lobjective3d-dbg
 
-INCLUDEPATH += $$(PREFIX)/lib/objective3d-dbg/
+# INCLUDEPATH += $$(PREFIX)/lib/objective3d-dbg/
 
 copyToDestdir($$TRANSLATIONS_FILES, languages)
 
