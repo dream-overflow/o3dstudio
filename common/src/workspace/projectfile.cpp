@@ -35,7 +35,7 @@ ProjectFile::ProjectFile(Project *project, ProjectFile::ProjectVersion version) 
     m_project(project),
     m_version(version)
 {
-    Q_ASSERT(project != nullptr);
+    O3D_ASSERT(project != nullptr);
 }
 
 ProjectFile::~ProjectFile()
@@ -43,17 +43,17 @@ ProjectFile::~ProjectFile()
 
 }
 
-const QString &ProjectFile::name() const
+const String &ProjectFile::name() const
 {
     return m_project->name();
 }
 
-QString ProjectFile::filename() const
+o3d::String ProjectFile::filename() const
 {
-    return m_project->path().absoluteFilePath("project.o3dstudio");
+    return m_project->path().makeFullFileName("project.o3dstudio");
 }
 
-const QDir &ProjectFile::path() const
+const o3d::Dir &ProjectFile::path() const
 {
     return m_project->path();
 }
@@ -65,7 +65,7 @@ void ProjectFile::create()
 
 void ProjectFile::load()
 {
-    QFile file(m_project->path().absoluteFilePath("project.o3dstudio"));
+    QFile file(toQString(filename()));
     if (!file.exists()) {
         throw E_ProjectException(fromQString(tr("Missing project file for %1").arg(m_project->name())));
     }
@@ -212,7 +212,7 @@ void ProjectFile::save()
     Asset *asset = nullptr;
     foreach (asset, m_project->m_assets) {
         stream << asset->ref().uuid()
-               << asset->ref().strong().typeName()
+               << toQString(asset->ref().strong().typeName())
                << *asset;
     }
 
@@ -223,7 +223,7 @@ void ProjectFile::save()
     Hub *hub = nullptr;
     foreach (hub, m_project->m_hubs) {
         stream << hub->ref().uuid()
-               << hub->ref().strong().typeName()
+               << toQString(hub->ref().strong().typeName())
                << *hub;
     }
 
@@ -234,7 +234,7 @@ void ProjectFile::save()
     Fragment *fragment = nullptr;
     foreach (fragment, m_project->m_fragments) {
         stream << fragment->ref().uuid()
-               << fragment->ref().strong().typeName()
+               << toQString(fragment->ref().strong().typeName())
                << *fragment;
     }
 

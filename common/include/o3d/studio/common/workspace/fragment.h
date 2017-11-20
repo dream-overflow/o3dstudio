@@ -9,11 +9,6 @@
 #ifndef _O3DS_COMMON_FRAGMENT_H
 #define _O3DS_COMMON_FRAGMENT_H
 
-#include <QtCore/QString>
-#include <QtCore/QMap>
-#include <QtCore/QException>
-#include <QtCore/QCoreApplication>
-
 #include "../exception.h"
 #include "../objectref.h"
 
@@ -32,11 +27,9 @@ class MasterScene;
  */
 class O3S_API Fragment : public Entity
 {
-    Q_DECLARE_TR_FUNCTIONS(Fragment)
-
 public:
 
-    Fragment(const QString &name, Entity *parent = nullptr);
+    Fragment(const String &name, Entity *parent = nullptr);
     virtual ~Fragment();
 
     void setProject(Project *project);
@@ -51,18 +44,18 @@ public:
 
     virtual void create() override;
 
-    virtual bool load() override;
-    virtual bool save() override;
+    virtual Bool load() override;
+    virtual Bool save() override;
 
-    virtual bool exists() const override;
+    virtual Bool exists() const override;
 
     void linkToHub(Hub *hub);
 
     Hub* hub();
     const Hub* hub() const;
 
-    virtual bool serializeContent(QDataStream &stream) const;
-    virtual bool deserializeContent(QDataStream &stream);
+    virtual Bool serializeContent(QDataStream &stream) const;
+    virtual Bool deserializeContent(QDataStream &stream);
 
 private:
 
@@ -75,11 +68,13 @@ private:
 /**
  * @brief The FragmentException class
  */
-class FragmentException : public E_CommonException
+class E_FragmentException : public E_CommonException
 {
-public:
+    O3D_E_DEF_CLASS(E_FragmentException)
 
-    FragmentException(const QString &message);
+    //! Ctor
+    E_FragmentException(const String& msg) throw() : E_CommonException(msg)
+        O3D_E_DEF(E_FragmentException, "Objective-3D Studio fragment exception")
 };
 
 } // namespace common

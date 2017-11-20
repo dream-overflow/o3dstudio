@@ -31,12 +31,12 @@ const TypeRef &Component::typeRef() const
     return m_typeRef;
 }
 
-const QString &Component::name() const
+const o3d::String &Component::name() const
 {
     return m_name;
 }
 
-const QString &Component::targetName() const
+const o3d::String &Component::targetName() const
 {
     return m_targetName;
 }

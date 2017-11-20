@@ -9,12 +9,12 @@
 #include "o3d/studio/common/storage/storeitem.h"
 
 #include <QtCore/QCryptographicHash>
-#include <QtCore/QDir>
+#include <QtCore/QFile>
 
 using namespace o3d::studio::common;
 
-// Returns empty QByteArray() on failure.
-QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm)
+// Returns empty QByteArray() on failure. @todo
+/*QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm hashAlgorithm)
 {
     QFile f(fileName);
     if (f.open(QFile::ReadOnly)) {
@@ -24,14 +24,14 @@ QByteArray fileChecksum(const QString &fileName, QCryptographicHash::Algorithm h
         }
     }
     return QByteArray();
-}
+}*/
 
 
 StoreItem::StoreItem(Project* project) :
     m_ref(),
     m_project(project)
 {
-    Q_ASSERT(project != nullptr);
+    O3D_ASSERT(project != nullptr);
 
     m_ref = ObjectRef::buildRef(project, TypeRef());  // @todo store ref type
 }
@@ -41,7 +41,7 @@ StoreItem::~StoreItem()
 
 }
 
-const QString &StoreItem::name() const
+const o3d::String &StoreItem::name() const
 {
     return m_name;
 }
@@ -56,12 +56,12 @@ const Project *StoreItem::project() const
     return m_project;
 }
 
-const QString &StoreItem::originalFullName() const
+const o3d::String &StoreItem::originalFullName() const
 {
     return m_originalFullName;
 }
 
-const QByteArray &StoreItem::originalChecksum() const
+const o3d::ArrayChar &StoreItem::originalChecksum() const
 {
     return m_originalChecksum;
 }
@@ -71,27 +71,19 @@ StoreItem::StoreItemState StoreItem::storeItemState() const
     return m_itemState;
 }
 
-QString StoreItem::itemFileName() const
+o3d::String StoreItem::itemFileName() const
 {
-    QString filename;
-    QChar s = QDir::separator();
-    QString hash1, hash2;
+    String filename;
+    Char s = '/';
+    String hash1, hash2;
 
-    const QUuid &uuid = m_ref.uuid();
+    const Uuid &uuid = m_ref.uuid();
 
     // generate two levels of path from the uuid node
-    hash1 = QString::asprintf("%02x", (uuid.data4[2] << 16 & uuid.data4[3] << 8 & uuid.data4[4]) % 256);
-    hash2 = QString::asprintf("%02x", (uuid.data4[5] << 16 & uuid.data4[6] << 8 & uuid.data4[7]) % 256);
+    hash1 = String::print("%02x", (uuid.node()[0] << 16 & uuid.node()[1] << 8 & uuid.node()[2]) % 256);
+    hash2 = String::print("%02x", (uuid.node()[3] << 16 & uuid.node()[4] << 8 & uuid.node()[5]) % 256);
 
-    filename = m_project->path().absolutePath() + s + "data" + hash1 + s + hash2 + s + uuid.toString() + ".content";
+    filename = m_project->path().getFullPathName() + s + "data" + hash1 + s + hash2 + s + uuid.toString() + ".content";
 
     return filename;
-}
-
-QFile& StoreItem::file()
-{
-    // @todo depending on state ?
-    m_file.setFileName(itemFileName());
-
-    return m_file;
 }

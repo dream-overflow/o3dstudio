@@ -6,6 +6,8 @@
  * @details
  */
 
+#include <QtCore/QUuid>
+
 #include "o3d/studio/common/objectref.h"
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/workspace.h"
@@ -49,7 +51,7 @@ TypeRef::TypeRef() :
 
 }
 
-TypeRef::TypeRef(EntityBaseType baseType, quint32 id, const QString &name) :
+TypeRef::TypeRef(EntityBaseType baseType, UInt32 id, const String &name) :
     m_id((id << 4) | (baseType & 0x0f)),
     m_name(name)
 {
@@ -141,17 +143,17 @@ ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type)
     ObjectRef ref;
 
     ref.m_lightRef.m_id = project->generateEntityId();
-    ref.m_lightRef.m_projectId = (quint32)project->ref().light().id();
+    ref.m_lightRef.m_projectId = (UInt32)project->ref().light().id();
     ref.m_lightRef.m_typeId = type.id();
 
-    ref.m_strongRef.m_uuid = QUuid::createUuid();
+    ref.m_strongRef.m_uuid = Uuid(QUuid::createUuid().toRfc4122().data());
     ref.m_strongRef.m_projectUuid = project->ref().strong().uuid();
     ref.m_strongRef.m_typeName = type.name();
 
     return ref;
 }
 
-ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const QUuid &uuid)
+ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const Uuid &uuid)
 {
     if (!project) {
         throw;
@@ -160,7 +162,7 @@ ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const QUuid
     ObjectRef ref;
 
     ref.m_lightRef.m_id = project->generateEntityId();
-    ref.m_lightRef.m_projectId = (quint32)project->ref().light().id();
+    ref.m_lightRef.m_projectId = (UInt32)project->ref().light().id();
     ref.m_lightRef.m_typeId = type.id();
 
     ref.m_strongRef.m_uuid = uuid;
@@ -170,7 +172,7 @@ ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const QUuid
     return ref;
 }
 
-ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const QUuid &uuid, quint64 id)
+ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const Uuid &uuid, UInt64 id)
 {
     if (!project) {
         throw;
@@ -179,7 +181,7 @@ ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type, const QUuid
     ObjectRef ref;
 
     ref.m_lightRef.m_id = id;
-    ref.m_lightRef.m_projectId = (quint32)project->ref().light().id();
+    ref.m_lightRef.m_projectId = (UInt32)project->ref().light().id();
     ref.m_lightRef.m_typeId = type.id();
 
     ref.m_strongRef.m_uuid = uuid;
@@ -197,16 +199,16 @@ ObjectRef ObjectRef::buildRef(Workspace *workspace)
 
     ObjectRef ref;
 
-    ref.m_lightRef.m_id = (quint64)workspace->generateProjectId();
+    ref.m_lightRef.m_id = (UInt64)workspace->generateProjectId();
     ref.m_lightRef.m_typeId = TypeRef::makeTypeId(PROJECT_TYPE_ID);
 
-    ref.m_strongRef.m_uuid = QUuid::createUuid();
+    ref.m_strongRef.m_uuid = Uuid(QUuid::createUuid().toRfc4122().data());
     ref.m_strongRef.m_typeName = PROJECT_TYPE_STRING;
 
     return ref;
 }
 
-ObjectRef ObjectRef::buildRef(Workspace *workspace, const QUuid &uuid)
+ObjectRef ObjectRef::buildRef(Workspace *workspace, const Uuid &uuid)
 {
     if (!workspace) {
         throw;
@@ -214,7 +216,7 @@ ObjectRef ObjectRef::buildRef(Workspace *workspace, const QUuid &uuid)
 
     ObjectRef ref;
 
-    ref.m_lightRef.m_id = (quint64)workspace->generateProjectId();
+    ref.m_lightRef.m_id = (UInt64)workspace->generateProjectId();
     ref.m_lightRef.m_typeId = TypeRef::makeTypeId(PROJECT_TYPE_ID);
 
     ref.m_strongRef.m_uuid = uuid;
@@ -230,11 +232,11 @@ ObjectRef::ObjectRef(const ObjectRef &dup) :
 
 }
 
-QUrl ObjectRef::url() const
-{
-    QString path = QString("o3s://%1/%2")
-            .arg(m_strongRef.projectUuid().toRfc4122().toStdString().c_str())
-            .arg(m_strongRef.uuid().toRfc4122().toStdString().c_str());
+//QUrl ObjectRef::url() const
+//{
+//    QString path = QString("o3s://%1/%2")
+//            .arg(m_strongRef.projectUuid().toRfc4122().toStdString().c_str())
+//            .arg(m_strongRef.uuid().toRfc4122().toStdString().c_str());
 
-    return QUrl(path);
-}
+//    return QUrl(path);
+//}

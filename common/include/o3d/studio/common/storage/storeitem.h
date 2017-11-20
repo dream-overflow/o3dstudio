@@ -9,10 +9,10 @@
 #ifndef _O3DS_COMMON_STOREITEM_H
 #define _O3DS_COMMON_STOREITEM_H
 
-#include <QtCore/QFile>
-
 #include "../workspace/project.h"
 #include "../objectref.h"
+
+#include <o3d/core/templatearray.h>
 
 namespace o3d {
 namespace studio {
@@ -35,14 +35,14 @@ public:
     StoreItem(Project *project);
     ~StoreItem();
 
-    const QString& name() const;
+    const String& name() const;
     const ObjectRef& ref() const;
 
     Project* project();
     const Project* project() const;
 
-    const QString& originalFullName() const;
-    const QByteArray& originalChecksum() const;
+    const String& originalFullName() const;
+    const ArrayChar& originalChecksum() const;
 
     StoreItemState storeItemState() const;
 
@@ -50,9 +50,7 @@ public:
      * @brief Build the store item full filename
      * @return
      */
-    QString itemFileName() const;
-
-    QFile &file();
+    String itemFileName() const;
 
     /**
      * @brief Put the resource data to project trash
@@ -69,14 +67,12 @@ protected:
     StoreItemState m_itemState;
 
     ObjectRef m_ref;                    //!< Unique object identifier
-    QString m_name;                     //!< User item name
+    String m_name;                      //!< User item name
 
     Project *m_project;                 //!< Owner project
 
-    QString m_originalFullName;         //!< Original file with full path (relative or absolute, as imported)
-    QByteArray m_originalChecksum;      //!< Original file SHA-1 checksum
-
-    QFile m_file;
+    String m_originalFullName;          //!< Original file with full path (relative or absolute, as imported)
+    ArrayChar m_originalChecksum;       //!< Original file SHA-1 checksum
 };
 
 } // namespace common

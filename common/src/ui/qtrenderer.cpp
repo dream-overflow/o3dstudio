@@ -21,7 +21,7 @@ QtRenderer::QtRenderer(QOpenGLWidget *glWidget) :
     o3d::Renderer(),
     m_glWidget(glWidget)
 {
-    Q_ASSERT(m_glWidget != nullptr);
+    O3D_ASSERT(m_glWidget != nullptr);
 }
 
 QtRenderer::~QtRenderer()

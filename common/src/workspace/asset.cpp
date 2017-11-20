@@ -13,7 +13,7 @@
 using namespace o3d::studio::common;
 
 
-Asset::Asset(const QString &name, Entity *parent) :
+Asset::Asset(const String &name, Entity *parent) :
     Entity(name, parent)
 {
     m_typeRef = TypeRef::asset();
@@ -48,35 +48,35 @@ void Asset::create()
     setDirty();
 }
 
-bool Asset::load()
+o3d::Bool Asset::load()
 {
-    return true;
+    return True;
 }
 
-bool Asset::save()
+o3d::Bool Asset::save()
 {
-    return true;
+    return True;
 }
 
-bool Asset::exists() const
+o3d::Bool Asset::exists() const
 {
     return Entity::exists();
 }
 
-bool Asset::serializeContent(QDataStream &stream) const
+o3d::Bool Asset::serializeContent(QDataStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
-bool Asset::deserializeContent(QDataStream &stream)
+o3d::Bool Asset::deserializeContent(QDataStream &stream)
 {
     if (!Entity::deserializeContent(stream)) {
         return false;
     }
 
-    return false;
+    return False;
 }

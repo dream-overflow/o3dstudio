@@ -34,7 +34,7 @@ class O3S_API Asset : public Entity
 
 public:
 
-    Asset(const QString &name, Entity *parent = nullptr);
+    Asset(const String &name, Entity *parent = nullptr);
     virtual ~Asset();
 
     void setProject(Project *project);
@@ -44,13 +44,13 @@ public:
 
     virtual void create() override;
 
-    virtual bool load() override;
-    virtual bool save() override;
+    virtual Bool load() override;
+    virtual Bool save() override;
 
-    virtual bool exists() const override;
+    virtual Bool exists() const override;
 
-    virtual bool serializeContent(QDataStream &stream) const;
-    virtual bool deserializeContent(QDataStream &stream);
+    virtual Bool serializeContent(QDataStream &stream) const;
+    virtual Bool deserializeContent(QDataStream &stream);
 
 private:
 
@@ -58,13 +58,15 @@ private:
 };
 
 /**
- * @brief The FragmentException class
+ * @brief The AssetException class
  */
-class AssetException : public E_CommonException
+class E_AssetException : public E_CommonException
 {
-public:
+    O3D_E_DEF_CLASS(E_AssetException)
 
-    AssetException(const QString &message);
+    //! Ctor
+    E_AssetException(const String& msg) throw() : E_CommonException(msg)
+        O3D_E_DEF(E_AssetException, "Objective-3D Studio asset exception")
 };
 
 } // namespace common

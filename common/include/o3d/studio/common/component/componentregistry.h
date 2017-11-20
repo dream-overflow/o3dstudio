@@ -9,9 +9,9 @@
 #ifndef _O3DS_COMMON_COMPONENTREGISTRY_H
 #define _O3DS_COMMON_COMPONENTREGISTRY_H
 
-#include <QtCore/QString>
-#include <QtCore/QMap>
-#include <QtWidgets/QWidget>
+#include <map>
+
+#include <o3d/core/baseobject.h>
 
 #include "../objectref.h"
 #include "../exception.h"
@@ -22,13 +22,11 @@ namespace common {
 
 class Component;
 
-class O3S_API ComponentRegistry : public QObject
+class O3S_API ComponentRegistry : public BaseObject
 {
-    Q_OBJECT
-
 public:
 
-    ComponentRegistry(QObject *parent = nullptr);
+    ComponentRegistry(BaseObject *parent = nullptr);
     virtual ~ComponentRegistry();
 
     /**
@@ -42,29 +40,29 @@ public:
      */
     void registerComponent(Component *component);
 
-    bool unregisterComponent(const QString &name);
-    bool unregisterComponent(quint64 id);
-    bool unregisterComponent(const TypeRef &ref);
+    Bool unregisterComponent(const String &name);
+    Bool unregisterComponent(UInt64 id);
+    Bool unregisterComponent(const TypeRef &ref);
 
-    Component* component(const QString &name);
-    const Component* component(const QString &name) const;
+    Component* component(const String &name);
+    const Component* component(const String &name) const;
 
     Component* component(const TypeRef &ref);
     const Component* component(const TypeRef &ref) const;
 
-    Component* componentByTarget(const QString &name);
-    const Component* componentByTarget(const QString &name) const;
+    Component* componentByTarget(const String &name);
+    const Component* componentByTarget(const String &name) const;
 
 signals:
 
-    void onComponentRegistered(QString name);
-    void onComponentUnregistered(QString name);
+    void onComponentRegistered(String name);
+    void onComponentUnregistered(String name);
 
 protected:
 
-    QMap<QString, Component*> m_components;
-    QMap<quint64, Component*> m_componentsById;
-    QMap<QString, Component*> m_componentsByTargetName;
+    std::map<String, Component*> m_components;
+    std::map<UInt64, Component*> m_componentsById;
+    std::map<String, Component*> m_componentsByTargetName;
 };
 
 /**

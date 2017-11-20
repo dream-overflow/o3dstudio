@@ -6,10 +6,6 @@
  * @details
  */
 
-#include<QtCore/QDir>
-#include<QtCore/QUrl>
-#include<QtCore/QThread>
-#include<QtCore/QCoreApplication>
 #include<QtCore/QLibraryInfo>
 #include<QtCore/QLocale>
 
@@ -36,7 +32,6 @@ Application::Application() :
     m_started(False)
 {
     qRegisterMetaType<LightRef>("LightRef");
-    qRegisterMetaType<QtMsgType>();
 
     // avoid recursive call when ctor call himself
     m_instance = (Application*)this;
@@ -201,7 +196,7 @@ o3d::Bool Application::start()
 {
     m_settings.loadAll();
 
-    ModuleManager::instance()->setPluginsPath(fromQString(m_settings.get("o3s::plugin::path").toUrl().toLocalFile()));
+    ModuleManager::instance()->setPluginsPath(fromQString(m_settings.get("o3s::plugin::path").toString()));
     ModuleManager::instance()->setPluginsFilters(fromQString(m_settings.get("o3s::plugin::exts").toString()));
     ModuleManager::instance()->searchModules();
 

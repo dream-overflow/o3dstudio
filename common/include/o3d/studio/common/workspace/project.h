@@ -9,16 +9,17 @@
 #ifndef _O3DS_COMMON_PROJECT_H
 #define _O3DS_COMMON_PROJECT_H
 
-#include <QtCore/QString>
-#include <QtCore/QMap>
-#include <QtCore/QDir>
-#include <QtCore/QException>
 #include <QtCore/QCoreApplication>
+
+#include <map>
+#include <list>
 
 #include "entity.h"
 
 #include "../exception.h"
 #include "../objectref.h"
+
+#include <o3d/core/diskdir.h>
 
 class QDataStream;
 
@@ -46,7 +47,7 @@ class O3S_API Project : public Entity
 
 public:
 
-    Project(const QString &name, Workspace *workspace = nullptr);
+    Project(const String &name, Workspace *workspace = nullptr);
     virtual ~Project();
 
     virtual Project* project() override;
@@ -57,7 +58,7 @@ public:
     Workspace* workspace();
     const Workspace* workspace() const;
 
-    quint64 generateEntityId();
+    UInt64 generateEntityId();
 
     /**
      * @brief Has changes to saved since last save(). Project change or any of its child entity.
@@ -65,7 +66,7 @@ public:
      * Else it perform a check on throught the lookup maps of each child and returns on the first
      * entity having changes.
      */
-    virtual bool hasChanges() const override;
+    virtual Bool hasChanges() const override;
 
     /**
      * @brief Initialize a new project at the specified path with name.
@@ -73,18 +74,18 @@ public:
      */
     virtual void create() override;
 
-    QString filename() const;
-    const QDir& path() const;
+    String filename() const;
+    const DiskDir& path() const;
 
-    bool setLocation(const QDir &path);
+    Bool setLocation(const Dir &path);
 
     const ProjectInfo& info() const;
     ProjectInfo& info();
 
-    virtual bool load() override;
-    virtual bool save() override;
+    virtual Bool load() override;
+    virtual Bool save() override;
 
-    virtual bool exists() const override;
+    virtual Bool exists() const override;
 
     MasterScene* masterScene();
     const MasterScene* masterScene() const;
@@ -125,27 +126,27 @@ public:
     void addHub(Hub *hub);
 
     void removeHub(const LightRef &ref);
-    void removeHub(qint64 id);
+    void removeHub(UInt64 id);
     void removeHub(Hub *hub);
 
     Hub* hub(const LightRef &ref);
     const Hub* hub(const LightRef &ref) const;
 
-    Hub* hub(qint64 id);
-    const Hub* hub(qint64 id) const;
+    Hub* hub(UInt64 id);
+    const Hub* hub(UInt64 id) const;
 
-    QList<Hub*> searchHub(const QString &name);
-    QList<const Hub*> searchHub(const QString &name) const;
+    std::list<Hub*> searchHub(const String &name);
+    std::list<const Hub*> searchHub(const String &name) const;
 
     /**
      * @brief Recursively find for a hub instance.
      */
-    Hub* findHub(quint64 id);
+    Hub* findHub(UInt64 id);
 
     /**
      * @brief Recursively find for a hub instance (const version).
      */
-    const Hub* findHub(quint64 id) const;
+    const Hub* findHub(UInt64 id) const;
 
     /**
      * @brief Recursively find for a hub instance.
@@ -158,19 +159,19 @@ public:
     const Hub* findHub(const QUuid &uuid) const;
 
 
-    int numHubs() const;
+    size_t numHubs() const;
 
     /**
      * @brief List of hubs of the project
      * @param recurse Default false, returns only projet level hubs, true recurse over all children.
      */
-    QList<Hub*> hubs(bool recurse = false);
+    std::list<Hub*> hubs(Bool recurse = false);
 
     /**
      * @brief List of hubs of the project (const version).
      * @param recurse Default false, returns only projet level hubs, true recurse over all children.
      */
-    QList<const Hub*> hubs(bool recurse = false) const;
+    std::list<const Hub*> hubs(Bool recurse = false) const;
 
     //
     // fragment
@@ -179,20 +180,20 @@ public:
     void addFragment(Fragment *fragment);
 
     void removeFragment(const LightRef &ref);
-    void removeFragment(quint64 id);
+    void removeFragment(UInt64 id);
     void removeFragment(Fragment *fragment);
 
     Fragment* fragment(const LightRef &ref);
     const Fragment* fragment(const LightRef &ref) const;
 
-    Fragment* fragment(quint64 id);
-    const Fragment* fragment(quint64 id) const;
+    Fragment* fragment(UInt64 id);
+    const Fragment* fragment(UInt64 id) const;
 
-    QList<Fragment*> searchFragment(const QString &name);
-    QList<const Fragment*> searchFragment(const QString &name) const;
+    std::list<Fragment*> searchFragment(const String &name);
+    std::list<const Fragment*> searchFragment(const String &name) const;
 
-    QList<Fragment*> fragments();
-    QList<const Fragment*> fragments() const;
+    std::list<Fragment*> fragments();
+    std::list<const Fragment*> fragments() const;
 
     //
     // asset
@@ -201,43 +202,43 @@ public:
     void addAsset(Asset *asset);
 
     void removeAsset(const LightRef &ref);
-    void removeAsset(quint64 id);
+    void removeAsset(UInt64 id);
     void removeAsset(Asset *asset);
 
     Asset* asset(const LightRef &ref);
     const Asset* asset(const LightRef &ref) const;
 
-    Asset* asset(quint64 id);
-    const Asset* asset(quint64 id) const;
+    Asset* asset(UInt64 id);
+    const Asset* asset(UInt64 id) const;
 
-    QList<Asset*> searchAsset(const QString &name);
-    QList<const Asset*> searchAsset(const QString &name) const;
+    std::list<Asset*> searchAsset(const String &name);
+    std::list<const Asset*> searchAsset(const String &name) const;
 
-    QList<Asset*> assets();
-    QList<const Asset*> assets() const;
+    std::list<Asset*> assets();
+    std::list<const Asset*> assets() const;
 
 private:
 
     Workspace *m_workspace;    //!< Workspace where the projet is currently loaded
 
-    QString m_filename;        //!< Project file name
-    QDir m_path;               //!< Project path
+    String m_filename;         //!< Project file name
+    DiskDir m_path;            //!< Project path
 
     ProjectFile *m_projectFile;
 
-    quint64 m_nextId;
+    UInt64 m_nextId;
 
     ProjectInfo *m_info;
     MasterScene *m_masterScene;
 
-    QMap<quint64, Fragment*> m_fragments;   //!< Children fragment.
-    QMap<quint64, Hub*> m_hubs;             //!< Children hubs (direct).
-    QMap<quint64, Asset*> m_assets;         //!< Children assets.
+    std::map<UInt64, Fragment*> m_fragments;   //!< Children fragment.
+    std::map<UInt64, Hub*> m_hubs;             //!< Children hubs (direct).
+    std::map<UInt64, Asset*> m_assets;         //!< Children assets.
 
     //! Global map by UUID
-    QMap<QUuid, Entity*> m_entitiesByUuid;
+    std::map<QUuid, Entity*> m_entitiesByUuid;
     //! Global map by ID
-    QMap<quint64, Entity*> m_entitiesById;
+    std::map<UInt64, Entity*> m_entitiesById;
 };
 
 /**

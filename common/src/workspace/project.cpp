@@ -18,13 +18,15 @@
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/masterscene.h"
 
+#include <o3d/core/filemanager.h>
+
 using namespace o3d::studio::common;
 
-Project::Project(const QString &name, Workspace *workspace) :
+Project::Project(const String &name, Workspace *workspace) :
     Entity(nullptr),
     m_workspace(workspace),
     m_filename(),
-    m_path(QDir::current()),
+    m_path(FileManager::instance()->getWorkingDirectory()),
     m_nextId(1),
     m_info(nullptr),
     m_masterScene(nullptr)
@@ -86,13 +88,13 @@ const Workspace *Project::workspace() const
     return m_workspace;
 }
 
-quint64 Project::generateEntityId()
+o3d::UInt64 Project::generateEntityId()
 {
-    quint64 nextId = m_nextId++;
+    UInt64 nextId = m_nextId++;
     return nextId;
 }
 
-bool Project::hasChanges() const
+o3d::Bool Project::hasChanges() const
 {
     if (isDirty()) {
         return true;
@@ -124,12 +126,12 @@ void Project::create()
     setDirty();
 }
 
-QString Project::filename() const
+o3d::String Project::filename() const
 {
     return m_path.absoluteFilePath("project.o3dstudio");
 }
 
-const QDir &Project::path() const
+const o3d::DiskDir &Project::path() const
 {
     return m_path;
 }
@@ -158,7 +160,7 @@ bool Project::setLocation(const QDir &path)
     return true;
 }
 
-bool Project::load()
+o3d::Bool Project::load()
 {
     if (!exists()) {
         throw E_ProjectException(fromQString(tr("Project doesn't exists")));
@@ -371,7 +373,7 @@ const Hub* Project::hub(const LightRef &_ref) const
     return nullptr;
 }
 
-Hub* Project::hub(qint64 id)
+Hub* Project::hub(UInt64 id)
 {
     auto it = m_hubs.find(id);
     if (it != m_hubs.end()) {
@@ -381,7 +383,7 @@ Hub* Project::hub(qint64 id)
     return nullptr;
 }
 
-const Hub* Project::hub(qint64 id) const
+const Hub* Project::hub(UInt64 id) const
 {
     auto cit = m_hubs.constFind(id);
     if (cit != m_hubs.cend()) {
@@ -391,7 +393,7 @@ const Hub* Project::hub(qint64 id) const
     return nullptr;
 }
 
-QList<Hub*> Project::searchHub(const QString &name)
+std::list<Hub *> Project::searchHub(const QString &name)
 {
     QList<Hub*> results;
 
@@ -479,7 +481,7 @@ const Hub *Project::findHub(const QUuid &uuid) const
     return nullptr;
 }
 
-int Project::numHubs() const
+size_t Project::numHubs() const
 {
     return m_hubs.size();
 }

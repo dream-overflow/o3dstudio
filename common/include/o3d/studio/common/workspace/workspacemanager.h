@@ -9,8 +9,9 @@
 #ifndef _O3DS_COMMON_WORKSPACEMANAGER_H
 #define _O3DS_COMMON_WORKSPACEMANAGER_H
 
-#include <QtCore/QStringList>
-#include <QtCore/QDir>
+#include <o3d/core/diskdir.h>
+#include <o3d/core/stringlist.h>
+#include <o3d/core/baseobject.h>
 
 #include "../global.h"
 
@@ -23,10 +24,8 @@ class Workspace;
 /**
  * @brief The WorkspaceManager final class
  */
-class O3S_API WorkspaceManager : public QObject
+class O3S_API WorkspaceManager : public BaseObject
 {
-    Q_OBJECT
-
 public:
 
     WorkspaceManager();
@@ -36,21 +35,21 @@ public:
      * @brief Return the list of found workspaces.
      * @return
      */
-    QStringList workspaces() const;
+    T_StringList workspaces() const;
 
-    Workspace* addWorkspace(const QString &name);
+    Workspace* addWorkspace(const String &name);
 
-    Workspace* workspace(const QString &name);
-    const Workspace* workspace(const QString &name) const;
+    Workspace* workspace(const String &name);
+    const Workspace* workspace(const String &name) const;
 
-    bool deleteWorkspace(const QString &name);
-    bool hasWorkspace(const QString &name) const;
+    Bool deleteWorkspace(const String &name);
+    Bool hasWorkspace(const String &name) const;
 
     /**
      * @brief Load and set as current workspace.
      * @param name
      */
-    bool loadWorkspace(const QString &name);
+    Bool loadWorkspace(const String &name);
 
     Workspace* current();
     const Workspace* current() const;
@@ -59,29 +58,29 @@ public:
      * @brief Close the current workspace, and save changes, finally setup an empty new workspace
      * @return
      */
-    bool closeCurrent();
+    Bool closeCurrent();
 
     /**
      * @brief Default workspaces location directory.
      * @return
      */
-    const QDir& defaultPath() const;
+    const DiskDir& defaultPath() const;
 
-    const QDir& defaultProjectsPath() const;
-    const QDir& defaultWorkspacesPath() const;
+    const DiskDir& defaultProjectsPath() const;
+    const DiskDir& defaultWorkspacesPath() const;
 
-signals:
+public /*signals*/:
 
-    void onWorkspaceAdded(const QString &name);
-    void onWorkspaceActivated(const QString &name);
+    Signal<const String &/*name*/> onWorkspaceAdded{this};
+    Signal<const String &/*name*/> onWorkspaceActivated{this};
 
 private:
 
-    QDir m_defaultPath;
-    QDir m_defaultProjectsPath;
-    QDir m_defaultWorkspacesPath;
+    DiskDir m_defaultPath;
+    DiskDir m_defaultProjectsPath;
+    DiskDir m_defaultWorkspacesPath;
 
-    QStringList m_foundWorkspaces;
+    T_StringList m_foundWorkspaces;
     Workspace* m_current{nullptr};
 };
 

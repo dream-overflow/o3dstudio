@@ -9,9 +9,10 @@
 #ifndef _O3DS_COMMON_HUB_H
 #define _O3DS_COMMON_HUB_H
 
-#include <QtCore/QMap>
-#include <QtCore/QException>
 #include <QtCore/QCoreApplication>
+
+#include <map>
+#include <list>
 
 #include "../global.h"
 #include "../exception.h"
@@ -35,7 +36,7 @@ class O3S_API Hub : public Entity
 
 public:
 
-    explicit Hub(const QString &name, Entity *parent = nullptr);
+    explicit Hub(const String &name, Entity *parent = nullptr);
     virtual ~Hub();
 
     void setProject(Project *project);
@@ -45,13 +46,13 @@ public:
 
     virtual void create() override;
 
-    virtual bool load() override;
-    virtual bool save() override;
+    virtual Bool load() override;
+    virtual Bool save() override;
 
-    virtual bool exists() const override;
+    virtual Bool exists() const override;
 
-    virtual bool serializeContent(QDataStream &stream) const;
-    virtual bool deserializeContent(QDataStream &stream);
+    virtual Bool serializeContent(QDataStream &stream) const;
+    virtual Bool deserializeContent(QDataStream &stream);
 
     //
     // children hub
@@ -60,27 +61,27 @@ public:
     void addHub(Hub *hub);
 
     void removeHub(const LightRef &ref);
-    void removeHub(quint64 id);
+    void removeHub(UInt64 id);
     void removeHub(Hub *hub);
 
     Hub* hub(const LightRef &ref);
     const Hub* hub(const LightRef &ref) const;
 
-    Hub* hub(quint64 id);
-    const Hub* hub(quint64 id) const;
+    Hub* hub(UInt64 id);
+    const Hub* hub(UInt64 id) const;
 
-    QList<Hub*> searchHub(const QString &name);
-    QList<const Hub*> searchHub(const QString &name) const;
+    std::list<Hub*> searchHub(const QString &name);
+    std::list<const Hub*> searchHub(const QString &name) const;
 
     /**
      * @brief Recursively find for a hub instance.
      */
-    Hub* findHub(quint64 id);
+    Hub* findHub(UInt64 id);
 
     /**
      * @brief Recursively find for a hub instance (const version).
      */
-    const Hub* findHub(quint64 id) const;
+    const Hub* findHub(UInt64 id) const;
 
     /**
      * @brief Recursively find for a hub instance.
@@ -93,19 +94,19 @@ public:
     const Hub* findHub(const QUuid &uuid) const;
 
 
-    int numHubs() const;
+    size_t numHubs() const;
 
     /**
      * @brief List of children hubs.
      * @param recurse Default false, returns only projet level hubs, true recurse over all children.
      */
-    QList<Hub*> hubs(bool recurse = false);
+    std::list<Hub*> hubs(Bool recurse = False);
 
     /**
      * @brief List of children hubs (const version).
      * @param recurse Default false, returns only projet level hubs, true recurse over all children.
      */
-    QList<const Hub*> hubs(bool recurse = false) const;
+    std::list<const Hub*> hubs(Bool recurse = False) const;
 
     //
     // engine proxy
@@ -128,9 +129,9 @@ public:
 
 private:
 
-    Project *m_project;            //!< Owner project;
+    Project *m_project;               //!< Owner project;
 
-    QMap<quint64, Hub*> m_hubs;    //!< Child hubs
+    std::map<UInt64, Hub*> m_hubs;    //!< Child hubs
 };
 
 /**

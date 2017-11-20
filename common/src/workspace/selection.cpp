@@ -12,9 +12,9 @@
 
 using namespace o3d::studio::common;
 
-Selection::Selection(QObject *parent) :
-    QObject(parent),
-    m_selecting(false),
+Selection::Selection(BaseObject *parent) :
+    BaseObject(parent),
+    m_selecting(False),
     m_workspace(nullptr)
 {
 
@@ -39,22 +39,20 @@ void Selection::initialize(Workspace *workspace)
 void Selection::terminate()
 {
     if (m_workspace) {
-        SelectionItem *selectionItem = nullptr;
-        foreach (selectionItem, m_previousSelection) {
+        for (SelectionItem *selectionItem : m_previousSelection) {
             delete selectionItem;
         }
 
         m_previousSelection.clear();
 
-        selectionItem = nullptr;
-        foreach (selectionItem, m_currentSelection) {
+        for (SelectionItem *selectionItem : m_currentSelection) {
             delete selectionItem;
         }
 
         m_currentSelection.clear();
 
         m_selectingSet.clear();
-        m_selecting = false;
+        m_selecting = False;
 
         m_workspace = nullptr;
     }
@@ -62,7 +60,7 @@ void Selection::terminate()
 
 void Selection::beginSelection()
 {
-    Q_ASSERT(!m_selecting);
+    O3D_ASSERT(!m_selecting);
 
     if (m_selecting) {
         return;
@@ -87,35 +85,32 @@ void Selection::appendSelection(Entity *entity)
 
 void Selection::endSelection()
 {
-    Q_ASSERT(m_selecting);
+    O3D_ASSERT(m_selecting);
 
     if (!m_selecting) {
         return;
     }
 
-    SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, m_previousSelection) {
+    for (SelectionItem *selectionItem : m_previousSelection) {
         delete selectionItem;
     }
 
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
-    Entity *entity = nullptr;
-    foreach (entity, m_selectingSet) {
+    for (Entity *entity : m_selectingSet) {
         m_currentSelection.insert(new SelectionItem(entity));
     }
 
     m_selectingSet.clear();
-    m_selecting = false;
+    m_selecting = False;
 
-    emit selectionChanged();
+    selectionChanged();
 }
 
 void Selection::select(Entity *entity)
 {
-    SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, m_previousSelection) {
+    for (SelectionItem *selectionItem : m_previousSelection) {
         delete selectionItem;
     }
 
@@ -126,38 +121,36 @@ void Selection::select(Entity *entity)
         m_currentSelection.insert(new SelectionItem(entity));
     }
 
-    emit selectionChanged();
+    selectionChanged();
 }
 
 void Selection::unselectAll()
 {
-    SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, m_previousSelection) {
+    for (SelectionItem *selectionItem : m_previousSelection) {
         delete selectionItem;
     }
 
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
-    emit selectionChanged();
+    selectionChanged();
 }
 
-const QSet<SelectionItem *> Selection::previousSelection() const
+const std::set<SelectionItem *> Selection::previousSelection() const
 {
     return m_previousSelection;
 }
 
-const QSet<SelectionItem *> Selection::currentSelection() const
+const std::set<SelectionItem *> Selection::currentSelection() const
 {
     return m_currentSelection;
 }
 
-const QSet<SelectionItem *> Selection::filterPrevious(const TypeRef &typeRef) const
+const std::set<SelectionItem *> Selection::filterPrevious(const TypeRef &typeRef) const
 {
-    QSet<SelectionItem*> filtered;
+    std::set<SelectionItem*> filtered;
 
-    SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, m_previousSelection) {
+    for (SelectionItem *selectionItem : m_previousSelection) {
         if (selectionItem->ref().typeId() == typeRef.id()) {
             filtered.insert(selectionItem);
         }
@@ -166,12 +159,11 @@ const QSet<SelectionItem *> Selection::filterPrevious(const TypeRef &typeRef) co
     return filtered;
 }
 
-const QSet<SelectionItem *> Selection::filterCurrent(const TypeRef &typeRef) const
+const std::set<SelectionItem *> Selection::filterCurrent(const TypeRef &typeRef) const
 {
-    QSet<SelectionItem*> filtered;
+    std::set<SelectionItem*> filtered;
 
-    SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, m_currentSelection) {
+    for (SelectionItem *selectionItem : m_currentSelection) {
         if (selectionItem->ref().typeId() == typeRef.id()) {
             filtered.insert(selectionItem);
         }
@@ -180,12 +172,11 @@ const QSet<SelectionItem *> Selection::filterCurrent(const TypeRef &typeRef) con
     return filtered;
 }
 
-const QSet<SelectionItem *> Selection::filterPreviousByBaseType(const TypeRef &typeRef) const
+const std::set<SelectionItem *> Selection::filterPreviousByBaseType(const TypeRef &typeRef) const
 {
-    QSet<SelectionItem*> filtered;
+    std::set<SelectionItem*> filtered;
 
-    SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, m_previousSelection) {
+    for (SelectionItem *selectionItem : m_previousSelection) {
         if (selectionItem->ref().baseTypeOf(typeRef)) {
             filtered.insert(selectionItem);
         }
@@ -194,12 +185,11 @@ const QSet<SelectionItem *> Selection::filterPreviousByBaseType(const TypeRef &t
     return filtered;
 }
 
-const QSet<SelectionItem *> Selection::filterCurrentByBaseType(const TypeRef &typeRef) const
+const std::set<SelectionItem *> Selection::filterCurrentByBaseType(const TypeRef &typeRef) const
 {
-    QSet<SelectionItem*> filtered;
+    std::set<SelectionItem*> filtered;
 
-    SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, m_currentSelection) {
+    for (SelectionItem *selectionItem : m_currentSelection) {
         if (selectionItem->ref().baseTypeOf(typeRef)) {
             filtered.insert(selectionItem);
         }

@@ -6,12 +6,6 @@
  * @details
  */
 
-#include<QtCore/QLibrary>
-#include<QtCore/QDir>
-#include<QtCore/QCoreApplication>
-#include<QtCore/QUrl>
-#include<QtCore/QStringList>
-
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/settings.h"
 #include "o3d/studio/common/modulemanager.h"
@@ -36,14 +30,14 @@ ModuleManager::ModuleManager()
     Settings &settings = Application::instance()->settings();
 
     if (!settings.has("o3s::plugin::path")) {
-        settings.set("o3s::plugin::path", QUrl::fromLocalFile(PLUGIN_PATH));
+        settings.set("o3s::plugin::path", PLUGIN_PATH);
     }
 
     if (!settings.has("o3s::plugin::exts")) {
-        settings.set("o3s::plugin::exts", QStringList(QString(MODULE_EXT)));
+        settings.set("o3s::plugin::exts", MODULE_EXT);
     }
 
-    m_path = fromQString(settings.get("o3s::plugin::path").toUrl().toLocalFile());
+    m_path = fromQString(settings.get("o3s::plugin::path").toString());
     m_filters = fromQString(settings.get("o3s::plugin::exts").toString());
 }
 
@@ -96,7 +90,7 @@ void ModuleManager::setPluginsFilters(const String &filters)
 void ModuleManager::searchModules()
 {
     // lookup for plugins directory
-    DiskDir dir(m_path);
+    DiskDir dir(Application::instance()->appDir() + '/'  + m_path);
     if (!dir.isAbsolute()) {
         dir.makeAbsolute();
     }

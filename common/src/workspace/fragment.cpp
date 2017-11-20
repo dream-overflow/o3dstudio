@@ -14,7 +14,7 @@
 using namespace o3d::studio::common;
 
 
-Fragment::Fragment(const QString &name, Entity *parent) :
+Fragment::Fragment(const String &name, Entity *parent) :
     Entity(name, parent),
     m_masterScene(nullptr)
 {
@@ -66,17 +66,17 @@ void Fragment::create()
     setDirty();
 }
 
-bool Fragment::load()
+o3d::Bool Fragment::load()
 {
-    return true;
+    return True;
 }
 
-bool Fragment::save()
+o3d::Bool Fragment::save()
 {
-    return true;
+    return True;
 }
 
-bool Fragment::exists() const
+o3d::Bool Fragment::exists() const
 {
     return Entity::exists();
 }
@@ -99,21 +99,21 @@ const Hub *Fragment::hub() const
     return m_hub;
 }
 
-bool Fragment::serializeContent(QDataStream &stream) const
+o3d::Bool Fragment::serializeContent(QDataStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
-        return false;
+        return False;
     }
 
     stream << m_hubRef.uuid();
 
-    return true;
+    return True;
 }
 
-bool Fragment::deserializeContent(QDataStream &stream)
+o3d::Bool Fragment::deserializeContent(QDataStreaml &stream)
 {
     if (!Entity::deserializeContent(stream)) {
-        return false;
+        return False;
     }
 
     QUuid uuid;
@@ -126,9 +126,9 @@ bool Fragment::deserializeContent(QDataStream &stream)
         if (m_hub) {
             m_hubRef = m_hub->ref();
         } else {
-            return false;
+            return False;
         }
     }
 
-    return true;
+    return True;
 }

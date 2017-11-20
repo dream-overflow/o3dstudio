@@ -17,8 +17,8 @@
 using namespace o3d::studio::common;
 
 
-ComponentRegistry::ComponentRegistry(QObject *parent) :
-    QObject(parent)
+ComponentRegistry::ComponentRegistry(BaseObject *parent) :
+    BaseObject(parent)
 {
 
 }
@@ -81,7 +81,7 @@ void ComponentRegistry::registerComponent(Component *component)
     }
 }
 
-bool ComponentRegistry::unregisterComponent(const QString &name)
+o3d::Bool ComponentRegistry::unregisterComponent(const String &name)
 {
     auto it = m_components.find(name);
     if (it != m_components.end()) {
@@ -102,20 +102,20 @@ bool ComponentRegistry::unregisterComponent(const QString &name)
         types.unregisterType(component->typeRef());
         types.unregisterType(component->targetTypeRef());
 
-        emit onComponentUnregistered(name);
+        onComponentUnregistered(name);
 
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-bool ComponentRegistry::unregisterComponent(quint64 id)
+o3d::Bool ComponentRegistry::unregisterComponent(UInt64 id)
 {
     auto it2 = m_componentsById.find(id);
     if (it2 != m_componentsById.end()) {
         Component *component = it2.value();
-        QString name = component->name();
+        String name = component->name();
 
         m_componentsById.erase(it2);
 
@@ -135,20 +135,20 @@ bool ComponentRegistry::unregisterComponent(quint64 id)
 
         delete component;
 
-        emit onComponentUnregistered(name);
+        onComponentUnregistered(name);
 
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-bool ComponentRegistry::unregisterComponent(const TypeRef &ref)
+o3d::Bool ComponentRegistry::unregisterComponent(const TypeRef &ref)
 {
     return unregisterComponent(ref.id());
 }
 
-Component *ComponentRegistry::component(const QString &name)
+Component *ComponentRegistry::component(const String &name)
 {
     auto it = m_components.find(name);
     if (it != m_components.end()) {
@@ -158,7 +158,7 @@ Component *ComponentRegistry::component(const QString &name)
     return nullptr;
 }
 
-const Component *ComponentRegistry::component(const QString &name) const
+const Component *ComponentRegistry::component(const String &name) const
 {
     auto cit = m_components.constFind(name);
     if (cit != m_components.cend()) {
@@ -188,7 +188,7 @@ const Component *ComponentRegistry::component(const TypeRef &ref) const
     return nullptr;
 }
 
-Component *ComponentRegistry::componentByTarget(const QString &name)
+Component *ComponentRegistry::componentByTarget(const String &name)
 {
     auto it = m_componentsByTargetName.find(name);
     if (it != m_componentsByTargetName.end()) {
@@ -198,7 +198,7 @@ Component *ComponentRegistry::componentByTarget(const QString &name)
     return nullptr;
 }
 
-const Component *ComponentRegistry::componentByTarget(const QString &name) const
+const Component *ComponentRegistry::componentByTarget(const String &name) const
 {
     auto cit = m_componentsByTargetName.constFind(name);
     if (cit != m_componentsByTargetName.cend()) {

@@ -9,10 +9,12 @@
 #ifndef _O3DS_COMMON_SETTINGS_H
 #define _O3DS_COMMON_SETTINGS_H
 
-#include <QtCore/QString>
 #include <QtCore/QVariant>
+#include <o3d/core/baseobject.h>
 
 #include "global.h"
+
+#include <map>
 
 namespace o3d {
 namespace studio {
@@ -28,10 +30,8 @@ static const char MODULE_EXT[] = "*.dll";
 static const char MODULE_EXT[] = "*.so";
 #endif
 
-class O3S_API Settings : public QObject
+class O3S_API Settings : public BaseObject
 {
-    Q_OBJECT
-
 public:
 
     Settings();
@@ -40,18 +40,18 @@ public:
     void loadAll();
     void saveAll();
 
-    void set(const QString &key, const QVariant& value, bool force = false);
-    QVariant get(const QString &key, const QVariant& _default = QVariant());
+    void set(const String &key, const QVariant& value, Bool force = false);
+    QVariant get(const String &key, const QVariant& _default = QVariant());
 
-    bool has(const QString &key) const;
+    Bool has(const String &key) const;
 
-signals:
+public /*signals*/:
 
-    void settingChanged(const QString &key, const QVariant &value);
+    Signal<const String &/*key*/, const QVariant &/*value*/> settingChanged{this};
 
 private:
 
-    QMap<QString, QVariant> m_settings;
+    std::map<String, QVariant> m_settings;
 
     //! Non copyable
     Settings(const Settings&);
@@ -59,8 +59,8 @@ private:
     //! Non assignable
     void operator=(const Settings&);
 
-    void loadGroup(const QString &group);
-    void saveGroup(const QString &group);
+    void loadGroup(const String &group);
+    void saveGroup(const String &group);
 };
 
 } // namespace common

@@ -11,8 +11,8 @@
 using namespace o3d::studio::common;
 
 
-TypeRegistry::TypeRegistry(QObject *parent) :
-    QObject(parent),
+TypeRegistry::TypeRegistry(BaseObject *parent) :
+    BaseObject(parent),
     m_nextId(1)
 {
     // reserved base types
@@ -35,30 +35,30 @@ TypeRegistry::~TypeRegistry()
 
 }
 
-bool TypeRegistry::registerType(EntityBaseType baseType, const QString &name)
+o3d::Bool TypeRegistry::registerType(EntityBaseType baseType, const String &name)
 {
     // unknown base type
     if (baseType < MIN_TYPE_ID || baseType > MAX_TYPE_ID) {
-        return false;
+        return False;
     }
 
     // named already used or type already defined
     if (m_typeRefs.find(name) != m_typeRefs.end()) {
-        return false;
+        return False;
     }
 
     TypeRef typeRef = TypeRef(baseType, m_nextId++, name);
     m_typeRefs[name] = typeRef;
     m_typeRefsById[typeRef.id()] = typeRef;
 
-    emit typeRegistered(typeRef);
-    return true;
+    typeRegistered(typeRef);
+    return True;
 }
 
-bool TypeRegistry::unregisterType(const QString &name)
+o3d::Bool TypeRegistry::unregisterType(const String &name)
 {
     auto it = m_typeRefs.find(name);
-    auto it2 = m_typeRefsById.find(it.value().id());
+    auto it2 = m_typeRefsById.find(it->second.id());
 
     if (it != m_typeRefs.end()) {
         m_typeRefs.erase(it);
@@ -69,13 +69,13 @@ bool TypeRegistry::unregisterType(const QString &name)
     }
 
     if (it == m_typeRefs.end() || it2 == m_typeRefsById.end()) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
-bool TypeRegistry::unregisterType(quint32 id)
+o3d::Bool TypeRegistry::unregisterType(UInt32 id)
 {
     auto it2 = m_typeRefsById.find(id);
     if (it2 != m_typeRefsById.end()) {
@@ -83,19 +83,19 @@ bool TypeRegistry::unregisterType(quint32 id)
     }
 
     // now we have the name
-    auto it = m_typeRefs.find(it2.value().name());
+    auto it = m_typeRefs.find(it2->second.name());
     if (it != m_typeRefs.end()) {
         m_typeRefs.erase(it);
     }
 
     if (it == m_typeRefs.end() || it2 == m_typeRefsById.end()) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
-bool TypeRegistry::unregisterType(const TypeRef &typeRef)
+o3d::Bool TypeRegistry::unregisterType(const TypeRef &typeRef)
 {
     auto it = m_typeRefs.find(typeRef.name());
     auto it2 = m_typeRefsById.find(typeRef.id());
@@ -109,17 +109,17 @@ bool TypeRegistry::unregisterType(const TypeRef &typeRef)
     }
 
     if (it == m_typeRefs.end() || it2 == m_typeRefsById.end()) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
-TypeRef TypeRegistry::typeRef(const QString &name) const
+TypeRef TypeRegistry::typeRef(const String &name) const
 {
-    auto it = m_typeRefs.constFind(name);
-    if (it != m_typeRefs.cend()) {
-        return it.value();
+    auto cit = m_typeRefs.find(name);
+    if (cit != m_typeRefs.cend()) {
+        return cit->second;
     } else {
         return TypeRef();
     }
@@ -129,23 +129,23 @@ TypeRef TypeRegistry::baseTypeRef(const TypeRef &typeRef) const
 {
     if (typeRef.isValid()) {
         // direct by using baseType()
-        auto it2 = m_typeRefsById.constFind(typeRef.baseTypeId());
+        auto it2 = m_typeRefsById.find(typeRef.baseTypeId());
         if (it2 != m_typeRefsById.cend()) {
-            return it2.value();
+            return it2->second;
         }
     }
 
     return TypeRef();
 }
 
-TypeRef TypeRegistry::baseTypeRef(quint32 id) const
+TypeRef TypeRegistry::baseTypeRef(UInt32 id) const
 {
     if (id > 0) {
         quint32 baseTypeId = ((id & 0x0f) << 4) | (id & 0x0f);
 
-        auto it2 = m_typeRefsById.constFind(baseTypeId);
+        auto it2 = m_typeRefsById.find(baseTypeId);
         if (it2 != m_typeRefsById.cend()) {
-            return it2.value();
+            return it2->second;
         }
     }
 

@@ -21,7 +21,7 @@ SceneCommand::~SceneCommand()
 SceneHubCommand::SceneHubCommand(Hub *hub, SceneHubCommand::CommandType cmdType) :
     m_hub(hub)
 {
-    Q_ASSERT(hub != nullptr);
+    O3D_ASSERT(hub != nullptr);
 
     if (m_hub) {
         m_ref = m_hub->ref().light();

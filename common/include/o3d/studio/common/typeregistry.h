@@ -9,10 +9,9 @@
 #ifndef _O3DS_COMMON_TYPEREGISTRY_H
 #define _O3DS_COMMON_TYPEREGISTRY_H
 
-#include <QtCore/QObject>
-#include <QtCore/QMap>
-#include <QtCore/QSet>
-#include <QtCore/QStringList>
+#include <map>
+
+#include <o3d/core/baseobject.h>
 
 #include "global.h"
 #include "objectref.h"
@@ -21,22 +20,20 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class O3S_API TypeRegistry : public QObject
+class O3S_API TypeRegistry : public BaseObject
 {
-    Q_OBJECT
-
 public:
 
-    TypeRegistry(QObject *parent = nullptr);
+    TypeRegistry(BaseObject *parent = nullptr);
     virtual ~TypeRegistry();
 
-    bool registerType(EntityBaseType baseType, const QString &name);
+    Bool registerType(EntityBaseType baseType, const String &name);
 
-    bool unregisterType(const QString &name);
-    bool unregisterType(quint32 id);
-    bool unregisterType(const TypeRef &typeRef);
+    Bool unregisterType(const String &name);
+    Bool unregisterType(UInt32 id);
+    Bool unregisterType(const TypeRef &typeRef);
 
-    TypeRef typeRef(const QString &name) const;
+    TypeRef typeRef(const String &name) const;
 
     /**
      * @brief Return the base type for a type ref
@@ -46,18 +43,18 @@ public:
     /**
      * @brief Return the base type for a type ref id
      */
-    TypeRef baseTypeRef(quint32 id) const;
+    TypeRef baseTypeRef(UInt32 id) const;
 
-signals:
+public /*signals*/:
 
-    void typeRegistered(TypeRef typeRef);
+    Signal<TypeRef> typeRegistered{this};
 
 protected:
 
-    quint32 m_nextId;
+    UInt32 m_nextId;
 
-    QMap<QString, TypeRef> m_typeRefs;
-    QMap<quint32, TypeRef> m_typeRefsById;
+    std::map<String, TypeRef> m_typeRefs;
+    std::map<UInt32, TypeRef> m_typeRefsById;
 };
 
 } // namespace common

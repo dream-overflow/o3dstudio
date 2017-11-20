@@ -9,13 +9,12 @@
 #ifndef _O3DS_COMMON_SELECTION_H
 #define _O3DS_COMMON_SELECTION_H
 
-#include <QtCore/QString>
-#include <QtCore/QUuid>
-#include <QtCore/QSet>
-#include <QtCore/QMap>
-
 #include "workspace.h"
 #include "selectionitem.h"
+
+#include <set>
+
+#include <o3d/core/baseobject.h>
 
 namespace o3d {
 namespace studio {
@@ -23,13 +22,11 @@ namespace common {
 
 class Hub;
 
-class O3S_API Selection : public QObject
+class O3S_API Selection : public BaseObject
 {
-    Q_OBJECT
-
 public:
 
-    Selection(QObject *parent = nullptr);
+    Selection(BaseObject *parent = nullptr);
     virtual ~Selection();
 
     /**
@@ -66,37 +63,33 @@ public:
      */
     void unselectAll();
 
-    const QSet<SelectionItem*> previousSelection() const;
-    const QSet<SelectionItem*> currentSelection() const;
+    const std::set<SelectionItem*> previousSelection() const;
+    const std::set<SelectionItem*> currentSelection() const;
 
-    const QSet<SelectionItem*> filterPrevious(const TypeRef &typeRef) const;
-    const QSet<SelectionItem*> filterCurrent(const TypeRef &typeRef) const;
+    const std::set<SelectionItem*> filterPrevious(const TypeRef &typeRef) const;
+    const std::set<SelectionItem*> filterCurrent(const TypeRef &typeRef) const;
 
-    const QSet<SelectionItem*> filterPreviousByBaseType(const TypeRef &typeRef) const;
-    const QSet<SelectionItem*> filterCurrentByBaseType(const TypeRef &typeRef) const;
+    const std::set<SelectionItem*> filterPreviousByBaseType(const TypeRef &typeRef) const;
+    const std::set<SelectionItem*> filterCurrentByBaseType(const TypeRef &typeRef) const;
 
-public slots:
+public /*signals*/:
 
-signals:
-
-    void selectionChanged();
-
-private slots:
+    Signal<> selectionChanged{this};
 
 private:
 
-    bool m_selecting;
+    Bool m_selecting;
 
     //! Related workspace
     Workspace *m_workspace;
 
     //! Current set of selected items
-    QSet<SelectionItem*> m_currentSelection;
+    std::set<SelectionItem*> m_currentSelection;
     //! Previous set of selected items
-    QSet<SelectionItem*> m_previousSelection;
+    std::set<SelectionItem*> m_previousSelection;
 
     //! Current set of selected items
-    QSet<Entity*> m_selectingSet;
+    std::set<Entity*> m_selectingSet;
 };
 
 } // namespace common

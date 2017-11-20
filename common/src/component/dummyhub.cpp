@@ -29,7 +29,7 @@ void DummyHubComponent::setup()
 
 }
 
-Hub *DummyHubComponent::buildHub(const QString &name, Project *project, Entity *parent)
+Hub *DummyHubComponent::buildHub(const String &name, Project *project, Entity *parent)
 {
     if (!project) {
         return nullptr;
@@ -45,7 +45,7 @@ Hub *DummyHubComponent::buildHub(const QString &name, Project *project, Entity *
     return dummyHub;
 }
 
-DummyHub::DummyHub(const QString &name, Entity *parent) :
+DummyHub::DummyHub(const String &name, Entity *parent) :
     Hub(name, parent)
 {
 
@@ -61,38 +61,38 @@ void DummyHub::create()
 
 }
 
-bool DummyHub::load()
+o3d::Bool DummyHub::load()
 {
     return Hub::load();
 }
 
-bool DummyHub::save()
+o3d::Bool DummyHub::save()
 {
     return Hub::save();
 }
 
-bool DummyHub::exists() const
+o3d::Bool DummyHub::exists() const
 {
     // @todo O3D
     return Entity::exists();
 }
 
-bool DummyHub::serializeContent(QDataStream &stream) const
+o3d::Bool DummyHub::serializeContent(QDataStream &stream) const
 {
     if (!Hub::serializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
-bool DummyHub::deserializeContent(QDataStream &stream)
+o3d::Bool DummyHub::deserializeContent(QDataStream &stream)
 {
     if (!Hub::deserializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
 void DummyHub::createToScene(MasterScene *masterScene)

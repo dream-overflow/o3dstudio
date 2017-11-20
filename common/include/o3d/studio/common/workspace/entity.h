@@ -9,11 +9,9 @@
 #ifndef _O3DS_COMMON_ENTITY_H
 #define _O3DS_COMMON_ENTITY_H
 
-#include <QtCore/QString>
-#include <QtCore/QException>
-#include <QtCore/QCoreApplication>
-#include <QtCore/QBitArray>
 #include <QtCore/QDataStream>
+
+#include <o3d/core/templatebitset.h>
 
 #include "../exception.h"
 #include "../objectref.h"
@@ -34,14 +32,14 @@ public:
         STATE_CHANGED = 32
     };
 
-    explicit Entity(const QString &name, Entity *parent = nullptr);
+    explicit Entity(const String &name, Entity *parent = nullptr);
     virtual ~Entity();
 
     Entity* parent();
     const Entity* parent() const;
 
-    void setName(const QString& name);
-    const QString& name() const;
+    void setName(const String& name);
+    const String& name() const;
 
     void setRef(const ObjectRef &ref);
     const ObjectRef& ref() const;
@@ -51,8 +49,8 @@ public:
 
     virtual void create() = 0;
 
-    virtual bool load() = 0;
-    virtual bool save() = 0;
+    virtual Bool load() = 0;
+    virtual Bool save() = 0;
 
     /**
      * @brief Project related to the entity.
@@ -67,37 +65,37 @@ public:
     /**
      * @brief By default it exists if the reference point to a project.
      */
-    virtual bool exists() const;
+    virtual Bool exists() const;
 
     /**
      * @brief Has changes to saved since last save(). Default ready the STATE_CHANGED flag.
      */
-    virtual bool hasChanges() const;
+    virtual Bool hasChanges() const;
 
     /**
      * @brief Serialize the entity content.
      */
-    virtual bool serializeContent(QDataStream &stream) const;
+    virtual Bool serializeContent(QDataStream &stream) const;
 
     /**
      * @brief Deserialize the entity content.
      */
-    virtual bool deserializeContent(QDataStream &stream);
+    virtual Bool deserializeContent(QDataStream &stream);
 
 protected:
 
     TypeRef m_typeRef;   //!< Related object reference type
 
-    QString m_name;      //!< Project display name
+    String m_name;       //!< Project display name
     ObjectRef m_ref;
 
     Entity *m_parent;
 
-    QBitArray m_capacities{64};  //!< Flags and capacities
+    BitSet64 m_capacities;  //!< Flags and capacities
 
-    inline void setDirty() { m_capacities.setBit(STATE_CHANGED); }
-    inline void setClean() { m_capacities.clearBit(STATE_CHANGED); }
-    inline bool isDirty() const { return m_capacities.testBit(STATE_CHANGED); }
+    inline void setDirty() { m_capacities.enable(STATE_CHANGED); }
+    inline void setClean() { m_capacities.disable(STATE_CHANGED); }
+    inline Bool isDirty() const { return m_capacities.getBit(STATE_CHANGED); }
 
 public:
 

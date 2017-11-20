@@ -43,6 +43,11 @@ inline o3d::String fromQString(const QString &str)
     return o3d::String(str.toStdWString().c_str());
 }
 
+const o3d::String& _T(const o3d::String &str)
+{
+    return str;
+}
+
 #endif // CONV_STRING
 
 #endif // _O3DS_COMMON_GLOBAL_H

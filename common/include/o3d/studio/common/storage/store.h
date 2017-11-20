@@ -17,6 +17,9 @@
 #include "../exception.h"
 #include "storeitem.h"
 
+#include <map>
+#include <list>
+
 namespace o3d {
 namespace studio {
 namespace common {
@@ -67,22 +70,22 @@ public:
     StoreItem* item(const QUuid &uuid);
     const StoreItem* item(const QUuid &uuid) const;
 
-    StoreItem* addItem(const QString &originalFileName);
-    const StoreItem* addItem(const QString &originalFileName) const;
+    StoreItem* addItem(const String &originalFileName);
+    const StoreItem* addItem(const String &originalFileName) const;
 
-    bool removeItem(const QUuid &uuid);
-    bool removeItem(StoreItem *item);
+    Bool removeItem(const QUuid &uuid);
+    Bool removeItem(StoreItem *item);
 
-    bool deleteItem(const QUuid &uuid);
-    bool deleteItem(StoreItem *item);
+    Bool deleteItem(const QUuid &uuid);
+    Bool deleteItem(StoreItem *item);
 
     void purgeTrash(Project *project);
 
-    QList<StoreItem*> removedItems(Project *project);
+    std::list<StoreItem *> removedItems(Project *project);
 
 protected:
 
-    QMap<QUuid, StoreItem*> m_items;
+    std::map<QUuid, StoreItem*> m_items;
 };
 
 /**

@@ -15,21 +15,25 @@
 #include "o3d/studio/common/settings.h"
 #include "o3d/studio/common/messenger.h"
 
+#include <o3d/core/diskdir.h>
+
 using namespace o3d::studio::common;
 
-Workspace::Workspace(const QString &name, QObject *parent) :
-    QObject(parent),
+Workspace::Workspace(const String &name, BaseObject *parent) :
+    BaseObject(parent),
     m_nextId(1),
     m_name(name)
 {
     // selection manager
-    connect(&Application::instance()->selection(), SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
+    Application::instance()->selection().selectionChanged.connect(this, &Workspace::onSelectionChanged);
 }
 
 Workspace::~Workspace()
 {
     Project *project = nullptr;
-    foreach (project, m_loadedProjects) {
+    for (auto it = m_loadedProjects.begin(); it != m_loadedProjects.end(); ++it) {
+        project = it->second;
+
         if (project->hasChanges()) {
             project->save();
         }
@@ -38,28 +42,28 @@ Workspace::~Workspace()
     }
 }
 
-quint32 Workspace::generateProjectId()
+o3d::UInt32 Workspace::generateProjectId()
 {
-    quint64 nextId = m_nextId++;
+    UInt32 nextId = m_nextId++;
     return nextId;
 }
 
-const QUuid &Workspace::uuid() const
+const o3d::Uuid &Workspace::uuid() const
 {
     return m_uuid;
 }
 
-const QString& Workspace::name() const
+const o3d::String& Workspace::name() const
 {
     return m_name;
 }
 
-const QString& Workspace::filename() const
+const o3d::String& Workspace::filename() const
 {
     return m_filename;
 }
 
-void Workspace::setUuid(const QUuid &uuid)
+void Workspace::setUuid(const Uuid &uuid)
 {
     m_uuid = uuid;
 }
@@ -67,11 +71,11 @@ void Workspace::setUuid(const QUuid &uuid)
 Project *Workspace::project(const LightRef &ref)
 {
     // id can comes from a project reference or a entity of this project
-    quint64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
+    UInt64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
 
     auto it = m_loadedProjects.find(id);
     if (it != m_loadedProjects.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
@@ -80,11 +84,11 @@ Project *Workspace::project(const LightRef &ref)
 const Project *Workspace::project(const LightRef &ref) const
 {
     // id can comes from a project reference or a entity of this project
-    quint64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
+    UInt64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
 
     auto cit = m_loadedProjects.find(id);
     if (cit != m_loadedProjects.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
@@ -100,41 +104,47 @@ const Project *Workspace::activeProject() const
     return m_activeProject;
 }
 
-QStringList Workspace::projectsList() const
+o3d::T_StringList Workspace::projectsList() const
 {
     return m_foundProjects;
 }
 
-QList<Project*> Workspace::loadedProjectList() const
+std::list<Project*> Workspace::loadedProjectList() const
 {
-    return m_loadedProjects.values();
+    std::list<Project*> projects;
+
+    for (auto it = m_loadedProjects.begin(); it != m_loadedProjects.end(); ++it) {
+        projects.push_back(it->second);
+    }
+
+    return projects;
 }
 
-bool Workspace::addProject(Project *project)
+o3d::Bool Workspace::addProject(Project *project)
 {
     if (!project) {
-        return false;
+        return False;
     }
 
     auto it = m_loadedProjects.find(project->ref().light().id());
-    Q_ASSERT(it == m_loadedProjects.end());
+    O3D_ASSERT(it == m_loadedProjects.end());
     if (it != m_loadedProjects.end()) {
-        return false;
+        return False;
     }
 
-    m_loadedProjects.insert(project->ref().light().id(), project);
+    m_loadedProjects[project->ref().light().id()] = project;
 
     // signal
-    emit onProjectAdded(project->ref().light());
+    onProjectAdded(project->ref().light());
 
-    return true;
+    return True;
 }
 
-bool Workspace::closeProject(const LightRef &ref)
+o3d::Bool Workspace::closeProject(const LightRef &ref)
 {
     auto it = m_loadedProjects.find(ref.id());
     if (it != m_loadedProjects.end()) {
-        Project *project = it.value();
+        Project *project = it->second;
 
         m_loadedProjects.erase(it);
 
@@ -144,75 +154,71 @@ bool Workspace::closeProject(const LightRef &ref)
 
         project->save();
 
-        emit onProjectRemoved(ref);
+        onProjectRemoved(ref);
 
         delete project;
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-bool Workspace::hasProject(QString location) const
+o3d::Bool Workspace::hasProject(String location) const
 {
-    location = QDir::cleanPath(location);
-
-    if (location.endsWith(QDir::separator())) {
-        location.chop(1);
-    }
+    DiskDir path(location);
 
     auto cit = m_loadedProjects.cbegin();
     while (cit != m_loadedProjects.cend()) {
-        if (cit.value()->path().absolutePath() == location) {
-            return true;
+        if (cit->second->path() == location) {
+            return True;
         }
 
         ++cit;
     }
 
-    return false;
+    return False;
 }
 
-bool Workspace::hasProject(const LightRef& ref) const
+o3d::Bool Workspace::hasProject(const LightRef& ref) const
 {
     // id can comes from a project reference or a entity of this project
-    qint64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
+    UInt64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
 
     auto cit = m_loadedProjects.find(id);
     return cit != m_loadedProjects.cend();
 }
 
-bool Workspace::hasChanges() const
+o3d::Bool Workspace::hasChanges() const
 {
     // at least one project has changes to be saved
     Project *project = nullptr;
     foreach (project, m_loadedProjects) {
         if (project->hasChanges()) {
-            return true;
+            return True;
         }
     }
 
-    return false;
+    return False;
 }
 
-bool Workspace::setActiveProject(const LightRef &ref)
+o3d::Bool Workspace::setActiveProject(const LightRef &ref)
 {
     // id can comes from a project reference or a entity of this project
-    quint64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
+    UInt64 id = ref.baseTypeOf(TypeRef::project()) ? ref.id() : ref.projectId();
 
     auto it = m_loadedProjects.find(id);
     if (it != m_loadedProjects.end()) {
         m_activeProject = it.value();
 
-        emit onProjectActivated(ref);
+        onProjectActivated(ref);
 
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-bool Workspace::save()
+o3d::Bool Workspace::save()
 {
     messenger().info(fromQString(tr("Saving current workspace...")));
 
@@ -225,12 +231,12 @@ bool Workspace::save()
 
     messenger().info(fromQString(tr("Current workspace saved !")));
 
-    return true;
+    return True;
 }
 
-bool Workspace::load()
+o3d::Bool Workspace::load()
 {
-    return true;
+    return True;
 }
 
 Hub *Workspace::hub(const LightRef &ref)
@@ -342,19 +348,19 @@ void Workspace::onSelectionChanged()
     // done by the UI depending of the context, the need, and the selection
     return;
 
-    const QSet<SelectionItem *> previousSelection =
+    const std::set<SelectionItem *> previousSelection =
             Application::instance()->selection().filterPreviousByBaseType(TypeRef::project());
-    const QSet<SelectionItem *> currentSelection =
+    const std::set<SelectionItem *> currentSelection =
             Application::instance()->selection().filterCurrentByBaseType(TypeRef::project());
 
-    bool changeProject = false;
+    Bool changeProject = False;
 
     if (!previousSelection.isEmpty()) {
         SelectionItem *selectionItem = nullptr;
         foreach (selectionItem, previousSelection) {
             if (selectionItem->ref() == m_activeProject->ref().light()) {
                 m_activeProject = nullptr;
-                changeProject = true;
+                changeProject = True;
                 break;
             }
         }
@@ -366,7 +372,7 @@ void Workspace::onSelectionChanged()
             Project *lproject = project(selectionItem->ref());
             if (lproject) {
                 m_activeProject = lproject;
-                changeProject = true;
+                changeProject = True;
                 break;
             }
         }
@@ -374,9 +380,9 @@ void Workspace::onSelectionChanged()
 
     if (changeProject) {
         if (m_activeProject) {
-            emit onProjectActivated(m_activeProject->ref().light());
+            onProjectActivated(m_activeProject->ref().light());
         } else {
-            emit onProjectActivated(LightRef());
+            onProjectActivated(LightRef());
         }
     }
 }

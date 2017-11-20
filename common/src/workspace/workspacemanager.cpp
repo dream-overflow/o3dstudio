@@ -11,40 +11,49 @@
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
 
+#include <algorithm>
+
+#include <QtCore/QDir>
+#include <QtCore/QUuid>
+
 using namespace o3d::studio::common;
 
-WorkspaceManager::WorkspaceManager()
+WorkspaceManager::WorkspaceManager() :
+    BaseObject()
 {
-    if (!QDir::home().exists(".o3dstudio")) {
-        if (!QDir::home().mkdir(".o3dstudio")) {
+    String homePath = fromQString(QDir::home().absolutePath());
+    DiskDir homeDir(homePath);
+
+    if (!homeDir.check(".o3dstudio")) {
+        if (homeDir.makeDir(".o3dstudio") != Dir::SUCCESS) {
             throw;
         }
     }
 
-    m_defaultPath = QDir::home();
+    m_defaultPath = fromQString(QDir::home().absolutePath());
     if (!m_defaultPath.cd(".o3dstudio")) {
         throw;
     }
 
-    if (!m_defaultPath.exists("projects")) {
-        m_defaultPath.mkdir("projects");
+    if (m_defaultPath.check("projects") != Dir::SUCCESS) {
+        m_defaultPath.makeDir("projects");
     }
 
     if (!m_defaultPath.isReadable()) {
         throw;
     }
 
-    m_defaultProjectsPath = m_defaultPath.absoluteFilePath("projects");
+    m_defaultProjectsPath = m_defaultPath.makeFullPathName("projects");
 
     if (!m_defaultProjectsPath.isReadable()) {
         throw;
     }
 
-    if (!m_defaultPath.exists("workspaces")) {
-        m_defaultPath.mkdir("workspaces");
+    if (m_defaultPath.check("workspaces") != Dir::SUCCESS) {
+        m_defaultPath.makeDir("workspaces");
     }
 
-    m_defaultWorkspacesPath = m_defaultPath.absoluteFilePath("workspaces");
+    m_defaultWorkspacesPath = m_defaultPath.makeFullPathName("workspaces");
 
     if (!m_defaultWorkspacesPath.isReadable()) {
         throw;
@@ -59,12 +68,12 @@ WorkspaceManager::WorkspaceManager()
 
         settings.set(
             "o3s::main::project::previous-folder",
-            QVariant(m_defaultProjectsPath.absolutePath()));
+            toQString(m_defaultProjectsPath.getFullPathName()));
     }
 
     // setup a new empty workspace
     m_current = new Workspace("default");
-    m_current->setUuid(QUuid::createUuid());
+    m_current->setUuid(QUuid::createUuid().toByteArray().data());
 }
 
 WorkspaceManager::~WorkspaceManager()
@@ -78,14 +87,14 @@ WorkspaceManager::~WorkspaceManager()
     }
 }
 
-QStringList WorkspaceManager::workspaces() const
+o3d::T_StringList WorkspaceManager::workspaces() const
 {
     return m_foundWorkspaces;
 }
 
-Workspace *WorkspaceManager::addWorkspace(const QString &name)
+Workspace *WorkspaceManager::addWorkspace(const String &name)
 {
-    if (m_foundWorkspaces.contains(name)) {
+    if (std::find(m_foundWorkspaces.begin(), m_foundWorkspaces.end(), name) != m_foundWorkspaces.end()) {
         return nullptr;
     }
 
@@ -94,53 +103,55 @@ Workspace *WorkspaceManager::addWorkspace(const QString &name)
     }
 
     Workspace *workspace = new Workspace(name);
-    m_foundWorkspaces.append(name);
+    m_foundWorkspaces.push_back(name);
 
-    emit onWorkspaceAdded(name);
+    onWorkspaceAdded(name);
 
     return workspace;
 }
 
-Workspace *WorkspaceManager::workspace(const QString &name)
+Workspace *WorkspaceManager::workspace(const String &name)
 {
     Q_UNUSED(name)
 
     return nullptr;
 }
 
-const Workspace *WorkspaceManager::workspace(const QString &name) const
+const Workspace *WorkspaceManager::workspace(const String &name) const
 {
     Q_UNUSED(name)
 
     return nullptr;
 }
 
-bool WorkspaceManager::deleteWorkspace(const QString &name)
+o3d::Bool WorkspaceManager::deleteWorkspace(const String &name)
 {
-    if (!m_foundWorkspaces.contains(name)) {
-        return false;
+    auto it = std::find(m_foundWorkspaces.begin(), m_foundWorkspaces.end(), name);
+    if (it == m_foundWorkspaces.end()) {
+        return False;
     }
 
     // @todo load it and delete it
 
-    m_foundWorkspaces.removeOne(name);
+    m_foundWorkspaces.erase(it);
 
-    return true;
+    return True;
 }
 
-bool WorkspaceManager::hasWorkspace(const QString &name) const
+o3d::Bool WorkspaceManager::hasWorkspace(const String &name) const
 {
-    return m_foundWorkspaces.contains(name);
+    return std::find(m_foundWorkspaces.cbegin(), m_foundWorkspaces.cend(), name) != m_foundWorkspaces.cend();
 }
 
-bool WorkspaceManager::loadWorkspace(const QString &name)
+o3d::Bool WorkspaceManager::loadWorkspace(const String &name)
 {
     if (m_current && m_current->name() == name) {
-        return true;
+        return True;
     }
 
-    if (!m_foundWorkspaces.contains(name)) {
-        return false;
+    auto it = std::find(m_foundWorkspaces.begin(), m_foundWorkspaces.end(), name);
+    if (it == m_foundWorkspaces.end()) {
+        return False;
     }
 
     // @todo load it and set as current
@@ -148,9 +159,9 @@ bool WorkspaceManager::loadWorkspace(const QString &name)
 
     m_current = workspace;
 
-    emit onWorkspaceActivated(name);
+    onWorkspaceActivated(name);
 
-    return true;
+    return True;
 }
 
 Workspace *WorkspaceManager::current()
@@ -158,7 +169,7 @@ Workspace *WorkspaceManager::current()
     return m_current;
 }
 
-bool WorkspaceManager::closeCurrent()
+o3d::Bool WorkspaceManager::closeCurrent()
 {
     if (m_current) {
         if (m_current->hasChanges()) {
@@ -167,27 +178,27 @@ bool WorkspaceManager::closeCurrent()
 
         // setup a new empty workspace
         m_current = new Workspace("default");
-        m_current->setUuid(QUuid::createUuid());
+        m_current->setUuid(QUuid::createUuid().toByteArray().data());
 
-        emit onWorkspaceActivated(m_current->name());
+        onWorkspaceActivated(m_current->name());
 
-        return true;
+        return True;
     }
 
-    return false;
+    return False;
 }
 
-const QDir &WorkspaceManager::defaultPath() const
+const o3d::DiskDir &WorkspaceManager::defaultPath() const
 {
     return m_defaultPath;
 }
 
-const QDir &WorkspaceManager::defaultProjectsPath() const
+const o3d::DiskDir &WorkspaceManager::defaultProjectsPath() const
 {
     return m_defaultProjectsPath;
 }
 
-const QDir &WorkspaceManager::defaultWorkspacesPath() const
+const o3d::DiskDir &WorkspaceManager::defaultWorkspacesPath() const
 {
     return m_defaultWorkspacesPath;
 }

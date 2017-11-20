@@ -21,7 +21,7 @@
 using namespace o3d::studio::common;
 
 
-Hub::Hub(const QString &name, Entity *parent) :
+Hub::Hub(const String &name, Entity *parent) :
     Entity(name, parent),
     m_project(nullptr)
 {
@@ -57,17 +57,17 @@ void Hub::create()
     setDirty();
 }
 
-bool Hub::load()
+o3d::Bool Hub::load()
 {
     return true;
 }
 
-bool Hub::save()
+o3d::Bool Hub::save()
 {
     return true;
 }
 
-bool Hub::exists() const
+o3d::Bool Hub::exists() const
 {
     return Entity::exists();
 }
@@ -115,7 +115,7 @@ void Hub::removeHub(const LightRef &_ref)
     emit project()->workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
-void Hub::removeHub(quint64 id)
+void Hub::removeHub(UInt64 id)
 {
     auto it = m_hubs.find(id);
     if (it == m_hubs.end()) {
@@ -178,7 +178,7 @@ const Hub* Hub::hub(const LightRef &_ref) const
     return nullptr;
 }
 
-Hub* Hub::hub(quint64 id)
+Hub* Hub::hub(UInt64 id)
 {
     auto it = m_hubs.find(id);
     if (it != m_hubs.end()) {
@@ -188,7 +188,7 @@ Hub* Hub::hub(quint64 id)
     return nullptr;
 }
 
-const Hub* Hub::hub(quint64 id) const
+const Hub* Hub::hub(UInt64 id) const
 {
     auto cit = m_hubs.constFind(id);
     if (cit != m_hubs.cend()) {
@@ -198,9 +198,9 @@ const Hub* Hub::hub(quint64 id) const
     return nullptr;
 }
 
-QList<Hub*> Hub::searchHub(const QString &name)
+std::list<Hub*> Hub::searchHub(const QString &name)
 {
-    QList<Hub*> results;
+    std::list<Hub*> results;
 
     Hub *hub;
     foreach (hub, m_hubs) {
@@ -212,9 +212,9 @@ QList<Hub*> Hub::searchHub(const QString &name)
     return results;
 }
 
-QList<const Hub*> Hub::searchHub(const QString &name) const
+std::list<const Hub*> Hub::searchHub(const QString &name) const
 {
-    QList<const Hub*> results;
+    std::list<const Hub*> results;
 
     const Hub *hub;
     foreach (hub, m_hubs) {
@@ -226,7 +226,7 @@ QList<const Hub*> Hub::searchHub(const QString &name) const
     return results;
 }
 
-Hub *Hub::findHub(quint64 id)
+Hub *Hub::findHub(UInt64 id)
 {
     // himself
     if (id == m_ref.light().id()) {
@@ -246,7 +246,7 @@ Hub *Hub::findHub(quint64 id)
     return nullptr;
 }
 
-const Hub *Hub::findHub(quint64 id) const
+const Hub *Hub::findHub(UInt64 id) const
 {
     // himself
     if (id == m_ref.light().id()) {
@@ -306,15 +306,15 @@ const Hub *Hub::findHub(const QUuid &uuid) const
     return nullptr;
 }
 
-int Hub::numHubs() const
+size_t Hub::numHubs() const
 {
     return m_hubs.size();
 }
 
-QList<Hub *> Hub::hubs(bool recurse)
+std::list<Hub *> Hub::hubs(Bool recurse)
 {
     // first level
-    QList<Hub*> results;
+    std::list<Hub*> results;
     Hub *hub = nullptr;
 
     if (recurse) {
@@ -331,9 +331,9 @@ QList<Hub *> Hub::hubs(bool recurse)
     return results;
 }
 
-QList<const Hub *> Hub::hubs(bool recurse) const
+std::list<const Hub *> Hub::hubs(Bool recurse) const
 {
-    QList<const Hub*> results;
+    std::list<const Hub*> results;
     const Hub *hub = nullptr;
 
     if (recurse) {
@@ -350,10 +350,10 @@ QList<const Hub *> Hub::hubs(bool recurse) const
     return results;
 }
 
-bool Hub::serializeContent(QDataStream &stream) const
+o3d::Bool Hub::serializeContent(QDataStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
-        return false;
+        return False;
     }
 
     qint32 num = m_hubs.size();
@@ -368,13 +368,13 @@ bool Hub::serializeContent(QDataStream &stream) const
                << *hub;
     }
 
-    return true;
+    return True;
 }
 
-bool Hub::deserializeContent(QDataStream &stream)
+o3d::Bool Hub::deserializeContent(QDataStream &stream)
 {
     if (!Entity::deserializeContent(stream)) {
-        return false;
+        return False;
     }
 
     Hub *hub = nullptr;
@@ -412,5 +412,5 @@ bool Hub::deserializeContent(QDataStream &stream)
         m_hubs.insert(hub->ref().light().id(), hub);
     }
 
-    return true;
+    return True;
 }

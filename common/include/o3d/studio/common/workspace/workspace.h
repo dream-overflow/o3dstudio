@@ -9,14 +9,16 @@
 #ifndef _O3DS_COMMON_WORKSPACE_H
 #define _O3DS_COMMON_WORKSPACE_H
 
-#include <QtCore/QStringList>
-#include <QtCore/QMap>
-#include <QtCore/QUuid>
-
 #include "../exception.h"
 #include "../objectref.h"
 
 #include "project.h"
+
+#include <map>
+#include <list>
+
+#include <o3d/core/baseobject.h>
+#include <o3d/core/stringlist.h>
 
 namespace o3d {
 namespace studio {
@@ -28,22 +30,22 @@ class Messenger;
 /**
  * @brief The Workspace final class.
  */
-class O3S_API Workspace : public QObject
+class O3S_API Workspace : public BaseObject
 {
-    Q_OBJECT
+    Q_DECLARE_TR_FUNCTIONS(Workspace)
 
 public:
 
-    Workspace(const QString &name, QObject *parent = nullptr);
+    Workspace(const String &name, BaseObject *parent = nullptr);
     virtual ~Workspace();
 
-    const QUuid& uuid() const;
-    const QString& name() const;
-    const QString& filename() const;
+    const Uuid& uuid() const;
+    const String& name() const;
+    const String& filename() const;
 
-    quint32 generateProjectId();
+    UInt32 generateProjectId();
 
-    void setUuid(const QUuid &uuid);
+    void setUuid(const Uuid &uuid);
 
     Project* project(const LightRef& ref);
     const Project* project(const LightRef& ref) const;
@@ -55,45 +57,45 @@ public:
      * @brief Return the list of found projects.
      * @return
      */
-    QStringList projectsList() const;
+    T_StringList projectsList() const;
 
     /**
      * @brief loadedProjectList
      * @return
      */
-    QList<Project*> loadedProjectList() const;
+    std::list<Project*> loadedProjectList() const;
 
     /**
      * @brief addProject
      * @param project
      * @return
      */
-    bool addProject(Project *project);
+    Bool addProject(Project *project);
 
     /**
      * @brief The project is saved before to be closed and removed from the workspace.
      * @param uuid
      * @return
      */
-    bool closeProject(const LightRef& ref);
+    Bool closeProject(const LightRef& ref);
 
-    bool hasProject(const LightRef& ref) const;
-    bool hasProject(QString location) const;
+    Bool hasProject(const LightRef& ref) const;
+    Bool hasProject(String location) const;
 
     /**
      * @brief Changes occurs to one or more projects.
      * @return
      */
-    bool hasChanges() const;
+    Bool hasChanges() const;
 
     /**
      * @brief Set the current selected project.
      * @param name
      */
-    bool setActiveProject(const LightRef &ref);
+    Bool setActiveProject(const LightRef &ref);
 
-    bool save();
-    bool load();
+    Bool save();
+    Bool load();
 
     //
     // Project entity
@@ -141,33 +143,33 @@ public:
 
 signals:
 
-    void onProjectAdded(const LightRef &ref);
-    void onProjectActivated(const LightRef &ref);
-    void onProjectRemoved(const LightRef &ref);
+    Signal<const LightRef &> onProjectAdded{this};
+    Signal<const LightRef &> onProjectActivated{this};
+    Signal<const LightRef &> onProjectRemoved{this};
 
-    void onProjectHubAdded(const LightRef &ref);
-    void onProjectHubRemoved(const LightRef &ref);
+    Signal<const LightRef &> onProjectHubAdded{this};
+    Signal<const LightRef &> onProjectHubRemoved{this};
 
-    void onProjectFragmentAdded(const LightRef &ref);
-    void onProjectFragmentRemoved(const LightRef &ref);
+    Signal<const LightRef &> onProjectFragmentAdded{this};
+    Signal<const LightRef &> onProjectFragmentRemoved{this};
 
-    void onProjectAssetAdded(const LightRef &ref);
-    void onProjectAssetRemoved(const LightRef &ref);
+    Signal<const LightRef &> onProjectAssetAdded{this};
+    Signal<const LightRef &> onProjectAssetRemoved{this};
 
-public slots:
+public /*slots*/:
 
     void onSelectionChanged();
 
 private:
 
-    QUuid m_uuid;
-    quint32 m_nextId;
+    Uuid m_uuid;
+    UInt32 m_nextId;
 
-    QString m_filename;        //!< Related workspace file name
-    QString m_name;            //!< Unique workspace name
+    String m_filename;        //!< Related workspace file name
+    String m_name;            //!< Unique workspace name
 
-    QStringList m_foundProjects;
-    QMap<quint32, Project*> m_loadedProjects;
+    T_StringList m_foundProjects;
+    std::map<UInt32, Project*> m_loadedProjects;
 
     Project *m_activeProject{nullptr};
 

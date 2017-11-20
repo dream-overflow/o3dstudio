@@ -9,12 +9,7 @@
 #ifndef _O3DS_COMMON_MESSENGER_H
 #define _O3DS_COMMON_MESSENGER_H
 
-#include <QtCore/QObject>
-#include <QtCore/QDateTime>
-#include <QtCore/QMutex>
-#include <QtCore/QMap>
-#include <QtCore/QStringList>
-#include <QtCore/QMetaType>
+#include <map>
 
 #include <o3d/core/baseobject.h>
 #include <o3d/core/mutex.h>
@@ -56,7 +51,7 @@ public:
 
 public:
 
-    o3d::Signal<UInt32, const String&> onNewMessage{this};
+    Signal<UInt32, const String&> onNewMessage{this};
 
 protected:
 
@@ -76,7 +71,5 @@ protected:
 } // namespace common
 } // namespace studio
 } // namespace o3d
-
-Q_DECLARE_METATYPE(QtMsgType)
 
 #endif // _O3DS_COMMON_MESSENGER_H

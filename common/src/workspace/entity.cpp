@@ -11,12 +11,11 @@
 using namespace o3d::studio::common;
 
 
-Entity::Entity(const QString &name, Entity *parent) :
+Entity::Entity(const String &name, Entity *parent) :
     m_name(name),
     m_parent(parent),
     m_capacities()
 {
-    m_capacities.resize(64);
     setDirty();
 }
 
@@ -41,13 +40,13 @@ const Entity *Entity::parent() const
     return m_parent;
 }
 
-void Entity::setName(const QString &name)
+void Entity::setName(const String &name)
 {
     m_name = name;
     setDirty();
 }
 
-const QString &Entity::name() const
+const String &Entity::name() const
 {
     return m_name;
 }
@@ -67,26 +66,26 @@ const TypeRef& Entity::typeRef() const
     return m_typeRef;
 }
 
-bool Entity::exists() const
+o3d::Bool Entity::exists() const
 {
     return m_ref.light().isValid();
 }
 
-bool Entity::hasChanges() const
+o3d::Bool Entity::hasChanges() const
 {
     return isDirty();
 }
 
-bool Entity::serializeContent(QDataStream &stream) const
+o3d::Bool Entity::serializeContent(QDataStream &stream) const
 {
     stream << m_name
            << m_parent->ref().uuid()
-           << m_parent->ref().strong().typeName();
+           << toQString(m_parent->ref().strong().typeName());
 
-    return true;
+    return True;
 }
 
-bool Entity::deserializeContent(QDataStream &stream)
+o3d::Bool Entity::deserializeContent(QDataStream &stream)
 {
     QUuid uuid;
     QString typeName;
@@ -95,5 +94,5 @@ bool Entity::deserializeContent(QDataStream &stream)
            >> uuid
            >> typeName;
 
-    return true;
+    return True;
 }

@@ -9,11 +9,7 @@
 #ifndef _O3DS_COMMON_OBJECTREF_H
 #define _O3DS_COMMON_OBJECTREF_H
 
-#include <QtCore/QString>
-#include <QtCore/QUuid>
-#include <QtCore/QUrl>
-#include <QtCore/QHash>
-#include <QtCore/QMetaType>
+#include <o3d/core/uuid.h>
 
 #include "global.h"
 
@@ -60,42 +56,42 @@ public:
     static const TypeRef& component();
 
     TypeRef();
-    TypeRef(EntityBaseType baseType, quint32 id, const QString &name);
+    TypeRef(EntityBaseType baseType, UInt32 id, const String &name);
     TypeRef(const TypeRef &dup);
 
     TypeRef& operator= (const TypeRef &dup);
 
-    inline bool isValid() const
+    inline Bool isValid() const
     {
         return m_id > 0 && !m_name.isEmpty();
     }
 
-    inline bool operator <(const TypeRef &to) const
+    inline Bool operator <(const TypeRef &to) const
     {
         return m_id < to.m_id;
     }
 
-    inline bool operator <=(const TypeRef &to) const
+    inline Bool operator <=(const TypeRef &to) const
     {
         return m_id <= to.m_id;
     }
 
-    inline bool operator >(const TypeRef &to) const
+    inline Bool operator >(const TypeRef &to) const
     {
         return m_id > to.m_id;
     }
 
-    inline bool operator >=(const TypeRef &to) const
+    inline Bool operator >=(const TypeRef &to) const
     {
         return m_id >= to.m_id;
     }
 
-    inline bool operator ==(const TypeRef &to) const
+    inline Bool operator ==(const TypeRef &to) const
     {
         return m_id == to.m_id;
     }
 
-    inline bool operator !=(const TypeRef &to) const
+    inline Bool operator !=(const TypeRef &to) const
     {
         return m_id != to.m_id;
     }
@@ -104,49 +100,43 @@ public:
      * @brief id of the TypeRef containing the baseType on the 4 LSB and the type id on the 28 MSB.
      * @return
      */
-    inline quint32 id() const { return m_id; }
+    inline UInt32 id() const { return m_id; }
 
     /**
      * @brief id of the TypeRef of the base type. Similar as id for a base type.
      * @return
      */
-    inline quint32 baseTypeId() const { return ((m_id & 0x0f) << 4) | (m_id & 0x0f); }
+    inline UInt32 baseTypeId() const { return ((m_id & 0x0f) << 4) | (m_id & 0x0f); }
 
     /**
      * @brief id Unique per project 32 bits integer identifier.
      * This correspond to the 28 MSB of the id.
      * @return
      */
-    inline quint32 typeId() const { return (m_id & ~0x0f) >> 4; }
+    inline UInt32 typeId() const { return (m_id & ~0x0f) >> 4; }
 
     /**
      * @brief name Global reference of type of object.
      * @return
      */
-    inline const QString& name() const { return m_name; }
+    inline const String& name() const { return m_name; }
 
 private:
 
-    quint32 m_id;
-    QString m_name;
+    UInt32 m_id;
+    String m_name;
 
 public:
 
-    inline static quint32 makeTypeId(quint32 baseTypeId) {
+    inline static UInt32 makeTypeId(UInt32 baseTypeId) {
         return ((baseTypeId & 0x0f) << 4) | (baseTypeId & 0x0f);
     }
 
-    inline static quint32 hasBaseTypeId(quint32 id, quint32 baseTypeId) {
+    inline static UInt32 hasBaseTypeId(UInt32 id, UInt32 baseTypeId) {
         // keep only the 4 LSB of the base type id
         return (id & 0x0f) == (baseTypeId & 0x0f);
     }
-
-    friend uint qHash(const TypeRef &key, uint seed = 0)
-    {
-        return qHash(key.id(), seed);
-    }
 };
-
 
 /**
  * @brief Permit the identification of an object internaly.
@@ -172,7 +162,7 @@ public:
         }
     }
 
-    inline bool operator <(const LightRef &to) const
+    inline Bool operator <(const LightRef &to) const
     {
         if (m_projectId == to.m_projectId) {
             if (m_typeId == to.m_typeId) {
@@ -185,7 +175,7 @@ public:
         }
     }
 
-    inline bool operator <=(const LightRef &to) const
+    inline Bool operator <=(const LightRef &to) const
     {
         if (m_projectId == to.m_projectId) {
             if (m_typeId == to.m_typeId) {
@@ -198,7 +188,7 @@ public:
         }
     }
 
-    inline bool operator >(const LightRef &to) const
+    inline Bool operator >(const LightRef &to) const
     {
         if (m_projectId == to.m_projectId) {
             if (m_typeId == to.m_typeId) {
@@ -211,7 +201,7 @@ public:
         }
     }
 
-    inline bool operator >=(const LightRef &to) const
+    inline Bool operator >=(const LightRef &to) const
     {
         if (m_projectId == to.m_projectId) {
             if (m_typeId == to.m_typeId) {
@@ -224,12 +214,12 @@ public:
         }
     }
 
-    inline bool operator ==(const LightRef &to) const
+    inline Bool operator ==(const LightRef &to) const
     {
         return m_projectId == to.m_projectId && m_typeId == to.m_typeId && m_id == to.m_id;
     }
 
-    inline bool operator !=(const LightRef &to) const
+    inline Bool operator !=(const LightRef &to) const
     {
         return m_projectId != to.m_projectId || m_typeId != to.m_typeId || m_id != to.m_id;
     }
@@ -238,25 +228,25 @@ public:
      * @brief Unique type of the object, registered value to the object registry.
      * @return
      */
-    inline quint32 typeId() const { return m_typeId; }
+    inline UInt32 typeId() const { return m_typeId; }
 
     /**
      * @brief id Unique per project 64 bits integer identifier.
      * @return
      */
-    inline quint64 id() const { return m_id; }
+    inline UInt64 id() const { return m_id; }
 
     /**
      * @brief projectId Registered integer value of the project into the current workspace.
      * @return
      */
-    inline quint32 projectId() const { return m_projectId; }
+    inline UInt32 projectId() const { return m_projectId; }
 
     /**
      * @brief Check if the type of the reference inherit from a specific base type.
      * @return
      */
-    inline bool baseTypeOf(const TypeRef &baseTypeRef) const
+    inline Bool baseTypeOf(const TypeRef &baseTypeRef) const
     {
         return TypeRef::hasBaseTypeId(m_typeId, baseTypeRef.id());
     }
@@ -268,16 +258,9 @@ public:
 
 private:
 
-    quint32 m_typeId;
-    quint64 m_id;
-    quint32 m_projectId;
-
-public:
-
-    friend uint qHash(const LightRef &key, uint seed = 0)
-    {
-        return qHash(key.projectId()*key.id(), seed);
-    }
+    UInt32 m_typeId;
+    UInt64 m_id;
+    UInt32 m_projectId;
 };
 
 /**
@@ -307,7 +290,7 @@ public:
         }
     }
 
-    inline bool operator <=(const StrongRef &to) const
+    inline Bool operator <=(const StrongRef &to) const
     {
         if (m_projectUuid == to.m_projectUuid) {
             if (m_typeName == to.m_typeName) {
@@ -320,7 +303,7 @@ public:
         }
     }
 
-    inline bool operator >(const StrongRef &to) const
+    inline Bool operator >(const StrongRef &to) const
     {
         if (m_projectUuid == to.m_projectUuid) {
             if (m_typeName == to.m_typeName) {
@@ -333,7 +316,7 @@ public:
         }
     }
 
-    inline bool operator >=(const StrongRef &to) const
+    inline Bool operator >=(const StrongRef &to) const
     {
         if (m_projectUuid == to.m_projectUuid) {
             if (m_typeName == to.m_typeName) {
@@ -346,12 +329,12 @@ public:
         }
     }
 
-    inline bool operator ==(const StrongRef &to) const
+    inline Bool operator ==(const StrongRef &to) const
     {
         return m_projectUuid == to.m_projectUuid && m_typeName == to.m_typeName && m_uuid == to.m_uuid;
     }
 
-    inline bool operator !=(const StrongRef &to) const
+    inline Bool operator !=(const StrongRef &to) const
     {
         return m_projectUuid != to.m_projectUuid || m_typeName != to.m_typeName || m_uuid != to.m_uuid;
     }
@@ -360,30 +343,30 @@ public:
      * @brief Unique type of the object, registered string to the object registry.
      * @return
      */
-    inline const QString& typeName() const { return m_typeName; }
+    inline const String& typeName() const { return m_typeName; }
 
     /**
      * @brief UUID of the object
      * @return
      */
-    inline const QUuid& uuid() const { return m_uuid; }
+    inline const Uuid& uuid() const { return m_uuid; }
 
     /**
      * @brief UUID for the owner project
      * @return
      */
-    inline const QUuid& projectUuid() const { return m_projectUuid; }
+    inline const Uuid& projectUuid() const { return m_projectUuid; }
 
-    QString longUuid() const
+    String longUuid() const
     {
-        return QString("%1:%2").arg(m_projectUuid.toString()).arg(m_uuid.toString());
+        return String::print("%s:%s", m_projectUuid.toString(), m_uuid.toString());
     }
 
 private:
 
-    QString m_typeName;
-    QUuid m_uuid;
-    QUuid m_projectUuid;
+    String m_typeName;
+    Uuid m_uuid;
+    Uuid m_projectUuid;
 };
 
 /**
@@ -413,7 +396,7 @@ public:
      * @param type Reference on the type of the object to reference
      * @return
      */
-    static ObjectRef buildRef(Project *project, const TypeRef &type, const QUuid &uuid);
+    static ObjectRef buildRef(Project *project, const TypeRef &type, const Uuid &uuid);
 
     /**
      * @brief buildRef Build a new reference for an object into the project and force uuid and id values
@@ -421,7 +404,7 @@ public:
      * @param type Reference on the type of the object to reference
      * @return
      */
-    static ObjectRef buildRef(Project *project, const TypeRef &type, const QUuid &uuid, quint64 id);
+    static ObjectRef buildRef(Project *project, const TypeRef &type, const Uuid &uuid, UInt64 id);
 
     /**
      * @brief buildRef Build a new reference for a project into the workspace
@@ -436,15 +419,15 @@ public:
      * @param uuid The strong reference project UUID
      * @return
      */
-    static ObjectRef buildRef(Workspace *workspace, const QUuid &uuid);
+    static ObjectRef buildRef(Workspace *workspace, const Uuid &uuid);
 
     ObjectRef(const ObjectRef &dup);
 
     inline const LightRef& light() const { return m_lightRef; }
     inline const StrongRef& strong() const { return m_strongRef; }
 
-    inline const QUuid &uuid() const { return m_strongRef.uuid(); }
-    QUrl url() const;
+    inline const Uuid &uuid() const { return m_strongRef.uuid(); }
+    // Url url() const; @todo later
 
     inline operator LightRef() { return m_lightRef; }
     inline operator StrongRef() { return m_strongRef; }
@@ -459,6 +442,60 @@ private:
 } // namespace studio
 } // namespace o3d
 
-Q_DECLARE_METATYPE(o3d::studio::common::LightRef)
+namespace std {
+
+template<>
+struct hash<o3d::studio::common::TypeRef>
+{
+    enum
+    {
+        bucket_size = 8,
+        min_buckets = 16
+    };
+
+    bool operator() (const o3d::studio::common::TypeRef &s1, const o3d::studio::common::TypeRef &s2) const
+    {
+        if (s1.id() < s2.id()) {
+            return -1;
+        } else if (s1.id() > s2.id()) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    size_t operator() (const o3d::studio::common::TypeRef &s1) const
+    {
+        return s1.id();
+    }
+};
+
+template<>
+struct hash<o3d::studio::common::LightRef>
+{
+    enum
+    {
+        bucket_size = 8,
+        min_buckets = 16
+    };
+
+    bool operator() (const o3d::studio::common::LightRef &s1, const o3d::studio::common::LightRef &s2) const
+    {
+        if (s1 < s2) {
+            return -1;
+        } else if (s1 > s2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    size_t operator() (const o3d::studio::common::LightRef &s1) const
+    {
+        return s1.id() * s1.projectId();
+    }
+};
+
+}
 
 #endif // _O3DS_COMMON_ELEMENT_H

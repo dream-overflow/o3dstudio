@@ -9,7 +9,7 @@
 #ifndef _O3DS_COMMON_MASTERSCENE_H
 #define _O3DS_COMMON_MASTERSCENE_H
 
-#include <QtCore/QString>
+#include <list>
 
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/ui/canvas/o3ddrawer.h"
@@ -65,7 +65,7 @@ private:
 
     //! Ordered list of command to process during the moment where the context is set to current.
     //! In others words it is the pass of synchronization that will be executed here.
-    QList<SceneCommand*> m_commands;
+    std::list<SceneCommand*> m_commands;
 };
 
 } // namespace common

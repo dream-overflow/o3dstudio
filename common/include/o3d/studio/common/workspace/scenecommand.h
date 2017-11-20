@@ -9,11 +9,6 @@
 #ifndef _O3DS_COMMON_SCENECOMMAND_H
 #define _O3DS_COMMON_SCENECOMMAND_H
 
-#include <QtCore/QString>
-#include <QtCore/QMap>
-#include <QtCore/QException>
-#include <QtCore/QCoreApplication>
-
 #include "../exception.h"
 #include "../objectref.h"
 

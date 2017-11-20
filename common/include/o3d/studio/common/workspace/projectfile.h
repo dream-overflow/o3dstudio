@@ -9,10 +9,7 @@
 #ifndef _O3DS_COMMON_PROJECTFILE_H
 #define _O3DS_COMMON_PROJECTFILE_H
 
-#include <QtCore/QString>
-#include <QtCore/QUuid>
-#include <QtCore/QDir>
-#include <QtCore/QCoreApplication>
+#include <o3d/core/diskdir.h>
 
 #include "../global.h"
 
@@ -29,8 +26,6 @@ class Project;
  */
 class O3S_API ProjectFile
 {
-    Q_DECLARE_TR_FUNCTIONS(ProjectFile)
-
 public:
 
     enum ProjectVersion
@@ -43,9 +38,9 @@ public:
     ProjectFile(Project *project, ProjectVersion version = PROJECT_VERSION_1_0_0);
     virtual ~ProjectFile();
 
-    const QString& name() const;
-    QString filename() const;
-    const QDir& path() const;
+    const String& name() const;
+    String filename() const;
+    const Dir& path() const;
 
     /**
      * @brief Initialize a new project at the specified path with name.
