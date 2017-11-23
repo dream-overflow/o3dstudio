@@ -70,8 +70,8 @@ public:
     Hub* hub(UInt64 id);
     const Hub* hub(UInt64 id) const;
 
-    std::list<Hub*> searchHub(const QString &name);
-    std::list<const Hub*> searchHub(const QString &name) const;
+    std::list<Hub*> searchHub(const String &name);
+    std::list<const Hub*> searchHub(const String &name) const;
 
     /**
      * @brief Recursively find for a hub instance.
@@ -86,12 +86,12 @@ public:
     /**
      * @brief Recursively find for a hub instance.
      */
-    Hub* findHub(const QUuid &uuid);
+    Hub* findHub(const Uuid &uuid);
 
     /**
      * @brief Recursively find for a hub instance (const version).
      */
-    const Hub* findHub(const QUuid &uuid) const;
+    const Hub* findHub(const Uuid &uuid) const;
 
 
     size_t numHubs() const;

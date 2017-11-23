@@ -236,7 +236,7 @@ void switchTranslator(QTranslator& translator, const QString& filename, QString 
 
     // load the new translator
     if (path.isEmpty()) {
-        path = QDir::currentPath() + QDir::separator() + QString(LANGUAGES_PATH);
+        path = Application::appDir() + '/' + QString(LANGUAGES_PATH);
     }
 
     if (translator.load(filename, path, QString(), QString())) {

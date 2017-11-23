@@ -55,9 +55,9 @@ public:
     virtual Bool serializeContent(QDataStream &stream) const;
     virtual Bool deserializeContent(QDataStream &stream);
 
-    virtual Bool createToScene(MasterScene *masterScene) override;
-    virtual Bool removeFromScene(MasterScene *masterScene) override;
-    virtual Bool syncWithScene(MasterScene *masterScene) override;
+    virtual void createToScene(MasterScene *masterScene) override;
+    virtual void removeFromScene(MasterScene *masterScene) override;
+    virtual void syncWithScene(MasterScene *masterScene) override;
 
 protected:
 };

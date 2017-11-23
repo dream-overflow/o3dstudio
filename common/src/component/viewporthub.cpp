@@ -35,7 +35,7 @@ void ViewPortComponent::setup()
 
 }
 
-Hub *ViewPortComponent::buildHub(const QString &name, Project *project, Entity *parent)
+Hub *ViewPortComponent::buildHub(const String &name, Project *project, Entity *parent)
 {
     if (!project) {
         return nullptr;

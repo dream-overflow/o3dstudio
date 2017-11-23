@@ -46,7 +46,7 @@ void Entity::setName(const String &name)
     setDirty();
 }
 
-const String &Entity::name() const
+const o3d::String &Entity::name() const
 {
     return m_name;
 }
@@ -80,15 +80,15 @@ o3d::Bool Entity::serializeContent(QDataStream &stream) const
 {
     stream << m_name
            << m_parent->ref().uuid()
-           << toQString(m_parent->ref().strong().typeName());
+           << m_parent->ref().strong().typeName();
 
     return True;
 }
 
 o3d::Bool Entity::deserializeContent(QDataStream &stream)
 {
-    QUuid uuid;
-    QString typeName;
+    Uuid uuid;
+    String typeName;
 
     stream >> m_name
            >> uuid

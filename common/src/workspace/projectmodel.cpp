@@ -174,34 +174,31 @@ ProjectItem *ProjectModel::addProject(Project *project)
 
     ProjectItem *item = new ProjectItem(project,
                                         project->ref().light(),
-                                        project->name(),
+                                        toQString(project->name()),
                                         QIcon::fromTheme("document-open"),
                                         m_rootItem);
     m_rootItem->appendChild(item);
 
     // and add the initial structure of hubs
     {
-        QList<Hub*> hubs = project->hubs(true);
-        Hub *hub = nullptr;
-        foreach (hub, hubs) {
+        std::list<Hub*> hubs = project->hubs(true);
+        for (Hub *hub : hubs) {
             addHub(hub);
         }
     }
 
     // ...fragments
     {
-        QList<Fragment*> fragments = project->fragments();
-        Fragment *fragment = nullptr;
-        foreach (fragment, fragments) {
+        std::list<Fragment*> fragments = project->fragments();
+        for (Fragment *fragment : fragments) {
             addFragment(fragment);
         }
     }
 
     // ...assets
     {
-        QList<Asset*> assets = project->assets();
-        Asset *asset = nullptr;
-        foreach (asset, assets) {
+        std::list<Asset*> assets = project->assets();
+        for (Asset *asset : assets) {
             addAsset(asset);
         }
     }
@@ -253,7 +250,7 @@ ProjectItem *ProjectModel::addHub(common::Hub *hub)
 
     ProjectItem *item = new ProjectItem(hub,
                                         hub->ref().light(),
-                                        hub->name(),
+                                        toQString(hub->name()),
                                         UiUtils::tintIcon(":/icons/device_hub_black.svg"),
                                         parentItem);
     parentItem->appendChild(item);
@@ -317,7 +314,7 @@ ProjectItem *ProjectModel::addFragment(common::Fragment *fragment)
 
     ProjectItem *item = new ProjectItem(fragment,
                                         fragment->ref().light(),
-                                        fragment->name(),
+                                        toQString(fragment->name()),
                                         UiUtils::tintIcon(":/icons/fragment_flat.svg"),
                                         parentItem);
     parentItem->appendChild(item);
@@ -376,7 +373,7 @@ ProjectItem *ProjectModel::addAsset(common::Asset *asset)
 
     ProjectItem *item = new ProjectItem(asset,
                                         asset->ref().light(),
-                                        asset->name(),
+                                        toQString(asset->name()),
                                         UiUtils::tintIcon(":/icons/fragment_flat.svg"),
                                         parentItem);
     parentItem->appendChild(item);

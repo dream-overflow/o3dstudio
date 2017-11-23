@@ -110,13 +110,13 @@ o3d::Bool Fragment::serializeContent(QDataStream &stream) const
     return True;
 }
 
-o3d::Bool Fragment::deserializeContent(QDataStreaml &stream)
+o3d::Bool Fragment::deserializeContent(QDataStream &stream)
 {
     if (!Entity::deserializeContent(stream)) {
         return False;
     }
 
-    QUuid uuid;
+    Uuid uuid;
     stream >> uuid;
 
     if (!uuid.isNull()) {

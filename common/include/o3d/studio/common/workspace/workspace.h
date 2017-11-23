@@ -141,7 +141,7 @@ public:
      */
     const Asset* asset(const LightRef &ref) const;
 
-signals:
+public /*signals*/:
 
     Signal<const LightRef &> onProjectAdded{this};
     Signal<const LightRef &> onProjectActivated{this};

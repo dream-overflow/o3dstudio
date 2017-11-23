@@ -9,6 +9,8 @@
 #ifndef _O3DS_COMMON_COMPONENTREGISTRY_H
 #define _O3DS_COMMON_COMPONENTREGISTRY_H
 
+#include <QtCore/QCoreApplication>
+
 #include <map>
 
 #include <o3d/core/baseobject.h>
@@ -24,6 +26,8 @@ class Component;
 
 class O3S_API ComponentRegistry : public BaseObject
 {
+    Q_DECLARE_TR_FUNCTIONS(ComponentRegistry)
+
 public:
 
     ComponentRegistry(BaseObject *parent = nullptr);
@@ -53,10 +57,10 @@ public:
     Component* componentByTarget(const String &name);
     const Component* componentByTarget(const String &name) const;
 
-signals:
+public /*signals*/:
 
-    void onComponentRegistered(String name);
-    void onComponentUnregistered(String name);
+    Signal<String> onComponentRegistered{this};
+    Signal<String> onComponentUnregistered{this};
 
 protected:
 

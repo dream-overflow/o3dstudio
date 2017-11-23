@@ -17,25 +17,32 @@
 using namespace o3d::studio::common;
 
 
-CommandManager::CommandManager() :
-    m_running(false)
+CommandManager::CommandManager(BaseObject *parent) :
+    BaseObject(parent),
+    m_running(False),
+    m_thread(this)
 {
 }
 
 CommandManager::~CommandManager()
 {
-    wait();  // join the thread
+    m_thread.waitFinish();  // join the thread
 
-    Q_ASSERT(m_todoCommandsQueue.isEmpty());
-    Q_ASSERT(m_waitingCommandsQueue.isEmpty());
+    O3D_ASSERT(m_todoCommandsQueue.empty());
+    O3D_ASSERT(m_waitingCommandsQueue.empty());
 
     Command *cmd = nullptr;
-    foreach (cmd, m_doneCommandsQueue) {
+    while (!m_doneCommandsQueue.empty()) {
+        cmd = m_doneCommandsQueue.top();
+        m_doneCommandsQueue.pop();
+
         delete cmd;
     }
 
-    cmd = nullptr;
-    foreach (cmd, m_undoneCommandsQueue) {
+    while (!m_undoneCommandsQueue.empty()) {
+        cmd = m_undoneCommandsQueue.top();
+        m_undoneCommandsQueue.pop();
+
         delete cmd;
     }
 }
@@ -44,35 +51,33 @@ void CommandManager::initialize()
 {
     // initial setup of current workspace
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
-    connect(workspaceManager, SIGNAL(onWorkspaceActivated(QString)), SLOT(onChangeCurrentWorkspace(QString)));
+    workspaceManager->onWorkspaceActivated.connect(this, &CommandManager::onChangeCurrentWorkspace);
 
     onChangeCurrentWorkspace(workspaceManager->current()->name());
 
 }
 
-void CommandManager::onChangeCurrentWorkspace(const QString &name)
+void CommandManager::onChangeCurrentWorkspace(const String &/*name*/)
 {
-    Q_UNUSED(name)
-
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        connect(workspace, SIGNAL(onProjectRemoved(const LightRef &)), SLOT(onProjectRemoved(const LightRef &)));
+        workspace->onProjectRemoved.connect(this, &CommandManager::onProjectRemoved);
     }
 }
 
 void CommandManager::onProjectRemoved(const LightRef &ref)
 {
-    m_rwLock.lockForWrite();
+    m_rwLock.lockWrite();
 
     // remove any command related to the project @todo
-    QList<QStack<Command*>::iterator> eraseList;
+    std::list<std::stack<Command*>::iterator> eraseList;
     for (auto it = m_todoCommandsQueue.begin(); it != m_todoCommandsQueue.end(); ++it) {
         if ((*it)->targetRef() == ref) {
             eraseList.append(it);
         }
     }
 
-    QStack<Command*>::iterator it;
+    std::stack<Command*>::iterator it;
     foreach (it, eraseList) {
         delete *it;
         m_todoCommandsQueue.erase(it);
@@ -102,14 +107,14 @@ void CommandManager::onProjectRemoved(const LightRef &ref)
         m_undoneCommandsQueue.erase(it);
     }
 
-    m_rwLock.unlock();
+    m_rwLock.unlockWrite();
 }
 
 void CommandManager::addCommand(Command *cmd)
 {
-    bool update = false;
+    Bool update = False;
 
-    m_rwLock.lockForWrite();
+    m_rwLock.lockWrite();
     m_todoCommandsQueue.push(cmd);
 
     if (m_undoneCommandsQueue.size()) {
@@ -119,13 +124,13 @@ void CommandManager::addCommand(Command *cmd)
         }
 
         m_undoneCommandsQueue.clear();
-        update = true;
+        update = True;
     }
 
-    m_rwLock.unlock();
+    m_rwLock.unlockWrite();
 
     if (update) {
-        emit commandUpdate();
+        commandUpdate();
     }
 }
 
@@ -133,37 +138,37 @@ void CommandManager::undoLastCommand()
 {
     int size = 0;
 
-    m_rwLock.lockForRead();
+    m_rwLock.lockRead();
     size = m_doneCommandsQueue.size();
-    m_rwLock.unlock();
+    m_rwLock.unlockRead();
 
     if (size == 0) {
         return;
     }
 
-    m_rwLock.lockForWrite();
+    m_rwLock.lockWrite();
 
     Command *lastCmd = m_doneCommandsQueue.pop();
     m_waitingCommandsQueue.push(lastCmd);
 
-    m_rwLock.unlock();
+    m_rwLock.unlockWrite();
 
-    emit commandUpdate();
+    commandUpdate();
 }
 
-void CommandManager::undoNCommands(int num)
+void CommandManager::undoNCommands(Int32 num)
 {
-    int size = 0;
+    Int32 size = 0;
 
-    m_rwLock.lockForRead();
+    m_rwLock.lockRead();
     size = m_doneCommandsQueue.size();
-    m_rwLock.unlock();
+    m_rwLock.unlockRead();
 
     if (size == 0) {
         return;
     }
 
-    m_rwLock.lockForWrite();
+    m_rwLock.lockWrite();
 
     Command *lastCmd = nullptr;
     for (int i = 0; i < std::min(size, num); ++i) {
@@ -171,46 +176,46 @@ void CommandManager::undoNCommands(int num)
         m_waitingCommandsQueue.push(lastCmd);
     }
 
-    m_rwLock.unlock();
+    m_rwLock.unlockWrite();
 
-    emit commandUpdate();
+    commandUpdate();
 }
 
 void CommandManager::redoLastCommand()
 {
-    int size = 0;
+    Int32 size = 0;
 
-    m_rwLock.lockForRead();
+    m_rwLock.lockRead();
     size = m_undoneCommandsQueue.size();
-    m_rwLock.unlock();
+    m_rwLock.unlockRead();
 
     if (size == 0) {
         return;
     }
 
-    m_rwLock.lockForWrite();
+    m_rwLock.lockWrite();
 
     Command *lastUndone = m_undoneCommandsQueue.pop();
     m_waitingCommandsQueue.push(lastUndone);
 
-    m_rwLock.unlock();
+    m_rwLock.unlockWrite();
 
-    emit commandUpdate();
+    commandUpdate();
 }
 
-void CommandManager::redoNCommands(int num)
+void CommandManager::redoNCommands(Int32 num)
 {
     int size = 0;
 
-    m_rwLock.lockForRead();
+    m_rwLock.lockRead();
     size = m_undoneCommandsQueue.size();
-    m_rwLock.unlock();
+    m_rwLock.unlockRead();
 
     if (size == 0) {
         return;
     }
 
-    m_rwLock.lockForWrite();
+    m_rwLock.lockWrite();
 
     Command *lastUndone = nullptr;
     for (int i = 0; i < std::min(size, num); ++i) {
@@ -218,12 +223,12 @@ void CommandManager::redoNCommands(int num)
         m_waitingCommandsQueue.push(lastUndone);
     }
 
-    m_rwLock.unlock();
+    m_rwLock.unlockWrite();
 
     emit commandUpdate();
 }
 
-bool CommandManager::hasPendingCommands() const
+o3d::Bool CommandManager::hasPendingCommands() const
 {
     int size = 0;
 
@@ -234,7 +239,7 @@ bool CommandManager::hasPendingCommands() const
     return size > 0;
 }
 
-bool CommandManager::hasRunningCommands() const
+o3d::Bool CommandManager::hasRunningCommands() const
 {
     int size = 0;
 
@@ -245,7 +250,7 @@ bool CommandManager::hasRunningCommands() const
     return size > 0;
 }
 
-bool CommandManager::hasDoneCommands() const
+o3d::Bool CommandManager::hasDoneCommands() const
 {
     int size = 0;
 
@@ -256,7 +261,7 @@ bool CommandManager::hasDoneCommands() const
     return size > 0;
 }
 
-bool CommandManager::hasUndoneCommands() const
+o3d::Bool CommandManager::hasUndoneCommands() const
 {
     int size = 0;
 
@@ -267,9 +272,9 @@ bool CommandManager::hasUndoneCommands() const
     return size > 0;
 }
 
-QStringList CommandManager::undoableCommandList() const
+o3d::T_StringList CommandManager::undoableCommandList() const
 {
-    QStringList cmds;
+    T_StringList cmds;
 
     const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
 
@@ -282,9 +287,9 @@ QStringList CommandManager::undoableCommandList() const
     return cmds;
 }
 
-QStringList CommandManager::redoableCommandList() const
+o3d::T_StringList CommandManager::redoableCommandList() const
 {
-    QStringList cmds;
+    T_StringList cmds;
 
     const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
 
@@ -297,9 +302,9 @@ QStringList CommandManager::redoableCommandList() const
     return cmds;
 }
 
-QString CommandManager::nextToUndo() const
+o3d::String CommandManager::nextToUndo() const
 {
-    QString label;
+    String label;
 
     const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
     if (m_doneCommandsQueue.size()) {
@@ -310,36 +315,36 @@ QString CommandManager::nextToUndo() const
     return label;
 }
 
-QString CommandManager::nextToRedo() const
+o3d::String CommandManager::nextToRedo() const
 {
-    QString label;
+    String label;
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    m_rwLock->lockRead();
     if (m_undoneCommandsQueue.size()) {
         label = m_undoneCommandsQueue.top()->commandLabel();
     }
-    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+    m_rwLock->unlockRead();
 
     return label;
 }
 
-void CommandManager::run()
+o3d::Int32 CommandManager::run(void*)
 {
-    bool run = true;
-    bool error = false;
+    Bool run = True;
+    Bool error = False;
     Messenger& messenger = Application::instance()->messenger();
 
     while (1) {
         Command *nextCmd = nullptr;
 
-        m_rwLock.lockForWrite();
+        m_rwLock.lockWrite();
 
-        run = m_running | !m_waitingCommandsQueue.isEmpty() | !m_todoCommandsQueue.isEmpty();
+        run = m_running | !m_waitingCommandsQueue.empty() | !m_todoCommandsQueue.empty();
 
         // first look in wait list, if empty look in todo list
-        if (!m_waitingCommandsQueue.isEmpty()) {
+        if (!m_waitingCommandsQueue.empty()) {
             nextCmd = m_waitingCommandsQueue.pop();
-        } else if (!m_todoCommandsQueue.isEmpty()) {
+        } else if (!m_todoCommandsQueue.empty()) {
             nextCmd = m_todoCommandsQueue.pop();
         }
 
@@ -347,7 +352,7 @@ void CommandManager::run()
             m_waitingCommandsQueue.push(nextCmd);
         }
 
-        m_rwLock.unlock();
+        m_rwLock.unlockWrite();
 
         if (nextCmd != nullptr) {
             error = false;
@@ -388,7 +393,7 @@ void CommandManager::run()
                 error = true;
             }
 
-            m_rwLock.lockForWrite();
+            m_rwLock.lockWrite();
 
             if (error) {
                 nextCmd = nullptr;
@@ -423,10 +428,10 @@ void CommandManager::run()
                 m_waitingCommandsQueue.pop();
             }
 
-            m_rwLock.unlock();
+            m_rwLock.unlockWrite();
 
             // commands lists updated
-            emit commandUpdate();
+            commandUpdate();
         } else {
             msleep(2);
         }
@@ -437,27 +442,29 @@ void CommandManager::run()
             break;
         }
     }
+
+    return 0;
 }
 
 void CommandManager::begin()
 {
-    bool run = false;
+    Bool run = False;
 
-    m_rwLock.lockForRead();
+    m_rwLock.lockRead();
     run = m_running;
-    m_rwLock.unlock();
+    m_rwLock.unlockRead();
 
     if (run) {
         return;
     }
 
-    m_running = true;
+    m_running = True;
     start();
 }
 
 void CommandManager::finish()
 {
-    m_rwLock.lockForWrite();
-    m_running = false;
-    m_rwLock.unlock();
+    m_rwLock.lockWrite();
+    m_running = False;
+    m_rwLock.unlockWrite();
 }

@@ -9,6 +9,8 @@
 #ifndef _O3DS_COMMON_PROJECTFILE_H
 #define _O3DS_COMMON_PROJECTFILE_H
 
+#include <QtCore/QCoreApplication>
+
 #include <o3d/core/diskdir.h>
 
 #include "../global.h"
@@ -26,6 +28,8 @@ class Project;
  */
 class O3S_API ProjectFile
 {
+    Q_DECLARE_TR_FUNCTIONS(ProjectFile)
+
 public:
 
     enum ProjectVersion

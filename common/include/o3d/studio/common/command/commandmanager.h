@@ -9,11 +9,11 @@
 #ifndef _O3DS_COMMON_COMMANDMANAGER_H
 #define _O3DS_COMMON_COMMANDMANAGER_H
 
-#include <QtCore/QStack>
-#include <QtCore/QString>
-#include <QtCore/QVariant>
-#include <QtCore/QThread>
-#include <QtCore/QReadWriteLock>
+#include <stack>
+
+#include <o3d/core/baseobject.h>
+#include <o3d/core/thread.h>
+#include <o3d/core/stringlist.h>
 
 #include "command.h"
 #include "../objectref.h"
@@ -24,13 +24,11 @@ namespace common {
 
 using o3d::studio::common::LightRef;
 
-class O3S_API CommandManager : public QThread
+class O3S_API CommandManager : public BaseObject, public Runnable
 {
-    Q_OBJECT
-
 public:
 
-    CommandManager();
+    CommandManager(BaseObject *parent = nullptr);
     virtual ~CommandManager();
 
     /**
@@ -53,7 +51,7 @@ public:
     /**
      * @brief Undo the last dones n commands.
      */
-    void undoNCommands(int num);
+    void undoNCommands(Int32 num);
 
     /**
      * @brief Redo the left command.
@@ -64,62 +62,63 @@ public:
     /**
      * @brief Redo the last n undones commands.
      */
-    void redoNCommands(int num);
+    void redoNCommands(Int32 num);
 
-    bool hasPendingCommands() const;
-    bool hasRunningCommands() const;
-    bool hasDoneCommands() const;
-    bool hasUndoneCommands() const;
+    Bool hasPendingCommands() const;
+    Bool hasRunningCommands() const;
+    Bool hasDoneCommands() const;
+    Bool hasUndoneCommands() const;
 
-    QStringList undoableCommandList() const;
-    QStringList redoableCommandList() const;
+    T_StringList undoableCommandList() const;
+    T_StringList redoableCommandList() const;
 
-    QString nextToUndo() const;
-    QString nextToRedo() const;
+    String nextToUndo() const;
+    String nextToRedo() const;
 
     //
     // Thread management
     //
 
-    virtual void run() override;
+    virtual Int32 run(void*) override;
 
     void begin();
     void finish();
 
-public slots:
+public /*slots*/:
 
-    void onChangeCurrentWorkspace(const QString &name);
-    void onProjectRemoved(const LightRef &ref);
+    void onChangeCurrentWorkspace(const String& name);
+    void onProjectRemoved(const LightRef& ref);
 
-signals:
+public /*signals*/:
 
     /**
      * @brief Update commands list (todo, undoable, redoable)
      */
-    void commandUpdate();
+    Signal<> commandUpdate{this};
 
     /**
      * @brief Command done, undone or redone
      */
-    void commandDone(QString name, QString label, bool done);
+    Signal<String /*name*/, String /*label*/, Bool /*done*/> commandDone{this};
 
 protected:
 
     //! queue to commands to be executed, to be executable
-    QStack<Command*> m_todoCommandsQueue;
+    std::stack<Command*> m_todoCommandsQueue;
 
     //! queue to commands to be terminated, when execute, redo, undo many commands at once
-    QStack<Command*> m_waitingCommandsQueue;
+    std::stack<Command*> m_waitingCommandsQueue;
 
     //! queue for done commands, to be undoable
-    QStack<Command*> m_doneCommandsQueue;
+    std::stack<Command*> m_doneCommandsQueue;
 
     //! queue for undone commands, to be redoable
-    QStack<Command*> m_undoneCommandsQueue;
+    std::stack<Command*> m_undoneCommandsQueue;
 
-    bool m_running;
+    Bool m_running;
 
-    QReadWriteLock m_rwLock;
+    Thread m_thread;
+    ReadWriteLock m_rwLock;
 };
 
 } // namespace common

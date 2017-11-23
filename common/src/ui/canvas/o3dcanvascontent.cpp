@@ -32,7 +32,7 @@ O3DCanvasContent::O3DCanvasContent(const LightRef &ref, bool debug, QWidget *par
     common::WorkspaceManager *workspaces = &common::Application::instance()->workspaces();
     if (workspaces->current()) {
         common::Project *project = workspaces->current()->project(ref);
-        setWindowTitle(tr("Display %1").arg(project->name()));
+        setWindowTitle(tr("Display %1").arg(toQString(project->name())));
     }
 }
 

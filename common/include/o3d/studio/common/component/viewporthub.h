@@ -32,7 +32,7 @@ public:
     virtual ~ViewPortComponent();
 
     virtual void setup() override;
-    virtual Hub* buildHub(const QString &name, Project *project, Entity *parent) override;
+    virtual Hub* buildHub(const String &name, Project *project, Entity *parent) override;
 
 protected:
 };
@@ -81,15 +81,15 @@ public:
 
 protected:
 
-    qint32 m_priority;
+    Int32 m_priority;
 
-    float m_xpos, m_ypos;        //!< position
-    float m_width, m_height;     //!< size (can be in percent)
+    Float m_xpos, m_ypos;        //!< position
+    Float m_width, m_height;     //!< size (can be in percent)
 
-    bool m_percent;              //!< is using size in percent
-    bool m_isActive;             //!< is active
+    Bool m_percent;              //!< is using size in percent
+    Bool m_isActive;             //!< is active
 
-    qint32 m_nWidth, m_nHeight;  //!< real view-port size
+    Int32 m_nWidth, m_nHeight;  //!< real view-port size
 
     CameraHub *m_camera;
     DrawerHub *m_drawer;

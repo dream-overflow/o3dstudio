@@ -25,7 +25,7 @@ using namespace o3d::studio::common;
 Project::Project(const String &name, Workspace *workspace) :
     Entity(nullptr),
     m_workspace(workspace),
-    m_filename(),
+    m_filename(""),
     m_path(FileManager::instance()->getWorkingDirectory()),
     m_nextId(1),
     m_info(nullptr),
@@ -149,13 +149,13 @@ ProjectInfo &Project::info()
     return *m_info;
 }
 
-bool Project::setLocation(const QDir &path)
+o3d::Bool Project::setLocation(const DiskDir &path)
 {
     if (!path.exists()) {
         return false;
     }
 
-    m_path = path.absolutePath() + QDir::separator() + m_name;
+    m_path = path.getFullPathName() + '/' + m_name;
 
     return true;
 }
@@ -178,7 +178,7 @@ o3d::Bool Project::load()
     return true;
 }
 
-bool Project::save()
+o3d::Bool Project::save()
 {
     if (!exists()) {
         throw E_ProjectException(fromQString(tr("Project doesn't exists")));
@@ -197,9 +197,9 @@ bool Project::save()
     return true;
 }
 
-bool Project::exists() const
+o3d::Bool Project::exists() const
 {
-    return m_path.exists() && m_path.exists("project.o3dstudio");
+    return m_path.exists() && m_path.check("project.o3dstudio");
 }
 
 MasterScene *Project::masterScene()
@@ -224,7 +224,7 @@ Entity *Project::lookup(const LightRef &ref)
     if (ref.projectId() == ref.id()) {
         auto it = m_entitiesById.find(ref.id());
         if (it != m_entitiesById.end()) {
-            return it.value();
+            return it->second;
         }
     }
 
@@ -236,7 +236,7 @@ const Entity *Project::lookup(const LightRef &ref) const
     if (ref.projectId() == ref.id()) {
         auto cit = m_entitiesById.constFind(ref.id());
         if (cit != m_entitiesById.cend()) {
-            return cit.value();
+            return cit->second;
         }
     }
 
@@ -247,7 +247,7 @@ Entity *Project::lookup(const QUuid &uuid)
 {
     auto it = m_entitiesByUuid.find(uuid);
     if (it != m_entitiesByUuid.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
@@ -257,7 +257,7 @@ const Entity *Project::lookup(const QUuid &uuid) const
 {
     auto cit = m_entitiesByUuid.constFind(uuid);
     if (cit != m_entitiesByUuid.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
@@ -267,36 +267,36 @@ void Project::addHub(Hub *hub)
 {
     // not created for this project
     if (hub->ref().light().projectId() != ref().light().id()) {
-        throw E_ProjectException(fromQString(tr("Trying to add a hub that is created for another project")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a hub that is created for another project"))));
     }
 
     // already exists
     if (m_hubs.find(hub->ref().light().id()) != m_hubs.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to add a previously added hub, or with a similar id")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added hub, or with a similar id"))));
     }
 
-    m_hubs.insert(hub->ref().light().id(), hub);
+    m_hubs[hub->ref().light().id()] = hubs;
     hub->setProject(this);
 
     // structure change
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectHubAdded(hub->ref().light());
+    workspace()->onProjectHubAdded(hub->ref().light());
 }
 
 void Project::removeHub(const LightRef &_ref)
 {
     if (_ref.projectId() != ref().light().id()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove a reference for another project")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove a reference for another project"))));
     }
 
     auto it = m_hubs.find(_ref.id());
     if (it == m_hubs.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    Hub *hub = it.value();
+    Hub *hub = it->second;
 
     delete hub;
     m_hubs.erase(it);
@@ -305,17 +305,17 @@ void Project::removeHub(const LightRef &_ref)
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectHubRemoved(hub->ref().light());
+    workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
 void Project::removeHub(qint64 id)
 {
     auto it = m_hubs.find(id);
     if (it == m_hubs.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    Hub *hub = it.value();
+    Hub *hub = it->second;
 
     delete hub;
     m_hubs.erase(it);
@@ -324,21 +324,21 @@ void Project::removeHub(qint64 id)
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectHubRemoved(hub->ref().light());
+    workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
 void Project::removeHub(Hub *hub)
 {
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        if (it.value() == hub) {       
-            delete it.value();
+        if (it->second == hub) {
+            delete it->second;
             m_hubs.erase(it);
 
             // structure change
             setDirty();
 
             // signal throught workspace
-            emit workspace()->onProjectHubRemoved(hub->ref().light());
+            workspace()->onProjectHubRemoved(hub->ref().light());
 
             return;
         }
@@ -353,7 +353,7 @@ Hub* Project::hub(const LightRef &_ref)
 
     auto it = m_hubs.find(_ref.id());
     if (it != m_hubs.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
@@ -365,9 +365,9 @@ const Hub* Project::hub(const LightRef &_ref) const
         return nullptr;
     }
 
-    auto cit = m_hubs.constFind(_ref.id());
+    auto cit = m_hubs.find(_ref.id());
     if (cit != m_hubs.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
@@ -377,7 +377,7 @@ Hub* Project::hub(UInt64 id)
 {
     auto it = m_hubs.find(id);
     if (it != m_hubs.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
@@ -385,9 +385,9 @@ Hub* Project::hub(UInt64 id)
 
 const Hub* Project::hub(UInt64 id) const
 {
-    auto cit = m_hubs.constFind(id);
+    auto cit = m_hubs.find(id);
     if (cit != m_hubs.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
@@ -395,26 +395,26 @@ const Hub* Project::hub(UInt64 id) const
 
 std::list<Hub *> Project::searchHub(const QString &name)
 {
-    QList<Hub*> results;
+    std::list<Hub*> results;
 
     Hub *hub;
     foreach (hub, m_hubs) {
         if (hub->name() == name) {
-            results.append(hub);
+            results.push_back(hub);
         }
     }
 
     return results;
 }
 
-QList<const Hub*> Project::searchHub(const QString &name) const
+std::list<const Hub*> Project::searchHub(const QString &name) const
 {
-    QList<const Hub*> results;
+    std::list<const Hub*> results;
 
     const Hub *hub;
     foreach (hub, m_hubs) {
         if (hub->name() == name) {
-            results.append(hub);
+            results.push_back(hub);
         }
     }
 
@@ -486,15 +486,15 @@ size_t Project::numHubs() const
     return m_hubs.size();
 }
 
-QList<Hub*> Project::hubs(bool recurse)
+std::list<Hub*> Project::hubs(bool recurse)
 {
     // first level
-    QList<Hub*> results;
+    std::list<Hub*> results;
     Hub *hub = nullptr;
 
     if (recurse) {
         foreach (hub, m_hubs) {
-            results.append(hub);
+            results.push_back(hub);
             results += hub->hubs(recurse);
         }
     } else {
@@ -506,15 +506,15 @@ QList<Hub*> Project::hubs(bool recurse)
     return results;
 }
 
-QList<const Hub *> Project::hubs(bool recurse) const
+std::list<const Hub *> Project::hubs(bool recurse) const
 {
     // first level
-    QList<const Hub*> results;
+    std::list<const Hub*> results;
     const Hub *hub = nullptr;
 
     if (recurse) {
         foreach (hub, m_hubs) {
-            results.append(hub);
+            results.push_back(hub);
             results += hub->hubs(recurse);
         }
     } else {
@@ -530,35 +530,35 @@ void Project::addFragment(Fragment *fragment)
 {
     // not created for this project
     if (fragment->ref().light().projectId() != ref().light().id()) {
-        throw E_ProjectException(fromQString(tr("Trying to add a fragment that is created for another project")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a fragment that is created for another project"))));
     }
 
     // already exists
     if (m_fragments.find(fragment->ref().light().id()) != m_fragments.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to add a previously added fragment, or with a similar id")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added fragment, or with a similar id"))));
     }
 
-    m_fragments.insert(fragment->ref().light().id(), fragment);
+    m_fragments[fragment->ref().light().id()] = fragment;
 
     // structure change
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectFragmentAdded(fragment->ref().light());
+    workspace()->onProjectFragmentAdded(fragment->ref().light());
 }
 
 void Project::removeFragment(const LightRef &_ref)
 {
     if (_ref.projectId() != ref().light().id()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove a reference for another project")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove a reference for another project"))));
     }
 
     auto it = m_fragments.find(_ref.id());
     if (it == m_fragments.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    Fragment *fragment = it.value();
+    Fragment *fragment = it->second;
 
     delete fragment;
     m_fragments.erase(it);
@@ -567,17 +567,17 @@ void Project::removeFragment(const LightRef &_ref)
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
+    workspace()->onProjectFragmentRemoved(fragment->ref().light());
 }
 
 void Project::removeFragment(quint64 id)
 {
     auto it = m_fragments.find(id);
     if (it == m_fragments.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    Fragment *fragment = it.value();
+    Fragment *fragment = it->second;
 
     delete fragment;
     m_fragments.erase(it);
@@ -586,21 +586,21 @@ void Project::removeFragment(quint64 id)
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
+    workspace()->onProjectFragmentRemoved(fragment->ref().light());
 }
 
 void Project::removeFragment(Fragment *fragment)
 {
     for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {
         if (it.value() == fragment) {
-            delete it.value();
+            delete it->second;
             m_fragments.erase(it);
 
             // structure change
             setDirty();
 
             // signal throught workspace
-            emit workspace()->onProjectFragmentRemoved(fragment->ref().light());
+            workspace()->onProjectFragmentRemoved(fragment->ref().light());
 
             return;
         }
@@ -615,7 +615,7 @@ Fragment *Project::fragment(const LightRef &_ref)
 
     auto it = m_fragments.find(_ref.id());
     if (it != m_fragments.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
@@ -627,83 +627,83 @@ const Fragment *Project::fragment(const LightRef &_ref) const
         return nullptr;
     }
 
-    auto cit = m_fragments.constFind(_ref.id());
+    auto cit = m_fragments.find(_ref.id());
     if (cit != m_fragments.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
 }
 
-Fragment *Project::fragment(quint64 id)
+Fragment *Project::fragment(UInt64 id)
 {
     auto it = m_fragments.find(id);
     if (it != m_fragments.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
 }
 
-const Fragment *Project::fragment(quint64 id) const
+const Fragment *Project::fragment(UInt64 id) const
 {
-    auto cit = m_fragments.constFind(id);
+    auto cit = m_fragments.find(id);
     if (cit != m_fragments.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
 }
 
-QList<Fragment *> Project::searchFragment(const QString &name)
+std::list<Fragment *> Project::searchFragment(const String &name)
 {
-    QList<Fragment*> results;
+    std::list<Fragment*> results;
 
     Fragment *fragment;
     foreach (fragment, m_fragments) {
         if (fragment->name() == name) {
-            results.append(fragment);
+            results.push_back(fragment);
         }
     }
 
     return results;
 }
 
-QList<const Fragment *> Project::searchFragment(const QString &name) const
+std::list<const Fragment *> Project::searchFragment(const String &name) const
 {
-    QList<const Fragment*> results;
+    std::list<const Fragment*> results;
 
     const Fragment *fragment;
     foreach (fragment, m_fragments) {
         if (fragment->name() == name) {
-            results.append(fragment);
+            results.push_back(fragment);
         }
     }
 
     return results;
 }
 
-QList<Fragment *> Project::fragments()
+std::list<Fragment *> Project::fragments()
 {
     // first level
-    QList<Fragment*> results;
+    std::list<Fragment*> results;
     Fragment *fragment = nullptr;
 
     foreach (fragment, m_fragments) {
-        results.append(fragment);
+        results.push_back(fragment);
     }
 
     return results;
 }
 
-QList<const Fragment *> Project::fragments() const
+std::list<const Fragment *> Project::fragments() const
 {
     // first level
-    QList<const Fragment*> results;
+    std::list<const Fragment*> results;
     const Fragment *fragment = nullptr;
 
     foreach (fragment, m_fragments) {
-        results.append(fragment);
+        results.push_back(fragment);
     }
 
     return results;
@@ -713,15 +713,15 @@ void Project::addAsset(Asset *asset)
 {
     // not created for this project
     if (asset->ref().light().projectId() != ref().light().id()) {
-        throw E_ProjectException(fromQString(tr("Trying to add an asset that is created for another project")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add an asset that is created for another project"))));
     }
 
     // already exists
     if (m_fragments.find(asset->ref().light().id()) != m_fragments.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to add a previously added asset, or with a similar id")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added asset, or with a similar id"))));
     }
 
-    m_assets.insert(asset->ref().light().id(), asset);
+    m_assets[asset->ref().light().id()] = asset;
 
     // structure change
     setDirty();
@@ -733,15 +733,15 @@ void Project::addAsset(Asset *asset)
 void Project::removeAsset(const LightRef &_ref)
 {
     if (_ref.projectId() != ref().light().id()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove a reference for another project")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove a reference for another project"))));
     }
 
     auto it = m_assets.find(_ref.id());
     if (it == m_assets.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    Asset *asset = it.value();
+    Asset *asset = it->second;
 
     delete asset;
     m_assets.erase(it);
@@ -750,17 +750,17 @@ void Project::removeAsset(const LightRef &_ref)
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectAssetRemoved(asset->ref().light());
+    workspace()->onProjectAssetRemoved(asset->ref().light());
 }
 
-void Project::removeAsset(quint64 id)
+void Project::removeAsset(UInt64 id)
 {
     auto it = m_assets.find(id);
     if (it == m_assets.end()) {
-        throw E_ProjectException(fromQString(tr("Trying to remove an unknown reference")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    Asset *asset = it.value();
+    Asset *asset = it->second;
 
     delete asset;
     m_assets.erase(it);
@@ -769,21 +769,21 @@ void Project::removeAsset(quint64 id)
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectAssetRemoved(asset->ref().light());
+    workspace()->onProjectAssetRemoved(asset->ref().light());
 }
 
 void Project::removeAsset(Asset *asset)
 {
     for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
         if (it.value() == asset) {
-            delete it.value();
+            delete it->second;
             m_assets.erase(it);
 
             // structure change
             setDirty();
 
             // signal throught workspace
-            emit workspace()->onProjectAssetRemoved(asset->ref().light());
+            workspace()->onProjectAssetRemoved(asset->ref().light());
 
             return;
         }
@@ -798,7 +798,7 @@ Asset *Project::asset(const LightRef &_ref)
 
     auto it = m_assets.find(_ref.id());
     if (it != m_assets.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
@@ -810,83 +810,83 @@ const Asset *Project::asset(const LightRef &_ref) const
         return nullptr;
     }
 
-    auto cit = m_assets.constFind(_ref.id());
+    auto cit = m_assets.find(_ref.id());
     if (cit != m_assets.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
 }
 
-Asset *Project::asset(quint64 id)
+Asset *Project::asset(UInt64 id)
 {
     auto it = m_assets.find(id);
     if (it != m_assets.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
 }
 
-const Asset *Project::asset(quint64 id) const
+const Asset *Project::asset(UInt64 id) const
 {
-    auto cit = m_assets.constFind(id);
+    auto cit = m_assets.find(id);
     if (cit != m_assets.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
 }
 
-QList<Asset *> Project::searchAsset(const QString &name)
+std::list<Asset *> Project::searchAsset(const String &name)
 {
-    QList<Asset*> results;
+    std::list<Asset*> results;
 
     Asset *asset;
     foreach (asset, m_assets) {
         if (asset->name() == name) {
-            results.append(asset);
+            results.push_back(asset);
         }
     }
 
     return results;
 }
 
-QList<const Asset *> Project::searchAsset(const QString &name) const
+std::list<const Asset *> Project::searchAsset(const String &name) const
 {
-    QList<const Asset*> results;
+    std::list<const Asset*> results;
 
     const Asset *asset;
     foreach (asset, m_assets) {
         if (asset->name() == name) {
-            results.append(asset);
+            results.push_back(asset);
         }
     }
 
     return results;
 }
 
-QList<Asset *> Project::assets()
+std::list<Asset *> Project::assets()
 {
     // first level
-    QList<Asset*> results;
+    std::list<Asset*> results;
     Asset *asset= nullptr;
 
     foreach (asset, m_assets) {
-        results.append(asset);
+        results.push_back(asset);
     }
 
     return results;
 }
 
-QList<const Asset *> Project::assets() const
+std::list<const Asset *> Project::assets() const
 {
     // first level
-    QList<const Asset*> results;
+    std::list<const Asset*> results;
     const Asset *asset = nullptr;
 
     foreach (asset, m_assets) {
-        results.append(asset);
+        results.push_back(asset);
     }
 
     return results;

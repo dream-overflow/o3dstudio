@@ -43,7 +43,7 @@ ProjectFile::~ProjectFile()
 
 }
 
-const String &ProjectFile::name() const
+const o3d::String &ProjectFile::name() const
 {
     return m_project->name();
 }
@@ -67,7 +67,7 @@ void ProjectFile::load()
 {
     QFile file(toQString(filename()));
     if (!file.exists()) {
-        throw E_ProjectException(fromQString(tr("Missing project file for %1").arg(m_project->name())));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Missing project file for %1").arg(m_project->name()))));
     }
 
     file.open(QFile::ReadOnly);
@@ -75,7 +75,7 @@ void ProjectFile::load()
     QDataStream stream(&file);
 
     if (stream.status() != QDataStream::Ok) {
-        throw E_ProjectException(fromQString(tr("Project file streaming output not ok")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Project file streaming output not ok"))));
     }
 
     // header
@@ -85,11 +85,11 @@ void ProjectFile::load()
 
     int size = stream.readRawData(lmagic, magicLen);
     if ((size != magicLen) || (memcmp(lmagic, PROJECT_MAGIC, magicLen) != 0)) {
-        throw E_ProjectException(fromQString(tr("Invalid project file format")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Invalid project file format"))));
     }
 
-    QUuid uuid;
-    QString name;
+    Uuid uuid;
+    String name;
 
     stream >> uuid
            >> name;
@@ -97,7 +97,7 @@ void ProjectFile::load()
     m_project->setRef(ObjectRef::buildRef(m_project->workspace(), uuid));
 
     if (m_project->name() != name) {
-        throw E_ProjectException(fromQString(tr("Invalid project name")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Invalid project name"))));
     }
 
     // id generator
@@ -107,12 +107,12 @@ void ProjectFile::load()
     stream >> *m_project->m_info;
 
     // read assets
-    QString typeName;
-    qint32 num = 0;
+    String typeName;
+    Int32 num = 0;
     stream >> num;
 
     Asset *asset = nullptr;
-    for (qint32 i = 0; i < num; ++i) {
+    for (Int32 i = 0; i < num; ++i) {
         stream >> uuid
                >> typeName;
 
@@ -121,7 +121,7 @@ void ProjectFile::load()
         stream >> *asset;
 
         asset->setProject(m_project);
-        m_project->m_assets.insert(asset->ref().light().id(), asset);
+        m_project->m_assets[asset->ref().light().id()] = asset;
     }
 
     // read hubs
@@ -131,7 +131,7 @@ void ProjectFile::load()
     Component *component = nullptr;
 
     Hub *hub = nullptr;
-    for (qint32 i = 0; i < num; ++i) {
+    for (Int32 i = 0; i < num; ++i) {
         stream >> uuid
                >> typeName;
 
@@ -154,14 +154,14 @@ void ProjectFile::load()
             // stream.skipRawData(hubSize...) // @todo
         }
 
-        m_project->m_hubs.insert(hub->ref().light().id(), hub);
+        m_project->m_hubs[hub->ref().light().id()] = hub;
     }
 
     // read fragments
     stream >> num;
 
     Fragment *fragment = nullptr;
-    for (qint32 i = 0; i < num; ++i) {
+    for (Int32 i = 0; i < num; ++i) {
         stream >> uuid
                >> typeName;
 
@@ -170,7 +170,7 @@ void ProjectFile::load()
         stream >> *fragment;
 
         fragment->setProject(m_project);
-        m_project->m_fragments.insert(fragment->ref().light().id(), fragment);
+        m_project->m_fragments[fragment->ref().light().id()] = fragment;
     }
 
     file.close();
@@ -184,7 +184,7 @@ void ProjectFile::save()
     QDataStream stream(&file);
 
     if (stream.status() != QDataStream::Ok) {
-        throw E_ProjectException(fromQString(tr("Project file streaming output not ok")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Project file streaming output not ok"))));
     }
 
     // header
@@ -206,13 +206,15 @@ void ProjectFile::save()
     // could be interseting to split per chunks of N hubs per file
 
     // save assets
-    qint32 num = m_project->m_assets.size();
+    Int32 num = m_project->m_assets.size();
     stream << num;
 
     Asset *asset = nullptr;
-    foreach (asset, m_project->m_assets) {
+    for (auto cit = m_project->m_assets.cbegin(); cit != m_project->m_assets.cend(); ++cit) {
+        asset = cit->second;
+
         stream << asset->ref().uuid()
-               << toQString(asset->ref().strong().typeName())
+               << asset->ref().strong().typeName()
                << *asset;
     }
 
@@ -221,9 +223,11 @@ void ProjectFile::save()
     stream << num;
 
     Hub *hub = nullptr;
-    foreach (hub, m_project->m_hubs) {
+    for (auto cit = m_project->m_hubs.cbegin(); cit != m_project->m_hubs.cend(); ++cit) {
+        hub = cit->second;
+
         stream << hub->ref().uuid()
-               << toQString(hub->ref().strong().typeName())
+               << hub->ref().strong().typeName()
                << *hub;
     }
 
@@ -232,9 +236,11 @@ void ProjectFile::save()
     stream << num;
 
     Fragment *fragment = nullptr;
-    foreach (fragment, m_project->m_fragments) {
+    for (auto cit = m_project->m_fragments.cbegin(); cit != m_project->m_fragments.cend(); ++cit) {
+        fragment = cit->second;
+
         stream << fragment->ref().uuid()
-               << toQString(fragment->ref().strong().typeName())
+               << fragment->ref().strong().typeName()
                << *fragment;
     }
 

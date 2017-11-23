@@ -77,7 +77,7 @@ public:
     String filename() const;
     const DiskDir& path() const;
 
-    Bool setLocation(const Dir &path);
+    Bool setLocation(const DiskDir &path);
 
     const ProjectInfo& info() const;
     ProjectInfo& info();

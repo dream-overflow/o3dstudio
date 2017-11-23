@@ -122,7 +122,7 @@ void Hub::removeHub(UInt64 id)
         throw E_HubException(fromQString(tr("Trying to remove an unknown reference")));
     }
 
-    Hub *hub = it.value();
+    Hub *hub = it->second;
 
     delete hub;
     m_hubs.erase(it);
@@ -137,7 +137,7 @@ void Hub::removeHub(Hub *hub)
 {
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         if (it.value() == hub) {
-            delete it.value();
+            delete it->second;
             m_hubs.erase(it);
 
             setDirty();
@@ -158,7 +158,7 @@ Hub* Hub::hub(const LightRef &_ref)
 
     auto it = m_hubs.find(_ref.id());
     if (it != m_hubs.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
@@ -172,7 +172,7 @@ const Hub* Hub::hub(const LightRef &_ref) const
 
     auto cit = m_hubs.constFind(_ref.id());
     if (cit != m_hubs.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
@@ -182,7 +182,7 @@ Hub* Hub::hub(UInt64 id)
 {
     auto it = m_hubs.find(id);
     if (it != m_hubs.end()) {
-        return it.value();
+        return it->second;
     }
 
     return nullptr;
@@ -190,36 +190,40 @@ Hub* Hub::hub(UInt64 id)
 
 const Hub* Hub::hub(UInt64 id) const
 {
-    auto cit = m_hubs.constFind(id);
+    auto cit = m_hubs.find(id);
     if (cit != m_hubs.cend()) {
-        return cit.value();
+        return cit->second;
     }
 
     return nullptr;
 }
 
-std::list<Hub*> Hub::searchHub(const QString &name)
+std::list<Hub*> Hub::searchHub(const String &name)
 {
     std::list<Hub*> results;
 
     Hub *hub;
-    foreach (hub, m_hubs) {
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+
         if (hub->name() == name) {
-            results.append(hub);
+            results.push_back(hub);
         }
     }
 
     return results;
 }
 
-std::list<const Hub*> Hub::searchHub(const QString &name) const
+std::list<const Hub*> Hub::searchHub(const String &name) const
 {
     std::list<const Hub*> results;
 
     const Hub *hub;
-    foreach (hub, m_hubs) {
+    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+        hub = cit->second;
+
         if (hub->name() == name) {
-            results.append(hub);
+            results.push_back(hub);
         }
     }
 
@@ -236,7 +240,9 @@ Hub *Hub::findHub(UInt64 id)
     // recurse on children
     Hub *result = nullptr;
     Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+
         result = hub->findHub(id);
         if (result) {
             return result;
@@ -256,7 +262,9 @@ const Hub *Hub::findHub(UInt64 id) const
     // recurse on children
     const Hub *result = nullptr;
     const Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+        hub = cit->second;
+
         result = hub->findHub(id);
         if (result) {
             return result;
@@ -266,7 +274,7 @@ const Hub *Hub::findHub(UInt64 id) const
     return nullptr;
 }
 
-Hub *Hub::findHub(const QUuid &uuid)
+Hub *Hub::findHub(const Uuid &uuid)
 {
     // himself
     if (uuid == m_ref.uuid()) {
@@ -276,7 +284,9 @@ Hub *Hub::findHub(const QUuid &uuid)
     // recurse on children
     Hub *result = nullptr;
     Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+
         result = hub->findHub(uuid);
         if (result) {
             return result;
@@ -286,7 +296,7 @@ Hub *Hub::findHub(const QUuid &uuid)
     return nullptr;
 }
 
-const Hub *Hub::findHub(const QUuid &uuid) const
+const Hub *Hub::findHub(const Uuid &uuid) const
 {
     // himself
     if (uuid == m_ref.uuid()) {
@@ -296,7 +306,9 @@ const Hub *Hub::findHub(const QUuid &uuid) const
     // recurse on children
     const Hub *result = nullptr;
     const Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+        hub = cit->second;
+
         result = hub->findHub(uuid);
         if (result) {
             return result;
@@ -315,16 +327,23 @@ std::list<Hub *> Hub::hubs(Bool recurse)
 {
     // first level
     std::list<Hub*> results;
+    std::list<Hub*> childResults;
     Hub *hub = nullptr;
 
     if (recurse) {
-        foreach (hub, m_hubs) {
-            results.append(hub);
-            results += hub->hubs(recurse);
+        for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+            hub = it->second;
+
+            results.push_back(hub);
+
+            childResults = hub->hubs(recurse);
+            results.insert(results.end(), childResults.begin(), childResults.end());
         }
     } else {
-        foreach (hub, m_hubs) {
-            results += hub;
+        for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+            hub = it->second;
+
+            results.push_back(hub);
         }
     }
 
@@ -334,16 +353,23 @@ std::list<Hub *> Hub::hubs(Bool recurse)
 std::list<const Hub *> Hub::hubs(Bool recurse) const
 {
     std::list<const Hub*> results;
+    std::list<const Hub*> childResults;
     const Hub *hub = nullptr;
 
     if (recurse) {
-        foreach (hub, m_hubs) {
-            results.append(hub);
-            results += hub->hubs(recurse);
+        for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+            hub = cit->second;
+
+            results.push_back(hub);
+
+            childResults = hub->hubs(recurse);
+            results.insert(results.end(), childResults.begin(), childResults.end());
         }
     } else {
-        foreach (hub, m_hubs) {
-            results += hub;
+        for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+            hub = cit->second;
+
+            results.push_back(hub);
         }
     }
 
@@ -356,12 +382,14 @@ o3d::Bool Hub::serializeContent(QDataStream &stream) const
         return False;
     }
 
-    qint32 num = m_hubs.size();
+    Int32 num = m_hubs.size();
     stream << num;
 
     // children recursively
     const Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+        hub = cit->second;
+
         // uuid and type ref, for instanciation
         stream << ref().uuid()
                << ref().strong().typeName()
@@ -379,15 +407,15 @@ o3d::Bool Hub::deserializeContent(QDataStream &stream)
 
     Hub *hub = nullptr;
 
-    QString typeName;
-    QUuid uuid;
-    qint32 num = 0;
+    String typeName;
+    Uuid uuid;
+    Int32 num = 0;
     stream >> num;
 
     ComponentRegistry &components = Application::instance()->components();
     Component *component = nullptr;
 
-    for (qint32 i = 0; i < num; ++i) {
+    for (Int32 i = 0; i < num; ++i) {
         stream >> uuid
                >> typeName;
 
@@ -409,7 +437,7 @@ o3d::Bool Hub::deserializeContent(QDataStream &stream)
             // stream.skipRawData(hubSize...) // @todo
         }
 
-        m_hubs.insert(hub->ref().light().id(), hub);
+        m_hubs[hub->ref().light().id()] = hub;
     }
 
     return True;
