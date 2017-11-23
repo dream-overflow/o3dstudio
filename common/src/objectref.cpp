@@ -6,8 +6,6 @@
  * @details
  */
 
-#include <QtCore/QUuid>
-
 #include "o3d/studio/common/objectref.h"
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/workspace.h"
@@ -146,7 +144,7 @@ ObjectRef ObjectRef::buildRef(Project *project, const TypeRef &type)
     ref.m_lightRef.m_projectId = (UInt32)project->ref().light().id();
     ref.m_lightRef.m_typeId = type.id();
 
-    ref.m_strongRef.m_uuid = Uuid(QUuid::createUuid().toRfc4122().data());
+    ref.m_strongRef.m_uuid = o3d::Uuid::uuid5();
     ref.m_strongRef.m_projectUuid = project->ref().strong().uuid();
     ref.m_strongRef.m_typeName = type.name();
 
@@ -202,7 +200,7 @@ ObjectRef ObjectRef::buildRef(Workspace *workspace)
     ref.m_lightRef.m_id = (UInt64)workspace->generateProjectId();
     ref.m_lightRef.m_typeId = TypeRef::makeTypeId(PROJECT_TYPE_ID);
 
-    ref.m_strongRef.m_uuid = Uuid(QUuid::createUuid().toRfc4122().data());
+    ref.m_strongRef.m_uuid = o3d::Uuid::uuid5();
     ref.m_strongRef.m_typeName = PROJECT_TYPE_STRING;
 
     return ref;
@@ -232,11 +230,11 @@ ObjectRef::ObjectRef(const ObjectRef &dup) :
 
 }
 
-//QUrl ObjectRef::url() const
+//Url ObjectRef::url() const
 //{
-//    QString path = QString("o3s://%1/%2")
-//            .arg(m_strongRef.projectUuid().toRfc4122().toStdString().c_str())
-//            .arg(m_strongRef.uuid().toRfc4122().toStdString().c_str());
-
-//    return QUrl(path);
+//    String path = String("o3s://%1/%2")
+//            .arg(m_strongRef.projectUuid().toRfc4122())
+//            .arg(m_strongRef.uuid().toRfc4122());
+//
+//    return Url(path);
 //}
