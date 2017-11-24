@@ -6,8 +6,8 @@
  * @details
  */
 
-#include <QtCore/QDataStream>
-#include <QtCore/QUuid>
+#include <o3d/core/fileinstream.h>
+#include <o3d/core/fileoutstream.h>
 
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/projectinfo.h"
@@ -65,25 +65,14 @@ void ProjectFile::create()
 
 void ProjectFile::load()
 {
-    QFile file(toQString(filename()));
-    if (!file.exists()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Missing project file for %1").arg(m_project->name()))));
-    }
-
-    file.open(QFile::ReadOnly);
-
-    QDataStream stream(&file);
-
-    if (stream.status() != QDataStream::Ok) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Project file streaming output not ok"))));
-    }
+    FileInStream stream(filename());
 
     // header
-    char lmagic[9] = {0};
+    Char lmagic[9] = {0};
 
     const int magicLen = sizeof(PROJECT_MAGIC) - 1;
 
-    int size = stream.readRawData(lmagic, magicLen);
+    int size = stream.read(lmagic, magicLen);
     if ((size != magicLen) || (memcmp(lmagic, PROJECT_MAGIC, magicLen) != 0)) {
         O3D_ERROR(E_ProjectException(fromQString(tr("Invalid project file format"))));
     }
@@ -173,23 +162,16 @@ void ProjectFile::load()
         m_project->m_fragments[fragment->ref().light().id()] = fragment;
     }
 
-    file.close();
+    stream.close();
 }
 
 void ProjectFile::save()
 {
-    QFile file(m_project->path().absoluteFilePath("project.o3dstudio"));
-    file.open(QFile::WriteOnly | QFile::Truncate);
-
-    QDataStream stream(&file);
-
-    if (stream.status() != QDataStream::Ok) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Project file streaming output not ok"))));
-    }
+    FileOutStream stream(m_project->path().makeFullFileName("project.o3dstudio"));
 
     // header
     const int magicLen = sizeof(PROJECT_MAGIC) - 1;
-    stream.writeRawData(PROJECT_MAGIC, magicLen);
+    stream.write(PROJECT_MAGIC, magicLen);
     stream << m_project->ref().uuid()
            << m_project->name();
 
@@ -197,7 +179,7 @@ void ProjectFile::save()
     stream << m_project->m_nextId;
 
     // global info, update modification date to now
-    m_project->m_info->modificationDate() = QDateTime::currentDateTime();
+    m_project->m_info->modificationDate() = DateTime(True);
 
     stream << *m_project->m_info;
 
@@ -244,5 +226,5 @@ void ProjectFile::save()
                << *fragment;
     }
 
-    file.close();
+    stream.close();
 }

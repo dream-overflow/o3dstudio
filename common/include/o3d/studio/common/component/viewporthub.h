@@ -56,18 +56,18 @@ public:
         VIEWPORT_NATIVE = 1    //!< Use the capacity of the material to managed viewport in addition of the engine capacity
     };
 
-    explicit ViewPortHub(const QString &name, Entity *parent = nullptr);
+    explicit ViewPortHub(const String &name, Entity *parent = nullptr);
     virtual ~ViewPortHub();
 
     virtual void create() override;
 
-    virtual bool load() override;
-    virtual bool save() override;
+    virtual Bool load() override;
+    virtual Bool save() override;
 
-    virtual bool exists() const override;
+    virtual Bool exists() const override;
 
-    virtual bool serializeContent(QDataStream &stream) const;
-    virtual bool deserializeContent(QDataStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const;
+    virtual Bool deserializeContent(InStream &stream);
 
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;

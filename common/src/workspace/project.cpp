@@ -9,24 +9,25 @@
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/storage/store.h"
 
+#include "o3d/studio/common/workspace/workspace.h"
+#include "o3d/studio/common/workspace/masterscene.h"
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/hub.h"
 #include "o3d/studio/common/workspace/fragment.h"
 #include "o3d/studio/common/workspace/asset.h"
 #include "o3d/studio/common/workspace/projectinfo.h"
 #include "o3d/studio/common/workspace/projectfile.h"
-#include "o3d/studio/common/workspace/workspace.h"
-#include "o3d/studio/common/workspace/masterscene.h"
 
 #include <o3d/core/filemanager.h>
 
 using namespace o3d::studio::common;
 
 Project::Project(const String &name, Workspace *workspace) :
-    Entity(nullptr),
+    Entity(name, nullptr),
     m_workspace(workspace),
     m_filename(""),
     m_path(FileManager::instance()->getWorkingDirectory()),
+    m_projectFile(nullptr),
     m_nextId(1),
     m_info(nullptr),
     m_masterScene(nullptr)
@@ -47,19 +48,22 @@ Project::~Project()
     delete m_info;
 
     // first the fragments
-    Fragment *fragment = nullptr;
-    foreach (fragment, m_fragments) {
-        delete fragment;
+    Fragment *fragment;
+    for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {
+        fragment = it->second;
+        deletePtr(fragment);
     }
 
     Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
-        delete hub;
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+        deletePtr(hub);
     }
 
     Asset *asset = nullptr;
-    foreach (asset, m_assets) {
-        delete asset;
+    for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
+        asset = it->second;
+        deletePtr(asset);
     }
 }
 
@@ -97,23 +101,24 @@ o3d::UInt64 Project::generateEntityId()
 o3d::Bool Project::hasChanges() const
 {
     if (isDirty()) {
-        return true;
+        return True;
     }
 
     Entity *entity = nullptr;
-    foreach (entity, m_entitiesById) {
+    for (auto it = m_entitiesById.begin(); it != m_entitiesById.end(); ++it) {
+        entity = it->second;
         if (entity->hasChanges()) {
-            return true;
+            return True;
         }
     }
 
-    return false;
+    return False;
 }
 
 void Project::create()
 {
     if (exists()) {
-        throw E_ProjectException(fromQString(tr("Project already exists")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Project already exists"))));
     };
 
     // project structure
@@ -128,7 +133,7 @@ void Project::create()
 
 o3d::String Project::filename() const
 {
-    return m_path.absoluteFilePath("project.o3dstudio");
+    return m_path.makeFullFileName("project.o3dstudio");
 }
 
 const o3d::DiskDir &Project::path() const
@@ -234,7 +239,7 @@ Entity *Project::lookup(const LightRef &ref)
 const Entity *Project::lookup(const LightRef &ref) const
 {
     if (ref.projectId() == ref.id()) {
-        auto cit = m_entitiesById.constFind(ref.id());
+        auto cit = m_entitiesById.find(ref.id());
         if (cit != m_entitiesById.cend()) {
             return cit->second;
         }
@@ -243,7 +248,7 @@ const Entity *Project::lookup(const LightRef &ref) const
     return nullptr;
 }
 
-Entity *Project::lookup(const QUuid &uuid)
+Entity *Project::lookup(const Uuid &uuid)
 {
     auto it = m_entitiesByUuid.find(uuid);
     if (it != m_entitiesByUuid.end()) {
@@ -253,9 +258,9 @@ Entity *Project::lookup(const QUuid &uuid)
     return nullptr;
 }
 
-const Entity *Project::lookup(const QUuid &uuid) const
+const Entity *Project::lookup(const Uuid &uuid) const
 {
-    auto cit = m_entitiesByUuid.constFind(uuid);
+    auto cit = m_entitiesByUuid.find(uuid);
     if (cit != m_entitiesByUuid.cend()) {
         return cit->second;
     }
@@ -275,7 +280,7 @@ void Project::addHub(Hub *hub)
         O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added hub, or with a similar id"))));
     }
 
-    m_hubs[hub->ref().light().id()] = hubs;
+    m_hubs[hub->ref().light().id()] = hub;
     hub->setProject(this);
 
     // structure change
@@ -308,7 +313,7 @@ void Project::removeHub(const LightRef &_ref)
     workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
-void Project::removeHub(qint64 id)
+void Project::removeHub(UInt64 id)
 {
     auto it = m_hubs.find(id);
     if (it == m_hubs.end()) {
@@ -393,12 +398,14 @@ const Hub* Project::hub(UInt64 id) const
     return nullptr;
 }
 
-std::list<Hub *> Project::searchHub(const QString &name)
+std::list<Hub *> Project::searchHub(const String &name)
 {
     std::list<Hub*> results;
 
     Hub *hub;
-    foreach (hub, m_hubs) {
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+
         if (hub->name() == name) {
             results.push_back(hub);
         }
@@ -407,12 +414,14 @@ std::list<Hub *> Project::searchHub(const QString &name)
     return results;
 }
 
-std::list<const Hub*> Project::searchHub(const QString &name) const
+std::list<const Hub*> Project::searchHub(const String &name) const
 {
     std::list<const Hub*> results;
 
     const Hub *hub;
-    foreach (hub, m_hubs) {
+    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+        hub = cit->second;
+
         if (hub->name() == name) {
             results.push_back(hub);
         }
@@ -421,12 +430,14 @@ std::list<const Hub*> Project::searchHub(const QString &name) const
     return results;
 }
 
-Hub *Project::findHub(quint64 id)
+Hub *Project::findHub(UInt64 id)
 {
     // first level
     Hub *result = nullptr;
     Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+
         result = hub->findHub(id);
         if (result != nullptr) {
             return result;
@@ -436,12 +447,14 @@ Hub *Project::findHub(quint64 id)
     return nullptr;
 }
 
-const Hub *Project::findHub(quint64 id) const
+const Hub *Project::findHub(UInt64 id) const
 {
     // first level
     const Hub *result = nullptr;
     const Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+        hub = cit->second;
+
         result = hub->findHub(id);
         if (result != nullptr) {
             return result;
@@ -451,12 +464,14 @@ const Hub *Project::findHub(quint64 id) const
     return nullptr;
 }
 
-Hub *Project::findHub(const QUuid &uuid)
+Hub *Project::findHub(const Uuid &uuid)
 {
     // first level
     Hub *result = nullptr;
     Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+
         result = hub->findHub(uuid);
         if (result != nullptr) {
             return result;
@@ -466,12 +481,14 @@ Hub *Project::findHub(const QUuid &uuid)
     return nullptr;
 }
 
-const Hub *Project::findHub(const QUuid &uuid) const
+const Hub *Project::findHub(const Uuid &uuid) const
 {
     // first level
     const Hub *result = nullptr;
     const Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+        hub = cit->second;
+
         result = hub->findHub(uuid);
         if (result != nullptr) {
             return result;
@@ -486,40 +503,54 @@ size_t Project::numHubs() const
     return m_hubs.size();
 }
 
-std::list<Hub*> Project::hubs(bool recurse)
+std::list<Hub*> Project::hubs(Bool recurse)
 {
     // first level
     std::list<Hub*> results;
+    std::list<Hub*> childResults;
     Hub *hub = nullptr;
 
     if (recurse) {
-        foreach (hub, m_hubs) {
+        for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+            hub = it->second;
+
             results.push_back(hub);
-            results += hub->hubs(recurse);
+
+            childResults = hub->hubs(recurse);
+            results.insert(results.end(), childResults.begin(), childResults.end());
         }
     } else {
-        foreach (hub, m_hubs) {
-            results += hub;
+        for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+            hub = it->second;
+
+            results.push_back(hub);
         }
     }
 
     return results;
 }
 
-std::list<const Hub *> Project::hubs(bool recurse) const
+std::list<const Hub *> Project::hubs(Bool recurse) const
 {
     // first level
     std::list<const Hub*> results;
+    std::list<const Hub*> childResults;
     const Hub *hub = nullptr;
 
     if (recurse) {
-        foreach (hub, m_hubs) {
+        for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+            hub = cit->second;
+
             results.push_back(hub);
-            results += hub->hubs(recurse);
+
+            childResults = hub->hubs(recurse);
+            results.insert(results.end(), childResults.begin(), childResults.end());
         }
     } else {
-        foreach (hub, m_hubs) {
-            results += hub;
+        for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
+            hub = cit->second;
+
+            results.push_back(hub);
         }
     }
 
@@ -570,7 +601,7 @@ void Project::removeFragment(const LightRef &_ref)
     workspace()->onProjectFragmentRemoved(fragment->ref().light());
 }
 
-void Project::removeFragment(quint64 id)
+void Project::removeFragment(UInt64 id)
 {
     auto it = m_fragments.find(id);
     if (it == m_fragments.end()) {
@@ -591,8 +622,8 @@ void Project::removeFragment(quint64 id)
 
 void Project::removeFragment(Fragment *fragment)
 {
-    for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {
-        if (it.value() == fragment) {
+    for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {   
+        if (it->second == fragment) {
             delete it->second;
             m_fragments.erase(it);
 
@@ -660,7 +691,9 @@ std::list<Fragment *> Project::searchFragment(const String &name)
     std::list<Fragment*> results;
 
     Fragment *fragment;
-    foreach (fragment, m_fragments) {
+    for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {
+        fragment = it->second;
+
         if (fragment->name() == name) {
             results.push_back(fragment);
         }
@@ -674,7 +707,9 @@ std::list<const Fragment *> Project::searchFragment(const String &name) const
     std::list<const Fragment*> results;
 
     const Fragment *fragment;
-    foreach (fragment, m_fragments) {
+    for (auto cit = m_fragments.cbegin(); cit != m_fragments.cend(); ++cit) {
+        fragment = cit->second;
+
         if (fragment->name() == name) {
             results.push_back(fragment);
         }
@@ -689,7 +724,8 @@ std::list<Fragment *> Project::fragments()
     std::list<Fragment*> results;
     Fragment *fragment = nullptr;
 
-    foreach (fragment, m_fragments) {
+    for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {
+        fragment = it->second;
         results.push_back(fragment);
     }
 
@@ -702,7 +738,8 @@ std::list<const Fragment *> Project::fragments() const
     std::list<const Fragment*> results;
     const Fragment *fragment = nullptr;
 
-    foreach (fragment, m_fragments) {
+    for (auto cit = m_fragments.cbegin(); cit != m_fragments.cend(); ++cit) {
+        fragment = cit->second;
         results.push_back(fragment);
     }
 
@@ -775,7 +812,7 @@ void Project::removeAsset(UInt64 id)
 void Project::removeAsset(Asset *asset)
 {
     for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
-        if (it.value() == asset) {
+        if (it->second == asset) {
             delete it->second;
             m_assets.erase(it);
 
@@ -843,7 +880,9 @@ std::list<Asset *> Project::searchAsset(const String &name)
     std::list<Asset*> results;
 
     Asset *asset;
-    foreach (asset, m_assets) {
+    for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
+        asset = it->second;
+
         if (asset->name() == name) {
             results.push_back(asset);
         }
@@ -857,7 +896,9 @@ std::list<const Asset *> Project::searchAsset(const String &name) const
     std::list<const Asset*> results;
 
     const Asset *asset;
-    foreach (asset, m_assets) {
+    for (auto cit = m_assets.cbegin(); cit != m_assets.cend(); ++cit) {
+        asset = cit->second;
+
         if (asset->name() == name) {
             results.push_back(asset);
         }
@@ -872,7 +913,8 @@ std::list<Asset *> Project::assets()
     std::list<Asset*> results;
     Asset *asset= nullptr;
 
-    foreach (asset, m_assets) {
+    for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
+        asset = it->second;
         results.push_back(asset);
     }
 
@@ -885,7 +927,8 @@ std::list<const Asset *> Project::assets() const
     std::list<const Asset*> results;
     const Asset *asset = nullptr;
 
-    foreach (asset, m_assets) {
+    for (auto cit = m_assets.cbegin(); cit != m_assets.cend(); ++cit) {
+        asset = cit->second;
         results.push_back(asset);
     }
 

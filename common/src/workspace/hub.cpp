@@ -32,7 +32,8 @@ Hub::Hub(const String &name, Entity *parent) :
 Hub::~Hub()
 {
     Hub *hub = nullptr;
-    foreach (hub, m_hubs) {
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
         delete hub;
     }
 }
@@ -76,15 +77,15 @@ void Hub::addHub(Hub *hub)
 {
     // not created for this project
     if (hub->ref().light().projectId() != project()->ref().light().id()) {
-        throw E_HubException(fromQString(tr("Trying to add a hub that is created for another project")));
+        O3D_ERROR(E_HubException(fromQString(tr("Trying to add a hub that is created for another project"))));
     }
 
     // already exists
     if (m_hubs.find(hub->ref().light().id()) != m_hubs.end()) {
-        throw E_HubException(fromQString(tr("Trying to add a previously added hub, or with a similar id")));
+        O3D_ERROR(E_HubException(fromQString(tr("Trying to add a previously added hub, or with a similar id"))));
     }
 
-    m_hubs.insert(hub->ref().light().id(), hub);
+    m_hubs[hub->ref().light().id()] = hub;
     hub->setProject(project());
 
     setDirty();
@@ -96,15 +97,15 @@ void Hub::addHub(Hub *hub)
 void Hub::removeHub(const LightRef &_ref)
 {
     if (_ref.projectId() != project()->ref().light().id()) {
-        throw E_HubException(fromQString(tr("Trying to remove a reference for another project")));
+        O3D_ERROR(E_HubException(fromQString(tr("Trying to remove a reference for another project"))));
     }
 
     auto it = m_hubs.find(_ref.id());
     if (it == m_hubs.end()) {
-        throw E_HubException(fromQString(tr("Trying to remove an unknown reference")));
+        O3D_ERROR(E_HubException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    Hub *hub = it.value();
+    Hub *hub = it->second;
 
     delete hub;
     m_hubs.erase(it);
@@ -119,7 +120,7 @@ void Hub::removeHub(UInt64 id)
 {
     auto it = m_hubs.find(id);
     if (it == m_hubs.end()) {
-        throw E_HubException(fromQString(tr("Trying to remove an unknown reference")));
+        O3D_ERROR(E_HubException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
     Hub *hub = it->second;
@@ -136,14 +137,14 @@ void Hub::removeHub(UInt64 id)
 void Hub::removeHub(Hub *hub)
 {
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        if (it.value() == hub) {
+        if (it->second == hub) {
             delete it->second;
             m_hubs.erase(it);
 
             setDirty();
 
             // signal throught project->workspace
-            emit project()->workspace()->onProjectHubRemoved(hub->ref().light());
+            project()->workspace()->onProjectHubRemoved(hub->ref().light());
 
             return;
         }
@@ -170,7 +171,7 @@ const Hub* Hub::hub(const LightRef &_ref) const
         return nullptr;
     }
 
-    auto cit = m_hubs.constFind(_ref.id());
+    auto cit = m_hubs.find(_ref.id());
     if (cit != m_hubs.cend()) {
         return cit->second;
     }
@@ -376,7 +377,7 @@ std::list<const Hub *> Hub::hubs(Bool recurse) const
     return results;
 }
 
-o3d::Bool Hub::serializeContent(QDataStream &stream) const
+o3d::Bool Hub::serializeContent(OutStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
         return False;
@@ -399,7 +400,7 @@ o3d::Bool Hub::serializeContent(QDataStream &stream) const
     return True;
 }
 
-o3d::Bool Hub::deserializeContent(QDataStream &stream)
+o3d::Bool Hub::deserializeContent(InStream &stream)
 {
     if (!Entity::deserializeContent(stream)) {
         return False;

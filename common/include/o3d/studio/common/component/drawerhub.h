@@ -30,7 +30,7 @@ public:
     virtual ~DrawerHubComponent();
 
     virtual void setup() override;
-    virtual Hub* buildHub(const QString &name, Project *project, Entity *parent) override;
+    virtual Hub* buildHub(const String &name, Project *project, Entity *parent) override;
 
 protected:
 };
@@ -49,18 +49,18 @@ public:
         DRAW_DEFERED_RENDERING = 2
     };
 
-    explicit DrawerHub(const QString &name, Entity *parent = nullptr);
+    explicit DrawerHub(const String &name, Entity *parent = nullptr);
     virtual ~DrawerHub();
 
     virtual void create() override;
 
-    virtual bool load() override;
-    virtual bool save() override;
+    virtual Bool load() override;
+    virtual Bool save() override;
 
-    virtual bool exists() const override;
+    virtual Bool exists() const override;
 
-    virtual bool serializeContent(QDataStream &stream) const;
-    virtual bool deserializeContent(QDataStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const;
+    virtual Bool deserializeContent(InStream &stream);
 
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;

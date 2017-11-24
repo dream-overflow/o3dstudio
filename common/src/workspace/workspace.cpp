@@ -169,7 +169,7 @@ o3d::Bool Workspace::hasProject(String location) const
 
     auto cit = m_loadedProjects.cbegin();
     while (cit != m_loadedProjects.cend()) {
-        if (cit->second->path() == location) {
+        if (cit->second->path() == DiskDir(location)) {
             return True;
         }
 
@@ -192,7 +192,9 @@ o3d::Bool Workspace::hasChanges() const
 {
     // at least one project has changes to be saved
     Project *project = nullptr;
-    foreach (project, m_loadedProjects) {
+    for (auto cit = m_loadedProjects.cbegin(); cit != m_loadedProjects.cend(); ++cit) {
+        project = cit->second;
+
         if (project->hasChanges()) {
             return True;
         }
@@ -208,7 +210,7 @@ o3d::Bool Workspace::setActiveProject(const LightRef &ref)
 
     auto it = m_loadedProjects.find(id);
     if (it != m_loadedProjects.end()) {
-        m_activeProject = it.value();
+        m_activeProject = it->second;
 
         onProjectActivated(ref);
 
@@ -223,7 +225,9 @@ o3d::Bool Workspace::save()
     messenger().info(fromQString(tr("Saving current workspace...")));
 
     Project *project = nullptr;
-    foreach (project, m_loadedProjects) {
+    for (auto it = m_loadedProjects.begin(); it != m_loadedProjects.end(); ++it) {
+        project = it->second;
+
         if (!project->save()) {
             // @todo what ?
         }
@@ -244,7 +248,7 @@ Hub *Workspace::hub(const LightRef &ref)
     if (ref.baseTypeOf(TypeRef::hub())) {
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.end()) {
-            Project *project = it.value();
+            Project *project = it->second;
             return project->hub(ref.id());
         }
     }
@@ -255,9 +259,9 @@ Hub *Workspace::hub(const LightRef &ref)
 const Hub *Workspace::hub(const LightRef &ref) const
 {
     if (ref.baseTypeOf(TypeRef::hub())) {
-        auto cit = m_loadedProjects.constFind(ref.projectId());
+        auto cit = m_loadedProjects.find(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
-            const Project *project = cit.value();
+            const Project *project = cit->second;
             return project->hub(ref.id());
         }
     }
@@ -270,7 +274,7 @@ Hub *Workspace::findHub(const LightRef &ref)
     if (ref.baseTypeOf(TypeRef::hub())) {
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.cend()) {
-            Project *project = it.value();
+            Project *project = it->second;
             return project->findHub(ref.id());
         }
     }
@@ -281,9 +285,9 @@ Hub *Workspace::findHub(const LightRef &ref)
 const Hub *Workspace::findHub(const LightRef &ref) const
 {
     if (ref.baseTypeOf(TypeRef::hub())) {
-        auto cit = m_loadedProjects.constFind(ref.projectId());
+        auto cit = m_loadedProjects.find(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
-            const Project *project = cit.value();
+            const Project *project = cit->second;
             return project->findHub(ref.id());
         }
     }
@@ -296,7 +300,7 @@ Fragment *Workspace::fragment(const LightRef &ref)
     if (ref.baseTypeOf(TypeRef::fragment())) {
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.end()) {
-            Project *project = it.value();
+            Project *project = it->second;
             return project->fragment(ref.id());
         }
     }
@@ -307,9 +311,9 @@ Fragment *Workspace::fragment(const LightRef &ref)
 const Fragment *Workspace::fragment(const LightRef &ref) const
 {
     if (ref.baseTypeOf(TypeRef::fragment())) {
-        auto cit = m_loadedProjects.constFind(ref.projectId());
+        auto cit = m_loadedProjects.find(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
-            const Project *project = cit.value();
+            const Project *project = cit->second;
             return project->fragment(ref.id());
         }
     }
@@ -322,7 +326,7 @@ Asset *Workspace::asset(const LightRef &ref)
     if (ref.baseTypeOf(TypeRef::asset())) {
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.end()) {
-            Project *project = it.value();
+            Project *project = it->second;
             return project->asset(ref.id());
         }
     }
@@ -333,9 +337,9 @@ Asset *Workspace::asset(const LightRef &ref)
 const Asset *Workspace::asset(const LightRef &ref) const
 {
     if (ref.baseTypeOf(TypeRef::asset())) {
-        auto cit = m_loadedProjects.constFind(ref.projectId());
+        auto cit = m_loadedProjects.find(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
-            const Project *project = cit.value();
+            const Project *project = cit->second;
             return project->asset(ref.id());
         }
     }
@@ -355,7 +359,7 @@ void Workspace::onSelectionChanged()
 
     Bool changeProject = False;
 
-    if (!previousSelection.isEmpty()) {
+    if (!previousSelection.empty()) {
         SelectionItem *selectionItem = nullptr;
         foreach (selectionItem, previousSelection) {
             if (selectionItem->ref() == m_activeProject->ref().light()) {
@@ -366,7 +370,7 @@ void Workspace::onSelectionChanged()
         }
     }
 
-    if (!currentSelection.isEmpty()) {
+    if (!currentSelection.empty()) {
         SelectionItem *selectionItem = nullptr;
         foreach (selectionItem, previousSelection) {
             Project *lproject = project(selectionItem->ref());

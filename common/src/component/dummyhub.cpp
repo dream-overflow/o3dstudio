@@ -77,7 +77,7 @@ o3d::Bool DummyHub::exists() const
     return Entity::exists();
 }
 
-o3d::Bool DummyHub::serializeContent(QDataStream &stream) const
+o3d::Bool DummyHub::serializeContent(OutStream &stream) const
 {
     if (!Hub::serializeContent(stream)) {
         return False;
@@ -86,7 +86,7 @@ o3d::Bool DummyHub::serializeContent(QDataStream &stream) const
     return True;
 }
 
-o3d::Bool DummyHub::deserializeContent(QDataStream &stream)
+o3d::Bool DummyHub::deserializeContent(InStream &stream)
 {
     if (!Hub::deserializeContent(stream)) {
         return False;

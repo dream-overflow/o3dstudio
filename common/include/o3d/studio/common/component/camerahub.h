@@ -12,6 +12,8 @@
 #include "component.h"
 #include "../workspace/hub.h"
 
+#include <map>
+
 namespace o3d {
 
 class Camera;
@@ -34,7 +36,7 @@ public:
     virtual ~CameraComponent();
 
     virtual void setup() override;
-    virtual Hub* buildHub(const QString &name, Project *project, Entity *parent) override;
+    virtual Hub* buildHub(const String &name, Project *project, Entity *parent) override;
 
 protected:
 };
@@ -53,18 +55,18 @@ public:
         CAMERA_PERSPECTIVE = 2
     };
 
-    explicit CameraHub(const QString &name, Entity *parent = nullptr);
+    explicit CameraHub(const String &name, Entity *parent = nullptr);
     virtual ~CameraHub();
 
     virtual void create() override;
 
-    virtual bool load() override;
-    virtual bool save() override;
+    virtual Bool load() override;
+    virtual Bool save() override;
 
-    virtual bool exists() const override;
+    virtual Bool exists() const override;
 
-    virtual bool serializeContent(QDataStream &stream) const;
-    virtual bool deserializeContent(QDataStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const;
+    virtual Bool deserializeContent(InStream &stream);
 
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;
@@ -78,17 +80,17 @@ public:
 
 protected:
 
-    float m_left, m_right;   //!< Orthonormal 2d projection coordinates
-    float m_bottom,m_top;    //!< Orthonormal 2d projection coordinates
+    Float m_left, m_right;   //!< Orthonormal 2d projection coordinates
+    Float m_bottom,m_top;    //!< Orthonormal 2d projection coordinates
 
-    float m_coef;            //!< reshape width/height
-    float m_fov;             //!< half field of view in degree (60 by default)
+    Float m_coef;            //!< reshape width/height
+    Float m_fov;             //!< half field of view in degree (60 by default)
 
-    float m_znear, m_zfar;   //!< Depth clipping plane
+    Float m_znear, m_zfar;   //!< Depth clipping plane
 
     CameraMode m_cameraMode;
 
-    QMap<MasterScene*, o3d::Camera*> m_instances;
+    std::map<MasterScene*, o3d::Camera*> m_instances;
 };
 
 } // namespace common

@@ -13,7 +13,7 @@ using namespace o3d::studio::common;
 
 SelectionItem::SelectionItem(const Entity *entity)
 {
-    Q_ASSERT(entity != nullptr);
+    O3D_ASSERT(entity != nullptr);
 
     if (entity) {
         if (entity->parent()) {

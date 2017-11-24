@@ -6,8 +6,8 @@
  * @details
  */
 
-#include<QtCore/QLibraryInfo>
-#include<QtCore/QLocale>
+#include <QtCore/QLibraryInfo>
+#include <QtCore/QLocale>
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/modulemanager.h"
@@ -219,7 +219,7 @@ o3d::Bool Application::stop()
     m_commandManager->finish();
 
     while (m_commandManager->hasPendingCommands() || m_commandManager->hasRunningCommands()) {
-        m_commandManager->wait(20);
+        System::waitMs(20);
     }
 
     ModuleManager::instance()->unloadAll();
@@ -236,7 +236,7 @@ void switchTranslator(QTranslator& translator, const QString& filename, QString 
 
     // load the new translator
     if (path.isEmpty()) {
-        path = Application::appDir() + '/' + QString(LANGUAGES_PATH);
+        path = toQString(Application::instance()->appDir()) + '/' + QString(LANGUAGES_PATH);
     }
 
     if (translator.load(filename, path, QString(), QString())) {

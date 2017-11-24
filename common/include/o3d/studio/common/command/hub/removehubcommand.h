@@ -12,6 +12,8 @@
 #include "../command.h"
 #include "../../objectref.h"
 
+#include <o3d/core/templatearray.h>
+
 #include <QtCore/QCoreApplication>
 
 namespace o3d {
@@ -27,17 +29,17 @@ public:
     RemoveHubCommand(const LightRef &hubRef, const LightRef &parentRef);
     virtual ~RemoveHubCommand();
 
-    virtual QString commandLabel() const override;
-    virtual bool doCommand() override;
-    virtual bool undoCommand() override;
-    virtual bool redoCommand() override;
+    virtual String commandLabel() const override;
+    virtual Bool doCommand() override;
+    virtual Bool undoCommand() override;
+    virtual Bool redoCommand() override;
 
 private:
 
     LightRef m_parent;
     LightRef m_hub;
 
-    QByteArray m_data;
+    ArrayUInt8 m_data;
     ObjectRef m_storedHubRef;
 };
 

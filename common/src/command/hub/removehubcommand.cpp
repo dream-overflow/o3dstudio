@@ -21,6 +21,9 @@
 #include "o3d/studio/common/component/component.h"
 #include "o3d/studio/common/component/componentregistry.h"
 
+#include <o3d/core/datainstream.h>
+#include <o3d/core/dataoutstream.h>
+
 using namespace o3d::studio::common;
 
 
@@ -29,20 +32,20 @@ RemoveHubCommand::RemoveHubCommand(const LightRef &hubRef, const LightRef &paren
     m_parent(parentRef),
     m_hub(hubRef)
 {
-    Q_ASSERT(m_parent.isValid());
-    Q_ASSERT(m_hub.isValid());
+    O3D_ASSERT(m_parent.isValid());
+    O3D_ASSERT(m_hub.isValid());
 }
 
 RemoveHubCommand::~RemoveHubCommand()
 {
 }
 
-QString RemoveHubCommand::commandLabel() const
+o3d::String RemoveHubCommand::commandLabel() const
 {
-    return tr("Remove a hub");
+    return fromQString(tr("Remove a hub"));
 }
 
-bool RemoveHubCommand::doCommand()
+o3d::Bool RemoveHubCommand::doCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -53,12 +56,12 @@ bool RemoveHubCommand::doCommand()
             Hub *hub = project->hub(m_hub);
             if (hub) {
                 // backup
-                QDataStream stream(&m_data, QIODevice::WriteOnly | QIODevice::Truncate);
+                DataOutStream stream(m_data);
                 stream << *hub;
                 m_storedHubRef = hub->ref();
 
                 project->removeHub(m_hub);
-                return true;
+                return True;
             }
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
@@ -66,21 +69,21 @@ bool RemoveHubCommand::doCommand()
                 Hub *hub = parentHub->hub(m_hub);
                 if (hub) {
                     // backup
-                    QDataStream stream(&m_data, QIODevice::WriteOnly | QIODevice::Truncate);
+                    DataOutStream stream(m_data);
                     stream << *hub;
                     m_storedHubRef = hub->ref();
 
                     parentHub->removeHub(m_hub);
-                    return true;
+                    return True;
                 }
             }
         }
     }
 
-    return false;
+    return False;
 }
 
-bool RemoveHubCommand::undoCommand()
+o3d::Bool RemoveHubCommand::undoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -88,7 +91,7 @@ bool RemoveHubCommand::undoCommand()
 
         Component *component = Application::instance()->components().componentByTarget(m_storedHubRef.strong().typeName());
         if (!component) {
-            return false;
+            return False;
         }
 
         // first level hub, direct to project
@@ -97,11 +100,11 @@ bool RemoveHubCommand::undoCommand()
             hub->setProject(project);
 
             // restore content
-            QDataStream stream(&m_data, QIODevice::ReadOnly);
+            DataInStream stream(m_data);
             stream >> *hub;
             hub->setRef(m_storedHubRef);
 
-            m_data.clear();
+            m_data.destroy();
 
             project->addHub(hub);
 
@@ -109,10 +112,10 @@ bool RemoveHubCommand::undoCommand()
             common::Hub *node = nullptr;
             foreach (node, hub->hubs(true)) {
                 // signal throught project->workspace
-                emit project->workspace()->onProjectHubAdded(node->ref().light());
+                project->workspace()->onProjectHubAdded(node->ref().light());
             }
 
-            return true;
+            return True;
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
@@ -120,11 +123,11 @@ bool RemoveHubCommand::undoCommand()
                 hub->setProject(project);
 
                 // restore content
-                QDataStream stream(&m_data, QIODevice::ReadOnly);
+                DataInStream stream(m_data);
                 stream >> *hub;
                 hub->setRef(m_storedHubRef);
 
-                m_data.clear();
+                m_data.destroy();
 
                 parentHub->addHub(hub);
 
@@ -132,18 +135,18 @@ bool RemoveHubCommand::undoCommand()
                 common::Hub *node = nullptr;
                 foreach (node, hub->hubs(true)) {
                     // signal throught project->workspace
-                    emit project->workspace()->onProjectHubAdded(node->ref().light());
+                    project->workspace()->onProjectHubAdded(node->ref().light());
                 }
 
-                return true;
+                return True;
             }
         }
     }
 
-    return false;
+    return False;
 }
 
-bool RemoveHubCommand::redoCommand()
+o3d::Bool RemoveHubCommand::redoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -154,12 +157,12 @@ bool RemoveHubCommand::redoCommand()
             Hub *hub = project->hub(m_hub);
             if (hub) {
                 // backup
-                QDataStream stream(&m_data, QIODevice::WriteOnly | QIODevice::Truncate);
+                DataOutStream stream(m_data);
                 stream << *hub;
                 m_storedHubRef = hub->ref();
 
                 project->removeHub(m_hub);
-                return true;
+                return True;
             }
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
@@ -167,16 +170,16 @@ bool RemoveHubCommand::redoCommand()
                 Hub *hub = parentHub->hub(m_hub);
                 if (hub) {
                     // backup
-                    QDataStream stream(&m_data, QIODevice::WriteOnly | QIODevice::Truncate);
+                    DataOutStream stream(m_data);
                     stream << *hub;
                     m_storedHubRef = hub->ref();
 
                     parentHub->removeHub(m_hub);
-                    return true;
+                    return True;
                 }
             }
         }
     }
 
-    return false;
+    return False;
 }

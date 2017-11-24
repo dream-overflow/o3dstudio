@@ -34,7 +34,7 @@ void DrawerHubComponent::setup()
 
 }
 
-Hub *DrawerHubComponent::buildHub(const QString &name, Project *project, Entity *parent)
+Hub *DrawerHubComponent::buildHub(const String &name, Project *project, Entity *parent)
 {
     if (!project) {
         return nullptr;
@@ -50,7 +50,7 @@ Hub *DrawerHubComponent::buildHub(const QString &name, Project *project, Entity 
     return drawerHub;
 }
 
-DrawerHub::DrawerHub(const QString &name, Entity *parent) :
+DrawerHub::DrawerHub(const String &name, Entity *parent) :
     Hub(name, parent)
 {
 
@@ -66,38 +66,38 @@ void DrawerHub::create()
 
 }
 
-bool DrawerHub::load()
+o3d::Bool DrawerHub::load()
 {
     return Hub::load();
 }
 
-bool DrawerHub::save()
+o3d::Bool DrawerHub::save()
 {
     return Hub::save();
 }
 
-bool DrawerHub::exists() const
+o3d::Bool DrawerHub::exists() const
 {
     // @todo O3D
     return Entity::exists();
 }
 
-bool DrawerHub::serializeContent(QDataStream &stream) const
+o3d::Bool DrawerHub::serializeContent(OutStream &stream) const
 {
     if (!Hub::serializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
-bool DrawerHub::deserializeContent(QDataStream &stream)
+o3d::Bool DrawerHub::deserializeContent(InStream &stream)
 {
     if (!Hub::deserializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
 void DrawerHub::createToScene(MasterScene *masterScene)

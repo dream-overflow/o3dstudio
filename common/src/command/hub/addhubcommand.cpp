@@ -26,7 +26,7 @@
 using namespace o3d::studio::common;
 
 
-AddHubCommand::AddHubCommand(const LightRef &parent, const TypeRef& componentType, const QString &name) :
+AddHubCommand::AddHubCommand(const LightRef &parent, const TypeRef& componentType, const String &name) :
     Command("o3s::common::hub::add", parent),
     m_componentType(componentType),
     m_parent(parent),
@@ -36,19 +36,19 @@ AddHubCommand::AddHubCommand(const LightRef &parent, const TypeRef& componentTyp
         m_hubName = "Unamed hub";
     }
 
-    Q_ASSERT(m_parent.isValid());
+    O3D_ASSERT(m_parent.isValid());
 }
 
 AddHubCommand::~AddHubCommand()
 {
 }
 
-QString AddHubCommand::commandLabel() const
+o3d::String AddHubCommand::commandLabel() const
 {
-    return tr("Add a hub");
+    return fromQString(tr("Add a hub"));
 }
 
-bool AddHubCommand::doCommand()
+o3d::Bool AddHubCommand::doCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -56,7 +56,7 @@ bool AddHubCommand::doCommand()
 
         Component *component = Application::instance()->components().component(m_componentType);
         if (!component) {
-            return false;
+            return False;
         }
 
         // first level hub, direct to project
@@ -68,7 +68,7 @@ bool AddHubCommand::doCommand()
             project->addHub(hub);
 
             m_storedHubRef = hub->ref();
-            return true;
+            return True;
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
@@ -79,15 +79,15 @@ bool AddHubCommand::doCommand()
                 parentHub->addHub(hub);
 
                 m_storedHubRef = hub->ref();
-                return true;
+                return True;
             }
         }
     }
 
-    return false;
+    return False;
 }
 
-bool AddHubCommand::undoCommand()
+o3d::Bool AddHubCommand::undoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -96,20 +96,20 @@ bool AddHubCommand::undoCommand()
         // first level hub, direct to project
         if (project && m_parent.baseTypeOf(TypeRef::project())) {
             project->removeHub(m_storedHubRef.light());
-            return true;
+            return True;
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 parentHub->removeHub(m_storedHubRef.light());
-                return true;
+                return True;
             }
         }
     }
 
-    return false;
+    return False;
 }
 
-bool AddHubCommand::redoCommand()
+o3d::Bool AddHubCommand::redoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -117,7 +117,7 @@ bool AddHubCommand::redoCommand()
 
         Component *component = Application::instance()->components().component(m_componentType);
         if (!component) {
-            return false;
+            return False;
         }
 
         // first level hub, direct to project
@@ -127,7 +127,7 @@ bool AddHubCommand::redoCommand()
             hub->setRef(m_storedHubRef);
 
             project->addHub(hub);
-            return true;
+            return True;
         } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
@@ -136,10 +136,10 @@ bool AddHubCommand::redoCommand()
                 hub->setRef(m_storedHubRef);
 
                 parentHub->addHub(hub);
-                return true;
+                return True;
             }
         }
     }
 
-    return false;
+    return False;
 }

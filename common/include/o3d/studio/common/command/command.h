@@ -9,10 +9,6 @@
 #ifndef _O3DS_COMMON_COMMAND_H
 #define _O3DS_COMMON_COMMAND_H
 
-#include <QtCore/QMap>
-#include <QtCore/QString>
-#include <QtCore/QVariant>
-
 #include "../objectref.h"
 #include "../global.h"
 
@@ -31,13 +27,13 @@ class O3S_API Command
 {
 public:
 
-    Command(const QString &name, const LightRef &targetRef);
+    Command(const String &name, const LightRef &targetRef);
     virtual ~Command();
 
     /**
      * @brief Internal command name with full prefixes.
      */
-    QString commandName() const;
+    String commandName() const;
 
     /**
      * @brief Last command state.
@@ -47,25 +43,25 @@ public:
     /**
      * @brief Return a translated verbose string of the command to display.
      */
-    virtual QString commandLabel() const;
+    virtual String commandLabel() const;
 
     /**
      * @brief First processing of the command.
      * @return true if success
      */
-    virtual bool doCommand() = 0;
+    virtual Bool doCommand() = 0;
 
     /**
      * @brief Undo the command after a previous execute or redo.
      * @return true if success
      */
-    virtual bool undoCommand() = 0;
+    virtual Bool undoCommand() = 0;
 
     /**
      * @brief Redo the command after a previous undo.
      * @return true if success
      */
-    virtual bool redoCommand() = 0;
+    virtual Bool redoCommand() = 0;
 
     /**
      * @brief Get a reference onto the principal target of the command
@@ -83,7 +79,7 @@ protected:
     LightRef m_targetRef;
 
     //! command name
-    QString m_commandName;
+    String m_commandName;
 
     //! last command state
     CommandState m_commandState;

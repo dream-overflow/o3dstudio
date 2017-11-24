@@ -7,7 +7,6 @@
  */
 
 #include <QtWidgets/QApplication>
-#include <QtCore/QDataStream>
 
 #include "o3d/studio/common/command/fragment/removefragmentcommand.h"
 
@@ -17,6 +16,9 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/fragment.h"
 
+#include <o3d/core/datainstream.h>
+#include <o3d/core/dataoutstream.h>
+
 using namespace o3d::studio::common;
 
 
@@ -25,20 +27,20 @@ RemoveFragmentCommand::RemoveFragmentCommand(const LightRef &fragmentRef, const 
     m_parent(parentRef),
     m_fragment(fragmentRef)
 {
-    Q_ASSERT(m_parent.isValid());
-    Q_ASSERT(m_fragment.isValid());
+    O3D_ASSERT(m_parent.isValid());
+    O3D_ASSERT(m_fragment.isValid());
 }
 
 RemoveFragmentCommand::~RemoveFragmentCommand()
 {
 }
 
-QString RemoveFragmentCommand::commandLabel() const
+o3d::String RemoveFragmentCommand::commandLabel() const
 {
-    return tr("Remove a fragment");
+    return fromQString(tr("Remove a fragment"));
 }
 
-bool RemoveFragmentCommand::doCommand()
+o3d::Bool RemoveFragmentCommand::doCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -49,20 +51,20 @@ bool RemoveFragmentCommand::doCommand()
             Fragment *fragment = project->fragment(m_fragment);
             if (fragment) {
                 // backup
-                QDataStream stream(&m_data, QIODevice::WriteOnly | QIODevice::Truncate);
+                DataOutStream stream(m_data);
                 stream << *fragment;
                 m_storedFragmentRef = fragment->ref();
 
                 project->removeFragment(m_fragment);
-                return true;
+                return True;
             }
         }
     }
 
-    return false;
+    return False;
 }
 
-bool RemoveFragmentCommand::undoCommand()
+o3d::Bool RemoveFragmentCommand::undoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -74,22 +76,22 @@ bool RemoveFragmentCommand::undoCommand()
             fragment->setProject(project);
 
             // restore content
-            QDataStream stream(&m_data, QIODevice::ReadOnly);
+            DataInStream stream(m_data);
             stream >> *fragment;
             fragment->setRef(m_storedFragmentRef);
 
-            m_data.clear();
+            m_data.destroy();
 
             project->addFragment(fragment);
 
-            return true;
+            return True;
         }
     }
 
-    return false;
+    return False;
 }
 
-bool RemoveFragmentCommand::redoCommand()
+o3d::Bool RemoveFragmentCommand::redoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -100,15 +102,15 @@ bool RemoveFragmentCommand::redoCommand()
             Fragment *fragment = project->fragment(m_fragment);
             if (fragment) {
                 // backup
-                QDataStream stream(&m_data, QIODevice::WriteOnly | QIODevice::Truncate);
+                DataOutStream stream(m_data);
                 stream << *fragment;
                 m_storedFragmentRef = fragment->ref();
 
                 project->removeFragment(m_fragment);
-                return true;
+                return True;
             }
         }
     }
 
-    return false;
+    return False;
 }

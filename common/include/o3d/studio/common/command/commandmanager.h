@@ -104,16 +104,16 @@ public /*signals*/:
 protected:
 
     //! queue to commands to be executed, to be executable
-    std::stack<Command*> m_todoCommandsQueue;
+    std::list<Command*> m_todoCommandsStack;
 
     //! queue to commands to be terminated, when execute, redo, undo many commands at once
-    std::stack<Command*> m_waitingCommandsQueue;
+    std::list<Command*> m_waitingCommandsStack;
 
     //! queue for done commands, to be undoable
-    std::stack<Command*> m_doneCommandsQueue;
+    std::list<Command*> m_doneCommandsStack;
 
     //! queue for undone commands, to be redoable
-    std::stack<Command*> m_undoneCommandsQueue;
+    std::list<Command*> m_undoneCommandsStack;
 
     Bool m_running;
 

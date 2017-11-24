@@ -8,6 +8,8 @@
 
 #include "o3d/studio/common/workspace/entity.h"
 
+#include <o3d/core/file.h>
+
 using namespace o3d::studio::common;
 
 
@@ -76,7 +78,7 @@ o3d::Bool Entity::hasChanges() const
     return isDirty();
 }
 
-o3d::Bool Entity::serializeContent(QDataStream &stream) const
+o3d::Bool Entity::serializeContent(OutStream &stream) const
 {
     stream << m_name
            << m_parent->ref().uuid()
@@ -85,7 +87,7 @@ o3d::Bool Entity::serializeContent(QDataStream &stream) const
     return True;
 }
 
-o3d::Bool Entity::deserializeContent(QDataStream &stream)
+o3d::Bool Entity::deserializeContent(InStream &stream)
 {
     Uuid uuid;
     String typeName;
@@ -95,4 +97,14 @@ o3d::Bool Entity::deserializeContent(QDataStream &stream)
            >> typeName;
 
     return True;
+}
+
+o3d::Bool Entity::writeToFile(o3d::OutStream &os) const
+{
+    return serializeContent(os);
+}
+
+o3d::Bool Entity::readFromFile(o3d::InStream &is)
+{
+    return deserializeContent(is);
 }

@@ -8,6 +8,9 @@
 
 #include "o3d/studio/common/workspace/projectinfo.h"
 
+#include <o3d/core/instream.h>
+#include <o3d/core/outstream.h>
+
 using namespace o3d::studio::common;
 
 ProjectInfo::ProjectInfo() :
@@ -15,43 +18,55 @@ ProjectInfo::ProjectInfo() :
     m_revision(1),
     m_revisionState(STATE_DEVELOPMENT)
 {
-    m_creationDate = m_modificationDate = QDateTime::currentDateTime();
+    m_creationDate = m_modificationDate = DateTime(True);
 }
 
 ProjectInfo::~ProjectInfo()
 {
 
 }
-/*
-QDataStream& operator<<(QDataStream& stream, const ProjectInfo &projectInfo)
-{
-    stream << projectInfo.verboseName()
-           << projectInfo.description()
-           << projectInfo.copyright()
-           << projectInfo.vendor()
-           << projectInfo.authors()
-           << projectInfo.version()
-           << projectInfo.revision()
-           << projectInfo.revisionState()
-           << projectInfo.creationDate()
-           << projectInfo.modificationDate();
 
-    return stream;
-}
-*/
-/*QDataStream& operator>>(QDataStream& stream, ProjectInfo &projectInfo)
+o3d::Bool ProjectInfo::writeToFile(OutStream &os)
 {
-    stream >> projectInfo.verboseName()
-           >> projectInfo.description()
-           >> projectInfo.copyright()
-           >> projectInfo.vendor()
-           >> projectInfo.authors()
-           >> projectInfo.version()
-           >> projectInfo.revision()
-           >> projectInfo.revisionState()
-           >> projectInfo.creationDate()
-           >> projectInfo.modificationDate();
+    os << m_verboseName
+       << m_description
+       << m_copyright
+       << m_vendor;
 
-    return stream;
+    os << Int32(m_authors.size());
+    for (auto it = m_authors.begin(); it != m_authors.end(); ++it) {
+       os << *it;
+    }
+
+    os << m_version
+       << m_revision
+       << m_revisionState
+       << m_creationDate
+       << m_modificationDate;
+
+    return True;
 }
-*/
+
+o3d::Bool ProjectInfo::readFromFile(o3d::InStream &is)
+{
+   is >> m_verboseName
+           >> m_description
+           >> m_copyright
+           >> m_vendor;
+
+   Int32 num;
+   String author;
+   is >> num;
+   for (Int32 i = 0; i < num; ++i) {
+       is >> author;
+       m_authors.push_back(author);
+   }
+
+   is >> m_version
+           >> m_revision
+           >> m_revisionState
+           >> m_creationDate
+           >> m_modificationDate;
+
+   return True;
+}

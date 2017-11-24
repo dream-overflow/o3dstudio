@@ -32,7 +32,7 @@ void CameraComponent::setup()
 
 }
 
-Hub *CameraComponent::buildHub(const QString &name, Project *project, Entity *parent)
+Hub *CameraComponent::buildHub(const String &name, Project *project, Entity *parent)
 {
     if (!project) {
         return nullptr;
@@ -59,7 +59,7 @@ Hub *CameraComponent::buildHub(const QString &name, Project *project, Entity *pa
     return cameraHub;
 }
 
-CameraHub::CameraHub(const QString &name, Entity *parent) :
+CameraHub::CameraHub(const String &name, Entity *parent) :
     Hub(name, parent),
     m_left(0.f),
     m_right(640.f),
@@ -83,7 +83,7 @@ CameraHub::~CameraHub()
     // example
 
     for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
-        o3d::Camera *camera = it.value();
+        o3d::Camera *camera = it->second;
         delete camera;
     }
 }
@@ -93,38 +93,38 @@ void CameraHub::create()
 
 }
 
-bool CameraHub::load()
+o3d::Bool CameraHub::load()
 {
     return Hub::load();
 }
 
-bool CameraHub::save()
+o3d::Bool CameraHub::save()
 {
     return Hub::save();
 }
 
-bool CameraHub::exists() const
+o3d::Bool CameraHub::exists() const
 {
     // @todo O3D
     return Entity::exists();
 }
 
-bool CameraHub::serializeContent(QDataStream &stream) const
+o3d::Bool CameraHub::serializeContent(OutStream &stream) const
 {
     if (!Hub::serializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
-bool CameraHub::deserializeContent(QDataStream &stream)
+o3d::Bool CameraHub::deserializeContent(InStream &stream)
 {
     if (!Hub::deserializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
 void CameraHub::createToScene(MasterScene *masterScene)
@@ -135,7 +135,7 @@ void CameraHub::createToScene(MasterScene *masterScene)
 
     o3d::Camera *camera = new o3d::Camera(masterScene->scene());
 
-    camera->setName(m_name.toStdWString().c_str());
+    camera->setName(m_name);
 
     camera->setLeft(m_left);
     camera->setRatio(m_right);
@@ -156,14 +156,14 @@ void CameraHub::createToScene(MasterScene *masterScene)
         camera->computePerspective();
     }
 
-    m_instances.insert(masterScene, camera);
+    m_instances[masterScene] = camera;
 }
 
 void CameraHub::removeFromScene(MasterScene *masterScene)
 {
     auto it = m_instances.find(masterScene);
     if (it != m_instances.end()) {
-        o3d::Camera *camera = it.value();
+        o3d::Camera *camera = it->second;
         m_instances.erase(it);
         delete camera;
     }

@@ -22,25 +22,22 @@ DummyCommand::~DummyCommand()
 {
 }
 
-QString DummyCommand::commandLabel() const
+o3d::String DummyCommand::commandLabel() const
 {
-    return tr("Dummy operation");
+    return fromQString(tr("Dummy operation"));
 }
 
-bool DummyCommand::doCommand()
+o3d::Bool DummyCommand::doCommand()
 {
-    qDebug("DummyCommand executed");
-    return true;
+    return True;
 }
 
-bool DummyCommand::undoCommand()
+o3d::Bool DummyCommand::undoCommand()
 {
-    qDebug("DummyCommand undone");
-    return true;
+    return True;
 }
 
-bool DummyCommand::redoCommand()
+o3d::Bool DummyCommand::redoCommand()
 {
-    qDebug("DummyCommand redone");
-    return true;
+    return True;
 }

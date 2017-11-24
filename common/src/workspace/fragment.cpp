@@ -99,7 +99,7 @@ const Hub *Fragment::hub() const
     return m_hub;
 }
 
-o3d::Bool Fragment::serializeContent(QDataStream &stream) const
+o3d::Bool Fragment::serializeContent(OutStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
         return False;
@@ -110,7 +110,7 @@ o3d::Bool Fragment::serializeContent(QDataStream &stream) const
     return True;
 }
 
-o3d::Bool Fragment::deserializeContent(QDataStream &stream)
+o3d::Bool Fragment::deserializeContent(InStream &stream)
 {
     if (!Entity::deserializeContent(stream)) {
         return False;

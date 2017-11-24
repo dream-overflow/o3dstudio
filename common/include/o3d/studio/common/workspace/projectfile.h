@@ -15,8 +15,6 @@
 
 #include "../global.h"
 
-class QDataStream;
-
 namespace o3d {
 namespace studio {
 namespace common {

@@ -26,20 +26,20 @@ class O3S_API AddFragmentCommand : public Command
 
 public:
 
-    AddFragmentCommand(const LightRef &project, const QString &name);
+    AddFragmentCommand(const LightRef &project, const String &name);
     virtual ~AddFragmentCommand();
 
-    virtual QString commandLabel() const override;
-    virtual bool doCommand() override;
-    virtual bool undoCommand() override;
-    virtual bool redoCommand() override;
+    virtual String commandLabel() const override;
+    virtual Bool doCommand() override;
+    virtual Bool undoCommand() override;
+    virtual Bool redoCommand() override;
 
 private:
 
     LightRef m_project;
     ObjectRef m_fragment;
 
-    QString m_fragmentName;
+    String m_fragmentName;
 };
 
 } // namespace common

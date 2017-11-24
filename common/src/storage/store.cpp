@@ -11,8 +11,7 @@
 #include "o3d/studio/common/storage/store.h"
 #include "o3d/studio/common/workspace/project.h"
 
-#include <QtCore/QDataStream>
-#include <QtCore/QFile>
+#include "o3d/core/fileoutstream.h"
 
 using namespace o3d::studio::common;
 
@@ -30,55 +29,46 @@ Store::~Store()
     }
 }
 
-void Store::initProject(Project *project, Version version)
+void Store::initProject(Project *project, Version /*version*/)
 {
     if (!project) {
         return;
     }
 
     if (project->path().exists()) {
-        throw E_StoreException(fromQString(tr("Project path exists")));
+        O3D_ERROR(E_StoreException(fromQString(tr("Project path exists"))));
     }
 
     if (!Application::instance()->workspaces().defaultProjectsPath().makeDir(project->name())) {
-        throw E_StoreException("Unable to create the project directory");
+        O3D_ERROR(E_StoreException("Unable to create the project directory"));
     }
 
     if (project->path().makeDir("items") != Dir::SUCCESS) {
-        throw E_StoreException("Unable to create the project items directory");
+        O3D_ERROR(E_StoreException("Unable to create the project items directory"));
     }
 
     if (project->path().makeDir("cache") != Dir::SUCCESS) {
-        throw E_StoreException("Unable to create the project cache directory");
+        O3D_ERROR(E_StoreException("Unable to create the project cache directory"));
     }
 
     if (project->path().makeDir("tmp") != Dir::SUCCESS) {
-        throw E_StoreException("Unable to create the project temporary directory");
+        O3D_ERROR(E_StoreException("Unable to create the project temporary directory"));
     }
 
     if (project->path().makeDir("targets") != Dir::SUCCESS) {
-        throw E_StoreException("Unable to create the project targets path");
+        O3D_ERROR(E_StoreException("Unable to create the project targets path"));
     }
 
-    QFile readmeFile(project->path().makeFullFileName("README.txt"));
-    if (!readmeFile.open(QFile::WriteOnly | QFile::Text)) {
-        throw E_StoreException("Unable to create the project readme file");
-    }
-    readmeFile.write("TODO\n");
+    FileOutStream readmeFile(project->path().makeFullFileName("README.txt"));
+    readmeFile.writeLine("TODO\n");
     readmeFile.close();
 
-    QFile licenseFile(project->path().makeFullFileName("LICENSE.txt"));
-    if (!licenseFile.open(QFile::WriteOnly | QFile::Text)) {
-        throw E_StoreException("Unable to create the project licnse file");
-    }
-    licenseFile.write("TODO\n");
+    FileOutStream licenseFile(project->path().makeFullFileName("LICENSE.txt"));
+    licenseFile.writeLine("TODO\n");
     licenseFile.close();
 
-    QFile infoFile(project->path().makeFullFileName("INFO.txt"));
-    if (!infoFile.open(QFile::WriteOnly | QFile::Text)) {
-        throw E_StoreException("Unable to create the project information file");
-    }
-    infoFile.write("TODO\n");
+    FileOutStream infoFile(project->path().makeFullFileName("INFO.txt"));
+    infoFile.writeLine("TODO\n");
     infoFile.close();
 }
 
@@ -90,18 +80,18 @@ void Store::loadProject(Project *project)
 
     // check project structure, integrity
     if (!project->path().exists()) {
-        throw E_StoreException(fromQString(tr("Project directory doesn't exists")));
+        O3D_ERROR(E_StoreException(fromQString(tr("Project directory doesn't exists"))));
     }
 
     if (project->path().check("items") != Dir::SUCCESS) {
-        throw E_StoreException("Project items directory is missing");
+        O3D_ERROR(E_StoreException("Project items directory is missing"));
     }
 
     if (project->path().check("cache") != Dir::SUCCESS) {
         O3D_WARNING("Project cache directory is missing");
 
         if (project->path().makeDir("cache") != Dir::SUCCESS) {
-            throw E_StoreException("Unable to create the project cache directory");
+            O3D_ERROR(E_StoreException("Unable to create the project cache directory"));
         }
     }
 
@@ -109,44 +99,35 @@ void Store::loadProject(Project *project)
         O3D_WARNING("Project temporary directory is missing");
 
         if (project->path().makeDir("tmp") != Dir::SUCCESS) {
-            throw E_StoreException("Unable to create the project temporary directory");
+            O3D_ERROR(E_StoreException("Unable to create the project temporary directory"));
         }
     }
 
     if (project->path().check("targets") != Dir::SUCCESS) {
-        throw E_StoreException("Project targets directory is missing");
+        O3D_ERROR(E_StoreException("Project targets directory is missing"));
     }
 
     if (project->path().check("README.txt") != Dir::SUCCESS) {
         O3D_WARNING("Project readme file is missing");
 
-        QFile readmeFile(project->path().makeFullFileName("README.txt"));
-        if (!readmeFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw E_StoreException("Unable to create the project readme file");
-        }
-        readmeFile.write("TODO\n");
+        FileOutStream readmeFile(project->path().makeFullFileName("README.txt"));
+        readmeFile.writeLine("TODO\n");
         readmeFile.close();
     }
 
     if (project->path().check("LICENSE.txt") != Dir::SUCCESS) {
         O3D_WARNING("Project license file is missing");
 
-        QFile licenseFile(project->path().makeFullFileName("LICENSE.txt"));
-        if (!licenseFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw E_StoreException("Unable to create the project license file");
-        }
-        licenseFile.write("TODO\n");
+        FileOutStream licenseFile(project->path().makeFullFileName("LICENSE.txt"));
+        licenseFile.writeLine("TODO\n");
         licenseFile.close();
     }
 
     if (project->path().check("INFO.txt") != Dir::SUCCESS) {
         O3D_WARNING("Project information file is missing");
 
-        QFile infoFile(project->path().makeFullFileName("INFO.txt"));
-        if (!infoFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw E_StoreException("Unable to create the project information file");
-        }
-        infoFile.write("TODO\n");
+        FileOutStream infoFile(project->path().makeFullFileName("INFO.txt"));
+        infoFile.writeLine("TODO\n");
         infoFile.close();
     }
 }
@@ -159,18 +140,18 @@ void Store::saveProject(Project *project)
 
     // check project structure, integrity
     if (!project->path().exists()) {
-        throw E_StoreException(fromQString(tr("Project directory doesn't exists")));
+        O3D_ERROR(E_StoreException(fromQString(tr("Project directory doesn't exists"))));
     }
 
     if (project->path().check("items") != Dir::SUCCESS) {
-        throw E_StoreException("Project items directory is missing");
+        O3D_ERROR(E_StoreException("Project items directory is missing"));
     }
 
     if (project->path().check("cache") != Dir::SUCCESS) {
         O3D_WARNING("Project cache directory is missing");
 
         if (project->path().makeDir("cache") != Dir::SUCCESS) {
-            throw E_StoreException("Unable to create the project cache directory");
+            O3D_ERROR(E_StoreException("Unable to create the project cache directory"));
         }
     }
 
@@ -178,44 +159,35 @@ void Store::saveProject(Project *project)
         O3D_WARNING("Project temporary directory is missing");
 
         if (project->path().makeDir("tmp") != Dir::SUCCESS) {
-            throw E_StoreException("Unable to create the project temporary directory");
+            O3D_ERROR(E_StoreException("Unable to create the project temporary directory"));
         }
     }
 
     if (project->path().check("targets") != Dir::SUCCESS) {
-        throw E_StoreException("Project targets directory is missing");
+        O3D_ERROR(E_StoreException("Project targets directory is missing"));
     }
 
     if (project->path().check("README.txt") != Dir::SUCCESS) {
         O3D_WARNING("Project readme file is missing");
 
-        QFile readmeFile(project->path().makeFullFileName("README.txt"));
-        if (!readmeFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw E_StoreException("Unable to create the project readme file");
-        }
-        readmeFile.write("TODO\n");
+        FileOutStream readmeFile(project->path().makeFullFileName("README.txt"));
+        readmeFile.writeLine("TODO\n");
         readmeFile.close();
     }
 
     if (project->path().check("LICENSE.txt") != Dir::SUCCESS) {
         O3D_WARNING("Project license file is missing");
 
-        QFile licenseFile(project->path().makeFullFileName("LICENSE.txt"));
-        if (!licenseFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw E_StoreException("Unable to create the project license file");
-        }
-        licenseFile.write("TODO\n");
+        FileOutStream licenseFile(project->path().makeFullFileName("LICENSE.txt"));
+        licenseFile.writeLine("TODO\n");
         licenseFile.close();
     }
 
     if (project->path().check("INFO.txt") != Dir::SUCCESS) {
         O3D_WARNING("Project information file is missing");
 
-        QFile infoFile(project->path().makeFullFileName("INFO.txt"));
-        if (!infoFile.open(QFile::WriteOnly | QFile::Text)) {
-            throw E_StoreException("Unable to create the project information file");
-        }
-        infoFile.write("TODO\n");
+        FileOutStream infoFile(project->path().makeFullFileName("INFO.txt"));
+        infoFile.writeLine("TODO\n");
         infoFile.close();
     }
 }
@@ -229,7 +201,7 @@ void Store::deleteProject(Project *project)
     DiskDir path(project->path());
 
     if (!path.exists()) {
-        throw E_StoreException(fromQString(tr("Project directory doesn't exists")));
+        O3D_ERROR(E_StoreException(fromQString(tr("Project directory doesn't exists"))));
     }
 
     // items
@@ -281,14 +253,14 @@ void Store::deleteProject(Project *project)
     }
 }
 
-StoreItem *Store::item(const QUuid &uuid)
+StoreItem *Store::item(const Uuid &uuid)
 {
     StoreItem *item = nullptr;
 
     return item;
 }
 
-const StoreItem *Store::item(const QUuid &uuid) const
+const StoreItem *Store::item(const Uuid &uuid) const
 {
     const StoreItem *item = nullptr;
 
@@ -309,7 +281,7 @@ const StoreItem *Store::addItem(const String &originalFileName) const
     return item;
 }
 
-o3d::Bool Store::removeItem(const QUuid &uuid)
+o3d::Bool Store::removeItem(const Uuid &uuid)
 {
     return False;
 }
@@ -319,7 +291,7 @@ o3d::Bool Store::removeItem(StoreItem *item)
     return False;
 }
 
-o3d::Bool Store::deleteItem(const QUuid &uuid)
+o3d::Bool Store::deleteItem(const Uuid &uuid)
 {
     return False;
 }

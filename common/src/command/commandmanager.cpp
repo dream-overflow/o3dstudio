@@ -28,23 +28,18 @@ CommandManager::~CommandManager()
 {
     m_thread.waitFinish();  // join the thread
 
-    O3D_ASSERT(m_todoCommandsQueue.empty());
-    O3D_ASSERT(m_waitingCommandsQueue.empty());
+    O3D_ASSERT(m_todoCommandsStack.empty());
+    O3D_ASSERT(m_waitingCommandsStack.empty());
 
-    Command *cmd = nullptr;
-    while (!m_doneCommandsQueue.empty()) {
-        cmd = m_doneCommandsQueue.top();
-        m_doneCommandsQueue.pop();
-
+    for (Command *cmd : m_doneCommandsStack) {
         delete cmd;
     }
+    m_doneCommandsStack.clear();
 
-    while (!m_undoneCommandsQueue.empty()) {
-        cmd = m_undoneCommandsQueue.top();
-        m_undoneCommandsQueue.pop();
-
+    for (Command *cmd : m_undoneCommandsStack) {
         delete cmd;
     }
+    m_undoneCommandsStack.clear();
 }
 
 void CommandManager::initialize()
@@ -69,43 +64,73 @@ void CommandManager::onProjectRemoved(const LightRef &ref)
 {
     m_rwLock.lockWrite();
 
-    // remove any command related to the project @todo
-    std::list<std::stack<Command*>::iterator> eraseList;
-    for (auto it = m_todoCommandsQueue.begin(); it != m_todoCommandsQueue.end(); ++it) {
-        if ((*it)->targetRef() == ref) {
-            eraseList.append(it);
+    // remove any command related to the project
+    std::list<std::list<Command*>::iterator> eraseItList;
+    Command *cmd = nullptr;
+
+    // done command stack
+    for (auto it = m_doneCommandsStack.begin(); it != m_doneCommandsStack.end(); ++it) {
+        cmd = *it;
+
+        if (cmd->targetRef().projectId() == ref.projectId()) {
+            delete cmd;
+            eraseItList.push_back(it);
         }
     }
 
-    std::stack<Command*>::iterator it;
-    foreach (it, eraseList) {
-        delete *it;
-        m_todoCommandsQueue.erase(it);
+    for (auto it = eraseItList.begin(); it != eraseItList.end(); ++it) {
+        m_doneCommandsStack.erase(*it);
     }
 
-    eraseList.clear();
-    for (auto it = m_doneCommandsQueue.begin(); it != m_doneCommandsQueue.end(); ++it) {
-        if ((*it)->targetRef() == ref) {
-            eraseList.append(it);
+    eraseItList.clear();
+
+    // todo commands stack
+    for (auto it = m_todoCommandsStack.begin(); it != m_todoCommandsStack.end(); ++it) {
+        cmd = *it;
+
+        if (cmd->targetRef().projectId() == ref.projectId()) {
+            delete cmd;
+            eraseItList.push_back(it);
         }
     }
 
-    foreach (it, eraseList) {
-        delete *it;
-        m_doneCommandsQueue.erase(it);
+    for (auto it = eraseItList.begin(); it != eraseItList.end(); ++it) {
+        m_todoCommandsStack.erase(*it);
     }
 
-    eraseList.clear();
-    for (auto it = m_undoneCommandsQueue.begin(); it != m_undoneCommandsQueue.end(); ++it) {
-        if ((*it)->targetRef() == ref) {
-            eraseList.append(it);
+    eraseItList.clear();
+
+    // done commands stack
+    for (auto it = m_doneCommandsStack.begin(); it != m_doneCommandsStack.end(); ++it) {
+        cmd = *it;
+
+        if (cmd->targetRef().projectId() == ref.projectId()) {
+            delete cmd;
+            eraseItList.push_back(it);
         }
     }
 
-    foreach (it, eraseList) {
-        delete *it;
-        m_undoneCommandsQueue.erase(it);
+    for (auto it = eraseItList.begin(); it != eraseItList.end(); ++it) {
+        m_doneCommandsStack.erase(*it);
     }
+
+    eraseItList.clear();
+
+    // undone commands stack
+    for (auto it = m_undoneCommandsStack.begin(); it != m_undoneCommandsStack.end(); ++it) {
+        cmd = *it;
+
+        if (cmd->targetRef().projectId() == ref.projectId()) {
+            delete cmd;
+            eraseItList.push_back(it);
+        }
+    }
+
+    for (auto it = eraseItList.begin(); it != eraseItList.end(); ++it) {
+        m_undoneCommandsStack.erase(*it);
+    }
+
+    eraseItList.clear();
 
     m_rwLock.unlockWrite();
 }
@@ -115,15 +140,15 @@ void CommandManager::addCommand(Command *cmd)
     Bool update = False;
 
     m_rwLock.lockWrite();
-    m_todoCommandsQueue.push(cmd);
+    m_todoCommandsStack.push_back(cmd);
 
-    if (m_undoneCommandsQueue.size()) {
+    if (m_undoneCommandsStack.size()) {
         // clear redo history
-        for (auto it = m_undoneCommandsQueue.begin(); it != m_undoneCommandsQueue.end(); ++it) {
-            delete *it;
+        for (Command *cmd : m_undoneCommandsStack) {
+            delete cmd;
         }
 
-        m_undoneCommandsQueue.clear();
+        m_undoneCommandsStack.clear();
         update = True;
     }
 
@@ -139,7 +164,7 @@ void CommandManager::undoLastCommand()
     int size = 0;
 
     m_rwLock.lockRead();
-    size = m_doneCommandsQueue.size();
+    size = m_doneCommandsStack.size();
     m_rwLock.unlockRead();
 
     if (size == 0) {
@@ -148,8 +173,11 @@ void CommandManager::undoLastCommand()
 
     m_rwLock.lockWrite();
 
-    Command *lastCmd = m_doneCommandsQueue.pop();
-    m_waitingCommandsQueue.push(lastCmd);
+    Command *lastCmd = m_doneCommandsStack.back();
+    m_doneCommandsStack.pop_back();
+
+    // @todo or todoCommandStack ?
+    m_waitingCommandsStack.push_back(lastCmd);
 
     m_rwLock.unlockWrite();
 
@@ -161,7 +189,7 @@ void CommandManager::undoNCommands(Int32 num)
     Int32 size = 0;
 
     m_rwLock.lockRead();
-    size = m_doneCommandsQueue.size();
+    size = m_doneCommandsStack.size();
     m_rwLock.unlockRead();
 
     if (size == 0) {
@@ -171,9 +199,18 @@ void CommandManager::undoNCommands(Int32 num)
     m_rwLock.lockWrite();
 
     Command *lastCmd = nullptr;
+    std::list<Command*> cmdList;
     for (int i = 0; i < std::min(size, num); ++i) {
-        lastCmd = m_doneCommandsQueue.pop();
-        m_waitingCommandsQueue.push(lastCmd);
+        // pop back last n command
+        lastCmd = m_doneCommandsStack.back();
+        m_doneCommandsStack.pop_back();
+
+        cmdList.push_front(lastCmd);
+    }
+
+    for (Command *cmd : cmdList) {
+        // inject into waiting list @todo or todoCommandStack ?
+        m_waitingCommandsStack.push_back(cmd);
     }
 
     m_rwLock.unlockWrite();
@@ -186,7 +223,7 @@ void CommandManager::redoLastCommand()
     Int32 size = 0;
 
     m_rwLock.lockRead();
-    size = m_undoneCommandsQueue.size();
+    size = m_undoneCommandsStack.size();
     m_rwLock.unlockRead();
 
     if (size == 0) {
@@ -195,8 +232,11 @@ void CommandManager::redoLastCommand()
 
     m_rwLock.lockWrite();
 
-    Command *lastUndone = m_undoneCommandsQueue.pop();
-    m_waitingCommandsQueue.push(lastUndone);
+    Command *lastUndone = m_undoneCommandsStack.back();
+    m_undoneCommandsStack.pop_back();
+
+    // @todo or todoCommandStack ?
+    m_waitingCommandsStack.push_back(lastUndone);
 
     m_rwLock.unlockWrite();
 
@@ -208,7 +248,7 @@ void CommandManager::redoNCommands(Int32 num)
     int size = 0;
 
     m_rwLock.lockRead();
-    size = m_undoneCommandsQueue.size();
+    size = m_undoneCommandsStack.size();
     m_rwLock.unlockRead();
 
     if (size == 0) {
@@ -218,9 +258,18 @@ void CommandManager::redoNCommands(Int32 num)
     m_rwLock.lockWrite();
 
     Command *lastUndone = nullptr;
+    std::list<Command*> cmdList;
     for (int i = 0; i < std::min(size, num); ++i) {
-        lastUndone = m_undoneCommandsQueue.pop();
-        m_waitingCommandsQueue.push(lastUndone);
+        // pop back last n command
+        lastUndone = m_undoneCommandsStack.back();
+        m_undoneCommandsStack.pop_back();
+
+        cmdList.push_front(lastUndone);
+    }
+
+    for (Command *cmd : cmdList) {
+        // inject into waiting list @todo or todoCommandStack ?
+        m_waitingCommandsStack.push_back(cmd);
     }
 
     m_rwLock.unlockWrite();
@@ -232,9 +281,9 @@ o3d::Bool CommandManager::hasPendingCommands() const
 {
     int size = 0;
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
-    size = m_todoCommandsQueue.size();
-    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+    m_rwLock.lockRead();
+    size = m_todoCommandsStack.size();
+    m_rwLock.unlockRead();
 
     return size > 0;
 }
@@ -243,9 +292,9 @@ o3d::Bool CommandManager::hasRunningCommands() const
 {
     int size = 0;
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
-    size = m_waitingCommandsQueue.size();
-    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+    m_rwLock.lockRead();
+    size = m_waitingCommandsStack.size();
+    m_rwLock.unlockRead();
 
     return size > 0;
 }
@@ -254,9 +303,9 @@ o3d::Bool CommandManager::hasDoneCommands() const
 {
     int size = 0;
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
-    size = m_doneCommandsQueue.size();
-    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+    m_rwLock.lockRead();
+    size = m_doneCommandsStack.size();
+    m_rwLock.unlockRead();
 
     return size > 0;
 }
@@ -265,9 +314,9 @@ o3d::Bool CommandManager::hasUndoneCommands() const
 {
     int size = 0;
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
-    size = m_undoneCommandsQueue.size();
-    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+    m_rwLock.lockRead();
+    size = m_undoneCommandsStack.size();
+    m_rwLock.unlockRead();
 
     return size > 0;
 }
@@ -276,13 +325,13 @@ o3d::T_StringList CommandManager::undoableCommandList() const
 {
     T_StringList cmds;
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    m_rwLock.lockRead();
 
-    for (auto cit = m_doneCommandsQueue.cbegin(); cit != m_doneCommandsQueue.cend(); ++cit) {
-        cmds.append((*cit)->commandLabel());
+    for (auto cit = m_doneCommandsStack.cbegin(); cit != m_doneCommandsStack.cend(); ++cit) {
+        cmds.push_back((*cit)->commandLabel());
     }
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+    m_rwLock.unlockRead();
 
     return cmds;
 }
@@ -291,13 +340,13 @@ o3d::T_StringList CommandManager::redoableCommandList() const
 {
     T_StringList cmds;
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
+    m_rwLock.lockRead();
 
-    for (auto cit = m_undoneCommandsQueue.cbegin(); cit != m_undoneCommandsQueue.cend(); ++cit) {
-        cmds.append((*cit)->commandLabel());
+    for (auto cit = m_undoneCommandsStack.cbegin(); cit != m_undoneCommandsStack.cend(); ++cit) {
+        cmds.push_back((*cit)->commandLabel());
     }
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+    m_rwLock.unlockRead();
 
     return cmds;
 }
@@ -306,11 +355,13 @@ o3d::String CommandManager::nextToUndo() const
 {
     String label;
 
-    const_cast<QReadWriteLock*>(&m_rwLock)->lockForRead();
-    if (m_doneCommandsQueue.size()) {
-        label = m_doneCommandsQueue.top()->commandLabel();
+    m_rwLock.lockRead();
+
+    if (m_doneCommandsStack.size()) {
+        label = m_doneCommandsStack.back()->commandLabel();
     }
-    const_cast<QReadWriteLock*>(&m_rwLock)->unlock();
+
+    m_rwLock.unlockRead();
 
     return label;
 }
@@ -319,11 +370,13 @@ o3d::String CommandManager::nextToRedo() const
 {
     String label;
 
-    m_rwLock->lockRead();
-    if (m_undoneCommandsQueue.size()) {
-        label = m_undoneCommandsQueue.top()->commandLabel();
+    m_rwLock.lockRead();
+
+    if (m_undoneCommandsStack.size()) {
+        label = m_undoneCommandsStack.back()->commandLabel();
     }
-    m_rwLock->unlockRead();
+
+    m_rwLock.unlockRead();
 
     return label;
 }
@@ -339,17 +392,19 @@ o3d::Int32 CommandManager::run(void*)
 
         m_rwLock.lockWrite();
 
-        run = m_running | !m_waitingCommandsQueue.empty() | !m_todoCommandsQueue.empty();
+        run = m_running | !m_waitingCommandsStack.empty() | !m_todoCommandsStack.empty();
 
         // first look in wait list, if empty look in todo list
-        if (!m_waitingCommandsQueue.empty()) {
-            nextCmd = m_waitingCommandsQueue.pop();
-        } else if (!m_todoCommandsQueue.empty()) {
-            nextCmd = m_todoCommandsQueue.pop();
+        if (!m_waitingCommandsStack.empty()) {
+            nextCmd = m_waitingCommandsStack.back();
+            m_waitingCommandsStack.pop_back();
+        } else if (!m_todoCommandsStack.empty()) {
+            nextCmd = m_todoCommandsStack.back();
+            m_todoCommandsStack.pop_back();
         }
 
         if (nextCmd != nullptr) {
-            m_waitingCommandsQueue.push(nextCmd);
+            m_waitingCommandsStack.push_back(nextCmd);
         }
 
         m_rwLock.unlockWrite();
@@ -363,33 +418,32 @@ o3d::Int32 CommandManager::run(void*)
                     if (nextCmd->doCommand()) {
                         nextCmd->setDone();
 
-                        emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
+                        commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
                     }
                 } else if (nextCmd->commandState() == COMMAND_REDONE) {
                     // previously redone, then undo
                     if (nextCmd->undoCommand()) {
                         nextCmd->setUndone();
 
-                        emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
+                        commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
                     }
                 } else if (nextCmd->commandState() == COMMAND_DONE) {
                     // previously executed, then undo
                     if (nextCmd->undoCommand()) {
                         nextCmd->setUndone();
 
-                        emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
+                        commandDone(nextCmd->commandName(), nextCmd->commandLabel(), false);
                     }
                 } else if (nextCmd->commandState() == COMMAND_UNDONE) {
                     // previously undone, then redo
                     if (nextCmd->redoCommand()) {
                         nextCmd->setReDone();
 
-                        emit commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
+                        commandDone(nextCmd->commandName(), nextCmd->commandLabel(), true);
                     }
                 }
             } catch (E_CommonException &e) {
                 messenger.critical(e.getMsg());
-
                 error = true;
             }
 
@@ -399,33 +453,33 @@ o3d::Int32 CommandManager::run(void*)
                 nextCmd = nullptr;
 
                 // cannot terminate current command batch, so delete them
-                for (auto it = m_waitingCommandsQueue.begin(); it != m_waitingCommandsQueue.end(); ++it) {
+                for (auto it = m_waitingCommandsStack.begin(); it != m_waitingCommandsStack.end(); ++it) {
                     delete *it;
                 }
 
-                m_waitingCommandsQueue.clear();
+                m_waitingCommandsStack.clear();
 
                 // and cannot performs next pending commands because of the possible coherency, so delete them to
-                for (auto it = m_todoCommandsQueue.begin(); it != m_todoCommandsQueue.end(); ++it) {
+                for (auto it = m_todoCommandsStack.begin(); it != m_todoCommandsStack.end(); ++it) {
                     delete *it;
                 }
 
-                m_todoCommandsQueue.clear();
+                m_todoCommandsStack.clear();
             } else {
                 if (nextCmd->commandState() == COMMAND_READY) {
                     // error, may not arrives
                 } else if (nextCmd->commandState() == COMMAND_REDONE) {
                     // in done queue, can be later undone
-                    m_doneCommandsQueue.push(nextCmd);
+                    m_doneCommandsStack.push_back(nextCmd);
                 } else if (nextCmd->commandState() == COMMAND_DONE) {
                     // in done queue, can be later undone
-                    m_doneCommandsQueue.push(nextCmd);
+                    m_doneCommandsStack.push_back(nextCmd);
                 } else if (nextCmd->commandState() == COMMAND_UNDONE) {
                     // in undone queue, can be later redone
-                    m_undoneCommandsQueue.push(nextCmd);
+                    m_undoneCommandsStack.push_back(nextCmd);
                 }
 
-                m_waitingCommandsQueue.pop();
+                m_waitingCommandsStack.pop_back();
             }
 
             m_rwLock.unlockWrite();
@@ -433,10 +487,11 @@ o3d::Int32 CommandManager::run(void*)
             // commands lists updated
             commandUpdate();
         } else {
-            msleep(2);
+            System::waitMs(2);
         }
 
-        yieldCurrentThread();
+        // yeld
+        System::waitMs(0);
 
         if (!run) {
             break;
@@ -459,7 +514,7 @@ void CommandManager::begin()
     }
 
     m_running = True;
-    start();
+    m_thread.start();
 }
 
 void CommandManager::finish()

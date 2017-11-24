@@ -9,9 +9,6 @@
 #ifndef _O3DS_COMMON_STORE_H
 #define _O3DS_COMMON_STORE_H
 
-#include <QtCore/QList>
-#include <QtCore/QMap>
-#include <QtCore/QException>
 #include <QtCore/QCoreApplication>
 
 #include "../exception.h"
@@ -67,16 +64,16 @@ public:
      */
     void saveProject(Project *project);
 
-    StoreItem* item(const QUuid &uuid);
-    const StoreItem* item(const QUuid &uuid) const;
+    StoreItem* item(const Uuid &uuid);
+    const StoreItem* item(const Uuid &uuid) const;
 
     StoreItem* addItem(const String &originalFileName);
     const StoreItem* addItem(const String &originalFileName) const;
 
-    Bool removeItem(const QUuid &uuid);
+    Bool removeItem(const Uuid &uuid);
     Bool removeItem(StoreItem *item);
 
-    Bool deleteItem(const QUuid &uuid);
+    Bool deleteItem(const Uuid &uuid);
     Bool deleteItem(StoreItem *item);
 
     void purgeTrash(Project *project);
@@ -85,7 +82,7 @@ public:
 
 protected:
 
-    std::map<QUuid, StoreItem*> m_items;
+    std::map<Uuid, StoreItem*> m_items;
 };
 
 /**

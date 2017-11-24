@@ -62,7 +62,7 @@ Hub *ViewPortComponent::buildHub(const String &name, Project *project, Entity *p
     return viewportHub;
 }
 
-ViewPortHub::ViewPortHub(const QString &name, Entity *parent) :
+ViewPortHub::ViewPortHub(const String &name, Entity *parent) :
     Hub(name, parent),
     m_xpos(0.f),
     m_ypos(0.f),
@@ -86,38 +86,38 @@ void ViewPortHub::create()
 
 }
 
-bool ViewPortHub::load()
+o3d::Bool ViewPortHub::load()
 {
     return Hub::load();
 }
 
-bool ViewPortHub::save()
+o3d::Bool ViewPortHub::save()
 {
     return Hub::save();
 }
 
-bool ViewPortHub::exists() const
+o3d::Bool ViewPortHub::exists() const
 {
     // @todo O3D
     return Entity::exists();
 }
 
-bool ViewPortHub::serializeContent(QDataStream &stream) const
+o3d::Bool ViewPortHub::serializeContent(OutStream &stream) const
 {
     if (!Hub::serializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
-bool ViewPortHub::deserializeContent(QDataStream &stream)
+o3d::Bool ViewPortHub::deserializeContent(InStream &stream)
 {
     if (!Hub::deserializeContent(stream)) {
-        return false;
+        return False;
     }
 
-    return true;
+    return True;
 }
 
 void ViewPortHub::createToScene(MasterScene *masterScene)

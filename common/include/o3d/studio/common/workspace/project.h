@@ -21,8 +21,6 @@
 
 #include <o3d/core/diskdir.h>
 
-class QDataStream;
-
 namespace o3d {
 namespace studio {
 namespace common {
@@ -110,13 +108,13 @@ public:
     /**
      * @brief Search in the global map of entity by its UUID (faster than recursive).
      */
-    Entity* lookup(const QUuid &uuid);
+    Entity* lookup(const Uuid &uuid);
 
     /**
      * @brief Search in the global map of entity by its UUID (faster than recursive)
      * (const version).
      */
-    const Entity* lookup(const QUuid &uuid) const;
+    const Entity* lookup(const Uuid &uuid) const;
 
 
     //
@@ -151,12 +149,12 @@ public:
     /**
      * @brief Recursively find for a hub instance.
      */
-    Hub* findHub(const QUuid &uuid);
+    Hub* findHub(const Uuid &uuid);
 
     /**
      * @brief Recursively find for a hub instance (const version).
      */
-    const Hub* findHub(const QUuid &uuid) const;
+    const Hub* findHub(const Uuid &uuid) const;
 
 
     size_t numHubs() const;
@@ -236,7 +234,7 @@ private:
     std::map<UInt64, Asset*> m_assets;         //!< Children assets.
 
     //! Global map by UUID
-    std::map<QUuid, Entity*> m_entitiesByUuid;
+    std::map<Uuid, Entity*> m_entitiesByUuid;
     //! Global map by ID
     std::map<UInt64, Entity*> m_entitiesById;
 };

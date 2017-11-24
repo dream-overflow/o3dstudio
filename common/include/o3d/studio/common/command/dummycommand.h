@@ -9,8 +9,9 @@
 #ifndef _O3DS_COMMON_DUMMYCOMMAND_H
 #define _O3DS_COMMON_DUMMYCOMMAND_H
 
-#include "command.h"
 #include <QtCore/QCoreApplication>
+
+#include "command.h"
 
 namespace o3d {
 namespace studio {
@@ -25,10 +26,10 @@ public:
     DummyCommand();
     virtual ~DummyCommand();
 
-    virtual QString commandLabel() const override;
-    virtual bool doCommand() override;
-    virtual bool undoCommand() override;
-    virtual bool redoCommand() override;
+    virtual String commandLabel() const override;
+    virtual Bool doCommand() override;
+    virtual Bool undoCommand() override;
+    virtual Bool redoCommand() override;
 };
 
 } // namespace common

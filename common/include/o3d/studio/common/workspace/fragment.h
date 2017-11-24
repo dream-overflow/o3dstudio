@@ -54,8 +54,8 @@ public:
     Hub* hub();
     const Hub* hub() const;
 
-    virtual Bool serializeContent(QDataStream &stream) const;
-    virtual Bool deserializeContent(QDataStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const;
+    virtual Bool deserializeContent(InStream &stream);
 
 private:
 

@@ -6,8 +6,6 @@
  * @details
  */
 
-#include <QtWidgets/QApplication>
-
 #include "o3d/studio/common/command/fragment/addfragmentcommand.h"
 
 #include "o3d/studio/common/application.h"
@@ -22,7 +20,7 @@
 using namespace o3d::studio::common;
 
 
-AddFragmentCommand::AddFragmentCommand(const LightRef &project, const QString &name) :
+AddFragmentCommand::AddFragmentCommand(const LightRef &project, const String &name) :
     Command("o3s::common::fragment::add", project),
     m_project(project),
     m_fragmentName(name)
@@ -31,19 +29,19 @@ AddFragmentCommand::AddFragmentCommand(const LightRef &project, const QString &n
         m_fragmentName = "Unamed fragment";
     }
 
-    Q_ASSERT(m_project.isValid());
+    O3D_ASSERT(m_project.isValid());
 }
 
 AddFragmentCommand::~AddFragmentCommand()
 {
 }
 
-QString AddFragmentCommand::commandLabel() const
+o3d::String AddFragmentCommand::commandLabel() const
 {
-    return tr("Add a fragment");
+    return fromQString(tr("Add a fragment"));
 }
 
-bool AddFragmentCommand::doCommand()
+o3d::Bool AddFragmentCommand::doCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -56,28 +54,28 @@ bool AddFragmentCommand::doCommand()
             project->addFragment(fragment);
 
             m_fragment = fragment->ref();
-            return true;
+            return True;
         }
     }
 
-    return false;
+    return False;
 }
 
-bool AddFragmentCommand::undoCommand()
+o3d::Bool AddFragmentCommand::undoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         Project *project = workspace->project(m_project);
         if (project) {
             project->removeFragment(m_fragment);
-            return true;
+            return True;
         }
     }
 
-    return false;
+    return False;
 }
 
-bool AddFragmentCommand::redoCommand()
+o3d::Bool AddFragmentCommand::redoCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -88,9 +86,9 @@ bool AddFragmentCommand::redoCommand()
             fragment->setRef(m_fragment);
 
             project->addFragment(fragment);
-            return true;
+            return True;
         }
     }
 
-    return false;
+    return False;
 }

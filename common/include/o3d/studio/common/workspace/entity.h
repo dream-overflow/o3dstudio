@@ -9,12 +9,13 @@
 #ifndef _O3DS_COMMON_ENTITY_H
 #define _O3DS_COMMON_ENTITY_H
 
-#include <QtCore/QDataStream>
-
 #include <o3d/core/templatebitset.h>
 
 #include "../exception.h"
 #include "../objectref.h"
+
+#include <o3d/core/instream.h>
+#include <o3d/core/outstream.h>
 
 namespace o3d {
 namespace studio {
@@ -75,12 +76,15 @@ public:
     /**
      * @brief Serialize the entity content.
      */
-    virtual Bool serializeContent(QDataStream &stream) const;
+    virtual Bool serializeContent(OutStream &stream) const;
 
     /**
      * @brief Deserialize the entity content.
      */
-    virtual Bool deserializeContent(QDataStream &stream);
+    virtual Bool deserializeContent(InStream &stream);
+
+    Bool writeToFile(OutStream &os) const;
+    Bool readFromFile(InStream &is);
 
 protected:
 
@@ -96,20 +100,6 @@ protected:
     inline void setDirty() { m_capacities.enable(STATE_CHANGED); }
     inline void setClean() { m_capacities.disable(STATE_CHANGED); }
     inline Bool isDirty() const { return m_capacities.getBit(STATE_CHANGED); }
-
-public:
-
-    friend QDataStream& operator<<(QDataStream& stream, const Entity &entity)
-    {
-        entity.serializeContent(stream);
-        return stream;
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, Entity &entity)
-    {
-        entity.deserializeContent(stream);
-        return stream;
-    }
 };
 
 } // namespace common

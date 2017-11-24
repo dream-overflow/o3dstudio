@@ -52,8 +52,8 @@ public:
 
     virtual Bool exists() const override;
 
-    virtual Bool serializeContent(QDataStream &stream) const;
-    virtual Bool deserializeContent(QDataStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const;
+    virtual Bool deserializeContent(InStream &stream);
 
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;

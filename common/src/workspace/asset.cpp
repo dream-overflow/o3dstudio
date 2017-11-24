@@ -23,7 +23,7 @@ Asset::Asset(const String &name, Entity *parent) :
 Asset::~Asset()
 {
 //    Hub *hub = nullptr;
-//    foreach (hub, m_hubs) {
+//    for (auto it ...
 //        delete hub;
 //    }
 }
@@ -63,7 +63,7 @@ o3d::Bool Asset::exists() const
     return Entity::exists();
 }
 
-o3d::Bool Asset::serializeContent(QDataStream &stream) const
+o3d::Bool Asset::serializeContent(OutStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
         return False;
@@ -72,10 +72,10 @@ o3d::Bool Asset::serializeContent(QDataStream &stream) const
     return True;
 }
 
-o3d::Bool Asset::deserializeContent(QDataStream &stream)
+o3d::Bool Asset::deserializeContent(InStream &stream)
 {
     if (!Entity::deserializeContent(stream)) {
-        return false;
+        return False;
     }
 
     return False;
