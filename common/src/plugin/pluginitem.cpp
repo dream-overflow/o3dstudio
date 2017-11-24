@@ -28,7 +28,11 @@ PluginItem::PluginItem(const QString &section, const QString &name, const QList<
 
 PluginItem::~PluginItem()
 {
-    qDeleteAll(m_childItems);
+    for (PluginItem *item : m_childItems) {
+        deletePtr(item);
+    }
+
+    m_childItems.clear();
 }
 
 void PluginItem::appendChild(PluginItem *item)

@@ -31,20 +31,24 @@ public:
     DisplaySection(QWidget *parent = 0);
     virtual ~DisplaySection();
 
-    virtual QString name() override;
-    virtual QString label() override;
+    virtual String name() override;
+    virtual String label() override;
 
-    virtual bool setupSection(QWidget *parent) override;
-    virtual bool cleanupSection(QWidget *parent) override;
+    virtual Bool setupSection(QWidget *parent) override;
+    virtual Bool cleanupSection(QWidget *parent) override;
 
     virtual void commit() override;
-    virtual bool save() override;
+    virtual Bool save() override;
 
 private:
 
     Ui::DisplaySection ui;
 
-    QMap<QString, QVariant> m_properties;
+    String m_name;
+    String m_label;
+
+    String m_language;
+    String m_themeColor;
 };
 
 } // namespace main

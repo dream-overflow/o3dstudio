@@ -79,9 +79,6 @@ void QtMainWindow::setup()
     // @todo setup status bar with some fixed widgets addPermanentWidget()
     messenger.info(fromQString(tr("Objective-3D Studio starting...")));
 
-    // selection manager @todo move to o3d
-    connect(&common::Application::instance()->selection(), SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
-
     // common gui @todo move to o3d
     common::UiController &uiCtrl = common::Application::instance()->ui();
 
@@ -112,17 +109,6 @@ void QtMainWindow::setup()
     connect(ui.actionSystemInfo, SIGNAL(triggered(bool)), SLOT(onSystemInfo()));
     connect(ui.actionAboutPlugins, SIGNAL(triggered(bool)), SLOT(onAboutPlugin()));
     connect(ui.actionAbout, SIGNAL(triggered(bool)), SLOT(onAbout()));
-
-    // connections to settings controller @todo move to o3d
-    connect(&common::Application::instance()->settings(),
-            SIGNAL(settingChanged(const QString &, const QVariant &)),
-            SLOT(onSettingChanged(const QString &, const QVariant &)));
-
-    // connections to command manager (async) @todo move to o3d
-    connect(&common::Application::instance()->command(),
-            SIGNAL(commandDone(QString, QString, bool)), SLOT(onCommandDone(QString, QString, bool)), Qt::QueuedConnection);
-    connect(&common::Application::instance()->command(),
-            SIGNAL(commandUpdate()), SLOT(onCommandUpdate()), Qt::QueuedConnection);
 
     // connections to menu edit @todo move to o3d
     connect(ui.actionUndo, SIGNAL(triggered()), SLOT(onUndoAction()));
@@ -159,22 +145,17 @@ void QtMainWindow::setup()
     uiCtrl.addContent(browserContent);
     uiCtrl.setActiveContent(browserContent, true);
 
-    // for test execute a dummy command @todo remove me
-    common::Application::instance()->command().addCommand(new common::DummyCommand());
-
-    // menu @todo move to o3d
+    // menu
     connect(ui.actionRecentsProjectsClearAll, SIGNAL(triggered(bool)), SLOT(onClearAllRecentProjects(bool)));
     connect(ui.actionRecentsResourcesClearAll, SIGNAL(triggered(bool)), SLOT(onClearAllRecentResources(bool)));
-
-    common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
-    connect(workspaceManager, SIGNAL(onWorkspaceActivated(QString)), SLOT(onChangeCurrentWorkspace(QString)));
-
-    onChangeCurrentWorkspace(workspaceManager->current()->name());
 
     initRecentProjectsMenu();
     initRecentResourcesMenu();
 
     messenger.info(fromQString(tr("Objective-3D Studio successfully started !")));
+
+    // for test execute a dummy command @todo remove me
+    common::Application::instance()->command().addCommand(new common::DummyCommand());
 }
 
 QtMainWindow::~QtMainWindow()
@@ -607,36 +588,6 @@ void QtMainWindow::onAbout()
     dialog->show();
 }
 
-void QtMainWindow::onSettingChanged(const QString &key, const QVariant &value)
-{
-    if (key == "o3s::main::language") {
-        QString language = value.toString();
-        loadLanguage(fromQString(language));
-
-        QLocale locale = QLocale::system();
-
-        if (language != "default") {
-            locale = QLocale(language);
-        }
-
-        QString languageName = QLocale::languageToString(locale.language());
-        messenger().info(fromQString(tr("Current language changed to %1").arg(languageName)));
-    } else if (key == "o3s::main::theme::color") {
-        setThemeColor(fromQString(value.toString()));
-        messenger().info(fromQString(tr("Current theme changed to %1").arg(toQString(m_currentTheme))));
-    }
-}
-
-void QtMainWindow::onUndoAction()
-{
-    common::Application::instance()->command().undoLastCommand();
-}
-
-void QtMainWindow::onRedoAction()
-{
-    common::Application::instance()->command().redoLastCommand();
-}
-
 void QtMainWindow::onViewPreviousContentAction()
 {
     /*if (m_contents.size() < 2) {
@@ -689,42 +640,6 @@ void QtMainWindow::onViewNextContentAction()
     }*/
 }
 
-void QtMainWindow::onCommandUpdate()
-{
-    if (common::Application::instance()->command().hasDoneCommands()) {
-        ui.actionUndo->setEnabled(true);
-
-        const QString &nextCmd = common::Application::instance()->command().nextToUndo();
-        ui.actionUndo->setText(tr("Undo %1").arg(nextCmd));
-    } else {
-        ui.actionUndo->setEnabled(false);
-        ui.actionUndo->setText(tr("Undo"));
-    }
-
-    if (common::Application::instance()->command().hasUndoneCommands()) {
-        ui.actionRedo->setEnabled(true);
-
-        const QString &nextCmd = common::Application::instance()->command().nextToRedo();
-        ui.actionRedo->setText(tr("Redo %1").arg(nextCmd));
-    } else {
-        ui.actionRedo->setEnabled(false);
-        ui.actionRedo->setText(tr("Redo"));
-    }
-}
-
-void QtMainWindow::onCommandDone(QString name, QString label, bool done)
-{
-    Q_UNUSED(name)
-
-    if (done) {
-        // @todo move on CommandManager but need sync thread
-        messenger().info(fromQString(tr("%1 done").arg(label)));
-    } else {
-        // @todo move on CommandManager but need sync thread
-        messenger().info(fromQString(tr("%1 undone").arg(label)));
-    }
-}
-
 void QtMainWindow::onOpenRecentProject(bool)
 {
     QString location = sender()->property("location").toString();
@@ -748,32 +663,6 @@ void QtMainWindow::onClearAllRecentResources(bool)
     initRecentResourcesMenu();
 }
 
-void QtMainWindow::onChangeCurrentWorkspace(const QString&)
-{
-    common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    if (workspace) {
-        connect(workspace, SIGNAL(onProjectAdded(const LightRef &)), SLOT(onProjectAdded(const LightRef &)));
-    }
-}
-
-void QtMainWindow::onProjectAdded(const common::LightRef &ref)
-{
-    common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    common::Project *project = workspace->project(ref);
-
-    QStringList recentsProject = settings().get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
-    recentsProject.removeAll(project->path().absolutePath());
-    recentsProject.push_front(project->path().absolutePath());
-
-    while (recentsProject.size() > MAX_RECENTS_FILES) {
-        recentsProject.pop_back();
-    }
-
-    settings().set("o3s::main::project::recents", QVariant(recentsProject));
-
-    initRecentProjectsMenu();
-}
-
 void QtMainWindow::onChangeMainTitle(const QString &title)
 {
     if (title.isEmpty()) {
@@ -781,11 +670,6 @@ void QtMainWindow::onChangeMainTitle(const QString &title)
     } else {
         setWindowTitle(title + " - " + tr("Objective-3D Studio"));
     }
-}
-
-void QtMainWindow::onSelectionChanged()
-{
-//    common::Selection &selection = common::Application::instance()->selection();
 }
 
 void QtMainWindow::closeWorkspace()
@@ -797,39 +681,6 @@ void QtMainWindow::closeWorkspace()
         }
 
         common::Application::instance()->workspaces().closeCurrent();
-    }
-}
-
-void switchTranslator(QTranslator& translator, const QString& filename)
-{
-    // remove the old translator
-    qApp->removeTranslator(&translator);
-
-    // load the new translator
-    QString path = QDir::currentPath() + QDir::separator() + QString(o3d::studio::common::LANGUAGES_PATH);
-    if (translator.load(filename, path, QString(), QString())) {
-        qApp->installTranslator(&translator);
-    }
-}
-
-void QtMainWindow::loadLanguage(const String &language)
-{
-    common::Application::instance()->loadLanguage(language);
-
-    if (m_currentLanguage != language) {
-        QLocale locale = QLocale::system();
-        QString languageCode = toQString(language);
-
-        if (language != "default") {
-            locale = QLocale(toQString(language));
-        } else {
-            languageCode = locale.name().split("_").at(0);
-        }
-
-        QString languageName = QLocale::languageToString(locale.language());
-
-        switchTranslator(m_translator, QString("o3smain_%1.qm").arg(languageCode));
-        m_currentLanguage = language;
     }
 }
 
@@ -913,7 +764,7 @@ void QtMainWindow::openProject(const QString &location)
     }
 
     QString name = parts[parts.length()-1];
-    QString path = common::Application::instance()->workspaces().defaultProjectsPath().absolutePath();
+    QString path = toQString(common::Application::instance()->workspaces().defaultProjectsPath().getFullPathName());
 
     if (parts.length() > 1) {
         parts.removeLast();
@@ -924,13 +775,13 @@ void QtMainWindow::openProject(const QString &location)
     }
 
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    if (workspace->hasProject(location)) {
+    if (workspace->hasProject(fromQString(location))) {
         // currently loaded
         return;
     }
 
-    common::Project *project = new common::Project(name, workspace);
-    project->setLocation(path);
+    common::Project *project = new common::Project(fromQString(name), workspace);
+    project->setLocation(fromQString(path));
 
     try {
         project->load();
@@ -960,6 +811,39 @@ o3d::studio::common::Messenger &QtMainWindow::messenger()
     return common::Application::instance()->messenger();
 }
 
+void switchTranslator(QTranslator& translator, const QString& filename)
+{
+    // remove the old translator
+    qApp->removeTranslator(&translator);
+
+    // load the new translator
+    QString path = QDir::currentPath() + QDir::separator() + QString(o3d::studio::common::LANGUAGES_PATH);
+    if (translator.load(filename, path, QString(), QString())) {
+        qApp->installTranslator(&translator);
+    }
+}
+
+void QtMainWindow::loadLanguage(const String &language)
+{
+    common::Application::instance()->loadLanguage(language);
+
+    if (m_currentLanguage != language) {
+        QLocale locale = QLocale::system();
+        QString languageCode = toQString(language);
+
+        if (language != "default") {
+            locale = QLocale(toQString(language));
+        } else {
+            languageCode = locale.name().split("_").at(0);
+        }
+
+        QString languageName = QLocale::languageToString(locale.language());
+
+        switchTranslator(m_translator, QString("o3smain_%1.qm").arg(languageCode));
+        m_currentLanguage = language;
+    }
+}
+
 //
 // AppWindow standalone
 //
@@ -970,7 +854,17 @@ MainWindow::MainWindow(BaseObject *) :
     m_qtMainWindow = new QtMainWindow();
 
     setTitle("Objective-3D Studio");
-    setIcon("rc/main/icons/32x32/logo.png");
+    // setIcon("rc/main/icons/32x32/logo.png");
+
+    // connections to settings controller
+    common::Application::instance()->settings().settingChanged.connect(this, &MainWindow::onSettingChanged);
+
+    // connections to command manager (async)
+    common::Application::instance()->command().commandDone.connect(this, &MainWindow::onCommandDone, CONNECTION_ASYNCH);
+    common::Application::instance()->command().commandUpdate.connect(this, &MainWindow::onCommandUpdate, CONNECTION_ASYNCH);
+
+    // selection manager
+    common::Application::instance()->selection().selectionChanged.connect(this, &MainWindow::onSelectionChanged);
 
     // message
     common::Messenger& messenger = common::Application::instance()->messenger();
@@ -988,6 +882,12 @@ MainWindow::MainWindow(BaseObject *) :
     ui.detachToolBar.connect(this, &MainWindow::onDetachToolBar);
 
     ui.showContent.connect(this, &MainWindow::onShowContent);
+
+    // workspace manager
+    common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
+    workspaceManager->onWorkspaceActivated.connect(this, &MainWindow::onChangeCurrentWorkspace);
+
+    onChangeCurrentWorkspace(workspaceManager->current()->name());
 
     // setup the main ui
     applySettings();
@@ -1374,4 +1274,109 @@ const o3d::studio::common::Content *MainWindow::contentWidget(const String &name
     } else {
         return nullptr;
     }
+}
+
+void MainWindow::onChangeCurrentWorkspace(const String&)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        workspace->onProjectAdded.connect(this, &MainWindow::onProjectAdded);
+    }
+}
+
+void MainWindow::onSettingChanged(const String &key, const QVariant &value)
+{
+    if (key == "o3s::main::language") {
+        QString language = value.toString();
+        m_qtMainWindow->loadLanguage(fromQString(language));
+
+        QLocale locale = QLocale::system();
+
+        if (language != "default") {
+            locale = QLocale(language);
+        }
+
+        QString languageName = QLocale::languageToString(locale.language());
+        messenger().info(fromQString(tr("Current language changed to %1").arg(languageName)));
+    } else if (key == "o3s::main::theme::color") {
+        m_qtMainWindow->setThemeColor(fromQString(value.toString()));
+        messenger().info(fromQString(tr("Current theme changed to %1").arg(toQString(m_currentTheme))));
+    }
+}
+
+void MainWindow::onUndoAction()
+{
+    common::Application::instance()->command().undoLastCommand();
+}
+
+void MainWindow::onRedoAction()
+{
+    common::Application::instance()->command().redoLastCommand();
+}
+
+void MainWindow::onCommandUpdate()
+{
+    if (common::Application::instance()->command().hasDoneCommands()) {
+        m_qtMainWindow->ui.actionUndo->setEnabled(true);
+
+        String nextCmd = common::Application::instance()->command().nextToUndo();
+        m_qtMainWindow->ui.actionUndo->setText(tr("Undo %1").arg(toQString(nextCmd)));
+    } else {
+        m_qtMainWindow->ui.actionUndo->setEnabled(false);
+        m_qtMainWindow->ui.actionUndo->setText(tr("Undo"));
+    }
+
+    if (common::Application::instance()->command().hasUndoneCommands()) {
+        m_qtMainWindow->ui.actionRedo->setEnabled(true);
+
+        String nextCmd = common::Application::instance()->command().nextToRedo();
+        m_qtMainWindow->ui.actionRedo->setText(tr("Redo %1").arg(toQString(nextCmd)));
+    } else {
+        m_qtMainWindow->ui.actionRedo->setEnabled(false);
+        m_qtMainWindow->ui.actionRedo->setText(tr("Redo"));
+    }
+}
+
+void MainWindow::onCommandDone(String /*name*/, String label, bool done)
+{
+    if (done) {
+        // @todo move on CommandManager but need sync thread
+        messenger().info(fromQString(tr("%1 done").arg(toQString(label))));
+    } else {
+        // @todo move on CommandManager but need sync thread
+        messenger().info(fromQString(tr("%1 undone").arg(toQString(label))));
+    }
+}
+
+void MainWindow::onSelectionChanged()
+{
+//    common::Selection &selection = common::Application::instance()->selection();
+}
+
+void MainWindow::onProjectAdded(const common::LightRef &ref)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    common::Project *project = workspace->project(ref);
+
+    QStringList recentsProject = settings().get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
+    recentsProject.removeAll(toQString(project->path().getFullPathName()));
+    recentsProject.push_front(toQString(project->path().getFullPathName()));
+
+    while (recentsProject.size() > MAX_RECENTS_FILES) {
+        recentsProject.pop_back();
+    }
+
+    settings().set("o3s::main::project::recents", QVariant(recentsProject));
+
+    m_qtMainWindow->initRecentProjectsMenu();
+}
+
+o3d::studio::common::Settings &MainWindow::settings()
+{
+    return common::Application::instance()->settings();
+}
+
+o3d::studio::common::Messenger &MainWindow::messenger()
+{
+    return common::Application::instance()->messenger();
 }

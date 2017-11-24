@@ -22,8 +22,8 @@ DisplaySection::DisplaySection(QWidget *parent) :
 {
     ui.setupUi(this);
 
-    m_properties["language"] = common::Application::instance()->settings().get("o3s::main::language", QVariant("default")).toString();
-    m_properties["themeColor"] = common::Application::instance()->settings().get("o3s::main::theme::color", QVariant("darkorange")).toString();
+    m_language = fromQString(common::Application::instance()->settings().get("o3s::main::language", QVariant("default")).toString());
+    m_themeColor = fromQString(common::Application::instance()->settings().get("o3s::main::theme::color", QVariant("darkorange")).toString());
 
     // languages
     ui.language->addItem(tr("Default system"), QVariant("default"));
@@ -40,55 +40,55 @@ DisplaySection::~DisplaySection()
 {
 }
 
-QString DisplaySection::name()
+o3d::String DisplaySection::name()
 {
     return "o3s::main::display";
 }
 
-QString DisplaySection::label()
+o3d::String DisplaySection::label()
 {
-    return tr("Display");
+    return fromQString(tr("Display"));
 }
 
-bool DisplaySection::setupSection(QWidget *parent)
+o3d::Bool DisplaySection::setupSection(QWidget *parent)
 {
     parent->layout()->addWidget(this);
     show();
 
     // languages
-    int index = ui.language->findData(QVariant(m_properties["language"]));
+    int index = ui.language->findData(QVariant(toQString(m_language)));
     ui.language->setCurrentIndex(index);
 
     // theme colors
-    index = ui.themeColor->findData(QVariant(m_properties["themeColor"]));
+    index = ui.themeColor->findData(QVariant(toQString(m_themeColor)));
     ui.themeColor->setCurrentIndex(index);
 
-    return true;
+    return True;
 }
 
-bool DisplaySection::cleanupSection(QWidget *parent)
+o3d::Bool DisplaySection::cleanupSection(QWidget *parent)
 {
     parent->layout()->removeWidget(this);
     this->setParent(nullptr);
 
     hide();
 
-    return true;
+    return True;
 }
 
 void DisplaySection::commit()
 {
     // @todo store locally data from widgets
-    m_properties["language"] = ui.language->currentData().toString();
-    m_properties["themeColor"] = ui.themeColor->currentData().toString();
+    m_language = fromQString(ui.language->currentData().toString());
+    m_themeColor = fromQString(ui.themeColor->currentData().toString());
 
-    // event on language and themColor to set active
+    // event on language and themeColor to set active
 }
 
-bool DisplaySection::save()
+o3d::Bool DisplaySection::save()
 {
-    common::Application::instance()->settings().set("o3s::main::language", QVariant(m_properties["language"]));
-    common::Application::instance()->settings().set("o3s::main::theme::color", QVariant(m_properties["themeColor"]));
+    common::Application::instance()->settings().set("o3s::main::language", QVariant(toQString(m_language)));
+    common::Application::instance()->settings().set("o3s::main::theme::color", QVariant(toQString(m_themeColor)));
 
-    return true;
+    return True;
 }

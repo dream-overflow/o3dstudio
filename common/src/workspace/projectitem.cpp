@@ -23,7 +23,7 @@ using namespace o3d::studio::common;
 
 ProjectItem::ProjectItem(Entity *entity,
                          const LightRef &ref,
-                         const QString &name,
+                         const String &name,
                          const QIcon &icon,
                          ProjectItem *parentItem) :
     m_path(""),
@@ -34,7 +34,7 @@ ProjectItem::ProjectItem(Entity *entity,
     m_entity(entity)
 {
     if (parentItem) {
-        m_path = parentItem->m_path + "::" + toQString(ref.longId());
+        m_path = parentItem->m_path + "::" + ref.longId();
     } else {
         m_path = name;
     }
@@ -42,28 +42,49 @@ ProjectItem::ProjectItem(Entity *entity,
 
 ProjectItem::~ProjectItem()
 {
-    qDeleteAll(m_childItems);
+    for (ProjectItem *item : m_childItems) {
+        deletePtr(item);
+    }
+
+    m_childItems.clear();
 }
 
 void ProjectItem::appendChild(ProjectItem *item)
 {
-    m_childItems.append(item);
+    m_childItems.push_back(item);
 }
 
 ProjectItem *ProjectItem::child(int row)
 {
-    return m_childItems.value(row);
+    int i = 0;
+    auto it = m_childItems.begin();
+    while (i < row) {
+        ++it;
+        ++i;
+
+        if (it == m_childItems.end()) {
+            return nullptr;
+        }
+    }
+
+    return *it;
 }
 
 int ProjectItem::childCount() const
 {
-    return m_childItems.count();
+    return m_childItems.size();
 }
 
 int ProjectItem::row() const
 {
     if (m_parentItem) {
-        return m_parentItem->m_childItems.indexOf(const_cast<ProjectItem*>(this));
+        int n = 0;
+        for (const ProjectItem* item : m_parentItem->m_childItems) {
+            if (item == this) {
+                return n;
+            }
+            ++n;
+        }
     }
 
     return 0;
@@ -77,7 +98,7 @@ int ProjectItem::columnCount() const
 QVariant ProjectItem::data(int column) const
 {
     if (column == 0) {
-        return m_name;
+        return toQString(m_name);
     } else {
         return QVariant();
     }
@@ -99,21 +120,32 @@ ProjectItem* ProjectItem::parentItem()
 
 void ProjectItem::removeChild(int row)
 {
-    if (row < 0 || row > m_childItems.size()) {
+    if (row < 0 || row > (int)m_childItems.size()) {
         return;
     }
 
-    m_childItems.removeAt(row);
+    int i = 0;
+    auto it = m_childItems.begin();
+    while (i < row) {
+        ++it;
+        ++i;
+
+        if (it == m_childItems.end()) {
+            return;
+        }
+    }
+
+    m_childItems.erase(it);
 }
 
-ProjectItem *ProjectItem::find(const QString &path)
+ProjectItem *ProjectItem::find(const String &path)
 {
     if (path == m_path) {
         return this;
     }
 
-    QStringList dpath = path.split("::");
-    QStringList lpath = m_path.split("::");
+    QStringList dpath = toQString(path).split("::");
+    QStringList lpath = toQString(m_path).split("::");
 
     ProjectItem *result = nullptr;
 
@@ -150,7 +182,7 @@ ProjectItem *ProjectItem::find(const LightRef &ref)
     return nullptr;
 }
 
-const QString &ProjectItem::name() const
+const o3d::String &ProjectItem::name() const
 {
     return m_name;
 }
@@ -170,7 +202,7 @@ Entity *ProjectItem::entity()
     return m_entity;
 }
 
-bool ProjectItem::isProject() const
+o3d::Bool ProjectItem::isProject() const
 {
     if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::project())) {
         return true;
@@ -179,7 +211,7 @@ bool ProjectItem::isProject() const
     }
 }
 
-bool ProjectItem::isHub() const
+o3d::Bool ProjectItem::isHub() const
 {
     if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::hub())) {
         return true;
@@ -188,7 +220,7 @@ bool ProjectItem::isHub() const
     }
 }
 
-bool ProjectItem::isFragment() const
+o3d::Bool ProjectItem::isFragment() const
 {
     if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::fragment())) {
         return true;
@@ -197,7 +229,7 @@ bool ProjectItem::isFragment() const
     }
 }
 
-bool ProjectItem::isAsset() const
+o3d::Bool ProjectItem::isAsset() const
 {
     if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
         return true;

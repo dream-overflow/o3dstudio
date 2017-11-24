@@ -34,17 +34,15 @@
 using namespace o3d::studio::main;
 
 
-MainToolBar::MainToolBar(QWidget *parent) :
-    QToolBar(tr("Main toolbar"), parent)
+MainToolBar::MainToolBar(BaseObject *parent) :
+    BaseObject(parent),
+    common::ToolBar()
 {
-    setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea | Qt::RightToolBarArea);
-    setupButtons();
-
-    setWindowIcon(QIcon::fromTheme("applications-accessories"));
+    setupUi();
 
     // initial setup of current workspace
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
-    connect(workspaceManager, SIGNAL(onWorkspaceActivated(QString)), SLOT(onChangeCurrentWorkspace(QString)));
+    workspaceManager->onWorkspaceActivated.connect(this, &MainToolBar::onChangeCurrentWorkspace);
 
     onChangeCurrentWorkspace(workspaceManager->current()->name());
 }
@@ -56,7 +54,7 @@ MainToolBar::~MainToolBar()
 
 QToolBar *MainToolBar::ui()
 {
-    return this;
+    return m_qtMainToolBar;
 }
 
 o3d::String MainToolBar::elementName() const
@@ -72,7 +70,7 @@ Qt::ToolBarArea MainToolBar::toolBarArea() const
 void MainToolBar::onProjectActivated(const common::LightRef &ref)
 {
     if (ref.isValid()) {
-        QList<QAction*> actionsList = this->actions();
+        QList<QAction*> actionsList = m_qtMainToolBar->actions();
         QAction *action = nullptr;
         foreach (action, actionsList) {
             action->setEnabled(true);
@@ -83,7 +81,7 @@ void MainToolBar::onProjectActivated(const common::LightRef &ref)
 void MainToolBar::onProjectRemoved(const common::LightRef &ref)
 {
     if (ref.isValid()) {
-        QList<QAction*> actionsList = this->actions();
+        QList<QAction*> actionsList = m_qtMainToolBar->actions();
         QAction *action = nullptr;
         foreach (action, actionsList) {
             action->setEnabled(false);
@@ -91,19 +89,48 @@ void MainToolBar::onProjectRemoved(const common::LightRef &ref)
     }
 }
 
-void MainToolBar::onCreateFragment()
+void MainToolBar::setupUi()
+{
+    m_qtMainToolBar = new QtMainToolBar();
+}
+
+void MainToolBar::onChangeCurrentWorkspace(const String &/*name*/)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        workspace->onProjectActivated.connect(this, &MainToolBar::onProjectActivated);
+        workspace->onProjectRemoved.connect(this, &MainToolBar::onProjectRemoved);
+        // workspace->onProjectAdded.connect(this, &MainToolBar::onProjectAdded);
+    }
+}
+
+QtMainToolBar::QtMainToolBar(QWidget *parent) :
+    QToolBar(tr("Main toolbar"), parent)
+{
+    setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea | Qt::RightToolBarArea);
+    setupButtons();
+
+    setWindowIcon(QIcon::fromTheme("applications-accessories"));
+}
+
+QtMainToolBar::~QtMainToolBar()
+{
+
+}
+
+void QtMainToolBar::onCreateFragment()
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         common::Project *project = workspace->activeProject();
         if (project) {
-            common::AddFragmentCommand *cmd = new common::AddFragmentCommand(project->ref().light(), QString());
+            common::AddFragmentCommand *cmd = new common::AddFragmentCommand(project->ref().light(), String());
             common::Application::instance()->command().addCommand(cmd);
         }
     }
 }
 
-void MainToolBar::onCreateHub()
+void QtMainToolBar::onCreateHub()
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -115,7 +142,7 @@ void MainToolBar::onCreateHub()
             return;
         }
 
-        const QSet<common::SelectionItem*> hubs = selection.filterCurrentByBaseType(common::TypeRef::hub());
+        const std::set<common::SelectionItem*> hubs = selection.filterCurrentByBaseType(common::TypeRef::hub());
         if (hubs.size() > 1) {
             return;
         }
@@ -128,16 +155,16 @@ void MainToolBar::onCreateHub()
         // add as sub-hub
         if (hubs.size() == 1) {
             auto it = hubs.begin();
-            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), component->typeRef(), QString());
+            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), component->typeRef(), String());
             common::Application::instance()->command().addCommand(cmd);
         } else {
-            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), component->typeRef(), QString());
+            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), component->typeRef(), String());
             common::Application::instance()->command().addCommand(cmd);
         }
     }
 }
 
-void MainToolBar::setupButtons()
+void QtMainToolBar::setupButtons()
 {
     QAction *addFragment = new QAction(common::UiUtils::tintIcon(":/icons/fragment_flat.svg"), tr("Create a Fragment"));
     connect(addFragment, SIGNAL(triggered(bool)), SLOT(onCreateFragment()));
@@ -155,14 +182,3 @@ void MainToolBar::setupButtons()
     addWidget(new QLineEdit());
 }
 
-void MainToolBar::onChangeCurrentWorkspace(const QString &name)
-{
-    Q_UNUSED(name)
-
-    common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    if (workspace) {
-        // connect(workspace, SIGNAL(onProjectAdded(const LightRef &)), SLOT(onProjectAdded(const LightRef &)));
-        connect(workspace, SIGNAL(onProjectActivated(const LightRef &)), SLOT(onProjectActivated(const LightRef &)));
-        connect(workspace, SIGNAL(onProjectRemoved(const LightRef &)), SLOT(onProjectRemoved(const LightRef &)));
-    }
-}

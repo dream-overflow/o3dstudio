@@ -9,11 +9,6 @@
 #ifndef _O3DS_COMMON_PROPERTYSECTIONNODE_H
 #define _O3DS_COMMON_PROPERTYSECTIONNODE_H
 
-#include <QtCore/QString>
-#include <QtCore/QVariant>
-#include <QtCore/QList>
-#include <QtWidgets/QtWidgets>
-
 #include "propertysection.h"
 
 namespace o3d {
@@ -24,22 +19,22 @@ class O3S_API PropertySectionNode : public PropertySection
 {
 public:
 
-    PropertySectionNode(const QString &section, const QString &label);
+    PropertySectionNode(const String &section, const String &label);
     virtual ~PropertySectionNode();
 
-    virtual QString name() override;
-    virtual QString label() override;
+    virtual String name() override;
+    virtual String label() override;
 
-    virtual bool setupSection(QWidget *parent) override;
-    virtual bool cleanupSection(QWidget *parent) override;
+    virtual Bool setupSection(QWidget *parent) override;
+    virtual Bool cleanupSection(QWidget *parent) override;
 
     virtual void commit() override;
-    virtual bool save() override;
+    virtual Bool save() override;
 
 protected:
 
-    QString m_name;
-    QString m_label;
+    String m_name;
+    String m_label;
 };
 
 } // namespace common

@@ -13,35 +13,52 @@
 #include "o3d/studio/common/ui/toolbar.h"
 #include "o3d/studio/common/objectref.h"
 
+#include <o3d/core/baseobject.h>
+
 namespace o3d {
 namespace studio {
 namespace main {
 
 using o3d::studio::common::LightRef;
 
-class MainToolBar : public QToolBar, public common::ToolBar
+class MainToolBar : public BaseObject, public common::ToolBar
 {
-    Q_OBJECT
-
 public:
 
-    MainToolBar(QWidget *parent = nullptr);
+    MainToolBar(BaseObject *parent = nullptr);
     virtual ~MainToolBar();
 
     virtual QToolBar* ui() override;
     virtual String elementName() const override;
     virtual Qt::ToolBarArea toolBarArea() const override;
 
-signals:
+private /*slots*/:
 
-protected:
-
-private slots:
-
-    void onChangeCurrentWorkspace(const QString &name);
+    void onChangeCurrentWorkspace(const String &name);
 
     void onProjectActivated(const LightRef &ref);
     void onProjectRemoved(const LightRef &ref);
+
+private:
+
+    class QtMainToolBar *m_qtMainToolBar;
+
+    void setupButtons();
+    QIcon tintIcon(const QString &filename);
+
+    void setupUi();
+};
+
+class QtMainToolBar : public QToolBar
+{
+    Q_OBJECT
+
+public:
+
+    QtMainToolBar(QWidget *parent = nullptr);
+    virtual ~QtMainToolBar();
+
+private slots:
 
     void onCreateFragment();
     void onCreateHub();

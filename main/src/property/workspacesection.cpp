@@ -20,15 +20,15 @@
 using namespace o3d::studio::main;
 
 
-WorkspaceSection::WorkspaceSection(const QUuid &ref, QWidget *parent) :
+WorkspaceSection::WorkspaceSection(const Uuid &ref, QWidget *parent) :
     QWidget(parent)
 {
-    m_properties["uuid"] = ref;
+    m_properties["uuid"] = toQString(ref.toRfc4122());
     m_properties["name"] = tr("undefined");
 
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
-        m_properties["name"] = workspace->name();
+        m_properties["name"] = toQString(workspace->name());
     }
 
     // ui.setupUi(this);
@@ -38,32 +38,32 @@ WorkspaceSection::~WorkspaceSection()
 {
 }
 
-QString WorkspaceSection::name()
+o3d::String WorkspaceSection::name()
 {
-    return "o3s::workspace::" + m_properties["name"].toString();
+    return "o3s::workspace::" + fromQString(m_properties["name"].toString());
 }
 
-QString WorkspaceSection::label()
+o3d::String WorkspaceSection::label()
 {
-    return m_properties["name"].toString();
+    return fromQString(m_properties["name"].toString());
 }
 
-bool WorkspaceSection::setupSection(QWidget *parent)
+o3d::Bool WorkspaceSection::setupSection(QWidget *parent)
 {
     parent->layout()->addWidget(this);
     show();
 
-    return true;
+    return True;
 }
 
-bool WorkspaceSection::cleanupSection(QWidget *parent)
+o3d::Bool WorkspaceSection::cleanupSection(QWidget *parent)
 {
     parent->layout()->removeWidget(this);
     this->setParent(nullptr);
 
     hide();
 
-    return true;
+    return True;
 }
 
 void WorkspaceSection::commit()
@@ -71,8 +71,8 @@ void WorkspaceSection::commit()
 
 }
 
-bool WorkspaceSection::save()
+o3d::Bool WorkspaceSection::save()
 {
 
-    return true;
+    return True;
 }

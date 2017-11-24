@@ -10,7 +10,8 @@
 #define _O3DS_COMMON_PROJECTMODEL_H
 
 #include <QtCore/QAbstractItemModel>
-#include <QtCore/QList>
+
+#include <list>
 
 #include "projectitem.h"
 

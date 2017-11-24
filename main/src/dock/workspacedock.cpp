@@ -34,43 +34,36 @@
 using namespace o3d::studio::main;
 
 
-WorkspaceDock::WorkspaceDock(QWidget *parent) :
-    QDockWidget(tr("Workspace"), parent),
+WorkspaceDock::WorkspaceDock(BaseObject *parent) :
+    BaseObject(parent),
     common::Dock(),
     m_lastSelected(nullptr)
 {
-    setMinimumWidth(200);
-    setMinimumHeight(200);
-
     setupUi();
-    setFocusPolicy(Qt::StrongFocus);
 
     // initial setup of current workspace
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
-    connect(workspaceManager, SIGNAL(onWorkspaceActivated(QString)), SLOT(onChangeCurrentWorkspace(QString)));
+    workspaceManager->onWorkspaceActivated.connect(this, &WorkspaceDock::onChangeCurrentWorkspace);
 
     onChangeCurrentWorkspace(workspaceManager->current()->name());
 
-    // selection
-    QItemSelectionModel *selectionModel = m_treeView->selectionModel();
-    connect(selectionModel, SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), SLOT(onSelectionChanged(const QModelIndex &, const QModelIndex &)));
-
-    // details
-    connect(m_treeView, SIGNAL(doubleClicked(const QModelIndex &)), SLOT(onSelectionDetails(const QModelIndex &)));
-    connect(m_treeView, SIGNAL(clicked(const QModelIndex &)), SLOT(onSelectItem(const QModelIndex &)));
-
     // selection manager
-    connect(&common::Application::instance()->selection(), SIGNAL(selectionChanged()), SLOT(onSelectManagerChange()));
+    common::Application::instance()->selection().selectionChanged.connect(this, &WorkspaceDock::onSelectManagerChange);
 }
 
 WorkspaceDock::~WorkspaceDock()
 {
-    delete m_treeView;
+    // deletePtr(m_qtWorkspaceDock);
+}
+
+void WorkspaceDock::setupUi()
+{
+    m_qtWorkspaceDock = new QtWorkspaceDock(nullptr);
 }
 
 QDockWidget *WorkspaceDock::ui()
 {
-    return this;
+    return m_qtWorkspaceDock;
 }
 
 o3d::String WorkspaceDock::elementName() const
@@ -85,7 +78,7 @@ Qt::DockWidgetArea WorkspaceDock::dockWidgetArea() const
 
 void WorkspaceDock::onAddProject(const common::LightRef &ref)
 {
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
     common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
 
     // add a new project item
@@ -96,7 +89,7 @@ void WorkspaceDock::onAddProject(const common::LightRef &ref)
 
 void WorkspaceDock::onRemoveProject(const common::LightRef &ref)
 {
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
     common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
 
     // remove a project item
@@ -129,7 +122,159 @@ void WorkspaceDock::onActivateProject(const common::LightRef &ref)
     }
 }
 
-void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelIndex &previous)
+void WorkspaceDock::onProjectHubAdded(const common::LightRef &ref)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+    common::Hub *hub = workspace->findHub(ref);
+
+    // add a new project hub
+    if (hub) {
+        projectModel->addHub(hub);
+    }
+}
+
+void WorkspaceDock::onProjectHubRemoved(const common::LightRef &ref)
+{
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+
+    // remove a project hub
+    projectModel->removeHub(ref);
+}
+
+void WorkspaceDock::onProjectFragmentAdded(const o3d::studio::common::LightRef &ref)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+    common::Fragment *fragment = workspace->fragment(ref);
+
+    // add a new project fragment
+    if (fragment) {
+        projectModel->addFragment(fragment);
+    }
+}
+
+void WorkspaceDock::onProjectFragmentRemoved(const o3d::studio::common::LightRef &ref)
+{
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+
+    // remove a project fragment
+    projectModel->removeFragment(ref);
+}
+
+void WorkspaceDock::onProjectAssetAdded(const o3d::studio::common::LightRef &ref)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+    common::Asset *asset = workspace->asset(ref);
+
+    // add a new project asset
+    if (asset) {
+        projectModel->addAsset(asset);
+    }
+}
+
+void WorkspaceDock::onProjectAssetRemoved(const o3d::studio::common::LightRef &ref)
+{
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+
+    // remove a project asset
+    projectModel->removeAsset(ref);
+}
+
+void WorkspaceDock::onSelectManagerChange()
+{
+    const std::set<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPreviousByBaseType(common::TypeRef::project());
+    const std::set<common::SelectionItem *> currentSelection = common::Application::instance()->selection().filterCurrentByBaseType(common::TypeRef::project());
+
+    common::SelectionItem *selectionItem = nullptr;
+    foreach (selectionItem, previousSelection) {
+
+    }
+
+    selectionItem = nullptr;
+    foreach (selectionItem, currentSelection) {
+    }
+
+//    QModelIndex previous = m_treeView->currentIndex();
+//    QModelIndex current = QModelIndex();
+
+//    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
+//    common::ProjectItem *projectItem = projectModel->find(ref);
+//    if (projectItem) {
+//        current = projectModel->index(projectItem->row(), 0);
+//        m_treeView->selectionModel()->select(current, QItemSelectionModel::Current);
+//    }
+}
+
+void WorkspaceDock::onChangeCurrentWorkspace(const String &name)
+{
+    Q_UNUSED(name)
+
+    QAbstractItemModel *oldModel = m_qtWorkspaceDock->m_treeView->model();
+    m_qtWorkspaceDock->m_treeView->setModel(new common::ProjectModel());
+
+    if (oldModel) {
+        delete oldModel;
+    }
+
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        // workspace project
+        workspace->onProjectAdded.connect(this, &WorkspaceDock::onAddProject);
+        workspace->onProjectRemoved.connect(this, &WorkspaceDock::onRemoveProject);
+
+        // project entities
+        workspace->onProjectHubAdded.connect(this, &WorkspaceDock::onProjectHubAdded, CONNECTION_ASYNCH);
+        workspace->onProjectHubRemoved.connect(this, &WorkspaceDock::onProjectHubRemoved, CONNECTION_ASYNCH);
+
+        workspace->onProjectFragmentAdded.connect(this, &WorkspaceDock::onProjectFragmentAdded, CONNECTION_ASYNCH);
+        workspace->onProjectFragmentRemoved.connect(this, &WorkspaceDock::onProjectFragmentRemoved, CONNECTION_ASYNCH);
+
+        workspace->onProjectAssetAdded.connect(this, &WorkspaceDock::onProjectAssetAdded, CONNECTION_ASYNCH);
+        workspace->onProjectAssetRemoved.connect(this, &WorkspaceDock::onProjectAssetRemoved, CONNECTION_ASYNCH);
+    }
+}
+
+QtWorkspaceDock::QtWorkspaceDock(QWidget *parent) :
+    QDockWidget(tr("Workspace"), parent),
+    m_lastSelected(nullptr)
+{
+    setMinimumWidth(200);
+    setMinimumHeight(200);
+
+    setupUi();
+    setFocusPolicy(Qt::StrongFocus);
+
+    // selection
+    QItemSelectionModel *selectionModel = m_treeView->selectionModel();
+    connect(selectionModel, SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), SLOT(onSelectionChanged(const QModelIndex &, const QModelIndex &)));
+
+    // details
+    connect(m_treeView, SIGNAL(doubleClicked(const QModelIndex &)), SLOT(onSelectionDetails(const QModelIndex &)));
+    connect(m_treeView, SIGNAL(clicked(const QModelIndex &)), SLOT(onSelectItem(const QModelIndex &)));
+}
+
+QtWorkspaceDock::~QtWorkspaceDock()
+{
+    delete m_treeView;
+}
+
+
+void QtWorkspaceDock::onSelectionDetails(const QModelIndex &)
+{
+    QModelIndex current = m_treeView->currentIndex();
+
+    if (current.isValid()) {
+        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
+        common::Project *project = projectItem->project();
+        if (project) {
+            // @todo
+        }
+    }
+}
+
+void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     if (previous.isValid()) {
         // @todo for multiple selection
@@ -179,20 +324,7 @@ void WorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelI
     }
 }
 
-void WorkspaceDock::onSelectionDetails(const QModelIndex &)
-{
-    QModelIndex current = m_treeView->currentIndex();
-
-    if (current.isValid()) {
-        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
-        common::Project *project = projectItem->project();
-        if (project) {
-            // @todo
-        }
-    }
-}
-
-void WorkspaceDock::onSelectItem(const QModelIndex &index)
+void QtWorkspaceDock::onSelectItem(const QModelIndex &index)
 {
     // @todo should be unset when selection change
     // onSelectionChanged(index, index);
@@ -238,72 +370,13 @@ void WorkspaceDock::onSelectItem(const QModelIndex &index)
     }*/
 }
 
-void WorkspaceDock::onProjectHubAdded(const common::LightRef &ref)
-{
-    common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-    common::Hub *hub = workspace->findHub(ref);
 
-    // add a new project hub
-    if (hub) {
-        projectModel->addHub(hub);
-    }
-}
-
-void WorkspaceDock::onProjectHubRemoved(const common::LightRef &ref)
-{
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-
-    // remove a project hub
-    projectModel->removeHub(ref);
-}
-
-void WorkspaceDock::onProjectFragmentAdded(const o3d::studio::common::LightRef &ref)
-{
-    common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-    common::Fragment *fragment = workspace->fragment(ref);
-
-    // add a new project fragment
-    if (fragment) {
-        projectModel->addFragment(fragment);
-    }
-}
-
-void WorkspaceDock::onProjectFragmentRemoved(const o3d::studio::common::LightRef &ref)
-{
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-
-    // remove a project fragment
-    projectModel->removeFragment(ref);
-}
-
-void WorkspaceDock::onProjectAssetAdded(const o3d::studio::common::LightRef &ref)
-{
-    common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-    common::Asset *asset = workspace->asset(ref);
-
-    // add a new project asset
-    if (asset) {
-        projectModel->addAsset(asset);
-    }
-}
-
-void WorkspaceDock::onProjectAssetRemoved(const o3d::studio::common::LightRef &ref)
-{
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-
-    // remove a project asset
-    projectModel->removeAsset(ref);
-}
-
-void WorkspaceDock::focusInEvent(QFocusEvent *event)
+void QtWorkspaceDock::focusInEvent(QFocusEvent *event)
 {
     QDockWidget::focusInEvent(event);
 }
 
-void WorkspaceDock::keyPressEvent(QKeyEvent *event)
+void QtWorkspaceDock::keyPressEvent(QKeyEvent *event)
 {
     QModelIndex currentIndex = m_treeView->currentIndex();
 
@@ -332,32 +405,7 @@ void WorkspaceDock::keyPressEvent(QKeyEvent *event)
     return QDockWidget::keyPressEvent(event);
 }
 
-void WorkspaceDock::onSelectManagerChange()
-{
-    const QSet<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPreviousByBaseType(common::TypeRef::project());
-    const QSet<common::SelectionItem *> currentSelection = common::Application::instance()->selection().filterCurrentByBaseType(common::TypeRef::project());
-
-    common::SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, previousSelection) {
-
-    }
-
-    selectionItem = nullptr;
-    foreach (selectionItem, currentSelection) {
-    }
-
-//    QModelIndex previous = m_treeView->currentIndex();
-//    QModelIndex current = QModelIndex();
-
-//    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-//    common::ProjectItem *projectItem = projectModel->find(ref);
-//    if (projectItem) {
-//        current = projectModel->index(projectItem->row(), 0);
-//        m_treeView->selectionModel()->select(current, QItemSelectionModel::Current);
-//    }
-}
-
-void WorkspaceDock::setupUi()
+void QtWorkspaceDock::setupUi()
 {
     setWindowIcon(QIcon::fromTheme("input-gaming"));
 
@@ -366,34 +414,4 @@ void WorkspaceDock::setupUi()
 
     m_treeView->setHeaderHidden(true);
     m_treeView->setModel(new common::ProjectModel());
-}
-
-void WorkspaceDock::onChangeCurrentWorkspace(const QString &name)
-{
-    Q_UNUSED(name)
-
-    QAbstractItemModel *oldModel = m_treeView->model();
-    m_treeView->setModel(new common::ProjectModel());
-
-    if (oldModel) {
-        delete oldModel;
-    }
-
-    common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    if (workspace) {
-        // workspace project
-        connect(workspace, SIGNAL(onProjectAdded(const LightRef &)), SLOT(onAddProject(const LightRef &)));
-        connect(workspace, SIGNAL(onProjectActivated(const LightRef &)), SLOT(onActivateProject(const LightRef &)));
-        connect(workspace, SIGNAL(onProjectRemoved(const LightRef &)), SLOT(onRemoveProject(const LightRef &)));
-
-        // project entities
-        connect(workspace, SIGNAL(onProjectHubAdded(const LightRef &)), SLOT(onProjectHubAdded(const LightRef &)), Qt::QueuedConnection);
-        connect(workspace, SIGNAL(onProjectHubRemoved(const LightRef &)), SLOT(onProjectHubRemoved(const LightRef &)), Qt::QueuedConnection);
-
-        connect(workspace, SIGNAL(onProjectFragmentAdded(const LightRef &)), SLOT(onProjectFragmentAdded(const LightRef &)), Qt::QueuedConnection);
-        connect(workspace, SIGNAL(onProjectFragmentRemoved(const LightRef &)), SLOT(onProjectFragmentRemoved(const LightRef &)), Qt::QueuedConnection);
-
-        connect(workspace, SIGNAL(onProjectAssetAdded(const LightRef &)), SLOT(onProjectAssetAdded(const LightRef &)), Qt::QueuedConnection);
-        connect(workspace, SIGNAL(onProjectAssetRemoved(const LightRef &)), SLOT(onProjectAssetRemoved(const LightRef &)), Qt::QueuedConnection);
-    }
 }

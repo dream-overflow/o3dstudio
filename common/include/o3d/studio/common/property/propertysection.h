@@ -9,10 +9,9 @@
 #ifndef _O3DS_COMMON_PROPERTYSECTION_H
 #define _O3DS_COMMON_PROPERTYSECTION_H
 
-#include <QtCore/QString>
-#include <QtCore/QVariant>
-#include <QtCore/QList>
 #include <QtWidgets/QtWidgets>
+
+#include <o3d/core/string.h>
 
 #include "../global.h"
 
@@ -26,14 +25,14 @@ public:
 
     virtual ~PropertySection() = 0;
 
-    virtual QString name() = 0;
-    virtual QString label() = 0;
+    virtual String name() = 0;
+    virtual String label() = 0;
 
-    virtual bool setupSection(QWidget *parent) = 0;
-    virtual bool cleanupSection(QWidget *parent) = 0;
+    virtual Bool setupSection(QWidget *parent) = 0;
+    virtual Bool cleanupSection(QWidget *parent) = 0;
 
     virtual void commit() = 0;
-    virtual bool save() = 0;
+    virtual Bool save() = 0;
 };
 
 } // namespace common

@@ -6,18 +6,22 @@
  * @details
  */
 
+#include <QtCore/QCoreApplication>
+
 #include "o3d/studio/common/property/propertymodel.h"
 #include "o3d/studio/common/property/propertyitem.h"
 #include "o3d/studio/common/property/propertysection.h"
 
+#include <algorithm>
+
+#include <o3d/core/stringlist.h>
+
 using namespace o3d::studio::common;
 
-PropertyModel::PropertyModel(const QList<PropertySection*> &data, QObject *parent) :
+PropertyModel::PropertyModel(const std::list<PropertySection *> &data, QObject *parent) :
     QAbstractItemModel(parent)
 {
-    QList<QVariant> rootData;
-    rootData << tr("Properties");
-    m_rootItem = new PropertyItem("o3s", rootData);
+    m_rootItem = new PropertyItem("o3s", fromQString(tr("Properties")));
 
     setupModelData(data, m_rootItem);
 }
@@ -142,16 +146,13 @@ static QString makeParentPath(const QStringList &path, int minus) {
     return parentPath;
 }
 
-PropertyItem* createItem(const QString &section, const QString &label, PropertySection *ps, PropertyItem *itemParent)
+PropertyItem* createItem(const o3d::String &section, const o3d::String &label, PropertySection *ps, PropertyItem *itemParent)
 {
-    QList<QVariant> itemData;
-    itemData << label;
-
-    PropertyItem *item = new PropertyItem(section, itemData, ps, itemParent);
+    PropertyItem *item = new PropertyItem(section, label, ps, itemParent);
     return item;
 }
 
-void PropertyModel::setupModelData(const QList<PropertySection *> &data, PropertyItem *parent)
+void PropertyModel::setupModelData(const std::list<PropertySection *> &data, PropertyItem *parent)
 {
     Q_UNUSED(parent)
 
@@ -161,11 +162,11 @@ void PropertyModel::setupModelData(const QList<PropertySection *> &data, Propert
     PropertyItem *itemParent = nullptr;
 
     foreach (propertySection, data) {
-        QStringList path = propertySection->name().split("::");
+        QStringList path = toQString(propertySection->name()).split("::");
         QString leaf = path.last();
 
         QString parentPath = makeParentPath(path, 1);
-        itemParent = rootItem->find(parentPath);
+        itemParent = rootItem->find(fromQString(parentPath));
 
         // no parent found create intermediates nodes
         if (itemParent == nullptr) {
@@ -176,11 +177,11 @@ void PropertyModel::setupModelData(const QList<PropertySection *> &data, Propert
                 QString lParentPath = makeParentPath(path, path.length() - i - 1);
 
                 // is level exists
-                PropertyItem *lParent = rootItem->find(lParentPath);
+                PropertyItem *lParent = rootItem->find(fromQString(lParentPath));
 
                 // create it from current itemParent
                 if (lParent == nullptr) {
-                    lParent = createItem(path[i], path[i], nullptr, itemParent);
+                    lParent = createItem(fromQString(path[i]), fromQString(path[i]), nullptr, itemParent);
                     itemParent->appendChild(lParent);
                 }
 
@@ -188,11 +189,12 @@ void PropertyModel::setupModelData(const QList<PropertySection *> &data, Propert
             }
         }
 
-        PropertyItem *item = createItem(leaf, propertySection->label(), propertySection, itemParent);
+        PropertyItem *item = createItem(fromQString(leaf), propertySection->label(), propertySection, itemParent);
         itemParent->appendChild(item);
 
-        if (m_sections.indexOf(propertySection) < 0) {
-            m_sections.append(propertySection);
+        auto it = std::find(m_sections.begin(), m_sections.end(), propertySection);
+        if (it == m_sections.end()) {
+            m_sections.push_back(propertySection);
         }
     }
 }

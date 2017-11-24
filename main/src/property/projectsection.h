@@ -9,9 +9,7 @@
 #ifndef _O3DS_MAIN_PROJECTSECTION_H
 #define _O3DS_MAIN_PROJECTSECTION_H
 
-#include <QtCore/QString>
 #include <QtCore/QVariant>
-#include <QtCore/QList>
 #include <QtWidgets/QtWidgets>
 
 #include "o3d/studio/common/property/propertysection.h"
@@ -32,20 +30,23 @@ public:
     ProjectSection(const common::LightRef &ref, QWidget *parent = 0);
     virtual ~ProjectSection();
 
-    virtual QString name() override;
-    virtual QString label() override;
+    virtual String name() override;
+    virtual String label() override;
 
-    virtual bool setupSection(QWidget *parent) override;
-    virtual bool cleanupSection(QWidget *parent) override;
+    virtual Bool setupSection(QWidget *parent) override;
+    virtual Bool cleanupSection(QWidget *parent) override;
 
     virtual void commit() override;
-    virtual bool save() override;
+    virtual Bool save() override;
 
 private:
 
     // Ui::WorkspaceSection ui;
 
-    QMap<QString, QVariant> m_properties;
+    String m_name;
+    String m_label;
+
+    common::LightRef m_ref;
 };
 
 } // namespace main

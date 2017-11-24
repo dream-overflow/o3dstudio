@@ -24,13 +24,13 @@ WorkspaceManager::WorkspaceManager() :
     String homePath = fromQString(QDir::home().absolutePath());
     DiskDir homeDir(homePath);
 
-    if (!homeDir.check(".o3dstudio")) {
+    if (homeDir.check(".o3dstudio") != Dir::SUCCESS) {
         if (homeDir.makeDir(".o3dstudio") != Dir::SUCCESS) {
             throw;
         }
     }
 
-    m_defaultPath = fromQString(QDir::home().absolutePath());
+    m_defaultPath = homePath;
     if (!m_defaultPath.cd(".o3dstudio")) {
         throw;
     }

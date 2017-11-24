@@ -19,7 +19,7 @@ PropertySection::~PropertySection()
 {
 }
 
-PropertySectionNode::PropertySectionNode(const QString &section, const QString &label) :
+PropertySectionNode::PropertySectionNode(const String &section, const String &label) :
     m_name(section),
     m_label(label)
 {
@@ -29,25 +29,23 @@ PropertySectionNode::~PropertySectionNode()
 {
 }
 
-QString PropertySectionNode::name()
+o3d::String PropertySectionNode::name()
 {
     return m_name;
 }
 
-QString PropertySectionNode::label()
+o3d::String PropertySectionNode::label()
 {
     return m_label;
 }
 
-bool PropertySectionNode::setupSection(QWidget *parent)
+o3d::Bool PropertySectionNode::setupSection(QWidget */*parent*/)
 {
-    Q_UNUSED(parent)
     return true;
 }
 
-bool PropertySectionNode::cleanupSection(QWidget *parent)
+o3d::Bool PropertySectionNode::cleanupSection(QWidget */*parent*/)
 {
-    Q_UNUSED(parent)
     return true;
 }
 
@@ -56,7 +54,7 @@ void PropertySectionNode::commit()
 
 }
 
-bool PropertySectionNode::save()
+o3d::Bool PropertySectionNode::save()
 {
     return true;
 }

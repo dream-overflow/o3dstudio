@@ -12,6 +12,9 @@
 class QTreeView;
 
 #include <QtWidgets/QDockWidget>
+
+#include <o3d/core/baseobject.h>
+
 #include "o3d/studio/common/objectref.h"
 #include "o3d/studio/common/ui/dock.h"
 #include "o3d/studio/common/workspace/projectitem.h"
@@ -22,37 +25,24 @@ namespace main {
 
 using o3d::studio::common::LightRef;
 
-class WorkspaceDock : public QDockWidget, public common::Dock
+class WorkspaceDock : public BaseObject, public common::Dock
 {
-    Q_OBJECT
-
 public:
 
-    WorkspaceDock(QWidget *parent = nullptr);
+    WorkspaceDock(BaseObject *parent = nullptr);
     virtual ~WorkspaceDock();
 
     virtual QDockWidget* ui() override;
     virtual String elementName() const override;
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
-    virtual void focusInEvent(QFocusEvent *event) override;
-    virtual void keyPressEvent(QKeyEvent *event) override;
+public /*slots*/:
 
-signals:
-
-protected:
-
-public slots:
-
-    void onChangeCurrentWorkspace(const QString &name);
+    void onChangeCurrentWorkspace(const String &name);
 
     void onAddProject(const LightRef &ref);
     void onRemoveProject(const LightRef &ref);
     void onActivateProject(const LightRef &ref);
-
-    void onSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
-    void onSelectionDetails(const QModelIndex &);
-    void onSelectItem(const QModelIndex &index);
 
     void onProjectHubAdded(const LightRef &ref);
     void onProjectHubRemoved(const LightRef &ref);
@@ -67,10 +57,37 @@ public slots:
 
 private:
 
+    class QtWorkspaceDock *m_qtWorkspaceDock;
+    common::ProjectItem *m_lastSelected;
+
+    void setupUi();
+};
+
+class QtWorkspaceDock : public QDockWidget
+{
+    Q_OBJECT
+
+    friend class WorkspaceDock;
+
+public:
+
+    QtWorkspaceDock(QWidget *parent = nullptr);
+    virtual ~QtWorkspaceDock();
+
+    virtual void focusInEvent(QFocusEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
+
+public slots:
+
+    void onSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
+    void onSelectionDetails(const QModelIndex &);
+    void onSelectItem(const QModelIndex &index);
+
+public:
+
     void setupUi();
 
     QTreeView *m_treeView;
-
     common::ProjectItem *m_lastSelected;
 };
 

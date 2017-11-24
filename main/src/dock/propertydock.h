@@ -14,30 +14,48 @@ class QTreeView;
 #include <QtWidgets/QDockWidget>
 #include "o3d/studio/common/ui/dock.h"
 
+#include <o3d/core/baseobject.h>
+
 namespace o3d {
 namespace studio {
 namespace main {
 
-class PropertyDock : public QDockWidget, public common::Dock
+class PropertyDock : public BaseObject, public common::Dock
 {
-    Q_OBJECT
-
 public:
 
-    PropertyDock(QWidget *parent = nullptr);
+    PropertyDock(BaseObject *parent = nullptr);
     virtual ~PropertyDock();
 
     virtual QDockWidget* ui() override;
     virtual String elementName() const override;
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
+public /*slots*/:
+
+    void onSelectionChanged();
+
+private:
+
+    class QtPropertyDock *m_qtPropertyDock;
+
+    void setupUi();
+};
+
+class QtPropertyDock : public QDockWidget
+{
+    Q_OBJECT
+
+public:
+
+    QtPropertyDock(QWidget *parent = nullptr);
+    virtual ~QtPropertyDock();
+
 signals:
 
 protected:
 
 public slots:
-
-    void onSelectionChanged();
 
 private:
 

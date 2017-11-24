@@ -22,17 +22,16 @@ using namespace o3d::studio::main;
 
 
 ProjectSection::ProjectSection(const common::LightRef &ref, QWidget *parent) :
-    QWidget(parent)
+    QWidget(parent),
+    m_ref(ref)
 {
-    // m_properties["ref"] = ref; conversion to QVariant ?
-    m_properties["longId"] = toQString(ref.longId());
-    m_properties["name"] = tr("undefined");
+    m_name = fromQString(tr("undefined"));
 
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         const common::Project *project = workspace->project(ref);
         if (project) {
-            m_properties["name"] = project->name();
+            m_name = project->name();
         }
     }
 
@@ -43,32 +42,32 @@ ProjectSection::~ProjectSection()
 {
 }
 
-QString ProjectSection::name()
+o3d::String ProjectSection::name()
 {
-    return "o3s::workspace::project::" + m_properties["name"].toString();
+    return "o3s::workspace::project::" + m_name;
 }
 
-QString ProjectSection::label()
+o3d::String ProjectSection::label()
 {
-    return m_properties["name"].toString();
+    return m_label;
 }
 
-bool ProjectSection::setupSection(QWidget *parent)
+o3d::Bool ProjectSection::setupSection(QWidget *parent)
 {
     parent->layout()->addWidget(this);
     show();
 
-    return true;
+    return True;
 }
 
-bool ProjectSection::cleanupSection(QWidget *parent)
+o3d::Bool ProjectSection::cleanupSection(QWidget *parent)
 {
     parent->layout()->removeWidget(this);
     this->setParent(nullptr);
 
     hide();
 
-    return true;
+    return True;
 }
 
 void ProjectSection::commit()
@@ -76,8 +75,8 @@ void ProjectSection::commit()
 
 }
 
-bool ProjectSection::save()
+o3d::Bool ProjectSection::save()
 {
 
-    return true;
+    return True;
 }

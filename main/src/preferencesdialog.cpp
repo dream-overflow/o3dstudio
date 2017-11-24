@@ -67,7 +67,7 @@ void PreferencesDialog::changeEvent(QEvent *event)
                 common::PropertyItem *propertyItem = static_cast<common::PropertyItem*>(current.internalPointer());
                 int row = current.row();
                 int column = current.column();
-                QString path = propertyItem->path();
+                String path = propertyItem->path();
                 propertyItem = nullptr;
 
                 // renegerate model for translations
@@ -116,11 +116,11 @@ void PreferencesDialog::onSectionPropertyChanged(const QModelIndex &current, con
         currentPs->setupSection(ui.propertyFrame);
 
         // compound label
-        QString label = currentPs->label();
+        QString label = toQString(currentPs->label());
 
         common::PropertyItem *parent = item->parentItem();
         while (parent != nullptr && parent->section()) {
-            QString l = parent->section()->label();
+            QString l = toQString(parent->section()->label());
             label.prepend(" > ").prepend(l);
             parent = parent->parentItem();
         }
@@ -185,7 +185,6 @@ bool caseInsensitiveLessThan(const o3d::studio::common::Project *p1, const o3d::
     return p1->name().toLower() < p2->name().toLower();
 }
 
-
 void PreferencesDialog::setupCategories()
 {
     common::PropertyModel *model = static_cast<common::PropertyModel*>(ui.categoryTree->model());
@@ -195,33 +194,34 @@ void PreferencesDialog::setupCategories()
         delete model;
     }
 
-    QList<common::PropertySection*> sections;
+    std::list<common::PropertySection*> sections;
 
     // setup standard static sections
-    sections.append(new common::PropertySectionNode("o3s::main", tr("General")));
-    sections.append(new DisplaySection());
+    sections.push_back(new common::PropertySectionNode("o3s::main", fromQString(tr("General"))));
+    sections.push_back(new DisplaySection());
 
-    sections.append(new common::PropertySectionNode("o3s::workspace", tr("Workspace")));
-    sections.append(new common::PropertySectionNode("o3s::workspace::project", tr("Projects")));
-    sections.append(new common::PropertySectionNode("o3s::plugin", tr("Plugins")));
-    sections.append(new common::PropertySectionNode("o3s::tool", tr("Tools")));
+    sections.push_back(new common::PropertySectionNode("o3s::workspace", fromQString(tr("Workspace"))));
+    sections.push_back(new common::PropertySectionNode("o3s::workspace::project", fromQString(tr("Projects"))));
+    sections.push_back(new common::PropertySectionNode("o3s::plugin", fromQString(tr("Plugins"))));
+    sections.push_back(new common::PropertySectionNode("o3s::tool", fromQString(tr("Tools"))));
 
     // workspace
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         // specialized workspace section node
-        sections.append(new WorkspaceSection(workspace->uuid()));
+        sections.push_back(new WorkspaceSection(workspace->uuid()));
         // @todo others workspace section
 
-        QList<common::Project*> loadedProjectList = workspace->loadedProjectList();
+        std::list<common::Project*> loadedProjectList = workspace->loadedProjectList();
 
         // sort by project name
-        std::sort(loadedProjectList.begin(), loadedProjectList.end(), caseInsensitiveLessThan);
+        loadedProjectList.sort(caseInsensitiveLessThan);
+        // std::sort(loadedProjectList.begin(), loadedProjectList.end(), caseInsensitiveLessThan);
 
         common::Project *project = nullptr;
         foreach (project, loadedProjectList) {
             // specialized project section node
-            sections.append(new ProjectSection(project->ref().light()));
+            sections.push_back(new ProjectSection(project->ref().light()));
             // @todo project sub-sections
         }
     }

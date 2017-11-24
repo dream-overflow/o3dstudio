@@ -174,7 +174,7 @@ ProjectItem *ProjectModel::addProject(Project *project)
 
     ProjectItem *item = new ProjectItem(project,
                                         project->ref().light(),
-                                        toQString(project->name()),
+                                        project->name(),
                                         QIcon::fromTheme("document-open"),
                                         m_rootItem);
     m_rootItem->appendChild(item);
@@ -250,7 +250,7 @@ ProjectItem *ProjectModel::addHub(common::Hub *hub)
 
     ProjectItem *item = new ProjectItem(hub,
                                         hub->ref().light(),
-                                        toQString(hub->name()),
+                                        hub->name(),
                                         UiUtils::tintIcon(":/icons/device_hub_black.svg"),
                                         parentItem);
     parentItem->appendChild(item);
@@ -314,7 +314,7 @@ ProjectItem *ProjectModel::addFragment(common::Fragment *fragment)
 
     ProjectItem *item = new ProjectItem(fragment,
                                         fragment->ref().light(),
-                                        toQString(fragment->name()),
+                                        fragment->name(),
                                         UiUtils::tintIcon(":/icons/fragment_flat.svg"),
                                         parentItem);
     parentItem->appendChild(item);
@@ -373,7 +373,7 @@ ProjectItem *ProjectModel::addAsset(common::Asset *asset)
 
     ProjectItem *item = new ProjectItem(asset,
                                         asset->ref().light(),
-                                        toQString(asset->name()),
+                                        asset->name(),
                                         UiUtils::tintIcon(":/icons/fragment_flat.svg"),
                                         parentItem);
     parentItem->appendChild(item);

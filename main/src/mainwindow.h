@@ -39,6 +39,8 @@ using o3d::studio::common::LightRef;
  */
 class MainWindow : public AppWindow, public common::CapacitySettings
 {
+    Q_DECLARE_TR_FUNCTIONS(MainWindow)
+
 public:
 
     MainWindow(BaseObject *parent = nullptr);
@@ -84,6 +86,19 @@ private /*slots*/:
 
     void onShowContent(String name, common::Content *content, Bool showHide);
 
+    void onSettingChanged(const String &key, const QVariant &value);
+
+    void onUndoAction();
+    void onRedoAction();
+
+    void onCommandUpdate();
+    void onCommandDone(String name, String label, Bool done);
+
+    void onChangeCurrentWorkspace(const String &name);
+    void onProjectAdded(const LightRef &ref);
+
+    void onSelectionChanged();
+
 private:
 
     QtMainWindow *m_qtMainWindow;
@@ -91,7 +106,6 @@ private:
     String m_currentTheme;                //!< current active theme name
     String m_currentLanguage;             //!< current active language 2 letters code
 
-//    QStatusBar *m_statusBar{nullptr};    //!< unique bottom status bar
     common::Content *m_currentContent{nullptr};      //!< current active content widget
 
     std::map<o3d::String, common::Content*> m_contents;   //!< existings content widget (only once activated)
@@ -166,21 +180,7 @@ private slots:
     void onViewPreviousContentAction();
     void onViewNextContentAction();
 
-    // @todo
-    void onSettingChanged(const QString &key, const QVariant &value);
-
-    void onUndoAction();
-    void onRedoAction();
-
-    void onCommandUpdate();
-    void onCommandDone(QString name, QString label, bool done);
-
-    void onChangeCurrentWorkspace(const QString &name);
-    void onProjectAdded(const LightRef &ref);
-
     void onChangeMainTitle(const QString &title);
-
-    void onSelectionChanged();
 
 private:
 
@@ -189,9 +189,6 @@ private:
     QTranslator m_translator;     //!< contains the translations for o3smain
 
     void closeWorkspace();
-
-    // loads a language by the given language shortcurt (e.g. de, en)
-    void loadLanguage(const String &language);
 
     QPalette m_originalPalette;
     String m_currentTheme;                 //!< current active theme name
@@ -210,6 +207,9 @@ private:
     common::Messenger& messenger();
 
     void setup();
+
+    // loads a language by the given language shortcurt (e.g. de, en)
+    void loadLanguage(const String &language);
 };
 
 } // namespace main

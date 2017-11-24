@@ -9,10 +9,10 @@
 #ifndef _O3DS_COMMON_PROJECTITEM_H
 #define _O3DS_COMMON_PROJECTITEM_H
 
-#include <QtCore/QString>
 #include <QtCore/QVariant>
-#include <QtCore/QList>
 #include <QtWidgets/QtWidgets>
+
+#include <list>
 
 #include "../objectref.h"
 
@@ -32,7 +32,7 @@ public:
 
     ProjectItem(Entity *entity,
                 const LightRef &ref,
-                const QString &name,
+                const String &name,
                 const QIcon &icon,
                 ProjectItem *parentItem = nullptr);
 
@@ -50,19 +50,19 @@ public:
 
     void removeChild(int row);
 
-    ProjectItem *find(const QString &path);
+    ProjectItem *find(const String &path);
     ProjectItem *find(const LightRef &ref);
 
-    const QString& name() const;
+    const String& name() const;
     const LightRef& ref() const;
 
     const Entity* entity() const;
     Entity* entity();
 
-    bool isProject() const;
-    bool isHub() const;
-    bool isFragment() const;
-    bool isAsset() const;
+    Bool isProject() const;
+    Bool isHub() const;
+    Bool isFragment() const;
+    Bool isAsset() const;
 
     TypeRef typeRef() const;
 
@@ -80,14 +80,14 @@ public:
 
 private:
 
-    QString m_path;
-    QString m_name;   
+    String m_path;
+    String m_name;
     QIcon m_icon;
 
     LightRef m_ref;
 
     // QDataWidgetMapper
-    QList<ProjectItem*> m_childItems;
+    std::list<ProjectItem*> m_childItems;
     ProjectItem *m_parentItem;
 
     Entity *m_entity;

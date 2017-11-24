@@ -20,27 +20,24 @@
 using namespace o3d::studio::main;
 
 
-PropertyDock::PropertyDock(QWidget *parent) :
-    QDockWidget(tr("Property"), parent),
+PropertyDock::PropertyDock(BaseObject *parent) :
+    BaseObject(parent),
     common::Dock()
 {
-    setMinimumWidth(200);
-    setMinimumHeight(200);
-
     setupUi();
 
     // selection manager
-    connect(&common::Application::instance()->selection(), SIGNAL(selectionChanged()), SLOT(onSelectionChanged()));
+    common::Application::instance()->selection().selectionChanged.connect(this, &PropertyDock::onSelectionChanged);
 }
 
 PropertyDock::~PropertyDock()
 {
-
+    // deletePtr(m_qtPropertyDock);
 }
 
 QDockWidget *PropertyDock::ui()
 {
-    return this;
+    return m_qtPropertyDock;
 }
 
 o3d::String PropertyDock::elementName() const
@@ -55,22 +52,41 @@ Qt::DockWidgetArea PropertyDock::dockWidgetArea() const
 
 void PropertyDock::onSelectionChanged()
 {
-    const QSet<common::SelectionItem *> previousSelection =
+    const std::set<common::SelectionItem *> previousSelection =
             common::Application::instance()->selection().filterPreviousByBaseType(common::TypeRef::project());
-    const QSet<common::SelectionItem *> currentSelection =
+    const std::set<common::SelectionItem *> currentSelection =
             common::Application::instance()->selection().filterCurrentByBaseType(common::TypeRef::project());
 
-    common::SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, previousSelection) {
+    for (common::SelectionItem *selectionItem : previousSelection) {
 
     }
 
-    selectionItem = nullptr;
-    foreach (selectionItem, currentSelection) {
+    for (common::SelectionItem *selectionItem : currentSelection) {
+
     }
 }
 
 void PropertyDock::setupUi()
+{
+    m_qtPropertyDock = new QtPropertyDock();
+}
+
+
+QtPropertyDock::QtPropertyDock(QWidget *parent) :
+    QDockWidget(tr("Property"), parent)
+{
+    setMinimumWidth(200);
+    setMinimumHeight(200);
+
+    setupUi();
+}
+
+QtPropertyDock::~QtPropertyDock()
+{
+
+}
+
+void QtPropertyDock::setupUi()
 {
     setWindowIcon(QIcon::fromTheme("document-properties"));
 }

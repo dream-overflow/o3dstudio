@@ -26,7 +26,7 @@ class O3S_API PropertyModel : public QAbstractItemModel
 
 public:
 
-    explicit PropertyModel(const QList<PropertySection*> &data, QObject *parent = nullptr);
+    explicit PropertyModel(const std::list<PropertySection*> &data, QObject *parent = nullptr);
     virtual ~PropertyModel();
 
     virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
@@ -44,10 +44,10 @@ public:
 
 private:
 
-    void setupModelData(const QList<PropertySection*> &data, PropertyItem *parent);
+    void setupModelData(const std::list<PropertySection*> &data, PropertyItem *parent);
 
     PropertyItem *m_rootItem;
-    QList<PropertySection*> m_sections;
+    std::list<PropertySection*> m_sections;
 };
 
 } // namespace common

@@ -13,9 +13,9 @@
 using namespace o3d::studio::common;
 
 
-PropertyItem::PropertyItem(const QString section, const QList<QVariant> &data, PropertySection *ps, PropertyItem *parentItem) :
+PropertyItem::PropertyItem(const String section, const String &label, PropertySection *ps, PropertyItem *parentItem) :
     m_path(""),
-    m_itemData(data),
+    m_label(label),
     m_parentItem(parentItem),
     m_section(ps)
 {
@@ -33,23 +33,40 @@ PropertyItem::~PropertyItem()
 
 void PropertyItem::appendChild(PropertyItem *item)
 {
-    m_childItems.append(item);
+    m_childItems.push_back(item);
 }
 
 PropertyItem *PropertyItem::child(int row)
 {
-    return m_childItems.value(row);
+    int i = 0;
+    auto it = m_childItems.begin();
+    while (i < row) {
+        ++it;
+        ++i;
+
+        if (it == m_childItems.end()) {
+            return nullptr;
+        }
+    }
+
+    return *it;
 }
 
 int PropertyItem::childCount() const
 {
-    return m_childItems.count();
+    return m_childItems.size();
 }
 
 int PropertyItem::row() const
 {
     if (m_parentItem) {
-        return m_parentItem->m_childItems.indexOf(const_cast<PropertyItem*>(this));
+        int n = 0;
+        for (const PropertyItem* item : m_parentItem->m_childItems) {
+            if (item == this) {
+                return n;
+            }
+            ++n;
+        }
     }
 
     return 0;
@@ -57,12 +74,14 @@ int PropertyItem::row() const
 
 int PropertyItem::columnCount() const
 {
-    return m_itemData.count() + 1;
+    return 2;
 }
 
 QVariant PropertyItem::data(int column) const
 {
-    if (column == 1) {
+    if (column == 0) {
+        return toQString(m_label);
+    } else if (column == 1) {
         if (m_parentItem == nullptr) {
             return QVariant(QObject::tr("Count"));
         } else {
@@ -70,7 +89,7 @@ QVariant PropertyItem::data(int column) const
         }
     }
 
-    return m_itemData.value(column);
+    return QVariant();
 }
 
 PropertyItem* PropertyItem::parentItem()
@@ -78,14 +97,14 @@ PropertyItem* PropertyItem::parentItem()
     return m_parentItem;
 }
 
-PropertyItem *PropertyItem::find(const QString &path)
+PropertyItem *PropertyItem::find(const String &path)
 {
     if (path == m_path) {
         return this;
     }
 
-    QStringList dpath = path.split("::");
-    QStringList lpath = m_path.split("::");
+    QStringList dpath = toQString(path).split("::");
+    QStringList lpath = toQString(m_path).split("::");
 
     PropertyItem *result = nullptr;
 
@@ -113,7 +132,7 @@ const PropertySection *PropertyItem::section() const
     return m_section;
 }
 
-const QString &PropertyItem::path() const
+const o3d::String &PropertyItem::path() const
 {
     return m_path;
 }
