@@ -40,18 +40,18 @@ public /*slots*/:
 
     void onChangeCurrentWorkspace(const String &name);
 
-    void onAddProject(const LightRef &ref);
-    void onRemoveProject(const LightRef &ref);
-    void onActivateProject(const LightRef &ref);
+    void onAddProject(LightRef ref);
+    void onRemoveProject(LightRef ref);
+    void onActivateProject(LightRef ref);
 
-    void onProjectHubAdded(const LightRef &ref);
-    void onProjectHubRemoved(const LightRef &ref);
+    void onProjectHubAdded(LightRef ref);
+    void onProjectHubRemoved(LightRef ref);
 
-    void onProjectFragmentAdded(const LightRef &ref);
-    void onProjectFragmentRemoved(const LightRef &ref);
+    void onProjectFragmentAdded(LightRef ref);
+    void onProjectFragmentRemoved(LightRef ref);
 
-    void onProjectAssetAdded(const LightRef &ref);
-    void onProjectAssetRemoved(const LightRef &ref);
+    void onProjectAssetAdded(LightRef ref);
+    void onProjectAssetRemoved(LightRef ref);
 
     void onSelectManagerChange();
 
@@ -76,6 +76,8 @@ public:
 
     virtual void focusInEvent(QFocusEvent *event) override;
     virtual void keyPressEvent(QKeyEvent *event) override;
+
+    void setModel(QAbstractItemModel *model);
 
 public slots:
 

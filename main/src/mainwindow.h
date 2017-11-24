@@ -88,14 +88,11 @@ private /*slots*/:
 
     void onSettingChanged(const String &key, const QVariant &value);
 
-    void onUndoAction();
-    void onRedoAction();
-
     void onCommandUpdate();
     void onCommandDone(String name, String label, Bool done);
 
     void onChangeCurrentWorkspace(const String &name);
-    void onProjectAdded(const LightRef &ref);
+    void onProjectAdded(common::LightRef ref);
 
     void onSelectionChanged();
 
@@ -181,6 +178,9 @@ private slots:
     void onViewNextContentAction();
 
     void onChangeMainTitle(const QString &title);
+
+    void onUndoAction();
+    void onRedoAction();
 
 private:
 

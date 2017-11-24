@@ -588,6 +588,16 @@ void QtMainWindow::onAbout()
     dialog->show();
 }
 
+void QtMainWindow::onUndoAction()
+{
+    common::Application::instance()->command().undoLastCommand();
+}
+
+void QtMainWindow::onRedoAction()
+{
+    common::Application::instance()->command().redoLastCommand();
+}
+
 void QtMainWindow::onViewPreviousContentAction()
 {
     /*if (m_contents.size() < 2) {
@@ -1304,16 +1314,6 @@ void MainWindow::onSettingChanged(const String &key, const QVariant &value)
     }
 }
 
-void MainWindow::onUndoAction()
-{
-    common::Application::instance()->command().undoLastCommand();
-}
-
-void MainWindow::onRedoAction()
-{
-    common::Application::instance()->command().redoLastCommand();
-}
-
 void MainWindow::onCommandUpdate()
 {
     if (common::Application::instance()->command().hasDoneCommands()) {
@@ -1353,7 +1353,7 @@ void MainWindow::onSelectionChanged()
 //    common::Selection &selection = common::Application::instance()->selection();
 }
 
-void MainWindow::onProjectAdded(const common::LightRef &ref)
+void MainWindow::onProjectAdded(common::LightRef ref)
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     common::Project *project = workspace->project(ref);

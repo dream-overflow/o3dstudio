@@ -87,7 +87,7 @@ public:
 public /*slots*/:
 
     void onChangeCurrentWorkspace(const String& name);
-    void onProjectRemoved(const LightRef& ref);
+    void onProjectRemoved(LightRef ref);
 
 public /*signals*/:
 

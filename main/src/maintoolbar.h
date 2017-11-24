@@ -36,8 +36,8 @@ private /*slots*/:
 
     void onChangeCurrentWorkspace(const String &name);
 
-    void onProjectActivated(const LightRef &ref);
-    void onProjectRemoved(const LightRef &ref);
+    void onProjectActivated(LightRef ref);
+    void onProjectRemoved(LightRef ref);
 
 private:
 

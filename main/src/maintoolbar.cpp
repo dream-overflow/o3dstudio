@@ -67,7 +67,7 @@ Qt::ToolBarArea MainToolBar::toolBarArea() const
     return Qt::TopToolBarArea;
 }
 
-void MainToolBar::onProjectActivated(const common::LightRef &ref)
+void MainToolBar::onProjectActivated(common::LightRef ref)
 {
     if (ref.isValid()) {
         QList<QAction*> actionsList = m_qtMainToolBar->actions();
@@ -78,7 +78,7 @@ void MainToolBar::onProjectActivated(const common::LightRef &ref)
     }
 }
 
-void MainToolBar::onProjectRemoved(const common::LightRef &ref)
+void MainToolBar::onProjectRemoved(common::LightRef ref)
 {
     if (ref.isValid()) {
         QList<QAction*> actionsList = m_qtMainToolBar->actions();

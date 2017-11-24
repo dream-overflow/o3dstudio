@@ -34,7 +34,6 @@ Project::Project(const String &name, Workspace *workspace) :
 {
     m_typeRef = TypeRef::project();
 
-    m_name = name;
     m_ref = ObjectRef::buildRef(workspace);
     m_masterScene = new MasterScene(this);
     m_projectFile = new ProjectFile(this, ProjectFile::PROJECT_VERSION_1_0_0);
@@ -157,18 +156,18 @@ ProjectInfo &Project::info()
 o3d::Bool Project::setLocation(const DiskDir &path)
 {
     if (!path.exists()) {
-        return false;
+        return False;
     }
 
     m_path = path.getFullPathName() + '/' + m_name;
 
-    return true;
+    return True;
 }
 
 o3d::Bool Project::load()
 {
     if (!exists()) {
-        throw E_ProjectException(fromQString(tr("Project doesn't exists")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Project doesn't exists"))));
     };
 
     // project structure
@@ -180,13 +179,13 @@ o3d::Bool Project::load()
     // store indexe
     // @todo
 
-    return true;
+    return True;
 }
 
 o3d::Bool Project::save()
 {
     if (!exists()) {
-        throw E_ProjectException(fromQString(tr("Project doesn't exists")));
+        O3D_ERROR(E_ProjectException(fromQString(tr("Project doesn't exists"))));
     };
 
     // project structure
@@ -199,12 +198,12 @@ o3d::Bool Project::save()
     // @todo
 
     setClean();
-    return true;
+    return True;
 }
 
 o3d::Bool Project::exists() const
 {
-    return m_path.exists() && m_path.check("project.o3dstudio");
+    return m_path.exists() && m_path.check("project.o3dstudio") == Dir::SUCCESS;
 }
 
 MasterScene *Project::masterScene()

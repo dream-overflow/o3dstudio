@@ -143,18 +143,18 @@ public:
 
 public /*signals*/:
 
-    Signal<const LightRef &> onProjectAdded{this};
-    Signal<const LightRef &> onProjectActivated{this};
-    Signal<const LightRef &> onProjectRemoved{this};
+    Signal<LightRef> onProjectAdded{this};
+    Signal<LightRef> onProjectActivated{this};
+    Signal<LightRef> onProjectRemoved{this};
 
-    Signal<const LightRef &> onProjectHubAdded{this};
-    Signal<const LightRef &> onProjectHubRemoved{this};
+    Signal<LightRef> onProjectHubAdded{this};
+    Signal<LightRef> onProjectHubRemoved{this};
 
-    Signal<const LightRef &> onProjectFragmentAdded{this};
-    Signal<const LightRef &> onProjectFragmentRemoved{this};
+    Signal<LightRef> onProjectFragmentAdded{this};
+    Signal<LightRef> onProjectFragmentRemoved{this};
 
-    Signal<const LightRef &> onProjectAssetAdded{this};
-    Signal<const LightRef &> onProjectAssetRemoved{this};
+    Signal<LightRef> onProjectAssetAdded{this};
+    Signal<LightRef> onProjectAssetRemoved{this};
 
 public /*slots*/:
 

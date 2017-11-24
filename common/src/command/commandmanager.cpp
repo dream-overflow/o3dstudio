@@ -60,7 +60,7 @@ void CommandManager::onChangeCurrentWorkspace(const String &/*name*/)
     }
 }
 
-void CommandManager::onProjectRemoved(const LightRef &ref)
+void CommandManager::onProjectRemoved(LightRef ref)
 {
     m_rwLock.lockWrite();
 

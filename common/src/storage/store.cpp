@@ -39,7 +39,7 @@ void Store::initProject(Project *project, Version /*version*/)
         O3D_ERROR(E_StoreException(fromQString(tr("Project path exists"))));
     }
 
-    if (!Application::instance()->workspaces().defaultProjectsPath().makeDir(project->name())) {
+    if (Application::instance()->workspaces().defaultProjectsPath().makeDir(project->name()) != Dir::SUCCESS) {
         O3D_ERROR(E_StoreException("Unable to create the project directory"));
     }
 

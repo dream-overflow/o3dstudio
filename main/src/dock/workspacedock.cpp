@@ -45,10 +45,10 @@ WorkspaceDock::WorkspaceDock(BaseObject *parent) :
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
     workspaceManager->onWorkspaceActivated.connect(this, &WorkspaceDock::onChangeCurrentWorkspace);
 
-    onChangeCurrentWorkspace(workspaceManager->current()->name());
-
-    // selection manager
+     // selection manager
     common::Application::instance()->selection().selectionChanged.connect(this, &WorkspaceDock::onSelectManagerChange);
+
+    onChangeCurrentWorkspace(workspaceManager->current()->name());
 }
 
 WorkspaceDock::~WorkspaceDock()
@@ -76,7 +76,7 @@ Qt::DockWidgetArea WorkspaceDock::dockWidgetArea() const
     return Qt::LeftDockWidgetArea;
 }
 
-void WorkspaceDock::onAddProject(const common::LightRef &ref)
+void WorkspaceDock::onAddProject(LightRef ref)
 {
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
     common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
@@ -87,7 +87,7 @@ void WorkspaceDock::onAddProject(const common::LightRef &ref)
     }
 }
 
-void WorkspaceDock::onRemoveProject(const common::LightRef &ref)
+void WorkspaceDock::onRemoveProject(LightRef ref)
 {
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
     common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
@@ -98,7 +98,7 @@ void WorkspaceDock::onRemoveProject(const common::LightRef &ref)
     }
 }
 
-void WorkspaceDock::onActivateProject(const common::LightRef &ref)
+void WorkspaceDock::onActivateProject(LightRef ref)
 {
     common::UiController &uiCtrl = common::Application::instance()->ui();
 
@@ -122,7 +122,7 @@ void WorkspaceDock::onActivateProject(const common::LightRef &ref)
     }
 }
 
-void WorkspaceDock::onProjectHubAdded(const common::LightRef &ref)
+void WorkspaceDock::onProjectHubAdded(LightRef ref)
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
@@ -134,7 +134,7 @@ void WorkspaceDock::onProjectHubAdded(const common::LightRef &ref)
     }
 }
 
-void WorkspaceDock::onProjectHubRemoved(const common::LightRef &ref)
+void WorkspaceDock::onProjectHubRemoved(LightRef ref)
 {
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
 
@@ -142,7 +142,7 @@ void WorkspaceDock::onProjectHubRemoved(const common::LightRef &ref)
     projectModel->removeHub(ref);
 }
 
-void WorkspaceDock::onProjectFragmentAdded(const o3d::studio::common::LightRef &ref)
+void WorkspaceDock::onProjectFragmentAdded(LightRef ref)
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
@@ -154,7 +154,7 @@ void WorkspaceDock::onProjectFragmentAdded(const o3d::studio::common::LightRef &
     }
 }
 
-void WorkspaceDock::onProjectFragmentRemoved(const o3d::studio::common::LightRef &ref)
+void WorkspaceDock::onProjectFragmentRemoved(LightRef ref)
 {
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
 
@@ -162,7 +162,7 @@ void WorkspaceDock::onProjectFragmentRemoved(const o3d::studio::common::LightRef
     projectModel->removeFragment(ref);
 }
 
-void WorkspaceDock::onProjectAssetAdded(const o3d::studio::common::LightRef &ref)
+void WorkspaceDock::onProjectAssetAdded(LightRef ref)
 {
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
@@ -174,7 +174,7 @@ void WorkspaceDock::onProjectAssetAdded(const o3d::studio::common::LightRef &ref
     }
 }
 
-void WorkspaceDock::onProjectAssetRemoved(const o3d::studio::common::LightRef &ref)
+void WorkspaceDock::onProjectAssetRemoved(LightRef ref)
 {
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
 
@@ -207,16 +207,10 @@ void WorkspaceDock::onSelectManagerChange()
 //    }
 }
 
-void WorkspaceDock::onChangeCurrentWorkspace(const String &name)
+void WorkspaceDock::onChangeCurrentWorkspace(const String &/*name*/)
 {
-    Q_UNUSED(name)
-
-    QAbstractItemModel *oldModel = m_qtWorkspaceDock->m_treeView->model();
-    m_qtWorkspaceDock->m_treeView->setModel(new common::ProjectModel());
-
-    if (oldModel) {
-        delete oldModel;
-    }
+    common::ProjectModel *model = new common::ProjectModel();
+    m_qtWorkspaceDock->setModel(model);
 
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -245,10 +239,6 @@ QtWorkspaceDock::QtWorkspaceDock(QWidget *parent) :
 
     setupUi();
     setFocusPolicy(Qt::StrongFocus);
-
-    // selection
-    QItemSelectionModel *selectionModel = m_treeView->selectionModel();
-    connect(selectionModel, SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), SLOT(onSelectionChanged(const QModelIndex &, const QModelIndex &)));
 
     // details
     connect(m_treeView, SIGNAL(doubleClicked(const QModelIndex &)), SLOT(onSelectionDetails(const QModelIndex &)));
@@ -405,6 +395,18 @@ void QtWorkspaceDock::keyPressEvent(QKeyEvent *event)
     return QDockWidget::keyPressEvent(event);
 }
 
+void QtWorkspaceDock::setModel(QAbstractItemModel *model)
+{
+    QAbstractItemModel *oldModel = m_treeView->model();
+    m_treeView->setModel(model);
+
+    deletePtr(oldModel);
+
+    // selection
+    QItemSelectionModel *selectionModel = m_treeView->selectionModel();
+    connect(selectionModel, SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), SLOT(onSelectionChanged(const QModelIndex &, const QModelIndex &)));
+}
+
 void QtWorkspaceDock::setupUi()
 {
     setWindowIcon(QIcon::fromTheme("input-gaming"));
@@ -413,5 +415,5 @@ void QtWorkspaceDock::setupUi()
     setWidget(m_treeView);
 
     m_treeView->setHeaderHidden(true);
-    m_treeView->setModel(new common::ProjectModel());
+    setModel(new common::ProjectModel());
 }
