@@ -64,6 +64,13 @@ public:
     virtual const Project* project() const = 0;
 
     /**
+     * @brief Depending of the parent and child type, returns the index position
+     * in the dedicated set of children.
+     * @return -1 if not found.
+     */
+    virtual Int32 childIndexOf(Entity *entity) const = 0;
+
+    /**
      * @brief By default it exists if the reference point to a project.
      */
     virtual Bool exists() const;

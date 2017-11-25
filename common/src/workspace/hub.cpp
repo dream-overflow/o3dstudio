@@ -73,7 +73,7 @@ o3d::Bool Hub::exists() const
     return Entity::exists();
 }
 
-void Hub::addHub(Hub *hub)
+void Hub::addHub(Hub *hub, Int32 index)
 {
     // not created for this project
     if (hub->ref().light().projectId() != project()->ref().light().id()) {
@@ -85,7 +85,26 @@ void Hub::addHub(Hub *hub)
         O3D_ERROR(E_HubException(fromQString(tr("Trying to add a previously added hub, or with a similar id"))));
     }
 
-    m_hubs[hub->ref().light().id()] = hub;
+    UInt64 hubId = hub->ref().light().id();
+    m_hubs[hubId] = hub;
+
+    if (index >= 0) {
+        Int32 n = 0;
+        auto it = m_hubsOrder.begin();
+        while (n < index) {
+            if (it == m_hubsOrder.end()) {
+                break;
+            }
+
+            ++n;
+            ++it;
+        }
+
+        m_hubsOrder.emplace(it, hubId);
+    } else {
+        m_hubsOrder.push_back(hubId);
+    }
+
     hub->setProject(project());
 
     setDirty();
@@ -105,10 +124,17 @@ void Hub::removeHub(const LightRef &_ref)
         O3D_ERROR(E_HubException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
+    UInt64 hubId = _ref.id();
     Hub *hub = it->second;
 
     delete hub;
     m_hubs.erase(it);
+
+    // erase its order
+    auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
+    if (it2 != m_hubsOrder.end()) {
+        m_hubsOrder.erase(it2);
+    }
 
     setDirty();
 
@@ -128,6 +154,12 @@ void Hub::removeHub(UInt64 id)
     delete hub;
     m_hubs.erase(it);
 
+    // erase its order
+    auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), id);
+    if (it2 != m_hubsOrder.end()) {
+        m_hubsOrder.erase(it2);
+    }
+
     setDirty();
 
     // signal throught project->workspace
@@ -138,8 +170,16 @@ void Hub::removeHub(Hub *hub)
 {
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         if (it->second == hub) {
+            UInt64 hubId = hub->ref().light().id();
+
             delete it->second;
             m_hubs.erase(it);
+
+            // erase its order
+            auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
+            if (it2 != m_hubsOrder.end()) {
+                m_hubsOrder.erase(it2);
+            }
 
             setDirty();
 
@@ -377,6 +417,28 @@ std::list<const Hub *> Hub::hubs(Bool recurse) const
     return results;
 }
 
+o3d::Int32 Hub::childIndexOf(Entity *entity) const
+{
+    if (!entity || entity->ref().light().projectId() != project()->ref().light().id()) {
+        return -1;
+    }
+
+    UInt64 id = entity->ref().light().id();
+    Int32 n = 0;
+
+    if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
+        for (auto cit = m_hubsOrder.begin(); cit != m_hubsOrder.end(); ++cit) {
+            if ((*cit) == id) {
+                return n;
+            }
+
+            ++n;
+        }
+    }
+
+    return -1;
+}
+
 o3d::Bool Hub::serializeContent(OutStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
@@ -386,10 +448,11 @@ o3d::Bool Hub::serializeContent(OutStream &stream) const
     Int32 num = m_hubs.size();
     stream << num;
 
-    // children recursively
+    // children recursively, and by order
     const Hub *hub = nullptr;
-    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
-        hub = cit->second;
+    for (auto cit = m_hubsOrder.cbegin(); cit != m_hubsOrder.cend(); ++cit) {
+        auto cit2 = m_hubs.find(*cit);
+        hub = cit2->second;
 
         // uuid and type ref, for instanciation
         stream << ref().uuid()
@@ -438,7 +501,10 @@ o3d::Bool Hub::deserializeContent(InStream &stream)
             // stream.skipRawData(hubSize...) // @todo
         }
 
-        m_hubs[hub->ref().light().id()] = hub;
+        UInt64 hubId = hub->ref().light().id();
+
+        m_hubs[hubId] = hub;
+        m_hubsOrder.push_back(hubId);
     }
 
     return True;

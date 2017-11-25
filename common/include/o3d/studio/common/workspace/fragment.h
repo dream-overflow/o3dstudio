@@ -40,6 +40,8 @@ public:
     MasterScene* masterScene();
     const MasterScene* masterScene() const;
 
+    virtual Int32 childIndexOf(Entity *entity) const override;
+
     void setupMasterScene();
 
     virtual void create() override;

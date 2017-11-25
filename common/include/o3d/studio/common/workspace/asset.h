@@ -42,6 +42,8 @@ public:
     virtual Project* project() override;
     virtual const Project* project() const override;
 
+    virtual Int32 childIndexOf(Entity *entity) const override;
+
     virtual void create() override;
 
     virtual Bool load() override;

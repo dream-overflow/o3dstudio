@@ -54,9 +54,29 @@ void ProjectItem::appendChild(ProjectItem *item)
     m_childItems.push_back(item);
 }
 
-ProjectItem *ProjectItem::child(int row)
+void ProjectItem::insertChild(ProjectItem *item, o3d::Int32 row)
 {
-    int i = 0;
+    if (row < 0 || row >= (Int32)m_childItems.size()) {
+        m_childItems.push_back(item);
+    } else {
+        Int32 i = 0;
+        auto it = m_childItems.begin();
+        while (i < row) {
+            ++i;
+            ++it;
+
+            if (it == m_childItems.end()) {
+                break;
+            }
+        }
+
+        m_childItems.emplace(it, item);
+    }
+}
+
+ProjectItem *ProjectItem::child(Int32 row)
+{
+    Int32 i = 0;
     auto it = m_childItems.begin();
     while (i < row) {
         ++it;
@@ -70,15 +90,15 @@ ProjectItem *ProjectItem::child(int row)
     return *it;
 }
 
-int ProjectItem::childCount() const
+o3d::Int32 ProjectItem::childCount() const
 {
-    return m_childItems.size();
+    return (Int32)m_childItems.size();
 }
 
-int ProjectItem::row() const
+o3d::Int32 ProjectItem::row() const
 {
     if (m_parentItem) {
-        int n = 0;
+        Int32 n = 0;
         for (const ProjectItem* item : m_parentItem->m_childItems) {
             if (item == this) {
                 return n;
@@ -90,12 +110,12 @@ int ProjectItem::row() const
     return 0;
 }
 
-int ProjectItem::columnCount() const
+o3d::Int32 ProjectItem::columnCount() const
 {
     return 1;
 }
 
-QVariant ProjectItem::data(int column) const
+QVariant ProjectItem::data(Int32 column) const
 {
     if (column == 0) {
         return toQString(m_name);
@@ -104,7 +124,7 @@ QVariant ProjectItem::data(int column) const
     }
 }
 
-QVariant ProjectItem::decoration(int column) const
+QVariant ProjectItem::decoration(Int32 column) const
 {
     if (column == 0) {
         return m_icon;
@@ -118,13 +138,13 @@ ProjectItem* ProjectItem::parentItem()
     return m_parentItem;
 }
 
-void ProjectItem::removeChild(int row)
+void ProjectItem::removeChild(Int32 row)
 {
-    if (row < 0 || row > (int)m_childItems.size()) {
+    if (row < 0 || row > (Int32)m_childItems.size()) {
         return;
     }
 
-    int i = 0;
+    Int32 i = 0;
     auto it = m_childItems.begin();
     while (i < row) {
         ++it;

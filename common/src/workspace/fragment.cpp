@@ -54,6 +54,12 @@ const MasterScene *Fragment::masterScene() const
     return m_masterScene;
 }
 
+o3d::Int32 Fragment::childIndexOf(Entity *entity) const
+{
+    // @todo
+    return -1;
+}
+
 void Fragment::setupMasterScene()
 {
     if (m_masterScene) {

@@ -30,7 +30,8 @@ using namespace o3d::studio::common;
 RemoveHubCommand::RemoveHubCommand(const LightRef &hubRef, const LightRef &parentRef) :
     Command("o3s::common::hub::remove", hubRef),
     m_parent(parentRef),
-    m_hub(hubRef)
+    m_hub(hubRef),
+    m_nodePos(-1)
 {
     O3D_ASSERT(m_parent.isValid());
     O3D_ASSERT(m_hub.isValid());
@@ -59,6 +60,7 @@ o3d::Bool RemoveHubCommand::doCommand()
                 DataOutStream stream(m_data);
                 stream << *hub;
                 m_storedHubRef = hub->ref();
+                m_nodePos = project->childIndexOf(hub);
 
                 project->removeHub(m_hub);
                 return True;
@@ -72,6 +74,7 @@ o3d::Bool RemoveHubCommand::doCommand()
                     DataOutStream stream(m_data);
                     stream << *hub;
                     m_storedHubRef = hub->ref();
+                    m_nodePos = parentHub->childIndexOf(hub);
 
                     parentHub->removeHub(m_hub);
                     return True;
@@ -106,7 +109,7 @@ o3d::Bool RemoveHubCommand::undoCommand()
 
             m_data.destroy();
 
-            project->addHub(hub);
+            project->addHub(hub, m_nodePos);
 
             // iterator over children
             common::Hub *node = nullptr;
@@ -129,7 +132,7 @@ o3d::Bool RemoveHubCommand::undoCommand()
 
                 m_data.destroy();
 
-                parentHub->addHub(hub);
+                parentHub->addHub(hub, m_nodePos);
 
                 // iterator over children
                 common::Hub *node = nullptr;

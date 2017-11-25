@@ -43,6 +43,12 @@ const Project *Asset::project() const
     return static_cast<Project*>(m_parent);
 }
 
+o3d::Int32 Asset::childIndexOf(Entity *entity) const
+{
+    // @todo
+    return -1;
+}
+
 void Asset::create()
 {
     setDirty();

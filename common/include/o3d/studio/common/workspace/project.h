@@ -58,6 +58,8 @@ public:
 
     UInt64 generateEntityId();
 
+    virtual Int32 childIndexOf(Entity *entity) const override;
+
     /**
      * @brief Has changes to saved since last save(). Project change or any of its child entity.
      * If the project itself contains changes, it directly returns true.
@@ -121,7 +123,7 @@ public:
     // hub
     //
 
-    void addHub(Hub *hub);
+    void addHub(Hub *hub, Int32 index = -1);
 
     void removeHub(const LightRef &ref);
     void removeHub(UInt64 id);
@@ -237,6 +239,8 @@ private:
     std::map<Uuid, Entity*> m_entitiesByUuid;
     //! Global map by ID
     std::map<UInt64, Entity*> m_entitiesById;
+
+    std::list<UInt64> m_hubsOrder;             //!< Hub children ordering
 };
 
 /**

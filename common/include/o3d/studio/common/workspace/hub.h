@@ -58,7 +58,7 @@ public:
     // children hub
     //
 
-    void addHub(Hub *hub);
+    void addHub(Hub *hub, Int32 index = -1);
 
     void removeHub(const LightRef &ref);
     void removeHub(UInt64 id);
@@ -108,6 +108,8 @@ public:
      */
     std::list<const Hub*> hubs(Bool recurse = False) const;
 
+    virtual Int32 childIndexOf(Entity *entity) const override;
+
     //
     // engine proxy
     //
@@ -132,6 +134,7 @@ private:
     Project *m_project;               //!< Owner project;
 
     std::map<UInt64, Hub*> m_hubs;    //!< Child hubs
+    std::list<UInt64> m_hubsOrder;    //!< Children ordering
 };
 
 /**

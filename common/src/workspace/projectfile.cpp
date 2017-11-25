@@ -143,7 +143,10 @@ void ProjectFile::load()
             // stream.skipRawData(hubSize...) // @todo
         }
 
-        m_project->m_hubs[hub->ref().light().id()] = hub;
+        UInt64 hubId = hub->ref().light().id();
+
+        m_project->m_hubs[hubId] = hub;
+        m_project->m_hubsOrder.push_back(hubId);
     }
 
     // read fragments
@@ -191,7 +194,7 @@ void ProjectFile::save()
     Int32 num = m_project->m_assets.size();
     stream << num;
 
-    Asset *asset = nullptr;
+    const Asset *asset = nullptr;
     for (auto cit = m_project->m_assets.cbegin(); cit != m_project->m_assets.cend(); ++cit) {
         asset = cit->second;
 
@@ -200,13 +203,14 @@ void ProjectFile::save()
                << *asset;
     }
 
-    // save hubs recursively
+    // save hubs recursively, and in order
     num = m_project->m_hubs.size();
     stream << num;
 
-    Hub *hub = nullptr;
-    for (auto cit = m_project->m_hubs.cbegin(); cit != m_project->m_hubs.cend(); ++cit) {
-        hub = cit->second;
+    const Hub *hub = nullptr;
+    for (auto cit = m_project->m_hubsOrder.cbegin(); cit != m_project->m_hubsOrder.cend(); ++cit) {
+        auto cit2 = m_project->m_hubs.find(*cit);
+        hub = cit2->second;
 
         stream << hub->ref().uuid()
                << hub->ref().strong().typeName()
@@ -217,7 +221,7 @@ void ProjectFile::save()
     num = m_project->m_fragments.size();
     stream << num;
 
-    Fragment *fragment = nullptr;
+    const Fragment *fragment = nullptr;
     for (auto cit = m_project->m_fragments.cbegin(); cit != m_project->m_fragments.cend(); ++cit) {
         fragment = cit->second;
 

@@ -58,6 +58,7 @@ Project::~Project()
         hub = it->second;
         deletePtr(hub);
     }
+    m_hubsOrder.clear();
 
     Asset *asset = nullptr;
     for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
@@ -95,6 +96,28 @@ o3d::UInt64 Project::generateEntityId()
 {
     UInt64 nextId = m_nextId++;
     return nextId;
+}
+
+o3d::Int32 Project::childIndexOf(Entity *entity) const
+{
+    if (!entity || entity->ref().light().projectId() != project()->ref().light().id()) {
+        return -1;
+    }
+
+    UInt64 id = entity->ref().light().id();
+    Int32 n = 0;
+
+    if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
+        for (auto cit = m_hubsOrder.begin(); cit != m_hubsOrder.end(); ++cit) {
+            if ((*cit) == id) {
+                return n;
+            }
+
+            ++n;
+        }
+    }
+
+    return -1;
 }
 
 o3d::Bool Project::hasChanges() const
@@ -267,7 +290,7 @@ const Entity *Project::lookup(const Uuid &uuid) const
     return nullptr;
 }
 
-void Project::addHub(Hub *hub)
+void Project::addHub(Hub *hub, Int32 index)
 {
     // not created for this project
     if (hub->ref().light().projectId() != ref().light().id()) {
@@ -279,7 +302,26 @@ void Project::addHub(Hub *hub)
         O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added hub, or with a similar id"))));
     }
 
-    m_hubs[hub->ref().light().id()] = hub;
+    UInt64 hubId = hub->ref().light().id();
+    m_hubs[hubId] = hub;
+
+    if (index >= 0) {
+        Int32 n = 0;
+        auto it = m_hubsOrder.begin();
+        while (n < index) {
+            if (it == m_hubsOrder.end()) {
+                break;
+            }
+
+            ++n;
+            ++it;
+        }
+
+        m_hubsOrder.emplace(it, hubId);
+    } else {
+        m_hubsOrder.push_back(hubId);
+    }
+
     hub->setProject(this);
 
     // structure change
@@ -300,10 +342,17 @@ void Project::removeHub(const LightRef &_ref)
         O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
+    UInt64 hubId = _ref.id();
     Hub *hub = it->second;
 
     delete hub;
     m_hubs.erase(it);
+
+    // erase its order
+    auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
+    if (it2 != m_hubsOrder.end()) {
+        m_hubsOrder.erase(it2);
+    }
 
     // structure change
     setDirty();
@@ -324,6 +373,12 @@ void Project::removeHub(UInt64 id)
     delete hub;
     m_hubs.erase(it);
 
+    // erase its order
+    auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), id);
+    if (it2 != m_hubsOrder.end()) {
+        m_hubsOrder.erase(it2);
+    }
+
     // structure change
     setDirty();
 
@@ -335,8 +390,16 @@ void Project::removeHub(Hub *hub)
 {
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         if (it->second == hub) {
+            UInt64 hubId = hub->ref().light().id();
+
             delete it->second;
             m_hubs.erase(it);
+
+            // erase its order
+            auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
+            if (it2 != m_hubsOrder.end()) {
+                m_hubsOrder.erase(it2);
+            }
 
             // structure change
             setDirty();

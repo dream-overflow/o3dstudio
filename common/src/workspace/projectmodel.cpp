@@ -242,7 +242,14 @@ ProjectItem *ProjectModel::addHub(common::Hub *hub)
         return nullptr;
     }
 
-    int n = parentItem->childCount();
+    Int32 n = 0;
+
+    // compute its child index
+    if (hub->parent()) {
+        n = hub->parent()->childIndexOf(hub);
+    } else {
+        n = parentItem->childCount();
+    }
 
     QModelIndex parentIndex = createIndex(parentItem->row(), 0, parentItem);
 
@@ -253,13 +260,8 @@ ProjectItem *ProjectModel::addHub(common::Hub *hub)
                                         hub->name(),
                                         UiUtils::tintIcon(":/icons/device_hub_black.svg"),
                                         parentItem);
-    parentItem->appendChild(item);
+    parentItem->insertChild(item, n);
 
-//    // iterator over children
-//    common::Hub *node = nullptr;
-//    foreach (node, hub->hubs(true)) {
-//        addHub(node);
-//    }
     endInsertRows();
 
     return item;

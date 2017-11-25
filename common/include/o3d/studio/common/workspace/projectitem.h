@@ -38,17 +38,18 @@ public:
 
     virtual ~ProjectItem();
 
-    void appendChild(ProjectItem *child);
+    void appendChild(ProjectItem *item);
+    void insertChild(ProjectItem *item, Int32 row);
 
-    ProjectItem *child(int row);
-    int childCount() const;
-    int columnCount() const;
-    QVariant data(int column) const;
-    QVariant decoration(int column) const;
-    int row() const;
+    ProjectItem *child(Int32 row);
+    Int32 childCount() const;
+    Int32 columnCount() const;
+    QVariant data(Int32 column) const;
+    QVariant decoration(Int32 column) const;
+    Int32 row() const;
     ProjectItem *parentItem();
 
-    void removeChild(int row);
+    void removeChild(Int32 row);
 
     ProjectItem *find(const String &path);
     ProjectItem *find(const LightRef &ref);

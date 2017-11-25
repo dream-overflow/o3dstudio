@@ -41,6 +41,8 @@ private:
 
     ArrayUInt8 m_data;
     ObjectRef m_storedHubRef;
+
+    Int32 m_nodePos;
 };
 
 } // namespace common
