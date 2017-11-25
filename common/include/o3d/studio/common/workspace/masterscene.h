@@ -70,7 +70,7 @@ public:
     virtual void mouseReleaseEvent(const MouseEvent &event);
     virtual void mouseDoubleClickEvent(const MouseEvent &event);
     virtual void mouseMoveEvent(const MouseEvent &event);
-    virtual void wheelEvent(const MouseEvent &event);
+    virtual void wheelEvent(const WheelEvent &event);
 
     virtual void keyPressEvent(const KeyEvent &event);
     virtual void keyReleaseEvent(const KeyEvent &event);
@@ -89,8 +89,9 @@ private:
     QtRenderer *m_renderer;       //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
 
-    Point2i m_localPos;
+    Point2i m_lockedPos;
     Bool m_rotateCam;
+    Bool m_moveCam;
 
     //! Main working camera, cannot be deleted
     o3d::SmartObject<o3d::Camera> m_camera;

@@ -12,6 +12,7 @@
 #include "../../global.h"
 #include "../keyevent.h"
 #include "../mouseevent.h"
+#include "../wheelevent.h"
 
 namespace o3d {
 namespace studio {
@@ -31,7 +32,7 @@ public:
     virtual void mouseReleaseEvent(const MouseEvent &event) = 0;
     virtual void mouseDoubleClickEvent(const MouseEvent &event) = 0;
     virtual void mouseMoveEvent(const MouseEvent &event) = 0;
-    virtual void wheelEvent(const MouseEvent &event) = 0;
+    virtual void wheelEvent(const WheelEvent &event) = 0;
     virtual void keyPressEvent(const KeyEvent &event) = 0;
     virtual void keyReleaseEvent(const KeyEvent &event) = 0;
     virtual void focusInEvent(const Event &event) = 0;

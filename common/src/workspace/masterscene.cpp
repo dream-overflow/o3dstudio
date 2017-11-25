@@ -23,6 +23,7 @@
 #include <o3d/engine/hierarchy/hierarchytree.h>
 #include <o3d/engine/utils/framemanager.h>
 #include <o3d/engine/object/ftransform.h>
+#include <o3d/engine/context.h>
 
 #define __gl_h_
 #define __glext_h_
@@ -43,6 +44,7 @@ MasterScene::MasterScene(Entity *parent) :
     m_renderer(nullptr),
     m_scene(nullptr),
     m_rotateCam(False),
+    m_moveCam(False),
     m_camera(this),
     m_viewport(this),
     m_sceneDrawer(this)
@@ -186,6 +188,16 @@ void MasterScene::mousePressEvent(const MouseEvent &event)
 {
     if (event.button(Mouse::LEFT)) {
         m_rotateCam = True;
+    } else if (event.button(Mouse::RIGHT)) {
+        m_moveCam = True;
+    }
+
+    if (m_rotateCam || m_moveCam) {
+        QCursor cursor = m_content->cursor();
+        cursor.setShape(Qt::BlankCursor);
+
+        m_content->setCursor(cursor);
+        m_lockedPos = event.globalPos();
     }
 }
 
@@ -193,10 +205,19 @@ void MasterScene::mouseReleaseEvent(const MouseEvent &event)
 {
     if (event.button(Mouse::LEFT)) {
         m_rotateCam = False;
+    } else if (event.button(Mouse::RIGHT)) {
+        m_moveCam = False;
+    }
+
+    if (!m_rotateCam && !m_moveCam) {
+        QCursor cursor = m_content->cursor();
+        cursor.setShape(Qt::ArrowCursor);
+
+        m_content->setCursor(cursor);
     }
 }
 
-void MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
+void MasterScene::mouseDoubleClickEvent(const MouseEvent &/*event*/)
 {
 
 }
@@ -204,32 +225,70 @@ void MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
 void MasterScene::mouseMoveEvent(const MouseEvent &event)
 {
     Float elapsed = m_scene->getFrameManager()->getFrameDuration();
-    Int32 deltaX = event.localPos().x() - m_localPos.x();
-    Int32 deltaY = event.localPos().y() - m_localPos.y();
+    Int32 deltaX = event.globalPos().x() - m_lockedPos.x();
+    Int32 deltaY = event.globalPos().y() - m_lockedPos.y();
 
-    // keep for next delta calculation
-    m_localPos = event.localPos();
-
-    if (m_localPos.x() < 0) {
+    if (m_lockedPos.x() < 0) {
         deltaX = 0;
     }
 
-    if (m_localPos.y() < 0) {
+    if (m_lockedPos.y() < 0) {
         deltaY = 0;
     }
 
-    if (m_rotateCam) {
+    if (m_rotateCam && m_moveCam) {
+        BaseNode *cameraNode = m_camera.get()->getNode();
+        if (cameraNode) {
+            Float z = 0.f;
+
+            z = deltaY * 100.f * elapsed;
+
+            cameraNode->getTransform()->translate(Vector3(0.f, 0.f, z));
+        }
+    } else if (m_rotateCam) {
         BaseNode *cameraNode = m_camera.get()->getNode();
         if (cameraNode) {
             cameraNode->getTransform()->rotate(Y, -deltaX * elapsed);
             cameraNode->getTransform()->rotate(X, -deltaY * elapsed);
         }
+    } else if (m_moveCam) {
+        BaseNode *cameraNode = m_camera.get()->getNode();
+        if (cameraNode) {
+            Float x = 0.f, y = 0.f, z = 0.f;
+
+            x = deltaX * 100.f * elapsed;
+            y = -deltaY * 100.f * elapsed;
+
+            cameraNode->getTransform()->translate(Vector3(x, y, z));
+        }
+    }
+
+    if (m_rotateCam || m_moveCam) {
+        // lock mouse position
+        QCursor cursor = m_content->cursor();
+        QPoint pos(m_lockedPos.x(), m_lockedPos.y());
+
+        cursor.setPos(pos);
+        m_content->setCursor(cursor);
     }
 }
 
-void MasterScene::wheelEvent(const MouseEvent &event)
+void MasterScene::wheelEvent(const WheelEvent &event)
 {
+    Float elapsed = m_scene->getFrameManager()->getFrameDuration();
+    // Int32 deltaX = event.angleDelta().x();  // too rarely supported
+    Int32 deltaY = event.angleDelta().y();
 
+    if (deltaY != 0) {
+        BaseNode *cameraNode = m_camera.get()->getNode();
+        if (cameraNode) {
+            Float z = 0.f;
+
+            z = -deltaY * 100.f / 120.f * 10.f * elapsed;
+
+            cameraNode->getTransform()->translate(Vector3(0.f, 0.f, z));
+        }
+    }
 }
 
 void MasterScene::keyPressEvent(const KeyEvent &event)
@@ -272,6 +331,8 @@ void MasterScene::initializeDrawer()
         }
 
         m_scene = new o3d::Scene(nullptr, path.getFullPathName(), m_renderer);
+        // m_scene->setGlobalAmbient();
+        m_scene->getContext()->setBackgroundColor(0.633f,0.792f,.914f,0.0f);
 
         m_camera = new o3d::Camera(m_scene);
         Node *cameraNode = m_scene->getHierarchyTree()->addNode(m_camera.get());
@@ -279,7 +340,5 @@ void MasterScene::initializeDrawer()
 
         m_sceneDrawer = new o3d::ShadowVolumeForward(m_scene);
         m_viewport = m_scene->getViewPortManager()->addScreenViewPort(m_camera.get(), m_sceneDrawer.get(), 0);
-
-        m_localPos.set(-1, -1);
     }
 }

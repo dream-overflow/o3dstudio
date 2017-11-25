@@ -140,14 +140,14 @@ void O3DCanvasContent::updateGL()
 
 #include "o3d/studio/common/ui/keyevent.h"
 #include "o3d/studio/common/ui/mouseevent.h"
-//#include "o3d/studio/common/ui/wheelevent.h"
+#include "o3d/studio/common/ui/wheelevent.h"
 //#include "o3d/studio/common/ui/touchevent.h"
 //#include "o3d/studio/common/ui/dragevent.h"
 //#include "o3d/studio/common/ui/tabletevent.h"
 
 void O3DCanvasContent::mousePressEvent(QMouseEvent *event)
 {
-    Point2i localPos(event->localPos().x(), event->localPos().y());
+    Point2f localPos(event->localPos().x(), event->localPos().y());
     Point2i globalPos(event->globalPos().x(), event->globalPos().y());
 
     Point2f screenPos(event->screenPos().x(), event->screenPos().y());
@@ -157,6 +157,7 @@ void O3DCanvasContent::mousePressEvent(QMouseEvent *event)
                    event->timestamp(),
                    (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
                    (unsigned int)event->button(),
+                   (unsigned int)event->buttons(),
                    globalPos,
                    localPos,
                    screenPos,
@@ -168,7 +169,7 @@ void O3DCanvasContent::mousePressEvent(QMouseEvent *event)
 
 void O3DCanvasContent::mouseReleaseEvent(QMouseEvent *event)
 {
-    Point2i localPos(event->localPos().x(), event->localPos().y());
+    Point2f localPos(event->localPos().x(), event->localPos().y());
     Point2i globalPos(event->globalPos().x(), event->globalPos().y());
 
     Point2f screenPos(event->screenPos().x(), event->screenPos().y());
@@ -178,6 +179,7 @@ void O3DCanvasContent::mouseReleaseEvent(QMouseEvent *event)
                    event->timestamp(),
                    (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
                    (unsigned int)event->button(),
+                   (unsigned int)event->buttons(),
                    globalPos,
                    localPos,
                    screenPos,
@@ -189,7 +191,7 @@ void O3DCanvasContent::mouseReleaseEvent(QMouseEvent *event)
 
 void O3DCanvasContent::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    Point2i localPos(event->localPos().x(), event->localPos().y());
+    Point2f localPos(event->localPos().x(), event->localPos().y());
     Point2i globalPos(event->globalPos().x(), event->globalPos().y());
 
     Point2f screenPos(event->screenPos().x(), event->screenPos().y());
@@ -199,6 +201,7 @@ void O3DCanvasContent::mouseDoubleClickEvent(QMouseEvent *event)
                    event->timestamp(),
                    (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
                    (unsigned int)event->button(),
+                   (unsigned int)event->buttons(),
                    globalPos,
                    localPos,
                    screenPos,
@@ -210,7 +213,7 @@ void O3DCanvasContent::mouseDoubleClickEvent(QMouseEvent *event)
 
 void O3DCanvasContent::mouseMoveEvent(QMouseEvent *event)
 {
-    Point2i localPos(event->localPos().x(), event->localPos().y());
+    Point2f localPos(event->localPos().x(), event->localPos().y());
     Point2i globalPos(event->globalPos().x(), event->globalPos().y());
 
     Point2f screenPos(event->screenPos().x(), event->screenPos().y());
@@ -220,6 +223,7 @@ void O3DCanvasContent::mouseMoveEvent(QMouseEvent *event)
                    event->timestamp(),
                    (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
                    (unsigned int)event->button(),
+                   (unsigned int)event->buttons(),
                    globalPos,
                    localPos,
                    screenPos,
@@ -231,6 +235,20 @@ void O3DCanvasContent::mouseMoveEvent(QMouseEvent *event)
 
 void O3DCanvasContent::wheelEvent(QWheelEvent *event)
 {
+    Point2i angleDelta(event->angleDelta().x(), event->angleDelta().y());
+
+    Point2f globalPosF(event->globalPosF().x(), event->globalPosF().y());
+    Point2f posF(event->posF().x(), event->posF().y());
+
+    WheelEvent evt(Event::WHEEL_EVENT,
+                   event->timestamp(),
+                   (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
+                   (unsigned int)event->buttons(),
+                   angleDelta,
+                   globalPosF,
+                   posF);
+
+    m_drawer->wheelEvent(evt);
     QWidget::wheelEvent(event);
 }
 

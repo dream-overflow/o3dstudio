@@ -155,7 +155,8 @@ HEADERS += \
     include/o3d/studio/common/ui/event.h \
     include/o3d/studio/common/ui/inputevent.h \
     include/o3d/studio/common/ui/keyevent.h \
-    include/o3d/studio/common/ui/mouseevent.h
+    include/o3d/studio/common/ui/mouseevent.h \
+    include/o3d/studio/common/ui/wheelevent.h
 
 LIBS += -lobjective3d-dbg
 
