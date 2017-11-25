@@ -217,6 +217,7 @@ void WorkspaceDock::onChangeCurrentWorkspace(const String &/*name*/)
         // workspace project
         workspace->onProjectAdded.connect(this, &WorkspaceDock::onAddProject);
         workspace->onProjectRemoved.connect(this, &WorkspaceDock::onRemoveProject);
+        workspace->onProjectActivated.connect(this, &WorkspaceDock::onActivateProject);
 
         // project entities
         workspace->onProjectHubAdded.connect(this, &WorkspaceDock::onProjectHubAdded, CONNECTION_ASYNCH);

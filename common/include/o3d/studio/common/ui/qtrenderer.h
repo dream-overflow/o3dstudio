@@ -10,11 +10,11 @@
 #ifndef _O3DS_COMMON_QTRENDERER_H
 #define _O3DS_COMMON_QTRENDERER_H
 
-#include <QtWidgets/QOpenGLWidget>
-
 #include <o3d/engine/renderer.h>
 
 #include "../global.h"
+
+class QOpenGLWidget;
 
 namespace o3d {
 namespace studio {

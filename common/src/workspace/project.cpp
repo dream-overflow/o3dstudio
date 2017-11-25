@@ -763,7 +763,7 @@ void Project::addAsset(Asset *asset)
     setDirty();
 
     // signal throught workspace
-    emit workspace()->onProjectAssetAdded(asset->ref().light());
+    workspace()->onProjectAssetAdded(asset->ref().light());
 }
 
 void Project::removeAsset(const LightRef &_ref)

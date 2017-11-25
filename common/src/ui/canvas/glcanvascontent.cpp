@@ -22,6 +22,9 @@ GLCanvasContent::GLCanvasContent(const LightRef &ref, QWidget *parent) :
 {
     setWindowTitle(tr("Display"));
     setWindowIcon(QIcon::fromTheme("input-gaming"));
+    setFocusPolicy(Qt::NoFocus);
+    setMouseTracking(true);
+    setAttribute(Qt::WA_AcceptTouchEvents, true);
 
     // add project name
     common::WorkspaceManager *workspaces = &common::Application::instance()->workspaces();

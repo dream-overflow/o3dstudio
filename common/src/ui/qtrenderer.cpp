@@ -12,6 +12,10 @@
 #include <o3d/engine/context.h>
 #include <o3d/engine/glextensionmanager.h>
 
+#define __gl_h_
+#define __glext_h_
+
+#include <QtWidgets/QOpenGLWidget>
 #include <QtGui/QOpenGLContext>
 
 using namespace o3d::studio::common;

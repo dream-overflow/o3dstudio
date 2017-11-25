@@ -10,6 +10,8 @@
 #define _O3DS_COMMON_O3DRAWER_H
 
 #include "../../global.h"
+#include "../keyevent.h"
+#include "../mouseevent.h"
 
 namespace o3d {
 namespace studio {
@@ -24,6 +26,18 @@ public:
     virtual void updateDrawer() = 0;
     virtual void resizeDrawer(int w, int h) = 0;
     virtual void terminateDrawer() = 0;
+
+    virtual void mousePressEvent(const MouseEvent &event) = 0;
+    virtual void mouseReleaseEvent(const MouseEvent &event) = 0;
+    virtual void mouseDoubleClickEvent(const MouseEvent &event) = 0;
+    virtual void mouseMoveEvent(const MouseEvent &event) = 0;
+    virtual void wheelEvent(const MouseEvent &event) = 0;
+    virtual void keyPressEvent(const KeyEvent &event) = 0;
+    virtual void keyReleaseEvent(const KeyEvent &event) = 0;
+    virtual void focusInEvent(const Event &event) = 0;
+    virtual void focusOutEvent(const Event &event) = 0;
+    virtual void enterEvent(const Event &event) = 0;
+    virtual void leaveEvent(const Event &event) = 0;
 };
 
 } // namespace common

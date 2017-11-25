@@ -19,7 +19,7 @@
 
 using namespace o3d::studio::common;
 
-O3DCanvasContent::O3DCanvasContent(const LightRef &ref, bool debug, QWidget *parent) :
+O3DCanvasContent::O3DCanvasContent(const LightRef &ref, Bool debug, QWidget *parent) :
     GLCanvasContent(ref, parent),
     m_debug(debug),
     m_renderer(nullptr),
@@ -127,4 +127,175 @@ void O3DCanvasContent::updateGL()
     if (m_drawer) {
         m_drawer->updateDrawer();
     }
+
+    // paint every 16 ms
+    static int i = 0;
+    if (i == 0) {
+        repaint();
+        ++i;
+    } else if (i == 1) {
+        i = 0;
+    }
+}
+
+#include "o3d/studio/common/ui/keyevent.h"
+#include "o3d/studio/common/ui/mouseevent.h"
+//#include "o3d/studio/common/ui/wheelevent.h"
+//#include "o3d/studio/common/ui/touchevent.h"
+//#include "o3d/studio/common/ui/dragevent.h"
+//#include "o3d/studio/common/ui/tabletevent.h"
+
+void O3DCanvasContent::mousePressEvent(QMouseEvent *event)
+{
+    Point2i localPos(event->localPos().x(), event->localPos().y());
+    Point2i globalPos(event->globalPos().x(), event->globalPos().y());
+
+    Point2f screenPos(event->screenPos().x(), event->screenPos().y());
+    Point2f windowPos(event->windowPos().x(), event->windowPos().y());
+
+    MouseEvent evt(Event::MOUSE_BUTTON_PRESS,
+                   event->timestamp(),
+                   (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
+                   (unsigned int)event->button(),
+                   globalPos,
+                   localPos,
+                   screenPos,
+                   windowPos);
+
+    m_drawer->mousePressEvent(evt);
+    QWidget::mousePressEvent(event);
+}
+
+void O3DCanvasContent::mouseReleaseEvent(QMouseEvent *event)
+{
+    Point2i localPos(event->localPos().x(), event->localPos().y());
+    Point2i globalPos(event->globalPos().x(), event->globalPos().y());
+
+    Point2f screenPos(event->screenPos().x(), event->screenPos().y());
+    Point2f windowPos(event->windowPos().x(), event->windowPos().y());
+
+    MouseEvent evt(Event::MOUSE_BUTTON_RELEASE,
+                   event->timestamp(),
+                   (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
+                   (unsigned int)event->button(),
+                   globalPos,
+                   localPos,
+                   screenPos,
+                   windowPos);
+
+    m_drawer->mouseReleaseEvent(evt);
+    QWidget::mouseReleaseEvent(event);
+}
+
+void O3DCanvasContent::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    Point2i localPos(event->localPos().x(), event->localPos().y());
+    Point2i globalPos(event->globalPos().x(), event->globalPos().y());
+
+    Point2f screenPos(event->screenPos().x(), event->screenPos().y());
+    Point2f windowPos(event->windowPos().x(), event->windowPos().y());
+
+    MouseEvent evt(Event::MOUSE_BUTTON_DBL_CLICK,
+                   event->timestamp(),
+                   (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
+                   (unsigned int)event->button(),
+                   globalPos,
+                   localPos,
+                   screenPos,
+                   windowPos);
+
+    m_drawer->mouseDoubleClickEvent(evt);
+    QWidget::mouseDoubleClickEvent(event);
+}
+
+void O3DCanvasContent::mouseMoveEvent(QMouseEvent *event)
+{
+    Point2i localPos(event->localPos().x(), event->localPos().y());
+    Point2i globalPos(event->globalPos().x(), event->globalPos().y());
+
+    Point2f screenPos(event->screenPos().x(), event->screenPos().y());
+    Point2f windowPos(event->windowPos().x(), event->windowPos().y());
+
+    MouseEvent evt(Event::MOUSE_MOVE,
+                   event->timestamp(),
+                   (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
+                   (unsigned int)event->button(),
+                   globalPos,
+                   localPos,
+                   screenPos,
+                   windowPos);
+
+    m_drawer->mouseMoveEvent(evt);
+    QWidget::mouseMoveEvent(event);
+}
+
+void O3DCanvasContent::wheelEvent(QWheelEvent *event)
+{
+    QWidget::wheelEvent(event);
+}
+
+void O3DCanvasContent::keyPressEvent(QKeyEvent *event)
+{
+    KeyEvent evt(Event::KEY_PRESS_EVENT,
+                 event->timestamp(),
+                 event->key(),
+                 (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
+                 // event->nativeScanCode(),
+                 event->nativeVirtualKey(),
+                 // event->nativeModifiers(),
+                 fromQString(event->text()),
+                 event->isAutoRepeat(),
+                 event->count());
+
+    m_drawer->keyPressEvent(evt);
+    QWidget::keyPressEvent(event);
+}
+
+void O3DCanvasContent::keyReleaseEvent(QKeyEvent *event)
+{
+    KeyEvent evt(Event::KEY_RELEASE_EVENT,
+                 event->timestamp(),
+                 event->key(),
+                 (InputEvent::KeyboardModifier)(unsigned int)event->modifiers(),
+                 // event->nativeScanCode(),
+                 event->nativeVirtualKey(),
+                 // event->nativeModifiers(),
+                 fromQString(event->text()),
+                 event->isAutoRepeat(),
+                 event->count());
+
+    m_drawer->keyReleaseEvent(evt);
+    QWidget::keyReleaseEvent(event);
+}
+
+void O3DCanvasContent::focusInEvent(QFocusEvent *event)
+{
+    Event evt(Event::FOCUS_IN);
+    m_drawer->focusInEvent(evt);
+
+    QWidget::focusInEvent(event);
+}
+
+void O3DCanvasContent::focusOutEvent(QFocusEvent *event)
+{
+    Event evt(Event::FOCUS_OUT);
+    m_drawer->focusOutEvent(evt);
+
+    QWidget::focusOutEvent(event);
+}
+
+void O3DCanvasContent::enterEvent(QEvent *event)
+{
+    Event evt(Event::ENTER);
+    m_drawer->enterEvent(evt);
+
+    QWidget::enterEvent(event);
+}
+
+void O3DCanvasContent::leaveEvent(QEvent *event)
+{
+    Event evt(Event::LEAVE);
+    m_drawer->leaveEvent(evt);
+
+    QWidget::leaveEvent(event);
 }

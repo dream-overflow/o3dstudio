@@ -14,9 +14,15 @@
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/ui/canvas/o3ddrawer.h"
 
+#include <o3d/core/baseobject.h>
+#include <o3d/core/smartobject.h>
+
 namespace o3d {
 
 class Scene;
+class Camera;
+class ViewPort;
+class SceneDrawer;
 
 namespace studio {
 namespace common {
@@ -25,7 +31,12 @@ class O3DCanvasContent;
 class QtRenderer;
 class SceneCommand;
 
-class O3S_API MasterScene : public O3DDrawer
+class Event;
+class KeyEvent;
+class MouseEvent;
+class FocusEvent;
+
+class O3S_API MasterScene : public BaseObject, public O3DDrawer
 {
 public:
 
@@ -47,13 +58,28 @@ public:
     O3DCanvasContent *content();
     const O3DCanvasContent *content() const;
 
-    virtual void initialize();
+    virtual void initialize(Bool debug = False);
 
     virtual void initializeDrawer() override;
     virtual void paintDrawer() override;
     virtual void updateDrawer() override;
     virtual void resizeDrawer(int w, int h) override;
     virtual void terminateDrawer() override;
+
+    virtual void mousePressEvent(const MouseEvent &event);
+    virtual void mouseReleaseEvent(const MouseEvent &event);
+    virtual void mouseDoubleClickEvent(const MouseEvent &event);
+    virtual void mouseMoveEvent(const MouseEvent &event);
+    virtual void wheelEvent(const MouseEvent &event);
+
+    virtual void keyPressEvent(const KeyEvent &event);
+    virtual void keyReleaseEvent(const KeyEvent &event);
+
+    virtual void focusInEvent(const Event &event);
+    virtual void focusOutEvent(const Event &event);
+
+    virtual void enterEvent(const Event &event);
+    virtual void leaveEvent(const Event &event);
 
 private:
 
@@ -62,6 +88,18 @@ private:
     O3DCanvasContent *m_content;  //!< Attached widget
     QtRenderer *m_renderer;       //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
+
+    Point2i m_localPos;
+    Bool m_rotateCam;
+
+    //! Main working camera, cannot be deleted
+    o3d::SmartObject<o3d::Camera> m_camera;
+
+    //! Main working viewport, cannot be deleted
+    o3d::SmartObject<o3d::ViewPort> m_viewport;
+
+    //! Main working drawer, cannot be deleted
+    o3d::SmartObject<o3d::SceneDrawer> m_sceneDrawer;
 
     //! Ordered list of command to process during the moment where the context is set to current.
     //! In others words it is the pass of synchronization that will be executed here.

@@ -24,7 +24,7 @@ class O3S_API O3DCanvasContent : public GLCanvasContent
 
 public:
 
-    explicit O3DCanvasContent(const LightRef &ref, bool debug = false, QWidget *parent = nullptr);
+    explicit O3DCanvasContent(const LightRef &ref, Bool debug = false, QWidget *parent = nullptr);
     virtual ~O3DCanvasContent();
 
     virtual String elementName() const override;
@@ -48,9 +48,21 @@ protected:
     virtual void paintGL() override;
     virtual void resizeGL(int w, int h) override;
 
+    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void mouseReleaseEvent(QMouseEvent *event);
+    virtual void mouseDoubleClickEvent(QMouseEvent *event);
+    virtual void mouseMoveEvent(QMouseEvent *event);
+    virtual void wheelEvent(QWheelEvent *event);
+    virtual void keyPressEvent(QKeyEvent *event);
+    virtual void keyReleaseEvent(QKeyEvent *event);
+    virtual void focusInEvent(QFocusEvent *event);
+    virtual void focusOutEvent(QFocusEvent *event);
+    virtual void enterEvent(QEvent *event);
+    virtual void leaveEvent(QEvent *event);
+
 private:
 
-    bool m_debug;
+    Bool m_debug;
     QtRenderer *m_renderer;
 
     O3DDrawer *m_drawer;

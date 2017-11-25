@@ -90,6 +90,10 @@ public:
     TypeRegistry& types();
     const TypeRegistry& types() const;
 
+    //
+    // Factories
+    //
+
 private:
 
     String m_appDir;             //!< Absolute application base directory

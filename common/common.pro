@@ -151,7 +151,11 @@ HEADERS += \
     include/o3d/studio/common/importer/importer.h \
     include/o3d/studio/common/builder/builder.h \
     include/o3d/studio/common/component/drawerhub.h \
-    include/o3d/studio/common/workspace/scenecommand.h
+    include/o3d/studio/common/workspace/scenecommand.h \
+    include/o3d/studio/common/ui/event.h \
+    include/o3d/studio/common/ui/inputevent.h \
+    include/o3d/studio/common/ui/keyevent.h \
+    include/o3d/studio/common/ui/mouseevent.h
 
 LIBS += -lobjective3d-dbg
 

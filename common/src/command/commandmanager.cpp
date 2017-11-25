@@ -274,7 +274,7 @@ void CommandManager::redoNCommands(Int32 num)
 
     m_rwLock.unlockWrite();
 
-    emit commandUpdate();
+    commandUpdate();
 }
 
 o3d::Bool CommandManager::hasPendingCommands() const

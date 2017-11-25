@@ -91,7 +91,7 @@ void Hub::addHub(Hub *hub)
     setDirty();
 
     // signal throught project->workspace
-    emit project()->workspace()->onProjectHubAdded(hub->ref().light());
+    project()->workspace()->onProjectHubAdded(hub->ref().light());
 }
 
 void Hub::removeHub(const LightRef &_ref)
@@ -113,7 +113,7 @@ void Hub::removeHub(const LightRef &_ref)
     setDirty();
 
     // signal throught project->workspace
-    emit project()->workspace()->onProjectHubRemoved(hub->ref().light());
+    project()->workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
 void Hub::removeHub(UInt64 id)
@@ -131,7 +131,7 @@ void Hub::removeHub(UInt64 id)
     setDirty();
 
     // signal throught project->workspace
-    emit project()->workspace()->onProjectHubRemoved(hub->ref().light());
+    project()->workspace()->onProjectHubRemoved(hub->ref().light());
 }
 
 void Hub::removeHub(Hub *hub)
