@@ -92,7 +92,10 @@ private /*slots*/:
     void onCommandDone(String name, String label, Bool done);
 
     void onChangeCurrentWorkspace(const String &name);
+
     void onProjectAdded(common::LightRef ref);
+    void onProjectActivated(common::LightRef ref);
+    void onProjectRemoved(common::LightRef ref);
 
     void onSelectionChanged();
 
@@ -152,7 +155,7 @@ private slots:
     void onFileWorkspaceManage();
 
     void onFileMenuPreferences();
-    void onFileMenuClose();
+    void onFileMenuCloseProject();
     void onFileMenuQuit();
 
     void onWindowFullScreen();

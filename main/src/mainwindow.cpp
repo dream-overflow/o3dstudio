@@ -95,8 +95,8 @@ void QtMainWindow::setup()
     connect(ui.actionWorkspaceManage, SIGNAL(triggered(bool)), SLOT(onFileWorkspaceManage()));
 
     connect(ui.actionPreferences, SIGNAL(triggered(bool)), SLOT(onFileMenuPreferences()));
-    connect(ui.actionClose, SIGNAL(triggered(bool)), SLOT(onFileMenuClose()));
-    ui.actionClose->setEnabled(false);
+    connect(ui.actionCloseProject, SIGNAL(triggered(bool)), SLOT(onFileMenuCloseProject()));
+    ui.actionCloseProject->setEnabled(false);
 
     connect(ui.actionQuit, SIGNAL(triggered(bool)), SLOT(onFileMenuQuit()));
 
@@ -450,11 +450,19 @@ void QtMainWindow::onFileMenuPreferences()
     dialog->show();
 }
 
-void QtMainWindow::onFileMenuClose()
+void QtMainWindow::onFileMenuCloseProject()
 {
-    // @todo get selection
-    // @todo do close on selection
-    closeWorkspace();
+    common::Workspace *workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        common::Project *project = workspace->activeProject();
+        if (project) {
+            if (project->hasChanges()) {
+                project->save();
+            }
+
+            workspace->closeProject(project->ref().light());
+        }
+    }
 }
 
 void QtMainWindow::onFileMenuQuit()
@@ -1177,29 +1185,29 @@ o3d::Bool MainWindow::removeContentWidget(const String &name)
         return False;
     }
 
-    // @todo using ctrl
-
     auto it = m_contents.find(name);
     if (it != m_contents.end()) {
         if (m_currentContent && m_currentContent == it->second) {
             m_currentContent->ui()->setParent(nullptr);
             m_currentContent = nullptr;
 
-            setCurrentContentWidget("welcome");
+            setCurrentContentWidget("o3s::main::browsercontent");
         }
 
         it->second->ui()->setParent(nullptr);
-        delete it->second;
+        m_contents.erase(it);
 
-        // erase menu entry, but we have to reprocess any because if leaks in position
-        m_qtMainWindow->ui.menuContentViews->actions().clear();
+        // erase menu entry, but we have to reprocess it because of orders
+        for (QAction *action : m_qtMainWindow->ui.menuContentViews->actions()) {
+            m_qtMainWindow->ui.menuContentViews->removeAction(action);
+        }
 
-        QAction *action = nullptr;
         int i = 0;
         o3d::studio::common::Content *content = nullptr;
         QString title = "";
-        for (auto it = m_contents.begin(); it != m_contents.end(); ++it) {
-            content = it->second;
+        QAction *action = nullptr;
+        for (auto it2 = m_contents.begin(); it2 != m_contents.end(); ++it2) {
+            content = it2->second;
 
             if (i < 10) {
                 title = QString("&%1 | %2").arg(i).arg(content->ui()->windowTitle());
@@ -1217,17 +1225,6 @@ o3d::Bool MainWindow::removeContentWidget(const String &name)
             m_qtMainWindow->connect(action, SIGNAL(triggered(bool)), SLOT(onViewContent()));
             m_qtMainWindow->ui.menuContentViews->addAction(action);
         }
-
-//        QList<QAction*> actions = ui.menuContentViews->actions();
-//        QAction *action = nullptr;
-//        foreach (action, actions) {
-//            if (action->property("name").toString() == name) {
-//                ui.menuContentViews->removeAction(action);
-//                break;
-//            }
-//        }
-
-        m_contents.erase(it);
 
         return True;
     }
@@ -1291,6 +1288,11 @@ void MainWindow::onChangeCurrentWorkspace(const String&)
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
         workspace->onProjectAdded.connect(this, &MainWindow::onProjectAdded);
+        workspace->onProjectActivated.connect(this, &MainWindow::onProjectActivated);
+        workspace->onProjectRemoved.connect(this, &MainWindow::onProjectRemoved);
+
+        // no more opened projects
+        m_qtMainWindow->ui.actionCloseProject->setEnabled(false);
     }
 }
 
@@ -1369,6 +1371,20 @@ void MainWindow::onProjectAdded(common::LightRef ref)
     settings().set("o3s::main::project::recents", QVariant(recentsProject));
 
     m_qtMainWindow->initRecentProjectsMenu();
+}
+
+void MainWindow::onProjectActivated(o3d::studio::common::LightRef /*ref*/)
+{
+    m_qtMainWindow->ui.actionCloseProject->setEnabled(true);
+}
+
+void MainWindow::onProjectRemoved(o3d::studio::common::LightRef /*ref*/)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    common::Project *project = workspace->activeProject();
+    if (!project) {
+        m_qtMainWindow->ui.actionCloseProject->setEnabled(false);
+    }
 }
 
 o3d::studio::common::Settings &MainWindow::settings()

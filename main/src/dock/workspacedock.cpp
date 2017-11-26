@@ -90,12 +90,9 @@ void WorkspaceDock::onAddProject(LightRef ref)
 void WorkspaceDock::onRemoveProject(LightRef ref)
 {
     common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
-    common::Project *project = common::Application::instance()->workspaces().current()->project(ref);
 
     // remove a project item
-    if (project) {
-        projectModel->removeProject(ref);
-    }
+    projectModel->removeProject(ref);
 }
 
 void WorkspaceDock::onActivateProject(LightRef ref)

@@ -79,7 +79,7 @@
     <addaction name="actionSaveAs"/>
     <addaction name="actionSaveAll"/>
     <addaction name="separator"/>
-    <addaction name="actionClose"/>
+    <addaction name="actionCloseProject"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
     <addaction name="separator"/>
@@ -142,7 +142,26 @@
     <property name="title">
      <string>&amp;Tools</string>
     </property>
+    <widget class="QMenu" name="menuMesh">
+     <property name="title">
+      <string>&amp;Mesh</string>
+     </property>
+     <addaction name="actionTriangulate"/>
+     <addaction name="actionComputeNormal"/>
+     <addaction name="actionComputeTangentSpace"/>
+     <addaction name="actionGenerateTextureCoordinates"/>
+    </widget>
+    <widget class="QMenu" name="menuImage">
+     <property name="title">
+      <string>Image</string>
+     </property>
+     <addaction name="actionConvertToDDS"/>
+     <addaction name="actionConvertToPNG"/>
+     <addaction name="actionConvertToJPEG"/>
+    </widget>
     <addaction name="separator"/>
+    <addaction name="menuMesh"/>
+    <addaction name="menuImage"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -157,16 +176,141 @@
     <addaction name="actionDelete"/>
     <addaction name="actionSelectAll"/>
     <addaction name="separator"/>
+    <addaction name="actionSelectArea"/>
+    <addaction name="actionCompleXSelection"/>
    </widget>
    <widget class="QMenu" name="menuCompile">
     <property name="title">
      <string>&amp;Build</string>
     </property>
+    <addaction name="actionConfigureBuilders"/>
+    <addaction name="separator"/>
+    <addaction name="actionBuild"/>
+    <addaction name="actionGotoBuildFolder"/>
+   </widget>
+   <widget class="QMenu" name="menuDisplay">
+    <property name="title">
+     <string>&amp;Display</string>
+    </property>
+    <widget class="QMenu" name="menuScene">
+     <property name="title">
+      <string>&amp;Scene</string>
+     </property>
+     <widget class="QMenu" name="menuMeshs">
+      <property name="title">
+       <string>Meshs</string>
+      </property>
+      <addaction name="actionMeshs"/>
+      <addaction name="actionSkins"/>
+     </widget>
+     <widget class="QMenu" name="menuSky">
+      <property name="title">
+       <string>Sky</string>
+      </property>
+      <addaction name="actionSky"/>
+      <addaction name="actionSkyObjects"/>
+      <addaction name="actionCloudLayers"/>
+     </widget>
+     <widget class="QMenu" name="menuMap2D">
+      <property name="title">
+       <string>Map 2D</string>
+      </property>
+      <addaction name="actionMap2D"/>
+      <addaction name="actionMap2DLayers"/>
+      <addaction name="actionMap2DObjects"/>
+     </widget>
+     <widget class="QMenu" name="menuLocalAxis">
+      <property name="title">
+       <string>Local Axis</string>
+      </property>
+      <addaction name="actionLocalAxis"/>
+      <addaction name="actionMeshLocalAxis_2"/>
+      <addaction name="actionLocalSpace_2"/>
+     </widget>
+     <widget class="QMenu" name="menuPointLight">
+      <property name="title">
+       <string>Lights</string>
+      </property>
+      <addaction name="actionPointLights"/>
+      <addaction name="actionSpotLights"/>
+      <addaction name="actionDirectionalLights"/>
+     </widget>
+     <widget class="QMenu" name="menuAudioListener">
+      <property name="title">
+       <string>Audio</string>
+      </property>
+      <addaction name="actionAudioListener"/>
+      <addaction name="actionAudioSourceOmnidirectional"/>
+      <addaction name="actionAudioSourceDirectional"/>
+     </widget>
+     <widget class="QMenu" name="menuCubeGizmo">
+      <property name="title">
+       <string>Gizmo</string>
+      </property>
+      <addaction name="actionCubeGizmo"/>
+      <addaction name="actionCylinderGizmos"/>
+      <addaction name="actionPointGizmos"/>
+      <addaction name="actionSquareGizmos"/>
+      <addaction name="actionSphereGizmos"/>
+      <addaction name="actionVectorGizmos"/>
+     </widget>
+     <widget class="QMenu" name="menuVisibility">
+      <property name="title">
+       <string>Visibility</string>
+      </property>
+      <addaction name="actionQuadtree"/>
+      <addaction name="actionOctree"/>
+      <addaction name="actionConnection"/>
+     </widget>
+     <widget class="QMenu" name="menuPhysic">
+      <property name="title">
+       <string>Physic</string>
+      </property>
+      <addaction name="actionColliderBounding"/>
+     </widget>
+     <addaction name="actionDisplayAllConcretes"/>
+     <addaction name="menuMap2D"/>
+     <addaction name="menuMeshs"/>
+     <addaction name="menuSky"/>
+     <addaction name="actionTerrain"/>
+     <addaction name="actionWorldLabels"/>
+     <addaction name="separator"/>
+     <addaction name="actionDisplayAllSymbolics"/>
+     <addaction name="menuAudioListener"/>
+     <addaction name="actionBones"/>
+     <addaction name="actionBoundingVolume"/>
+     <addaction name="actionCamera"/>
+     <addaction name="actionDebug"/>
+     <addaction name="menuPointLight"/>
+     <addaction name="menuLocalAxis"/>
+     <addaction name="menuCubeGizmo"/>
+     <addaction name="actionMaterials"/>
+     <addaction name="menuPhysic"/>
+     <addaction name="actionTrajectory"/>
+     <addaction name="menuVisibility"/>
+    </widget>
+    <widget class="QMenu" name="menuGui">
+     <property name="title">
+      <string>Gui</string>
+     </property>
+     <addaction name="actionWidgets"/>
+     <addaction name="actionCursor"/>
+    </widget>
+    <addaction name="menuScene"/>
+    <addaction name="menuGui"/>
+   </widget>
+   <widget class="QMenu" name="menuNaviguation">
+    <property name="title">
+     <string>&amp;Navigation</string>
+    </property>
+    <addaction name="actionResetCameraPosition"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuCompile"/>
    <addaction name="menu_Tools"/>
+   <addaction name="menuDisplay"/>
+   <addaction name="menuNaviguation"/>
    <addaction name="menu_Window"/>
    <addaction name="menu_Help"/>
   </widget>
@@ -192,13 +336,13 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionClose">
+  <action name="actionCloseProject">
    <property name="icon">
     <iconset theme="window-close">
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>&amp;Close</string>
+    <string>&amp;Close Project</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+W</string>
@@ -401,7 +545,7 @@
      <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
-    <string>Select all</string>
+    <string>Select &amp;all</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+A</string>
@@ -476,7 +620,8 @@
   </action>
   <action name="actionPreviousContentView">
    <property name="icon">
-    <iconset theme="go-previous"/>
+    <iconset theme="go-previous">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Previous content</string>
@@ -487,7 +632,8 @@
   </action>
   <action name="actionNextContentView">
    <property name="icon">
-    <iconset theme="go-next"/>
+    <iconset theme="go-next">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>&amp;Next content</string>
@@ -496,9 +642,350 @@
     <string>Alt+Right</string>
    </property>
   </action>
+  <action name="actionDisplayAllSymbolics">
+   <property name="text">
+    <string>Display all &amp;symbolics</string>
+   </property>
+  </action>
+  <action name="actionDisplayAllConcretes">
+   <property name="text">
+    <string>Display all &amp;concretes</string>
+   </property>
+  </action>
+  <action name="actionSkin">
+   <property name="text">
+    <string>Skins</string>
+   </property>
+  </action>
+  <action name="actionWorldLabels">
+   <property name="text">
+    <string>World Labels</string>
+   </property>
+  </action>
+  <action name="actionSkyObject">
+   <property name="text">
+    <string>Sky Object</string>
+   </property>
+  </action>
+  <action name="actionCloudLayer">
+   <property name="text">
+    <string>Cloud Layer</string>
+   </property>
+  </action>
+  <action name="actionMap2DLayer">
+   <property name="text">
+    <string>Map 2D Layer</string>
+   </property>
+  </action>
+  <action name="actionMad2DObject">
+   <property name="text">
+    <string>Mad 2D Object</string>
+   </property>
+  </action>
+  <action name="actionTrajectory">
+   <property name="text">
+    <string>Trajectories</string>
+   </property>
+  </action>
+  <action name="actionBones">
+   <property name="text">
+    <string>Bones</string>
+   </property>
+  </action>
+  <action name="actionMeshLocalAxis">
+   <property name="text">
+    <string>Mesh Local Axis</string>
+   </property>
+  </action>
+  <action name="actionSpotLight">
+   <property name="text">
+    <string>Spot Light</string>
+   </property>
+  </action>
+  <action name="actionDirectionalLight">
+   <property name="text">
+    <string>Directional Light</string>
+   </property>
+  </action>
+  <action name="actionCamera">
+   <property name="text">
+    <string>Camera</string>
+   </property>
+  </action>
+  <action name="actionCylinderGizmo">
+   <property name="text">
+    <string>Cylinder Gizmo</string>
+   </property>
+  </action>
+  <action name="actionPointGizmo">
+   <property name="text">
+    <string>Point Gizmo</string>
+   </property>
+  </action>
+  <action name="actionSquareGizmo">
+   <property name="text">
+    <string>Square Gizmo</string>
+   </property>
+  </action>
+  <action name="actionSphereGizmo">
+   <property name="text">
+    <string>Sphere Gizmo</string>
+   </property>
+  </action>
+  <action name="actionVectorGizmo">
+   <property name="text">
+    <string>Vector Gizmo</string>
+   </property>
+  </action>
+  <action name="actionAudioSourceOmnidirectionnal">
+   <property name="text">
+    <string>Audio Source Omnidirectional</string>
+   </property>
+  </action>
+  <action name="actionAudioSourceDirectionnal">
+   <property name="text">
+    <string>Audio Source Directional</string>
+   </property>
+  </action>
+  <action name="actionMeshs">
+   <property name="text">
+    <string>Meshs</string>
+   </property>
+  </action>
+  <action name="actionSkins">
+   <property name="text">
+    <string>Skins</string>
+   </property>
+  </action>
+  <action name="actionSky">
+   <property name="text">
+    <string>Sky</string>
+   </property>
+  </action>
+  <action name="actionSkyObjects">
+   <property name="text">
+    <string>Sky Object</string>
+   </property>
+  </action>
+  <action name="actionCloudLayers">
+   <property name="text">
+    <string>Cloud Layer</string>
+   </property>
+  </action>
+  <action name="actionMap2D">
+   <property name="text">
+    <string>Map 2D</string>
+   </property>
+  </action>
+  <action name="actionMap2DLayers">
+   <property name="text">
+    <string>Map 2D Layer</string>
+   </property>
+  </action>
+  <action name="actionMap2DObjects">
+   <property name="text">
+    <string>Map 2D Object</string>
+   </property>
+  </action>
+  <action name="actionLocalAxis">
+   <property name="text">
+    <string>Local Axis</string>
+   </property>
+  </action>
+  <action name="actionMeshLocalAxis_2">
+   <property name="text">
+    <string>Mesh Local Axis</string>
+   </property>
+  </action>
+  <action name="actionPointLights">
+   <property name="text">
+    <string>Point Lights</string>
+   </property>
+  </action>
+  <action name="actionSpotLights">
+   <property name="text">
+    <string>Spot Lights</string>
+   </property>
+  </action>
+  <action name="actionDirectionalLights">
+   <property name="text">
+    <string>Directional Light</string>
+   </property>
+  </action>
+  <action name="actionAudioListener">
+   <property name="text">
+    <string>Audio Listener</string>
+   </property>
+  </action>
+  <action name="actionAudioSourceOmnidirectional">
+   <property name="text">
+    <string>Audio Source Omnidirectional</string>
+   </property>
+  </action>
+  <action name="actionAudioSourceDirectional">
+   <property name="text">
+    <string>Audio Source Directional</string>
+   </property>
+  </action>
+  <action name="actionCubeGizmo">
+   <property name="text">
+    <string>Cube Gizmo</string>
+   </property>
+  </action>
+  <action name="actionCylinderGizmos">
+   <property name="text">
+    <string>Cylinder Gizmo</string>
+   </property>
+  </action>
+  <action name="actionPointGizmos">
+   <property name="text">
+    <string>Point Gizmo</string>
+   </property>
+  </action>
+  <action name="actionSquareGizmos">
+   <property name="text">
+    <string>Square Gizmo</string>
+   </property>
+  </action>
+  <action name="actionSphereGizmos">
+   <property name="text">
+    <string>Sphere Gizmo</string>
+   </property>
+  </action>
+  <action name="actionVectorGizmos">
+   <property name="text">
+    <string>Vector Gizmo</string>
+   </property>
+  </action>
+  <action name="actionQuadtree">
+   <property name="text">
+    <string>Quadtree</string>
+   </property>
+  </action>
+  <action name="actionOctree">
+   <property name="text">
+    <string>Octree</string>
+   </property>
+  </action>
+  <action name="actionConnection">
+   <property name="text">
+    <string>Connection</string>
+   </property>
+  </action>
+  <action name="actionMaterials">
+   <property name="text">
+    <string>Materials</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+  </action>
+  <action name="actionBoundingVolume">
+   <property name="text">
+    <string>Bounding Volume</string>
+   </property>
+  </action>
+  <action name="actionColliderBounding">
+   <property name="text">
+    <string>Collider Bounding</string>
+   </property>
+  </action>
+  <action name="actionLocalSpace">
+   <property name="text">
+    <string>Local Space</string>
+   </property>
+  </action>
+  <action name="actionLocalSpace_2">
+   <property name="text">
+    <string>Local Space</string>
+   </property>
+  </action>
+  <action name="actionWidgets">
+   <property name="text">
+    <string>Widgets</string>
+   </property>
+  </action>
+  <action name="actionCursor">
+   <property name="text">
+    <string>Cursor</string>
+   </property>
+  </action>
+  <action name="actionTerrain">
+   <property name="text">
+    <string>Terrain</string>
+   </property>
+  </action>
+  <action name="actionConfigureBuilders">
+   <property name="text">
+    <string>&amp;Configure builders</string>
+   </property>
+  </action>
+  <action name="actionBuild">
+   <property name="text">
+    <string>&amp;Build</string>
+   </property>
+  </action>
+  <action name="actionGotoBuildFolder">
+   <property name="text">
+    <string>Goto build folder</string>
+   </property>
+  </action>
+  <action name="actionResetCameraPosition">
+   <property name="text">
+    <string>Reset &amp;camera position</string>
+   </property>
+  </action>
+  <action name="actionTriangulate">
+   <property name="text">
+    <string>&amp;Triangulate</string>
+   </property>
+  </action>
+  <action name="actionComputeNormal">
+   <property name="text">
+    <string>Compute vertex &amp;normals</string>
+   </property>
+  </action>
+  <action name="actionComputeTangentSpace">
+   <property name="text">
+    <string>Compute tangent &amp;space</string>
+   </property>
+  </action>
+  <action name="actionGenerateTextureCoordinates">
+   <property name="text">
+    <string>Generate &amp;texture coordinates</string>
+   </property>
+  </action>
+  <action name="actionConvertToDDS">
+   <property name="text">
+    <string>Convert to &amp;DDS</string>
+   </property>
+  </action>
+  <action name="actionConvertToPNG">
+   <property name="text">
+    <string>Convert to &amp;PNG</string>
+   </property>
+  </action>
+  <action name="actionConvertToJPEG">
+   <property name="text">
+    <string>Convert to &amp;JPEG</string>
+   </property>
+  </action>
+  <action name="actionSelectArea">
+   <property name="text">
+    <string>Select area...</string>
+   </property>
+  </action>
+  <action name="actionCompleXSelection">
+   <property name="text">
+    <string>Comple&amp;x selection</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="../rc/mainresources.qrc"/>
+  <include location="../../common/rc/common.qrc"/>
  </resources>
  <connections/>
 </ui>

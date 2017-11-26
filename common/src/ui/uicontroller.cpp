@@ -148,6 +148,8 @@ o3d::Bool UiController::removeContent(Content *content)
         }
 
         content->ui()->setParent(nullptr);
+        // content->ui()->deleteLater();
+
         return True;
     }
 

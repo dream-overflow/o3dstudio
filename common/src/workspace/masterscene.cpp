@@ -54,19 +54,24 @@ MasterScene::MasterScene(Entity *parent) :
 
 MasterScene::~MasterScene()
 {
-    if (m_scene) {
-        delete m_scene;
+    terminateDrawer();
+
+    if (m_content && m_renderer) {
+        m_content->makeCurrent();
+        delete m_renderer;
+        m_content->doneCurrent();
+    } else if (m_renderer) {
+        deletePtr(m_renderer);
     }
 
+    // and finally widget
     if (m_content) {
+        m_content->setDrawer(nullptr);
+
         common::UiController &uiCtrl = common::Application::instance()->ui();
         uiCtrl.removeContent(m_content);
 
         m_content->deleteLater();
-    }
-
-    if (m_renderer) {
-        delete m_renderer;
     }
 }
 
@@ -160,10 +165,7 @@ void MasterScene::resizeDrawer(int w, int h)
 void MasterScene::terminateDrawer()
 {
     if (m_content) {
-        common::UiController &uiCtrl = common::Application::instance()->ui();
-        uiCtrl.removeContent(m_content);
-
-        m_content = nullptr;
+        m_content->makeCurrent();
     }
 
     if (m_scene) {
@@ -178,9 +180,8 @@ void MasterScene::terminateDrawer()
         m_scene = nullptr;
     }
 
-    if (m_renderer) {
-        delete m_renderer;
-        m_renderer = nullptr;
+    if (m_content) {
+        m_content->doneCurrent();
     }
 }
 
@@ -340,5 +341,8 @@ void MasterScene::initializeDrawer()
 
         m_sceneDrawer = new o3d::ShadowVolumeForward(m_scene);
         m_viewport = m_scene->getViewPortManager()->addScreenViewPort(m_camera.get(), m_sceneDrawer.get(), 0);
+
+        // default all symbolics objects are drawn
+        m_scene->drawAllSymbolicObject();
     }
 }
