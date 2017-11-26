@@ -37,6 +37,7 @@ void QtMainConsole::setupUi()
     m_listWidget->setAutoScroll(true);
     m_listWidget->setIconSize(QSize(16, 16));
     setWidget(m_listWidget);
+    setWindowIcon(QIcon(":/icons/perm_device_information_black.svg"));
 }
 
 MainConsole::MainConsole(o3d::BaseObject *parent) :

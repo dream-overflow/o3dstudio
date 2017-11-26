@@ -60,6 +60,7 @@ public:
 
 private slots:
 
+    void onCreateAsset();
     void onCreateFragment();
     void onCreateHub();
 

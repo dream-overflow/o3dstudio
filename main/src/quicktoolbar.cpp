@@ -19,7 +19,7 @@ QuickToolBar::QuickToolBar(QWidget *parent) :
 
     setupButtons();
 
-    setWindowIcon(QIcon::fromTheme("applications-internet"));
+    setWindowIcon(QIcon(":/icons/apps_black.svg"));
 }
 
 QuickToolBar::~QuickToolBar()

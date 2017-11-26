@@ -83,7 +83,9 @@ SOURCES += \
     src/builder/builder.cpp \
     src/component/drawerhub.cpp \
     src/workspace/scenecommand.cpp \
-    src/command/renameentitycommand.cpp
+    src/command/renameentitycommand.cpp \
+    src/command/asset/addassetcommand.cpp \
+    src/command/asset/removeassetcommand.cpp
 
 
 HEADERS += \ 
@@ -158,7 +160,9 @@ HEADERS += \
     include/o3d/studio/common/ui/keyevent.h \
     include/o3d/studio/common/ui/mouseevent.h \
     include/o3d/studio/common/ui/wheelevent.h \
-    include/o3d/studio/common/command/renameentitycommand.h
+    include/o3d/studio/common/command/renameentitycommand.h \
+    include/o3d/studio/common/command/asset/addassetcommand.h \
+    include/o3d/studio/common/command/asset/removeassetcommand.h
 
 LIBS += -lobjective3d-dbg
 

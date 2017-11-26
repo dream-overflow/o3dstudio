@@ -19,7 +19,7 @@ BrowserContent:: BrowserContent(QWidget *parent) :
     QTextBrowser(parent)
 {
     setWindowTitle(tr("Home page"));
-    setWindowIcon(QIcon::fromTheme("go-home"));
+    setWindowIcon(QIcon(":/icons/home_black.svg"));
 
     setSearchPaths(QStringList(toQString(common::Application::instance()->appDir()) + QDir::separator() + "share/html"));
     setSource(QUrl::fromLocalFile("index.html"));

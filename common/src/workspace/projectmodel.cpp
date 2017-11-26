@@ -14,6 +14,13 @@
 #include "o3d/studio/common/workspace/fragment.h"
 #include "o3d/studio/common/workspace/asset.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/typeregistry.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+
+#include "o3d/studio/common/command/commandmanager.h"
+#include "o3d/studio/common/command/renameentitycommand.h"
+
 #include "o3d/studio/common/ui/uiutils.h"
 
 using namespace o3d::studio::common;
@@ -102,7 +109,7 @@ QVariant ProjectModel::data(const QModelIndex &index, int role) const
 
     ProjectItem *item = static_cast<ProjectItem*>(index.internalPointer());
 
-    if (role == Qt::DisplayRole) {
+    if (role == Qt::DisplayRole || role == Qt::EditRole) {
         return item->data(index.column());
     } else if (role == Qt::DecorationRole) {
         return item->decoration(index.column());
@@ -146,6 +153,16 @@ o3d::Bool ProjectModel::setData(const QModelIndex &index, const QVariant &value,
 
     if (role == Qt::DisplayRole) {
         return item->setData(index.column(), value);
+    } else if (role == Qt::EditRole) {
+        // uses the value for edition, but set after the command is done
+        String newName = fromQString(value.toString());
+        if (newName != item->entity()->name()) {
+            // only if name is different
+            common::RenameEntityCommand *cmd = new common::RenameEntityCommand(item->ref(), item->parentItem()->ref(), newName);
+            common::Application::instance()->command().addCommand(cmd);
+        }
+
+        return False; //item->setData(index.column(), value);
     } else if (role == Qt::DecorationRole) {
         // return item->setDecoration(index.column(), value);
         return False;
@@ -159,7 +176,13 @@ Qt::ItemFlags ProjectModel::flags(const QModelIndex &index) const
     if (!index.isValid())
         return 0;
 
-    return QAbstractItemModel::flags(index);
+    // project cannot be renamed like this
+    ProjectItem *item = static_cast<ProjectItem*>(index.internalPointer());
+    if (item->isProject()) {
+        return QAbstractItemModel::flags(index);
+    } else {
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    }
 }
 
 QVariant ProjectModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -195,7 +218,7 @@ ProjectItem *ProjectModel::addProject(Project *project)
     ProjectItem *item = new ProjectItem(project,
                                         project->ref().light(),
                                         project->name(),
-                                        QIcon::fromTheme("document-open"),
+                                        UiUtils::tintIcon(":/icons/folder_open_black.svg"),
                                         m_rootItem);
     m_rootItem->appendChild(item);
 
@@ -396,7 +419,7 @@ ProjectItem *ProjectModel::addAsset(common::Asset *asset)
     ProjectItem *item = new ProjectItem(asset,
                                         asset->ref().light(),
                                         asset->name(),
-                                        UiUtils::tintIcon(":/icons/fragment_flat.svg"),
+                                        UiUtils::tintIcon(":/icons/archive_black.svg"),
                                         parentItem);
     parentItem->appendChild(item);
 

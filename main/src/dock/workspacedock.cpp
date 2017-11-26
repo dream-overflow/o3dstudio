@@ -25,10 +25,9 @@
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
 #include "o3d/studio/common/command/commandmanager.h"
-#include "o3d/studio/common/command/renameentitycommand.h"
 #include "o3d/studio/common/command/hub/removehubcommand.h"
 #include "o3d/studio/common/command/fragment/removefragmentcommand.h"
-// #include "o3d/studio/common/command/asset/removeassetcommand.h"
+#include "o3d/studio/common/command/asset/removeassetcommand.h"
 
 #include <QtWidgets/QTreeView>
 
@@ -392,21 +391,17 @@ void QtWorkspaceDock::keyPressEvent(QKeyEvent *event)
     if (m_treeView->hasFocus() && currentIndex.isValid()) {
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(currentIndex.internalPointer());
 
-        if (event->key() == Qt::Key_F2) {
-            String newName = "Its the newest";
-            common::RenameEntityCommand *cmd = new common::RenameEntityCommand(projectItem->ref(), projectItem->parentItem()->ref(), newName);
-            common::Application::instance()->command().addCommand(cmd);
-        } else if (event->key() == Qt::Key_Delete) {
+        if (event->key() == Qt::Key_Delete) {
             if (projectItem->isHub()) {
                 common::RemoveHubCommand *cmd = new common::RemoveHubCommand(projectItem->ref(), projectItem->parentItem()->ref());
                 common::Application::instance()->command().addCommand(cmd);
             } else if (projectItem->isFragment()) {
                 common::RemoveFragmentCommand *cmd = new common::RemoveFragmentCommand(projectItem->ref(), projectItem->parentItem()->ref());
                 common::Application::instance()->command().addCommand(cmd);
+            } else if (projectItem->isAsset()) {
+                common::RemoveAssetCommand *cmd = new common::RemoveAssetCommand(projectItem->ref(), projectItem->parentItem()->ref());
+                common::Application::instance()->command().addCommand(cmd);
             }
-        } else if (projectItem->isAsset()) {
-                // common::RemoveAssetCommand *cmd = new common::RemoveAssetCommand(asset);
-                // common::Application::instance()->command().addCommand(cmd);
         }
     }
 
@@ -427,7 +422,7 @@ void QtWorkspaceDock::setModel(QAbstractItemModel *model)
 
 void QtWorkspaceDock::setupUi()
 {
-    setWindowIcon(QIcon::fromTheme("input-gaming"));
+    setWindowIcon(QIcon(":/icons/work_black.svg"));
 
     m_treeView = new QTreeView(this);
     setWidget(m_treeView);

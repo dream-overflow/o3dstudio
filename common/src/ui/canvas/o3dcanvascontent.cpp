@@ -26,7 +26,7 @@ O3DCanvasContent::O3DCanvasContent(const LightRef &ref, Bool debug, QWidget *par
     m_drawer(nullptr)
 {
     setWindowTitle(tr("Display"));
-    setWindowIcon(QIcon::fromTheme("input-gaming"));
+    setWindowIcon(QIcon(":/icons/videogame_asset_black.svg"));
 
     // add project name
     common::WorkspaceManager *workspaces = &common::Application::instance()->workspaces();

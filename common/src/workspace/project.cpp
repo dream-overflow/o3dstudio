@@ -831,7 +831,7 @@ void Project::addAsset(Asset *asset)
     }
 
     // already exists
-    if (m_fragments.find(asset->ref().light().id()) != m_fragments.end()) {
+    if (m_assets.find(asset->ref().light().id()) != m_assets.end()) {
         O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added asset, or with a similar id"))));
     }
 

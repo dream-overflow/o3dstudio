@@ -17,6 +17,7 @@
 #include "o3d/studio/common/command/commandmanager.h"
 #include "o3d/studio/common/command/hub/addhubcommand.h"
 #include "o3d/studio/common/command/fragment/addfragmentcommand.h"
+#include "o3d/studio/common/command/asset/addassetcommand.h"
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
@@ -110,12 +111,24 @@ QtMainToolBar::QtMainToolBar(QWidget *parent) :
     setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea | Qt::RightToolBarArea);
     setupButtons();
 
-    setWindowIcon(QIcon::fromTheme("applications-accessories"));
+    setWindowIcon(QIcon(":/icons/settings_applications_black.svg"));
 }
 
 QtMainToolBar::~QtMainToolBar()
 {
 
+}
+
+void QtMainToolBar::onCreateAsset()
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        common::Project *project = workspace->activeProject();
+        if (project) {
+            common::AddAssetCommand *cmd = new common::AddAssetCommand(project->ref().light(), String());
+            common::Application::instance()->command().addCommand(cmd);
+        }
+    }
 }
 
 void QtMainToolBar::onCreateFragment()
@@ -171,14 +184,18 @@ void QtMainToolBar::setupButtons()
     addFragment->setEnabled(false);
     addAction(addFragment);
 
-    QAction *addhub = new QAction(common::UiUtils::tintIcon(":/icons/device_hub_black.svg"), tr("Create a Hub"));
-    connect(addhub, SIGNAL(triggered(bool)), SLOT(onCreateHub()));
-    addhub->setEnabled(false);
-    addAction(addhub);
+    QAction *addHub = new QAction(common::UiUtils::tintIcon(":/icons/device_hub_black.svg"), tr("Create a Hub"));
+    connect(addHub, SIGNAL(triggered(bool)), SLOT(onCreateHub()));
+    addHub->setEnabled(false);
+    addAction(addHub);
+
+    QAction *addAsset = new QAction(common::UiUtils::tintIcon(":/icons/archive_black.svg"), tr("Create an asset"));
+    connect(addAsset, SIGNAL(triggered(bool)), SLOT(onCreateAsset()));
+    addAsset->setEnabled(false);
+    addAction(addAsset);
 
     addSeparator();
 
     addAction(QIcon::fromTheme("system-search"), tr("Search"));
     addWidget(new QLineEdit());
 }
-

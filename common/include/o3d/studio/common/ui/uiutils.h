@@ -23,6 +23,8 @@ class O3S_API UiUtils
 public:
 
     static QIcon tintIcon(const QString &icon, QWidget *widget = nullptr);
+    static QIcon tintIcon(QIcon icon, int size = -1, QWidget *widget = nullptr);
+    static void tintMenu(QList<QAction*> actions, QWidget *widget = nullptr);
 };
 
 } // namespace common

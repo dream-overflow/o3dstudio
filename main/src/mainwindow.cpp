@@ -45,6 +45,7 @@
 #include "o3d/studio/common/ui/toolbar.h"
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
+#include "o3d/studio/common/ui/uiutils.h"
 
 #include "maintoolbar.h"
 #include "quicktoolbar.h"
@@ -244,6 +245,8 @@ o3d::Bool QtMainWindow::setThemeColor(const String &theme)
         return true;
     }
 
+    Bool changed = False;
+
     if (theme == "darkblue") {
         qApp->setStyle(QStyleFactory::create("darkblue"));
 
@@ -275,7 +278,7 @@ o3d::Bool QtMainWindow::setThemeColor(const String &theme)
         qApp->setStyleSheet(content);
 
         m_currentTheme = theme;
-        return true;
+        changed = True;
     } else if (theme == "default") {
         qApp->setStyle(QStyleFactory::create("default"));
 
@@ -286,7 +289,7 @@ o3d::Bool QtMainWindow::setThemeColor(const String &theme)
         menuBar()->setStyleSheet("");
 
         m_currentTheme = theme;
-        return true;
+        changed = True;
     } else if (theme == "darkorange") {
         QPalette palette;
         palette.setColor(QPalette::Window, QColor(53,53,53));
@@ -315,10 +318,19 @@ o3d::Bool QtMainWindow::setThemeColor(const String &theme)
         qApp->setStyleSheet(content);
 
         m_currentTheme = theme;
-        return true;
+        changed = True;
     }
 
-    return false;
+    if (changed) {
+        // for each menu
+        for (QAction *menu: menuBar()->actions()) {
+            if (menu->menu()) {
+                common::UiUtils::tintMenu(menu->menu()->actions(), this);
+            }
+        }
+    }
+
+    return changed;
 }
 
 void QtMainWindow::closeEvent(QCloseEvent* _pEvent)
@@ -1068,7 +1080,7 @@ o3d::Bool MainWindow::setupDock(const String &name, o3d::studio::common::Dock *d
         title = QString("%1").arg(i).arg(dock->ui()->windowTitle());
     }
 
-    QAction *action = new QAction(dock->ui()->windowIcon(), title);
+    QAction *action = new QAction(common::UiUtils::tintIcon(dock->ui()->windowIcon()), title);
     action->setProperty("name", toQString(name));
 
     if (i < 10) {
@@ -1118,7 +1130,7 @@ o3d::Bool MainWindow::setupToolBar(const String &name, o3d::studio::common::Tool
         title = QString("%1").arg(i).arg(toolBar->ui()->windowTitle());
     }
 
-    QAction *action = new QAction(toolBar->ui()->windowIcon(), title);
+    QAction *action = new QAction(common::UiUtils::tintIcon(toolBar->ui()->windowIcon()), title);
     action->setProperty("name", toQString(name));
 
     if (i < 10) {
@@ -1164,7 +1176,7 @@ o3d::Bool MainWindow::addContentWidget(const String &name, o3d::studio::common::
         title = QString("%1").arg(i).arg(content->ui()->windowTitle());
     }
 
-    QAction *action = new QAction(content->ui()->windowIcon(), title);
+    QAction *action = new QAction(common::UiUtils::tintIcon(content->ui()->windowIcon()), title);
     action->setProperty("name", toQString(name));
 
     if (i < 10) {
@@ -1215,7 +1227,7 @@ o3d::Bool MainWindow::removeContentWidget(const String &name)
                 title = QString("%1").arg(i).arg(content->ui()->windowTitle());
             }
 
-            action = new QAction(content->ui()->windowIcon(), title);
+            action = new QAction(common::UiUtils::tintIcon(content->ui()->windowIcon()), title);
             action->setProperty("name", toQString(content->elementName()));
 
             if (i < 10) {

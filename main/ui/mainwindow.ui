@@ -47,8 +47,8 @@
       <string>&amp;Workspaces</string>
      </property>
      <property name="icon">
-      <iconset theme="user-home">
-       <normaloff>.</normaloff>.</iconset>
+      <iconset resource="../../common/rc/common.qrc">
+       <normaloff>:/icons/work_black.svg</normaloff>:/icons/work_black.svg</iconset>
      </property>
      <addaction name="actionWorkspaceManage"/>
      <addaction name="separator"/>
@@ -107,8 +107,8 @@
       <string>Content &amp;Views</string>
      </property>
      <property name="icon">
-      <iconset theme="preferences-system-windows">
-       <normaloff>.</normaloff>.</iconset>
+      <iconset resource="../../common/rc/common.qrc">
+       <normaloff>:/icons/desktop_windows_black.svg</normaloff>:/icons/desktop_windows_black.svg</iconset>
      </property>
     </widget>
     <widget class="QMenu" name="menuDockViews">
@@ -116,8 +116,8 @@
       <string>&amp;Dock views</string>
      </property>
      <property name="icon">
-      <iconset theme="folder-visiting">
-       <normaloff>.</normaloff>.</iconset>
+      <iconset resource="../../common/rc/common.qrc">
+       <normaloff>:/icons/border_outer_black.svg</normaloff>:/icons/border_outer_black.svg</iconset>
      </property>
     </widget>
     <widget class="QMenu" name="menuToolBarViews">
@@ -125,8 +125,8 @@
       <string>Toolbar views</string>
      </property>
      <property name="icon">
-      <iconset theme="preferences-system">
-       <normaloff>.</normaloff>.</iconset>
+      <iconset resource="../../common/rc/common.qrc">
+       <normaloff>:/icons/select_all_black.svg</normaloff>:/icons/select_all_black.svg</iconset>
      </property>
     </widget>
     <addaction name="actionWindowFullscreen"/>
@@ -317,8 +317,8 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset resource="../rc/mainresources.qrc">
-     <normaloff>:/icons/media/ico/preferences16.png</normaloff>:/icons/media/ico/preferences16.png</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/settings_black.svg</normaloff>:/icons/settings_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Preferences...</string>
@@ -326,8 +326,8 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="exit">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/exit_to_app_black.svg</normaloff>:/icons/exit_to_app_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Exit</string>
@@ -338,8 +338,8 @@
   </action>
   <action name="actionCloseProject">
    <property name="icon">
-    <iconset theme="window-close">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/clear_black.svg</normaloff>:/icons/clear_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Close Project</string>
@@ -350,8 +350,8 @@
   </action>
   <action name="actionNewProject">
    <property name="icon">
-    <iconset theme="document-new">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/create_new_folder_black.svg</normaloff>:/icons/create_new_folder_black.svg</iconset>
    </property>
    <property name="text">
     <string>New &amp;project...</string>
@@ -362,8 +362,8 @@
   </action>
   <action name="actionSave">
    <property name="icon">
-    <iconset theme="document-save">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/save_black.svg</normaloff>:/icons/save_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Save</string>
@@ -374,8 +374,8 @@
   </action>
   <action name="actionSaveAs">
    <property name="icon">
-    <iconset theme="document-save-as">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/save_black.svg</normaloff>:/icons/save_black.svg</iconset>
    </property>
    <property name="text">
     <string>S&amp;ave as...</string>
@@ -386,8 +386,8 @@
   </action>
   <action name="actionNewResource">
    <property name="icon">
-    <iconset theme="folder-new">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/insert_photo_black.svg</normaloff>:/icons/insert_photo_black.svg</iconset>
    </property>
    <property name="text">
     <string>New &amp;resource...</string>
@@ -407,8 +407,8 @@
   </action>
   <action name="actionAboutPlugins">
    <property name="icon">
-    <iconset theme="tools-check-spelling">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/developer_board_black.svg</normaloff>:/icons/developer_board_black.svg</iconset>
    </property>
    <property name="text">
     <string>About plu&amp;gins...</string>
@@ -416,8 +416,8 @@
   </action>
   <action name="actionSystemInfo">
    <property name="icon">
-    <iconset theme="computer">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/memory_black.svg</normaloff>:/icons/memory_black.svg</iconset>
    </property>
    <property name="text">
     <string>System &amp;information</string>
@@ -425,8 +425,8 @@
   </action>
   <action name="actionHelpIndex">
    <property name="icon">
-    <iconset theme="help">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/help_black.svg</normaloff>:/icons/help_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Index</string>
@@ -437,8 +437,8 @@
   </action>
   <action name="actionSupport">
    <property name="icon">
-    <iconset theme="dialog-information">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/live_help_black.svg</normaloff>:/icons/live_help_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Support</string>
@@ -446,8 +446,8 @@
   </action>
   <action name="actionBugReport">
    <property name="icon">
-    <iconset theme="mail-send">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/report_black.svg</normaloff>:/icons/report_black.svg</iconset>
    </property>
    <property name="text">
     <string>Signal a &amp;bug</string>
@@ -455,8 +455,8 @@
   </action>
   <action name="actionWindowFullscreen">
    <property name="icon">
-    <iconset theme="view-fullscreen">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/fullscreen_black.svg</normaloff>:/icons/fullscreen_black.svg</iconset>
    </property>
    <property name="text">
     <string>Fullscreen</string>
@@ -472,8 +472,8 @@
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset theme="edit-undo">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/undo_black.svg</normaloff>:/icons/undo_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Undo</string>
@@ -484,8 +484,8 @@
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset theme="edit-redo">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/redo_black.svg</normaloff>:/icons/redo_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Redo</string>
@@ -496,8 +496,8 @@
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset theme="edit-cut">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/content_cut_black.svg</normaloff>:/icons/content_cut_black.svg</iconset>
    </property>
    <property name="text">
     <string>C&amp;ut</string>
@@ -508,8 +508,8 @@
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset theme="edit-copy">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/content_copy_black.svg</normaloff>:/icons/content_copy_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Copy</string>
@@ -520,8 +520,8 @@
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset theme="edit-paste">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/content_paste_black.svg</normaloff>:/icons/content_paste_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Paste</string>
@@ -532,8 +532,8 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset theme="edit-delete">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/backspace_black.svg</normaloff>:/icons/backspace_black.svg</iconset>
    </property>
    <property name="text">
     <string>Delete...</string>
@@ -541,8 +541,8 @@
   </action>
   <action name="actionSelectAll">
    <property name="icon">
-    <iconset theme="edit-select-all">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/select_all_black.svg</normaloff>:/icons/select_all_black.svg</iconset>
    </property>
    <property name="text">
     <string>Select &amp;all</string>
@@ -587,8 +587,8 @@
   </action>
   <action name="actionOpenProject">
    <property name="icon">
-    <iconset theme="document-open">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/folder_open_black.svg</normaloff>:/icons/folder_open_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Open project...</string>
@@ -620,8 +620,8 @@
   </action>
   <action name="actionPreviousContentView">
    <property name="icon">
-    <iconset theme="go-previous">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/navigate_before_black.svg</normaloff>:/icons/navigate_before_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Previous content</string>
@@ -632,8 +632,8 @@
   </action>
   <action name="actionNextContentView">
    <property name="icon">
-    <iconset theme="go-next">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/navigate_next_black.svg</normaloff>:/icons/navigate_next_black.svg</iconset>
    </property>
    <property name="text">
     <string>&amp;Next content</string>
@@ -933,6 +933,10 @@
    </property>
   </action>
   <action name="actionResetCameraPosition">
+   <property name="icon">
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/gps_fixed_black.svg</normaloff>:/icons/gps_fixed_black.svg</iconset>
+   </property>
    <property name="text">
     <string>Reset &amp;camera position</string>
    </property>
@@ -973,6 +977,10 @@
    </property>
   </action>
   <action name="actionSelectArea">
+   <property name="icon">
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/center_focus_weak_black.svg</normaloff>:/icons/center_focus_weak_black.svg</iconset>
+   </property>
    <property name="text">
     <string>Select area...</string>
    </property>

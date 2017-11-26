@@ -88,5 +88,5 @@ QtPropertyDock::~QtPropertyDock()
 
 void QtPropertyDock::setupUi()
 {
-    setWindowIcon(QIcon::fromTheme("document-properties"));
+    setWindowIcon(QIcon(":/icons/settings_input_component_black.svg"));
 }

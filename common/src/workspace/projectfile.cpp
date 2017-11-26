@@ -110,7 +110,9 @@ void ProjectFile::load()
         stream >> *asset;
 
         asset->setProject(m_project);
+
         m_project->m_assets[asset->ref().light().id()] = asset;
+        m_project->addEntity(asset);
     }
 
     // read hubs
@@ -164,7 +166,9 @@ void ProjectFile::load()
         stream >> *fragment;
 
         fragment->setProject(m_project);
+
         m_project->m_fragments[fragment->ref().light().id()] = fragment;
+        m_project->addEntity(fragment);
     }
 
     stream.close();

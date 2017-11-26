@@ -23,7 +23,7 @@ CanvasContent::CanvasContent(const QString &name, QWidget *parent) :
 
     // @todo according to project name
     setWindowTitle(tr("Display %1").arg(name));
-    setWindowIcon(QIcon::fromTheme("input-gaming"));
+    setWindowIcon(QIcon(":/icons/videogame_asset_black.svg"));
 
     setAutoFillBackground(true);
 
