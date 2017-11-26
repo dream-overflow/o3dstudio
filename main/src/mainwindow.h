@@ -25,6 +25,8 @@
 
 #include "ui_mainwindow.h"
 
+class QStackedWidget;
+
 namespace o3d {
 namespace studio {
 namespace main {
@@ -198,6 +200,7 @@ private:
     String m_currentLanguage;              //!< current active language 2 letters code
 
     QStatusBar *m_statusBar{nullptr};      //!< unique bottom status bar
+    QStackedWidget *m_stackedWidget;
 
     common::Settings& settings();
 

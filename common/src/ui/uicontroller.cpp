@@ -332,3 +332,68 @@ const ToolBar *UiController::toolBar(const String &name) const
 
     return nullptr;
 }
+
+o3d::Int32 UiController::numContents() const
+{
+    return (Int32)m_contents.size();
+}
+
+o3d::Int32 UiController::numToolBars() const
+{
+    return (Int32)m_toolBars.size();
+}
+
+o3d::Int32 UiController::numDocks() const
+{
+    return (Int32)m_docks.size();
+}
+
+Content *UiController::previousContent()
+{
+    if (m_contents.size() < 2) {
+        return nullptr;
+    }
+
+    if (m_activeContent == nullptr) {
+        return m_contents.front();
+    }
+
+    auto it = m_contents.rbegin();
+    for (; it != m_contents.rend(); ++it) {
+        if ((*it) == m_activeContent) {
+            ++it;
+            break;
+        }
+    }
+
+    if (it == m_contents.rend()) {
+        it = m_contents.rbegin();
+    }
+
+    return (*it);
+}
+
+Content *UiController::nextContent()
+{
+    if (m_contents.size() < 2) {
+        return nullptr;
+    }
+
+    if (m_activeContent == nullptr) {
+        return m_contents.front();
+    }
+
+    auto it = m_contents.begin();
+    for (; it != m_contents.end(); ++it) {
+        if ((*it) == m_activeContent) {
+            ++it;
+            break;
+        }
+    }
+
+    if (it == m_contents.end()) {
+        it = m_contents.begin();
+    }
+
+    return (*it);
+}

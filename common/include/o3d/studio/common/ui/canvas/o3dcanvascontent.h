@@ -66,6 +66,7 @@ private:
     QtRenderer *m_renderer;
 
     O3DDrawer *m_drawer;
+    QTimer *m_timer;
 };
 
 } // namespace common

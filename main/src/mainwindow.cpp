@@ -18,6 +18,7 @@
 #include <QtCore/QSettings>
 
 #include <QtWidgets/QStyleFactory>
+#include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QToolBar>
 #include <QtGui/QCloseEvent>
@@ -70,6 +71,9 @@ QtMainWindow::QtMainWindow(QWidget *parent) :
     m_originalPalette = qApp->palette();
 
     ui.setupUi(this);
+
+    m_stackedWidget = new QStackedWidget();
+    setCentralWidget(m_stackedWidget);
 }
 
 void QtMainWindow::setup()
@@ -242,7 +246,7 @@ const o3d::String& QtMainWindow::theme() const
 o3d::Bool QtMainWindow::setThemeColor(const String &theme)
 {
     if (theme == m_currentTheme) {
-        return true;
+        return True;
     }
 
     Bool changed = False;
@@ -620,54 +624,22 @@ void QtMainWindow::onRedoAction()
 
 void QtMainWindow::onViewPreviousContentAction()
 {
-    /*if (m_contents.size() < 2) {
-        return;
-    }
-
-    if (m_currentContent == nullptr) {
-        return;
-    }
-    QString name = m_currentContent->property("name").toString();
-    auto it = m_contents.find(m_currentContent->property("name").toString());
-    if (it == m_contents.begin()) {
-        // loop back
-        it = m_contents.find(m_contents.lastKey());
-    } else {
-        --it;
-    }
-
     common::UiController &uiCtrl = common::Application::instance()->ui();
-    common::Content *content = uiCtrl.content(it.value()->property("name").toString());
+    common::Content *content = uiCtrl.previousContent();
 
     if (content) {
-        uiCtrl.setActiveContent(content, true);
-    }*/
+        uiCtrl.setActiveContent(content, True);
+    }
 }
 
 void QtMainWindow::onViewNextContentAction()
 {
-   /* if (m_contents.size() < 2) {
-        return;
-    }
-
-    if (m_currentContent == nullptr) {
-        return;
-    }
-
-    auto it = m_contents.find(m_currentContent->property("name").toString());
-    ++it;
-
-    // loop back
-    if (it == m_contents.end()) {
-        it = m_contents.begin();
-    }
-
     common::UiController &uiCtrl = common::Application::instance()->ui();
-    common::Content *content = uiCtrl.content(it.value()->property("name").toString());
+    common::Content *content = uiCtrl.nextContent();
 
     if (content) {
-        uiCtrl.setActiveContent(content, true);
-    }*/
+        uiCtrl.setActiveContent(content, True);
+    }
 }
 
 void QtMainWindow::onOpenRecentProject(bool)
@@ -1053,7 +1025,7 @@ void MainWindow::onShowContent(String name, o3d::studio::common::Content *conten
         if (showHide) {
             setCurrentContentWidget(name);
         } else {
-            m_qtMainWindow->setCentralWidget(nullptr);
+
         }
     }
 }
@@ -1186,6 +1158,7 @@ o3d::Bool MainWindow::addContentWidget(const String &name, o3d::studio::common::
     m_qtMainWindow->connect(action, SIGNAL(triggered(bool)), SLOT(onViewContent()));
 
     m_qtMainWindow->ui.menuContentViews->addAction(action);
+    m_qtMainWindow->m_stackedWidget->addWidget(content->ui());
 
     return True;
 }
@@ -1250,16 +1223,11 @@ o3d::Bool MainWindow::setCurrentContentWidget(const String &name)
     if (it != m_contents.end()) {
         // already current
         if (m_currentContent && m_currentContent == it->second) {
-            return true;
-        }
-
-        // unparent previous
-        if (m_currentContent && m_currentContent != it->second) {
-            m_currentContent->ui()->setParent(nullptr);
+            return True;
         }
 
         // setup
-        m_qtMainWindow->setCentralWidget(it->second->ui());
+        m_qtMainWindow->m_stackedWidget->setCurrentWidget(it->second->ui());
         m_currentContent = it->second;
 
         // adapt window title
@@ -1269,7 +1237,7 @@ o3d::Bool MainWindow::setCurrentContentWidget(const String &name)
             m_qtMainWindow->setWindowTitle(m_currentContent->ui()->windowTitle() + " - " + m_qtMainWindow->tr("Objective-3D Studio"));
         }
 
-        return true;
+        return True;
     }
 
     return false;

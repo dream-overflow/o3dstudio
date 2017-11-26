@@ -23,7 +23,8 @@ O3DCanvasContent::O3DCanvasContent(const LightRef &ref, Bool debug, QWidget *par
     GLCanvasContent(ref, parent),
     m_debug(debug),
     m_renderer(nullptr),
-    m_drawer(nullptr)
+    m_drawer(nullptr),
+    m_timer(nullptr)
 {
     setWindowTitle(tr("Display"));
     setWindowIcon(QIcon(":/icons/videogame_asset_black.svg"));
@@ -38,6 +39,10 @@ O3DCanvasContent::O3DCanvasContent(const LightRef &ref, Bool debug, QWidget *par
 
 O3DCanvasContent::~O3DCanvasContent()
 {
+    if (m_timer) {
+        m_timer->stop();
+    }
+
     if (m_drawer) {
         m_drawer->terminateDrawer();
     }
@@ -91,11 +96,11 @@ void O3DCanvasContent::initializeGL()
     }
 
     // start the update loop
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-    timer->start(8);  // 8 ms update frequency
-
-    // m_renderer->getContext()->setBackgroundColor(1.f, 1.f, 1.f, 1.f);
+    if (!m_timer) {
+        m_timer = new QTimer(this);
+        connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+        m_timer->start(8);  // 8 ms update frequency
+    }
 }
 
 void O3DCanvasContent::paintGL()

@@ -51,6 +51,13 @@ public:
     ToolBar* toolBar(const String &name);
     const ToolBar* toolBar(const String &name) const;
 
+    Int32 numContents() const;
+    Int32 numToolBars() const;
+    Int32 numDocks() const;
+
+    Content* previousContent();
+    Content* nextContent();
+
 public /*signals*/:
 
     Signal<String /*name*/, Content* /*content*/> attachContent{this};
