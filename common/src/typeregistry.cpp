@@ -141,7 +141,7 @@ TypeRef TypeRegistry::baseTypeRef(const TypeRef &typeRef) const
 TypeRef TypeRegistry::baseTypeRef(UInt32 id) const
 {
     if (id > 0) {
-        quint32 baseTypeId = ((id & 0x0f) << 4) | (id & 0x0f);
+        UInt32 baseTypeId = ((id & 0x0f) << 4) | (id & 0x0f);
 
         auto it2 = m_typeRefsById.find(baseTypeId);
         if (it2 != m_typeRefsById.cend()) {

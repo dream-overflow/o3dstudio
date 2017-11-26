@@ -28,9 +28,15 @@ class O3S_API Entity
 {
 public:
 
+    enum Changes
+    {
+        PRESENTATION_CHANGED = 0,
+        DISPLAY_CHANGED = 1
+    };
+
     enum Capacity
     {
-        STATE_CHANGED = 32
+        STATE_CHANGED = 32,
     };
 
     explicit Entity(const String &name, Entity *parent = nullptr);

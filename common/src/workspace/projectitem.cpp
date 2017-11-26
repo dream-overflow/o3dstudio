@@ -133,6 +133,16 @@ QVariant ProjectItem::decoration(Int32 column) const
     }
 }
 
+o3d::Bool ProjectItem::setData(o3d::Int32 column, const QVariant &value)
+{
+    if (column == 0) {
+        m_name = fromQString(value.toString());
+        return True;
+    }
+
+    return False;
+}
+
 ProjectItem* ProjectItem::parentItem()
 {
     return m_parentItem;
@@ -222,39 +232,46 @@ Entity *ProjectItem::entity()
     return m_entity;
 }
 
+void ProjectItem::updatePresentation()
+{
+    if (m_entity && m_ref.isValid()) {
+        m_name = m_entity->name();
+    }
+}
+
 o3d::Bool ProjectItem::isProject() const
 {
     if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::project())) {
-        return true;
+        return True;
     } else {
-        return false;
+        return False;
     }
 }
 
 o3d::Bool ProjectItem::isHub() const
 {
     if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::hub())) {
-        return true;
+        return True;
     } else {
-        return false;
+        return False;
     }
 }
 
 o3d::Bool ProjectItem::isFragment() const
 {
     if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::fragment())) {
-        return true;
+        return True;
     } else {
-        return false;
+        return False;
     }
 }
 
 o3d::Bool ProjectItem::isAsset() const
 {
     if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
-        return true;
+        return True;
     } else {
-        return false;
+        return False;
     }
 }
 

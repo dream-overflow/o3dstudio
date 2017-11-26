@@ -88,6 +88,8 @@ void Hub::addHub(Hub *hub, Int32 index)
     UInt64 hubId = hub->ref().light().id();
     m_hubs[hubId] = hub;
 
+    project()->addEntity(hub);
+
     if (index >= 0) {
         Int32 n = 0;
         auto it = m_hubsOrder.begin();
@@ -126,6 +128,7 @@ void Hub::removeHub(const LightRef &_ref)
 
     UInt64 hubId = _ref.id();
     Hub *hub = it->second;
+    project()->removeEntity(hub->ref());
 
     delete hub;
     m_hubs.erase(it);
@@ -150,6 +153,7 @@ void Hub::removeHub(UInt64 id)
     }
 
     Hub *hub = it->second;
+    project()->removeEntity(hub->ref());
 
     delete hub;
     m_hubs.erase(it);
@@ -171,6 +175,7 @@ void Hub::removeHub(Hub *hub)
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         if (it->second == hub) {
             UInt64 hubId = hub->ref().light().id();
+            project()->removeEntity(hub->ref());
 
             delete it->second;
             m_hubs.erase(it);
@@ -505,6 +510,8 @@ o3d::Bool Hub::deserializeContent(InStream &stream)
 
         m_hubs[hubId] = hub;
         m_hubsOrder.push_back(hubId);
+
+        project()->addEntity(hub);
     }
 
     return True;

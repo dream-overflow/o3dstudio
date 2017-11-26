@@ -248,7 +248,7 @@ void Project::setupMasterScene()
 
 Entity *Project::lookup(const LightRef &ref)
 {
-    if (ref.projectId() == ref.id()) {
+    if (ref.projectId() == m_ref.light().id()) {
         auto it = m_entitiesById.find(ref.id());
         if (it != m_entitiesById.end()) {
             return it->second;
@@ -260,7 +260,7 @@ Entity *Project::lookup(const LightRef &ref)
 
 const Entity *Project::lookup(const LightRef &ref) const
 {
-    if (ref.projectId() == ref.id()) {
+    if (ref.projectId() == m_ref.light().id()) {
         auto cit = m_entitiesById.find(ref.id());
         if (cit != m_entitiesById.cend()) {
             return cit->second;
@@ -303,8 +303,9 @@ void Project::addHub(Hub *hub, Int32 index)
     }
 
     UInt64 hubId = hub->ref().light().id();
-    m_hubs[hubId] = hub;
+    addEntity(hub);
 
+    // position index
     if (index >= 0) {
         Int32 n = 0;
         auto it = m_hubsOrder.begin();
@@ -322,6 +323,8 @@ void Project::addHub(Hub *hub, Int32 index)
         m_hubsOrder.push_back(hubId);
     }
 
+    m_hubs[hubId] = hub;
+
     hub->setProject(this);
 
     // structure change
@@ -337,22 +340,24 @@ void Project::removeHub(const LightRef &_ref)
         O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove a reference for another project"))));
     }
 
-    auto it = m_hubs.find(_ref.id());
+    UInt64 hubId = _ref.id();
+
+    auto it = m_hubs.find(hubId);
     if (it == m_hubs.end()) {
         O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    UInt64 hubId = _ref.id();
     Hub *hub = it->second;
-
-    delete hub;
-    m_hubs.erase(it);
+    removeEntity(hub->ref());
 
     // erase its order
-    auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
+    auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hub->ref().light().id());
     if (it2 != m_hubsOrder.end()) {
         m_hubsOrder.erase(it2);
     }
+
+    delete hub;
+    m_hubs.erase(it);
 
     // structure change
     setDirty();
@@ -369,15 +374,16 @@ void Project::removeHub(UInt64 id)
     }
 
     Hub *hub = it->second;
-
-    delete hub;
-    m_hubs.erase(it);
+    removeEntity(hub->ref());
 
     // erase its order
     auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), id);
     if (it2 != m_hubsOrder.end()) {
         m_hubsOrder.erase(it2);
     }
+
+    delete hub;
+    m_hubs.erase(it);
 
     // structure change
     setDirty();
@@ -388,18 +394,22 @@ void Project::removeHub(UInt64 id)
 
 void Project::removeHub(Hub *hub)
 {
+    if (!hub) {
+        return;
+    }
+
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         if (it->second == hub) {
-            UInt64 hubId = hub->ref().light().id();
-
-            delete it->second;
-            m_hubs.erase(it);
+            removeEntity(hub->ref());
 
             // erase its order
-            auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
+            auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hub->ref().light().id());
             if (it2 != m_hubsOrder.end()) {
                 m_hubsOrder.erase(it2);
             }
+
+            delete it->second;
+            m_hubs.erase(it);
 
             // structure change
             setDirty();
@@ -632,6 +642,7 @@ void Project::addFragment(Fragment *fragment)
     }
 
     m_fragments[fragment->ref().light().id()] = fragment;
+    addEntity(fragment);
 
     // structure change
     setDirty();
@@ -652,6 +663,7 @@ void Project::removeFragment(const LightRef &_ref)
     }
 
     Fragment *fragment = it->second;
+    removeEntity(fragment->ref());
 
     delete fragment;
     m_fragments.erase(it);
@@ -671,6 +683,7 @@ void Project::removeFragment(UInt64 id)
     }
 
     Fragment *fragment = it->second;
+    removeEntity(fragment->ref());
 
     delete fragment;
     m_fragments.erase(it);
@@ -686,6 +699,8 @@ void Project::removeFragment(Fragment *fragment)
 {
     for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {   
         if (it->second == fragment) {
+            removeEntity(fragment->ref());
+
             delete it->second;
             m_fragments.erase(it);
 
@@ -821,6 +836,7 @@ void Project::addAsset(Asset *asset)
     }
 
     m_assets[asset->ref().light().id()] = asset;
+    addEntity(asset);
 
     // structure change
     setDirty();
@@ -841,6 +857,7 @@ void Project::removeAsset(const LightRef &_ref)
     }
 
     Asset *asset = it->second;
+    removeEntity(asset->ref());
 
     delete asset;
     m_assets.erase(it);
@@ -860,6 +877,7 @@ void Project::removeAsset(UInt64 id)
     }
 
     Asset *asset = it->second;
+    removeEntity(asset->ref());
 
     delete asset;
     m_assets.erase(it);
@@ -875,6 +893,8 @@ void Project::removeAsset(Asset *asset)
 {
     for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
         if (it->second == asset) {
+            removeEntity(asset->ref());
+
             delete it->second;
             m_assets.erase(it);
 
@@ -995,4 +1015,29 @@ std::list<const Asset *> Project::assets() const
     }
 
     return results;
+}
+
+void Project::addEntity(Entity *entity)
+{
+    if (!entity) {
+        return;
+    }
+
+    UInt64 id = entity->ref().light().id();
+
+    m_entitiesById[id] = entity;
+    m_entitiesByUuid[entity->ref().uuid()] = entity;
+}
+
+void Project::removeEntity(const ObjectRef &ref)
+{
+    auto it2 = m_entitiesById.find(ref.light().id());
+    if (it2 != m_entitiesById.end()) {
+        m_entitiesById.erase(it2);
+    }
+
+    auto it3 = m_entitiesByUuid.find(ref.uuid());
+    if (it3 != m_entitiesByUuid.end()) {
+        m_entitiesByUuid.erase(it3);
+    }
 }

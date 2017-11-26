@@ -156,6 +156,8 @@ public /*signals*/:
     Signal<LightRef> onProjectAssetAdded{this};
     Signal<LightRef> onProjectAssetRemoved{this};
 
+    Signal<LightRef, BitSet64 /*changeFlags*/> onProjectEntityChanged{this};
+
 public /*slots*/:
 
     void onSelectionChanged();

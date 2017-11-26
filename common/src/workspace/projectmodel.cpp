@@ -107,6 +107,8 @@ QVariant ProjectModel::data(const QModelIndex &index, int role) const
     } else if (role == Qt::DecorationRole) {
         return item->decoration(index.column());
     }
+
+    return QVariant();
 /*
     if (role == Qt::DisplayRole && index.column() != 1) {
         return item->data(index.column());
@@ -129,9 +131,27 @@ QVariant ProjectModel::data(const QModelIndex &index, int role) const
         } else {
             return item->data(index.column()).toBool() ? Qt::Checked : Qt::Unchecked;
         }
-    } else {*/
+    } else {
         return QVariant();
-    //}
+    }*/
+}
+
+o3d::Bool ProjectModel::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (!index.isValid()) {
+        return False;
+    }
+
+    ProjectItem *item = static_cast<ProjectItem*>(index.internalPointer());
+
+    if (role == Qt::DisplayRole) {
+        return item->setData(index.column(), value);
+    } else if (role == Qt::DecorationRole) {
+        // return item->setDecoration(index.column(), value);
+        return False;
+    }
+
+    return False;
 }
 
 Qt::ItemFlags ProjectModel::flags(const QModelIndex &index) const
@@ -412,6 +432,28 @@ void ProjectModel::removeAsset(const common::LightRef &ref)
     delete assetItem;
 
     endRemoveRows();
+}
+
+void ProjectModel::updatePresentation(const LightRef &ref)
+{
+    ProjectItem *item = find(ref);
+    if (item) {
+        // find the parent
+        ProjectItem *parentItem = item->parentItem();
+
+        QModelIndex parentIndex = QModelIndex();
+        if (parentItem) {
+            parentIndex = createIndex(parentItem->row(), 0, parentItem);
+        }
+        QModelIndex itemIndex = index(item->row(), 0, parentIndex);
+
+//        if (setData(itemIndex, "Toto titi", Qt::DisplayRole)) {
+//            emit dataChanged(itemIndex, itemIndex);
+//        }
+
+        item->updatePresentation();
+        emit dataChanged(itemIndex, itemIndex);
+    }
 }
 
 static QString makeParentPath(const QStringList &path, int minus) {

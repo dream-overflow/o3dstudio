@@ -14,6 +14,7 @@ class QTreeView;
 #include <QtWidgets/QDockWidget>
 
 #include <o3d/core/baseobject.h>
+#include <o3d/core/templatebitset.h>
 
 #include "o3d/studio/common/objectref.h"
 #include "o3d/studio/common/ui/dock.h"
@@ -52,6 +53,8 @@ public /*slots*/:
 
     void onProjectAssetAdded(LightRef ref);
     void onProjectAssetRemoved(LightRef ref);
+
+    void onProjectEntityChanged(LightRef ref, BitSet64 changes);
 
     void onSelectManagerChange();
 

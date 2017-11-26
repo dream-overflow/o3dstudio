@@ -33,15 +33,16 @@ public:
     explicit ProjectModel(QObject *parent = nullptr);
     virtual ~ProjectModel();
 
-    virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const;
-    virtual QModelIndex parent(const QModelIndex &child) const;
+    virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    virtual QModelIndex parent(const QModelIndex &child) const override;
 
-    // virtual QModelIndex sibling(int row, int column, const QModelIndex &idx) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    // virtual bool hasChildren(const QModelIndex &parent = QModelIndex()) const;
+    // virtual QModelIndex sibling(int row, int column, const QModelIndex &idx) const override;
+    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    // virtual bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
 
-    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    virtual Bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
@@ -60,6 +61,8 @@ public:
 
     ProjectItem *addAsset(common::Asset *asset);
     void removeAsset(const common::LightRef &ref);
+
+    void updatePresentation(const LightRef &ref);
 
 private:
 

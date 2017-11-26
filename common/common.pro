@@ -82,7 +82,8 @@ SOURCES += \
     src/importer/importer.cpp \
     src/builder/builder.cpp \
     src/component/drawerhub.cpp \
-    src/workspace/scenecommand.cpp
+    src/workspace/scenecommand.cpp \
+    src/command/renameentitycommand.cpp
 
 
 HEADERS += \ 
@@ -156,7 +157,8 @@ HEADERS += \
     include/o3d/studio/common/ui/inputevent.h \
     include/o3d/studio/common/ui/keyevent.h \
     include/o3d/studio/common/ui/mouseevent.h \
-    include/o3d/studio/common/ui/wheelevent.h
+    include/o3d/studio/common/ui/wheelevent.h \
+    include/o3d/studio/common/command/renameentitycommand.h
 
 LIBS += -lobjective3d-dbg
 

@@ -72,7 +72,7 @@ void CommandManager::onProjectRemoved(LightRef ref)
     for (auto it = m_doneCommandsStack.begin(); it != m_doneCommandsStack.end(); ++it) {
         cmd = *it;
 
-        if (cmd->targetRef().projectId() == ref.projectId()) {
+        if (cmd->targetRef().projectId() == ref.id()) {
             delete cmd;
             eraseItList.push_back(it);
         }
@@ -88,7 +88,7 @@ void CommandManager::onProjectRemoved(LightRef ref)
     for (auto it = m_todoCommandsStack.begin(); it != m_todoCommandsStack.end(); ++it) {
         cmd = *it;
 
-        if (cmd->targetRef().projectId() == ref.projectId()) {
+        if (cmd->targetRef().projectId() == ref.id()) {
             delete cmd;
             eraseItList.push_back(it);
         }
@@ -100,27 +100,11 @@ void CommandManager::onProjectRemoved(LightRef ref)
 
     eraseItList.clear();
 
-    // done commands stack
-    for (auto it = m_doneCommandsStack.begin(); it != m_doneCommandsStack.end(); ++it) {
-        cmd = *it;
-
-        if (cmd->targetRef().projectId() == ref.projectId()) {
-            delete cmd;
-            eraseItList.push_back(it);
-        }
-    }
-
-    for (auto it = eraseItList.begin(); it != eraseItList.end(); ++it) {
-        m_doneCommandsStack.erase(*it);
-    }
-
-    eraseItList.clear();
-
     // undone commands stack
     for (auto it = m_undoneCommandsStack.begin(); it != m_undoneCommandsStack.end(); ++it) {
         cmd = *it;
 
-        if (cmd->targetRef().projectId() == ref.projectId()) {
+        if (cmd->targetRef().projectId() == ref.id()) {
             delete cmd;
             eraseItList.push_back(it);
         }
@@ -133,6 +117,8 @@ void CommandManager::onProjectRemoved(LightRef ref)
     eraseItList.clear();
 
     m_rwLock.unlockWrite();
+
+    commandUpdate();
 }
 
 void CommandManager::addCommand(Command *cmd)

@@ -118,6 +118,8 @@ public:
      */
     const Entity* lookup(const Uuid &uuid) const;
 
+    void addEntity(Entity *entity);
+    void removeEntity(const ObjectRef &ref);
 
     //
     // hub

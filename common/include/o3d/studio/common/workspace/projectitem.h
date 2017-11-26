@@ -46,6 +46,7 @@ public:
     Int32 columnCount() const;
     QVariant data(Int32 column) const;
     QVariant decoration(Int32 column) const;
+    Bool setData(Int32 column, const QVariant &value);
     Int32 row() const;
     ProjectItem *parentItem();
 
@@ -59,6 +60,8 @@ public:
 
     const Entity* entity() const;
     Entity* entity();
+
+    void updatePresentation();
 
     Bool isProject() const;
     Bool isHub() const;

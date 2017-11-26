@@ -25,6 +25,7 @@
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
 #include "o3d/studio/common/command/commandmanager.h"
+#include "o3d/studio/common/command/renameentitycommand.h"
 #include "o3d/studio/common/command/hub/removehubcommand.h"
 #include "o3d/studio/common/command/fragment/removefragmentcommand.h"
 // #include "o3d/studio/common/command/asset/removeassetcommand.h"
@@ -179,6 +180,24 @@ void WorkspaceDock::onProjectAssetRemoved(LightRef ref)
     projectModel->removeAsset(ref);
 }
 
+void WorkspaceDock::onProjectEntityChanged(o3d::studio::common::LightRef ref, o3d::BitSet64 changes)
+{
+    if (changes.getBit(common::Entity::PRESENTATION_CHANGED)) {
+        common::Workspace* workspace = common::Application::instance()->workspaces().current();
+        if (!workspace) {
+            return;
+        }
+
+        common::Project* project = workspace->project(ref);
+        if (!project) {
+            return;
+        }
+
+        common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+        projectModel->updatePresentation(ref);
+    }
+}
+
 void WorkspaceDock::onSelectManagerChange()
 {
     const std::set<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPreviousByBaseType(common::TypeRef::project());
@@ -225,6 +244,8 @@ void WorkspaceDock::onChangeCurrentWorkspace(const String &/*name*/)
 
         workspace->onProjectAssetAdded.connect(this, &WorkspaceDock::onProjectAssetAdded, CONNECTION_ASYNCH);
         workspace->onProjectAssetRemoved.connect(this, &WorkspaceDock::onProjectAssetRemoved, CONNECTION_ASYNCH);
+
+        workspace->onProjectEntityChanged.connect(this, &WorkspaceDock::onProjectEntityChanged, CONNECTION_ASYNCH);
     }
 }
 
@@ -371,23 +392,22 @@ void QtWorkspaceDock::keyPressEvent(QKeyEvent *event)
     if (m_treeView->hasFocus() && currentIndex.isValid()) {
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(currentIndex.internalPointer());
 
-        if (projectItem->isHub()) {
-            if (event->key() == Qt::Key_Delete) {
+        if (event->key() == Qt::Key_F2) {
+            String newName = "Its the newest";
+            common::RenameEntityCommand *cmd = new common::RenameEntityCommand(projectItem->ref(), projectItem->parentItem()->ref(), newName);
+            common::Application::instance()->command().addCommand(cmd);
+        } else if (event->key() == Qt::Key_Delete) {
+            if (projectItem->isHub()) {
                 common::RemoveHubCommand *cmd = new common::RemoveHubCommand(projectItem->ref(), projectItem->parentItem()->ref());
                 common::Application::instance()->command().addCommand(cmd);
-            }
-        } else if (projectItem->isFragment()) {
-            if (event->key() == Qt::Key_Delete) {
+            } else if (projectItem->isFragment()) {
                 common::RemoveFragmentCommand *cmd = new common::RemoveFragmentCommand(projectItem->ref(), projectItem->parentItem()->ref());
                 common::Application::instance()->command().addCommand(cmd);
             }
         } else if (projectItem->isAsset()) {
-            if (event->key() == Qt::Key_Delete) {
                 // common::RemoveAssetCommand *cmd = new common::RemoveAssetCommand(asset);
                 // common::Application::instance()->command().addCommand(cmd);
-            }
         }
-
     }
 
     return QDockWidget::keyPressEvent(event);

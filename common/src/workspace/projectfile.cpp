@@ -146,6 +146,8 @@ void ProjectFile::load()
         UInt64 hubId = hub->ref().light().id();
 
         m_project->m_hubs[hubId] = hub;
+        m_project->addEntity(hub);
+
         m_project->m_hubsOrder.push_back(hubId);
     }
 
