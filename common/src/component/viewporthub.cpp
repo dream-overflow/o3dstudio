@@ -86,6 +86,12 @@ void ViewPortHub::create()
 
 }
 
+o3d::Bool ViewPortHub::deletable() const
+{
+    // @todo instances
+    return True;
+}
+
 o3d::Bool ViewPortHub::load()
 {
     return Hub::load();
@@ -122,15 +128,15 @@ o3d::Bool ViewPortHub::deserializeContent(InStream &stream)
 
 void ViewPortHub::createToScene(MasterScene *masterScene)
 {
-
+    // @todo
 }
 
 void ViewPortHub::removeFromScene(MasterScene *masterScene)
 {
-
+    // @todo
 }
 
 void ViewPortHub::syncWithScene(MasterScene *masterScene)
 {
-
+    // @todo
 }

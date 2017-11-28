@@ -125,6 +125,13 @@ const O3DCanvasContent *MasterScene::content() const
     return m_content;
 }
 
+void MasterScene::addCommand(SceneCommand *command)
+{
+    if (command) {
+        m_commands.push_front(command);
+    }
+}
+
 void MasterScene::initialize(Bool debug)
 {
     if (m_content || m_scene || m_renderer) {
@@ -143,7 +150,21 @@ void MasterScene::initialize(Bool debug)
 
 void MasterScene::paintDrawer()
 {
+    // process commands (FIFO)
+    SceneCommand *command = nullptr;
+    while (m_commands.size() > 0) {
+        command = m_commands.front();
+        m_commands.pop_front();
+
+        if (m_scene) {
+            command->process(this);
+        }
+
+        delete command;
+    }
+
     if (m_scene) {
+        // CPU and GPU, need GL context
         m_scene->display();
     }
 }
@@ -151,6 +172,7 @@ void MasterScene::paintDrawer()
 void MasterScene::updateDrawer()
 {
     if (m_scene) {
+        // pure CPU, no GL context
         m_scene->update();
     }
 }
@@ -166,6 +188,17 @@ void MasterScene::terminateDrawer()
 {
     if (m_content) {
         m_content->makeCurrent();
+
+        // process remaining commands
+        for (SceneCommand *command : m_commands) {
+            if (m_scene) {
+                command->process(this);
+            }
+
+            delete command;
+        }
+
+        m_commands.clear();
     }
 
     if (m_scene) {
@@ -185,7 +218,7 @@ void MasterScene::terminateDrawer()
     }
 }
 
-void MasterScene::mousePressEvent(const MouseEvent &event)
+o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 {
     if (event.button(Mouse::LEFT)) {
         m_rotateCam = True;
@@ -200,9 +233,11 @@ void MasterScene::mousePressEvent(const MouseEvent &event)
         m_content->setCursor(cursor);
         m_lockedPos = event.globalPos();
     }
+
+    return m_rotateCam || m_moveCam;
 }
 
-void MasterScene::mouseReleaseEvent(const MouseEvent &event)
+o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
 {
     if (event.button(Mouse::LEFT)) {
         m_rotateCam = False;
@@ -216,14 +251,16 @@ void MasterScene::mouseReleaseEvent(const MouseEvent &event)
 
         m_content->setCursor(cursor);
     }
+
+    return m_rotateCam || m_moveCam;
 }
 
-void MasterScene::mouseDoubleClickEvent(const MouseEvent &/*event*/)
+o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &/*event*/)
 {
-
+    return False;
 }
 
-void MasterScene::mouseMoveEvent(const MouseEvent &event)
+o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
 {
     Float elapsed = m_scene->getFrameManager()->getFrameDuration();
     Int32 deltaX = event.globalPos().x() - m_lockedPos.x();
@@ -272,9 +309,11 @@ void MasterScene::mouseMoveEvent(const MouseEvent &event)
         cursor.setPos(pos);
         m_content->setCursor(cursor);
     }
+
+    return m_rotateCam || m_moveCam;
 }
 
-void MasterScene::wheelEvent(const WheelEvent &event)
+o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
 {
     Float elapsed = m_scene->getFrameManager()->getFrameDuration();
     // Int32 deltaX = event.angleDelta().x();  // too rarely supported
@@ -288,38 +327,42 @@ void MasterScene::wheelEvent(const WheelEvent &event)
             z = -deltaY * 100.f / 120.f * 10.f * elapsed;
 
             cameraNode->getTransform()->translate(Vector3(0.f, 0.f, z));
+
+            return True;
         }
     }
+
+    return False;
 }
 
-void MasterScene::keyPressEvent(const KeyEvent &event)
+o3d::Bool MasterScene::keyPressEvent(const KeyEvent &/*event*/)
 {
-
+    return False;
 }
 
-void MasterScene::keyReleaseEvent(const KeyEvent &event)
+o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &/*event*/)
 {
-
+    return False;
 }
 
-void MasterScene::focusInEvent(const Event &event)
+o3d::Bool MasterScene::focusInEvent(const Event &/*event*/)
 {
-
+    return False;
 }
 
-void MasterScene::focusOutEvent(const Event &event)
+o3d::Bool MasterScene::focusOutEvent(const Event &/*event*/)
 {
-
+    return False;
 }
 
-void MasterScene::enterEvent(const Event &event)
+o3d::Bool MasterScene::enterEvent(const Event &/*event*/)
 {
-
+    return False;
 }
 
-void MasterScene::leaveEvent(const Event &event)
+o3d::Bool MasterScene::leaveEvent(const Event &/*event*/)
 {
-
+    return False;
 }
 
 void MasterScene::initializeDrawer()

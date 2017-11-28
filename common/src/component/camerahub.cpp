@@ -12,6 +12,7 @@
 #include "o3d/studio/common/component/camerahub.h"
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/masterscene.h"
+#include "o3d/studio/common/workspace/scenecommand.h"
 
 using namespace o3d::studio::common;
 
@@ -77,11 +78,6 @@ CameraHub::CameraHub(const String &name, Entity *parent) :
 
 CameraHub::~CameraHub()
 {
-    // @todo it is not the solution, we need a propre method of deallocation of a hub
-    // and it need to be per instance, but it also need for somes to setup the context before
-    // so we need a sort of pull list to be done during sync when the renderer is activated for
-    // example
-
     for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
         o3d::Camera *camera = it->second;
         delete camera;
@@ -91,6 +87,12 @@ CameraHub::~CameraHub()
 void CameraHub::create()
 {
 
+}
+
+o3d::Bool CameraHub::deletable() const
+{
+    // deletable when no more attached to master scene
+    return m_instances.empty();
 }
 
 o3d::Bool CameraHub::load()
@@ -105,7 +107,6 @@ o3d::Bool CameraHub::save()
 
 o3d::Bool CameraHub::exists() const
 {
-    // @todo O3D
     return Entity::exists();
 }
 
@@ -134,7 +135,6 @@ void CameraHub::createToScene(MasterScene *masterScene)
     }
 
     o3d::Camera *camera = new o3d::Camera(masterScene->scene());
-
     camera->setName(m_name);
 
     camera->setLeft(m_left);
@@ -171,5 +171,34 @@ void CameraHub::removeFromScene(MasterScene *masterScene)
 
 void CameraHub::syncWithScene(MasterScene *masterScene)
 {
-    // @todo how to
+    auto it = m_instances.find(masterScene);
+    if (it != m_instances.end()) {
+        o3d::Camera *camera = it->second;
+
+        // hub => o3d
+        camera->setName(m_name);
+
+        camera->setLeft(m_left);
+        camera->setRatio(m_right);
+        camera->setBottom(m_bottom);
+        camera->setTop(m_top);
+
+        camera->setZnear(m_znear);
+        camera->setZfar(m_zfar);
+
+        camera->setRatio(m_coef);
+        camera->setFov(m_fov);
+
+        if (m_cameraMode == CAMERA_ORTHO_BY_FOV) {
+            camera->computeOrthoByFov();
+        } else if (m_cameraMode == CAMERA_ORTHO) {
+            camera->computeOrtho();
+        } else if (m_cameraMode == CAMERA_PERSPECTIVE) {
+            camera->computePerspective();
+        }
+
+        // o3d => hub
+
+        // nothing to do
+    }
 }

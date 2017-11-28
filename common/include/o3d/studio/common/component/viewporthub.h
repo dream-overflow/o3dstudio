@@ -60,6 +60,7 @@ public:
     virtual ~ViewPortHub();
 
     virtual void create() override;
+    virtual Bool deletable() const override;
 
     virtual Bool load() override;
     virtual Bool save() override;

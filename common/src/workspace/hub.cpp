@@ -60,12 +60,12 @@ void Hub::create()
 
 o3d::Bool Hub::load()
 {
-    return true;
+    return True;
 }
 
 o3d::Bool Hub::save()
 {
-    return true;
+    return True;
 }
 
 o3d::Bool Hub::exists() const
@@ -128,9 +128,6 @@ void Hub::removeHub(const LightRef &_ref)
 
     UInt64 hubId = _ref.id();
     Hub *hub = it->second;
-    project()->removeEntity(hub->ref());
-
-    delete hub;
     m_hubs.erase(it);
 
     // erase its order
@@ -141,8 +138,11 @@ void Hub::removeHub(const LightRef &_ref)
 
     setDirty();
 
+    // remove from project, deferred deletion...
+    project()->removeEntity(hub);
+
     // signal throught project->workspace
-    project()->workspace()->onProjectHubRemoved(hub->ref().light());
+    project()->workspace()->onProjectHubRemoved(_ref);
 }
 
 void Hub::removeHub(UInt64 id)
@@ -153,9 +153,8 @@ void Hub::removeHub(UInt64 id)
     }
 
     Hub *hub = it->second;
-    project()->removeEntity(hub->ref());
+    LightRef _ref = hub->ref().light();
 
-    delete hub;
     m_hubs.erase(it);
 
     // erase its order
@@ -166,33 +165,41 @@ void Hub::removeHub(UInt64 id)
 
     setDirty();
 
+    // remove from project, deferred deletion...
+    project()->removeEntity(hub);
+
     // signal throught project->workspace
-    project()->workspace()->onProjectHubRemoved(hub->ref().light());
+    project()->workspace()->onProjectHubRemoved(_ref);
 }
 
 void Hub::removeHub(Hub *hub)
 {
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        if (it->second == hub) {
-            UInt64 hubId = hub->ref().light().id();
-            project()->removeEntity(hub->ref());
+    if (!hub) {
+        return;
+    }
 
-            delete it->second;
-            m_hubs.erase(it);
+    UInt64 hubId = hub->ref().light().id();
+    auto it = m_hubs.find(hubId);
 
-            // erase its order
-            auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
-            if (it2 != m_hubsOrder.end()) {
-                m_hubsOrder.erase(it2);
-            }
+    if (it != m_hubs.end()) {
+        LightRef _ref = hub->ref().light();
+        m_hubs.erase(it);
 
-            setDirty();
-
-            // signal throught project->workspace
-            project()->workspace()->onProjectHubRemoved(hub->ref().light());
-
-            return;
+        // erase its order
+        auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
+        if (it2 != m_hubsOrder.end()) {
+            m_hubsOrder.erase(it2);
         }
+
+        setDirty();
+
+        // remove from project, deferred deletion...
+        project()->removeEntity(hub);
+
+        // signal throught project->workspace
+        project()->workspace()->onProjectHubRemoved(_ref);
+
+        return;
     }
 }
 

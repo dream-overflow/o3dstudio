@@ -17,6 +17,7 @@
 #include "o3d/studio/common/workspace/asset.h"
 #include "o3d/studio/common/workspace/projectinfo.h"
 #include "o3d/studio/common/workspace/projectfile.h"
+#include "o3d/studio/common/workspace/scenecommand.h"
 
 #include <o3d/core/filemanager.h>
 
@@ -46,13 +47,21 @@ Project::~Project()
     delete m_projectFile;
     delete m_info;
 
-    // first the fragments
-    Fragment *fragment;
+    // force deletion of deferred entities
+    Entity *entity = nullptr;
+    for (auto it = m_deferredDelete.begin(); it != m_deferredDelete.end(); ++it) {
+        entity = *it;
+        deletePtr(entity);
+    }
+
+    // then, the fragments
+    Fragment *fragment = nullptr;
     for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {
         fragment = it->second;
         deletePtr(fragment);
     }
 
+    // hubs
     Hub *hub = nullptr;
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         hub = it->second;
@@ -60,6 +69,7 @@ Project::~Project()
     }
     m_hubsOrder.clear();
 
+    // and finally assets
     Asset *asset = nullptr;
     for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
         asset = it->second;
@@ -151,6 +161,11 @@ void Project::create()
 
     // never saved
     setDirty();
+}
+
+o3d::Bool Project::deletable() const
+{
+    return m_deferredDelete.empty();
 }
 
 o3d::String Project::filename() const
@@ -348,7 +363,7 @@ void Project::removeHub(const LightRef &_ref)
     }
 
     Hub *hub = it->second;
-    removeEntity(hub->ref());
+    m_hubs.erase(it);
 
     // erase its order
     auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hub->ref().light().id());
@@ -356,14 +371,14 @@ void Project::removeHub(const LightRef &_ref)
         m_hubsOrder.erase(it2);
     }
 
-    delete hub;
-    m_hubs.erase(it);
-
     // structure change
     setDirty();
 
+    // remove from project, deferred deletion...
+    removeEntity(hub);
+
     // signal throught workspace
-    workspace()->onProjectHubRemoved(hub->ref().light());
+    workspace()->onProjectHubRemoved(_ref);
 }
 
 void Project::removeHub(UInt64 id)
@@ -374,7 +389,8 @@ void Project::removeHub(UInt64 id)
     }
 
     Hub *hub = it->second;
-    removeEntity(hub->ref());
+    LightRef _ref = hub->ref().light();
+    m_hubs.erase(it);
 
     // erase its order
     auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), id);
@@ -382,14 +398,14 @@ void Project::removeHub(UInt64 id)
         m_hubsOrder.erase(it2);
     }
 
-    delete hub;
-    m_hubs.erase(it);
-
     // structure change
     setDirty();
 
+    // remove from project, deferred deletion...
+    removeEntity(hub);
+
     // signal throught workspace
-    workspace()->onProjectHubRemoved(hub->ref().light());
+    workspace()->onProjectHubRemoved(_ref);
 }
 
 void Project::removeHub(Hub *hub)
@@ -398,27 +414,29 @@ void Project::removeHub(Hub *hub)
         return;
     }
 
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        if (it->second == hub) {
-            removeEntity(hub->ref());
+    UInt64 hubId = hub->ref().light().id();
+    auto it = m_hubs.find(hubId);
 
-            // erase its order
-            auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hub->ref().light().id());
-            if (it2 != m_hubsOrder.end()) {
-                m_hubsOrder.erase(it2);
-            }
+    if (it != m_hubs.end()) {
+        LightRef _ref = hub->ref().light();
+        m_hubs.erase(it);
 
-            delete it->second;
-            m_hubs.erase(it);
-
-            // structure change
-            setDirty();
-
-            // signal throught workspace
-            workspace()->onProjectHubRemoved(hub->ref().light());
-
-            return;
+        // erase its order
+        auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
+        if (it2 != m_hubsOrder.end()) {
+            m_hubsOrder.erase(it2);
         }
+
+        // structure change
+        setDirty();
+
+        // remove from project, deferred deletion...
+        removeEntity(hub);
+
+        // signal throught workspace
+        workspace()->onProjectHubRemoved(_ref);
+
+        return;
     }
 }
 
@@ -663,16 +681,16 @@ void Project::removeFragment(const LightRef &_ref)
     }
 
     Fragment *fragment = it->second;
-    removeEntity(fragment->ref());
-
-    delete fragment;
     m_fragments.erase(it);
 
     // structure change
     setDirty();
 
+    // remove from project, deferred deletion...
+    removeEntity(fragment);
+
     // signal throught workspace
-    workspace()->onProjectFragmentRemoved(fragment->ref().light());
+    workspace()->onProjectFragmentRemoved(_ref);
 }
 
 void Project::removeFragment(UInt64 id)
@@ -683,35 +701,42 @@ void Project::removeFragment(UInt64 id)
     }
 
     Fragment *fragment = it->second;
-    removeEntity(fragment->ref());
-
-    delete fragment;
+    LightRef _ref = fragment->ref().light();
     m_fragments.erase(it);
 
     // structure change
     setDirty();
 
+    // remove from project, deferred deletion...
+    removeEntity(fragment);
+
     // signal throught workspace
-    workspace()->onProjectFragmentRemoved(fragment->ref().light());
+    workspace()->onProjectFragmentRemoved(_ref);
 }
 
 void Project::removeFragment(Fragment *fragment)
 {
-    for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {   
-        if (it->second == fragment) {
-            removeEntity(fragment->ref());
+    if (!fragment) {
+        return;
+    }
 
-            delete it->second;
-            m_fragments.erase(it);
+    UInt64 fragmentId = fragment->ref().light().id();
+    auto it = m_fragments.find(fragmentId);
 
-            // structure change
-            setDirty();
+    if (it != m_fragments.end()) {
+        LightRef _ref = fragment->ref().light();
+        m_fragments.erase(it);
 
-            // signal throught workspace
-            workspace()->onProjectFragmentRemoved(fragment->ref().light());
+        // structure change
+        setDirty();
 
-            return;
-        }
+        // remove from project, deferred deletion...
+        removeEntity(fragment);
+
+        // signal throught workspace
+        workspace()->onProjectFragmentRemoved(_ref);
+
+        return;
     }
 }
 
@@ -857,16 +882,16 @@ void Project::removeAsset(const LightRef &_ref)
     }
 
     Asset *asset = it->second;
-    removeEntity(asset->ref());
-
-    delete asset;
     m_assets.erase(it);
 
     // structure change
     setDirty();
 
+    // remove from project, deferred deletion...
+    removeEntity(asset);
+
     // signal throught workspace
-    workspace()->onProjectAssetRemoved(asset->ref().light());
+    workspace()->onProjectAssetRemoved(_ref);
 }
 
 void Project::removeAsset(UInt64 id)
@@ -877,35 +902,42 @@ void Project::removeAsset(UInt64 id)
     }
 
     Asset *asset = it->second;
-    removeEntity(asset->ref());
-
-    delete asset;
+    LightRef _ref = asset->ref().light();
     m_assets.erase(it);
 
     // structure change
     setDirty();
 
+    // remove from project, deferred deletion...
+    removeEntity(asset);
+
     // signal throught workspace
-    workspace()->onProjectAssetRemoved(asset->ref().light());
+    workspace()->onProjectAssetRemoved(_ref);
 }
 
 void Project::removeAsset(Asset *asset)
 {
-    for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
-        if (it->second == asset) {
-            removeEntity(asset->ref());
+    if (!asset) {
+        return;
+    }
 
-            delete it->second;
-            m_assets.erase(it);
+    UInt64 assetId = asset->ref().light().id();
+    auto it = m_assets.find(assetId);
 
-            // structure change
-            setDirty();
+    if (it != m_assets.end()) {
+        LightRef _ref = asset->ref().light();
+        m_assets.erase(it);
 
-            // signal throught workspace
-            workspace()->onProjectAssetRemoved(asset->ref().light());
+        // structure change
+        setDirty();
 
-            return;
-        }
+        // remove from project, deferred deletion...
+        removeEntity(asset);
+
+        // signal throught workspace
+        workspace()->onProjectAssetRemoved(_ref);
+
+        return;
     }
 }
 
@@ -1027,17 +1059,52 @@ void Project::addEntity(Entity *entity)
 
     m_entitiesById[id] = entity;
     m_entitiesByUuid[entity->ref().uuid()] = entity;
+
+    if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
+        // sync with the master scene
+        SceneCommand *sceneCommand = new SceneHubCommand(static_cast<Hub*>(entity), SceneHubCommand::CREATE);
+        m_masterScene->addCommand(sceneCommand);
+    }
 }
 
-void Project::removeEntity(const ObjectRef &ref)
+void Project::removeEntity(Entity *entity)
 {
-    auto it2 = m_entitiesById.find(ref.light().id());
+    if (!entity) {
+        return;
+    }
+
+    auto it2 = m_entitiesById.find(entity->ref().light().id());
     if (it2 != m_entitiesById.end()) {
         m_entitiesById.erase(it2);
     }
 
-    auto it3 = m_entitiesByUuid.find(ref.uuid());
+    auto it3 = m_entitiesByUuid.find(entity->ref().uuid());
     if (it3 != m_entitiesByUuid.end()) {
         m_entitiesByUuid.erase(it3);
+    }
+
+    if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
+        // sync with the master scene
+        SceneCommand *sceneCommand = new SceneHubCommand(static_cast<Hub*>(entity), SceneHubCommand::DELETE);
+        m_masterScene->addCommand(sceneCommand);
+    }
+
+    // and set as deferred delete
+    m_deferredDelete.push_back(entity);
+}
+
+void Project::purgeEntities()
+{
+    Entity *entity = nullptr;
+    auto it = m_deferredDelete.begin();
+    while (it != m_deferredDelete.end()) {
+        entity = *it;
+
+        if (entity->deletable()) {
+            delete(entity);
+            it = m_deferredDelete.erase(it);
+        } else {
+            ++it;
+        }
     }
 }

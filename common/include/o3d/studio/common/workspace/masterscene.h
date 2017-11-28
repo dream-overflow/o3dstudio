@@ -43,6 +43,8 @@ public:
     MasterScene(Entity *parent);
     virtual ~MasterScene();
 
+    virtual void initialize(Bool debug = False);
+
     const Entity* parent() const;
     Entity* parent();
 
@@ -58,7 +60,15 @@ public:
     O3DCanvasContent *content();
     const O3DCanvasContent *content() const;
 
-    virtual void initialize(Bool debug = False);
+    //
+    // commands
+    //
+
+    void addCommand(SceneCommand *command);
+
+    //
+    // drawer
+    //
 
     virtual void initializeDrawer() override;
     virtual void paintDrawer() override;
@@ -66,20 +76,20 @@ public:
     virtual void resizeDrawer(int w, int h) override;
     virtual void terminateDrawer() override;
 
-    virtual void mousePressEvent(const MouseEvent &event);
-    virtual void mouseReleaseEvent(const MouseEvent &event);
-    virtual void mouseDoubleClickEvent(const MouseEvent &event);
-    virtual void mouseMoveEvent(const MouseEvent &event);
-    virtual void wheelEvent(const WheelEvent &event);
+    virtual Bool mousePressEvent(const MouseEvent &event) override;
+    virtual Bool mouseReleaseEvent(const MouseEvent &event) override;
+    virtual Bool mouseDoubleClickEvent(const MouseEvent &event) override;
+    virtual Bool mouseMoveEvent(const MouseEvent &event) override;
+    virtual Bool wheelEvent(const WheelEvent &event) override;
 
-    virtual void keyPressEvent(const KeyEvent &event);
-    virtual void keyReleaseEvent(const KeyEvent &event);
+    virtual Bool keyPressEvent(const KeyEvent &event) override;
+    virtual Bool keyReleaseEvent(const KeyEvent &event) override;
 
-    virtual void focusInEvent(const Event &event);
-    virtual void focusOutEvent(const Event &event);
+    virtual Bool focusInEvent(const Event &event) override;
+    virtual Bool focusOutEvent(const Event &event) override;
 
-    virtual void enterEvent(const Event &event);
-    virtual void leaveEvent(const Event &event);
+    virtual Bool enterEvent(const Event &event) override;
+    virtual Bool leaveEvent(const Event &event) override;
 
 private:
 

@@ -73,6 +73,7 @@ public:
      * @param stream
      */
     virtual void create() override;
+    virtual Bool deletable() const override;
 
     String filename() const;
     const DiskDir& path() const;
@@ -119,7 +120,9 @@ public:
     const Entity* lookup(const Uuid &uuid) const;
 
     void addEntity(Entity *entity);
-    void removeEntity(const ObjectRef &ref);
+    void removeEntity(Entity *entity);
+
+    void purgeEntities();
 
     //
     // hub
@@ -242,7 +245,11 @@ private:
     //! Global map by ID
     std::map<UInt64, Entity*> m_entitiesById;
 
-    std::list<UInt64> m_hubsOrder;             //!< Hub children ordering
+    //! Hub children ordering, not usefull for runtime, but for visualization
+    std::list<UInt64> m_hubsOrder;
+
+    //! Contains the entities to later at a safe time
+    std::list<Entity*> m_deferredDelete;
 };
 
 /**

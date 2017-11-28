@@ -488,6 +488,8 @@ void QtMainWindow::onFileMenuQuit()
         if (workspace->hasChanges()) {
             workspace->save();
         }
+
+        common::Application::instance()->workspaces().deleteWorkspace(workspace->name());
     }
 
     close();

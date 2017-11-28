@@ -16,20 +16,27 @@
 #include "o3d/studio/common/messenger.h"
 
 #include <o3d/core/diskdir.h>
+#include <o3d/core/timer.h>
 
 using namespace o3d::studio::common;
 
 Workspace::Workspace(const String &name, BaseObject *parent) :
     BaseObject(parent),
     m_nextId(1),
-    m_name(name)
+    m_name(name),
+    m_timer(nullptr)
 {
     // selection manager
     Application::instance()->selection().selectionChanged.connect(this, &Workspace::onSelectionChanged);
+
+    // update timer each second
+    m_timer = new Timer(1000, Timer::TIMER_TIMEOUT, new CallbackMethod<Workspace>(this, &Workspace::updatePrivate));
 }
 
 Workspace::~Workspace()
 {
+    deletePtr(m_timer);
+
     Project *project = nullptr;
     for (auto it = m_loadedProjects.begin(); it != m_loadedProjects.end(); ++it) {
         project = it->second;
@@ -102,6 +109,15 @@ Project *Workspace::activeProject()
 const Project *Workspace::activeProject() const
 {
     return m_activeProject;
+}
+
+void Workspace::updateAll()
+{
+    Project *project = nullptr;
+    for (auto it = m_loadedProjects.begin(); it != m_loadedProjects.end(); ++it) {
+        project = it->second;
+        project->purgeEntities();
+    }
 }
 
 o3d::T_StringList Workspace::projectsList() const
@@ -394,4 +410,10 @@ void Workspace::onSelectionChanged()
 Messenger &Workspace::messenger()
 {
     return Application::instance()->messenger();
+}
+
+o3d::Int32 Workspace::updatePrivate(void *)
+{
+    updateAll();
+    return 0;
 }

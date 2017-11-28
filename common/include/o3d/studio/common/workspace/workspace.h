@@ -21,6 +21,9 @@
 #include <o3d/core/stringlist.h>
 
 namespace o3d {
+
+class Timer;
+
 namespace studio {
 namespace common {
 
@@ -52,6 +55,11 @@ public:
 
     Project* activeProject();
     const Project* activeProject() const;
+
+    /**
+     * @brief Process on all loaded projects somes updates, like deferred deletions.
+     */
+    void updateAll();
 
     /**
      * @brief Return the list of found projects.
@@ -147,15 +155,22 @@ public /*signals*/:
     Signal<LightRef> onProjectActivated{this};
     Signal<LightRef> onProjectRemoved{this};
 
+    //! Hub is added, and it can be retrieved into its parent and its project
     Signal<LightRef> onProjectHubAdded{this};
+    //! Hub is removed, later delete, but cannot be retrieved into its parent or project into this signal
     Signal<LightRef> onProjectHubRemoved{this};
 
+    //! Fragment is added, and it can be retrieved into its parent and its project
     Signal<LightRef> onProjectFragmentAdded{this};
+    //! Fragment is removed, later delete, but cannot be retrieved into its parent or project into this signal
     Signal<LightRef> onProjectFragmentRemoved{this};
 
+    //! Asset is added, and it can be retrieved into its parent and its project
     Signal<LightRef> onProjectAssetAdded{this};
+    //! Asset is removed, later delete, but cannot be retrieved into its parent or project into this signal
     Signal<LightRef> onProjectAssetRemoved{this};
 
+    //! A changes occurs on a entity that belongs to this project, the bitset contains details about changes
     Signal<LightRef, BitSet64 /*changeFlags*/> onProjectEntityChanged{this};
 
 public /*slots*/:
@@ -173,9 +188,13 @@ private:
     T_StringList m_foundProjects;
     std::map<UInt32, Project*> m_loadedProjects;
 
-    Project *m_activeProject{nullptr};
+    Project *m_activeProject{nullptr};     //!< Current active project into the workspace
+    Timer *m_timer;
 
     Messenger& messenger();
+
+    //! Internal update called by timer
+    Int32 updatePrivate(void*);
 };
 
 /**

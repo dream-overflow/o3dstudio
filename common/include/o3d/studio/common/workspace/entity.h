@@ -48,13 +48,24 @@ public:
     void setName(const String& name);
     const String& name() const;
 
+    /**
+     * @brief Set the entity unique object reference.
+     */
     void setRef(const ObjectRef &ref);
     const ObjectRef& ref() const;
 
+    /**
+     * @brief Set the type reference of the instance of this entity.
+     */
     void setTypeRef(const TypeRef &typeRef);
     const TypeRef& typeRef() const;
 
     virtual void create() = 0;
+
+    /**
+     * @brief Returns true if the entity can be safely deleted.
+     */
+    virtual Bool deletable() const = 0;
 
     virtual Bool load() = 0;
     virtual Bool save() = 0;

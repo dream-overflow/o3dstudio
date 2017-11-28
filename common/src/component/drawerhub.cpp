@@ -66,6 +66,12 @@ void DrawerHub::create()
 
 }
 
+o3d::Bool DrawerHub::deletable() const
+{
+    // @todo
+    return True;
+}
+
 o3d::Bool DrawerHub::load()
 {
     return Hub::load();
@@ -102,15 +108,15 @@ o3d::Bool DrawerHub::deserializeContent(InStream &stream)
 
 void DrawerHub::createToScene(MasterScene *masterScene)
 {
-
+    // @todo
 }
 
 void DrawerHub::removeFromScene(MasterScene *masterScene)
 {
-
+    // @todo
 }
 
-void DrawerHub::syncWithScene(MasterScene *masterScene)
+void DrawerHub::syncWithScene(MasterScene */*masterScene*/)
 {
-
+    // nothing to do
 }

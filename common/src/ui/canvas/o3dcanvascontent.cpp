@@ -24,7 +24,10 @@ O3DCanvasContent::O3DCanvasContent(const LightRef &ref, Bool debug, QWidget *par
     m_debug(debug),
     m_renderer(nullptr),
     m_drawer(nullptr),
-    m_timer(nullptr)
+    m_timer(nullptr),
+    m_queryRefresh(0),
+    m_refreshBehavior(SEMI_AUTO_UPDATE),
+    m_repaint(False)
 {
     setWindowTitle(tr("Display"));
     setWindowIcon(QIcon(":/icons/videogame_asset_black.svg"));
@@ -41,6 +44,7 @@ O3DCanvasContent::~O3DCanvasContent()
 {
     if (m_timer) {
         m_timer->stop();
+        delete m_timer;
     }
 
     if (m_drawer) {
@@ -68,9 +72,80 @@ QtRenderer* O3DCanvasContent::renderer()
     return m_renderer;
 }
 
+void O3DCanvasContent::setRefreshBehavior(O3DCanvasContent::RefreshBehavior refreshBehavior)
+{
+    if (refreshBehavior != m_refreshBehavior) {
+        if (refreshBehavior == MANUAL_UPDATE) {
+            if (m_timer) {
+                m_timer->stop();
+                deletePtr(m_timer);
+            }
+        } else if (refreshBehavior == SEMI_AUTO_UPDATE) {
+            if (m_timer) {
+                m_timer->stop();
+                deletePtr(m_timer);
+            }
+        } else if (refreshBehavior == SLOW_FREQUENCY_UPDATE) {
+            if (m_timer) {
+                m_timer->setInterval(16);
+            } else {
+                m_timer = new QTimer(this);
+                connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+                m_timer->start(16);  // 16 ms update frequency
+            }
+        } else if (refreshBehavior == FULL_FREQUENCY_UPDATE) {
+            if (m_timer) {
+                m_timer->setInterval(8);
+            } else {
+                m_timer = new QTimer(this);
+                connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+                m_timer->start(8);  // 8 ms update frequency
+            }
+        }
+
+        m_repaint = True;
+        m_refreshBehavior = refreshBehavior;
+    }
+}
+
+O3DCanvasContent::RefreshBehavior O3DCanvasContent::refreshBehavior() const
+{
+    return m_refreshBehavior;
+}
+
 void O3DCanvasContent::setDrawer(O3DDrawer *drawer)
 {
     m_drawer = drawer;
+}
+
+void O3DCanvasContent::queryRefresh()
+{
+    if (m_queryRefresh <= 0) {
+        // only for manual and semi auto behaviors
+        if (m_refreshBehavior == MANUAL_UPDATE || m_refreshBehavior == SEMI_AUTO_UPDATE) {
+            // query 50 refresh
+            m_queryRefresh = 50;
+
+            // need a temporary timer at 8 ms
+            if (!m_timer) {
+                m_timer = new QTimer(this);
+                connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+                m_timer->start(8);
+            } else {
+                m_timer->setInterval(8);
+            }
+        }
+    }
+}
+
+o3d::Bool O3DCanvasContent::isDebug() const
+{
+    return m_debug;
+}
+
+o3d::Bool O3DCanvasContent::waitRefresh() const
+{
+    return m_queryRefresh > 0;
 }
 
 void O3DCanvasContent::closeEvent(QCloseEvent *)
@@ -96,11 +171,25 @@ void O3DCanvasContent::initializeGL()
     }
 
     // start the update loop
-    if (!m_timer) {
-        m_timer = new QTimer(this);
-        connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-        m_timer->start(8);  // 8 ms update frequency
+    if (m_refreshBehavior == SLOW_FREQUENCY_UPDATE) {
+        if (!m_timer) {
+            m_timer = new QTimer(this);
+            connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+            m_timer->start(16);  // 16 ms update frequency
+        } else {
+            m_timer->setInterval(16);
+        }
+    } else if (m_refreshBehavior == FULL_FREQUENCY_UPDATE) {
+        if (!m_timer) {
+            m_timer = new QTimer(this);
+            connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+            m_timer->start(8);  // 8 ms update frequency
+        } else {
+            m_timer->setInterval(8);
+        }
     }
+
+    m_repaint = True;
 }
 
 void O3DCanvasContent::paintGL()
@@ -133,13 +222,24 @@ void O3DCanvasContent::updateGL()
         m_drawer->updateDrawer();
     }
 
-    // paint every 16 ms
-    static int i = 0;
-    if (i == 0) {
+    // paint once on two
+    if (m_repaint) {
         repaint();
-        ++i;
-    } else if (i == 1) {
-        i = 0;
+        m_repaint = False;
+    } else {
+        m_repaint = True;
+    }
+
+    if (m_queryRefresh > 0) {
+        --m_queryRefresh;
+    }
+
+    if (m_queryRefresh == 0) {
+        // manual or semi auto, delete the temporary timer
+        if (m_refreshBehavior == MANUAL_UPDATE || m_refreshBehavior == SEMI_AUTO_UPDATE) {
+            m_timer->stop();
+            deletePtr(m_timer);
+        }
     }
 }
 
@@ -169,7 +269,9 @@ void O3DCanvasContent::mousePressEvent(QMouseEvent *event)
                        screenPos,
                        windowPos);
 
-        m_drawer->mousePressEvent(evt);
+        if (m_drawer->mousePressEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::mousePressEvent(event);
@@ -194,7 +296,9 @@ void O3DCanvasContent::mouseReleaseEvent(QMouseEvent *event)
                        screenPos,
                        windowPos);
 
-        m_drawer->mouseReleaseEvent(evt);
+        if (m_drawer->mouseReleaseEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::mouseReleaseEvent(event);
@@ -219,7 +323,9 @@ void O3DCanvasContent::mouseDoubleClickEvent(QMouseEvent *event)
                        screenPos,
                        windowPos);
 
-        m_drawer->mouseDoubleClickEvent(evt);
+        if (m_drawer->mouseDoubleClickEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::mouseDoubleClickEvent(event);
@@ -244,7 +350,9 @@ void O3DCanvasContent::mouseMoveEvent(QMouseEvent *event)
                        screenPos,
                        windowPos);
 
-        m_drawer->mouseMoveEvent(evt);
+        if (m_drawer->mouseMoveEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::mouseMoveEvent(event);
@@ -266,7 +374,9 @@ void O3DCanvasContent::wheelEvent(QWheelEvent *event)
                        globalPosF,
                        posF);
 
-        m_drawer->wheelEvent(evt);
+        if (m_drawer->wheelEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::wheelEvent(event);
@@ -286,7 +396,9 @@ void O3DCanvasContent::keyPressEvent(QKeyEvent *event)
                      event->isAutoRepeat(),
                      event->count());
 
-        m_drawer->keyPressEvent(evt);
+        if (m_drawer->keyPressEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::keyPressEvent(event);
@@ -306,7 +418,9 @@ void O3DCanvasContent::keyReleaseEvent(QKeyEvent *event)
                      event->isAutoRepeat(),
                      event->count());
 
-        m_drawer->keyReleaseEvent(evt);
+        if (m_drawer->keyReleaseEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::keyReleaseEvent(event);
@@ -316,7 +430,9 @@ void O3DCanvasContent::focusInEvent(QFocusEvent *event)
 {
     Event evt(Event::FOCUS_IN);
     if (m_drawer) {
-        m_drawer->focusInEvent(evt);
+        if (m_drawer->focusInEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::focusInEvent(event);
@@ -326,7 +442,9 @@ void O3DCanvasContent::focusOutEvent(QFocusEvent *event)
 {
     Event evt(Event::FOCUS_OUT);
     if (m_drawer) {
-        m_drawer->focusOutEvent(evt);
+        if (m_drawer->focusOutEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::focusOutEvent(event);
@@ -336,7 +454,9 @@ void O3DCanvasContent::enterEvent(QEvent *event)
 {
     Event evt(Event::ENTER);
     if (m_drawer) {
-        m_drawer->enterEvent(evt);
+        if (m_drawer->enterEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::enterEvent(event);
@@ -346,7 +466,9 @@ void O3DCanvasContent::leaveEvent(QEvent *event)
 {
     Event evt(Event::LEAVE);
     if (m_drawer) {
-        m_drawer->leaveEvent(evt);
+        if (m_drawer->leaveEvent(evt)) {
+            queryRefresh();
+        }
     }
 
     QWidget::leaveEvent(event);

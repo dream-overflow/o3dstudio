@@ -176,6 +176,8 @@ o3d::Bool WorkspaceManager::closeCurrent()
             m_current->save();
         }
 
+        deletePtr(m_current);
+
         // setup a new empty workspace
         m_current = new Workspace("default");
         m_current->setUuid(QUuid::createUuid().toByteArray().data());

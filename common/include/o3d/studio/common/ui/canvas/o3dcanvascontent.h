@@ -24,6 +24,14 @@ class O3S_API O3DCanvasContent : public GLCanvasContent
 
 public:
 
+    enum RefreshBehavior
+    {
+        MANUAL_UPDATE = 0,          //!< Update and paint must be called manually, only Qt event do paint
+        SEMI_AUTO_UPDATE = 1,       //!< Edition mode, not waste CPU, update and repaint less possible
+        SLOW_FREQUENCY_UPDATE = 2,  //!< Half game mode, update and repaint at slow frequency (uses of timer)
+        FULL_FREQUENCY_UPDATE = 3   //!< Full game mode, update and repaint at the best frequency (uses of timer)
+    };
+
     explicit O3DCanvasContent(const LightRef &ref, Bool debug = false, QWidget *parent = nullptr);
     virtual ~O3DCanvasContent();
 
@@ -34,7 +42,18 @@ public:
     const QtRenderer *renderer() const;
     QtRenderer *renderer();
 
+    /**
+     * @brief setBehavior
+     * @param behavior
+     */
+    void setRefreshBehavior(RefreshBehavior refreshBehavior);
+    RefreshBehavior refreshBehavior() const;
+
     void setDrawer(O3DDrawer *drawer);
+    void queryRefresh();
+
+    Bool isDebug() const;
+    Bool waitRefresh() const;
 
 public slots:
 
@@ -62,11 +81,16 @@ protected:
 
 private:
 
-    Bool m_debug;
-    QtRenderer *m_renderer;
+    Bool m_debug;                       //!< Renderer in debug mode
+    QtRenderer *m_renderer;             //!< Attached renderer
 
-    O3DDrawer *m_drawer;
-    QTimer *m_timer;
+    O3DDrawer *m_drawer;                //!< Attached drawer
+    QTimer *m_timer;                    //!< Refresh timer
+
+    Int32 m_queryRefresh;               //!< How many refresh needed
+    RefreshBehavior m_refreshBehavior;  //!< Current refresh behavior
+
+    Bool m_repaint;
 };
 
 } // namespace common

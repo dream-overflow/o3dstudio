@@ -28,17 +28,17 @@ public:
     virtual void resizeDrawer(int w, int h) = 0;
     virtual void terminateDrawer() = 0;
 
-    virtual void mousePressEvent(const MouseEvent &event) = 0;
-    virtual void mouseReleaseEvent(const MouseEvent &event) = 0;
-    virtual void mouseDoubleClickEvent(const MouseEvent &event) = 0;
-    virtual void mouseMoveEvent(const MouseEvent &event) = 0;
-    virtual void wheelEvent(const WheelEvent &event) = 0;
-    virtual void keyPressEvent(const KeyEvent &event) = 0;
-    virtual void keyReleaseEvent(const KeyEvent &event) = 0;
-    virtual void focusInEvent(const Event &event) = 0;
-    virtual void focusOutEvent(const Event &event) = 0;
-    virtual void enterEvent(const Event &event) = 0;
-    virtual void leaveEvent(const Event &event) = 0;
+    virtual Bool mousePressEvent(const MouseEvent &event) = 0;
+    virtual Bool mouseReleaseEvent(const MouseEvent &event) = 0;
+    virtual Bool mouseDoubleClickEvent(const MouseEvent &event) = 0;
+    virtual Bool mouseMoveEvent(const MouseEvent &event) = 0;
+    virtual Bool wheelEvent(const WheelEvent &event) = 0;
+    virtual Bool keyPressEvent(const KeyEvent &event) = 0;
+    virtual Bool keyReleaseEvent(const KeyEvent &event) = 0;
+    virtual Bool focusInEvent(const Event &event) = 0;
+    virtual Bool focusOutEvent(const Event &event) = 0;
+    virtual Bool enterEvent(const Event &event) = 0;
+    virtual Bool leaveEvent(const Event &event) = 0;
 };
 
 } // namespace common

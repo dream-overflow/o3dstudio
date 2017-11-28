@@ -61,6 +61,11 @@ void DummyHub::create()
 
 }
 
+o3d::Bool DummyHub::deletable() const
+{
+    return True;
+}
+
 o3d::Bool DummyHub::load()
 {
     return Hub::load();
@@ -73,7 +78,6 @@ o3d::Bool DummyHub::save()
 
 o3d::Bool DummyHub::exists() const
 {
-    // @todo O3D
     return Entity::exists();
 }
 
@@ -95,17 +99,17 @@ o3d::Bool DummyHub::deserializeContent(InStream &stream)
     return True;
 }
 
-void DummyHub::createToScene(MasterScene *masterScene)
+void DummyHub::createToScene(MasterScene */*masterScene*/)
 {
 
 }
 
-void DummyHub::removeFromScene(MasterScene *masterScene)
+void DummyHub::removeFromScene(MasterScene */*masterScene*/)
 {
 
 }
 
-void DummyHub::syncWithScene(MasterScene *masterScene)
+void DummyHub::syncWithScene(MasterScene */*masterScene*/)
 {
 
 }
