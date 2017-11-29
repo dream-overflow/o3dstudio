@@ -76,7 +76,7 @@ public:
 
 private /*slots*/:
 
-    void onMessage(UInt32 msgType, const String &message);
+    void onMessage(UInt32 msgType, String message);
 
     void onAttachContent(String, common::Content*);
     void onAttachDock(String, common::Dock*);

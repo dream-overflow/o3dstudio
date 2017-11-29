@@ -35,7 +35,7 @@ public:
 
 public /*slots*/:
 
-    void onMessage(UInt32 msgType, const String &message);
+    void onMessage(UInt32 msgType, String message);
 
 private:
 

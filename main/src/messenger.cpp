@@ -8,13 +8,16 @@
 
 #include "o3d/studio/common/messenger.h"
 
+#include <o3d/core/debug.h>
+
 using namespace o3d::studio::common;
 
 
 Messenger::Messenger(BaseObject *parent) :
     BaseObject(parent)
 {
-
+    // async to avoid threading issues
+    o3d::Debug::instance()->throwAll.connect(this, &Messenger::onDebugInfo);
 }
 
 Messenger::~Messenger()
@@ -59,4 +62,28 @@ void Messenger::fatal(const String &message)
 void Messenger::critical(const String &message)
 {
     this->message(CRITICAL_MSG, message);
+}
+
+void Messenger::onDebugInfo(o3d::DebugInfo _info)
+{
+    switch (_info.Type) {
+        case o3d::DebugInfo::MESSAGE_INFO:
+            info(_info.Message);
+            break;
+
+        case o3d::DebugInfo::WARNING_INFO:
+            warning(_info.Message);
+            break;
+
+        case o3d::DebugInfo::CRITICAL_INFO:
+            critical(_info.Message);
+            break;
+
+        case o3d::DebugInfo::ERROR_INFO:
+            fatal(_info.Message);
+            break;
+
+        default:
+            break;
+    }
 }

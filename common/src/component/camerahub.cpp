@@ -149,6 +149,8 @@ void CameraHub::createToScene(MasterScene *masterScene)
     }
 
     m_instances[masterScene] = camera;
+
+    O3D_MESSAGE("CameraHub created into scene");
 }
 
 void CameraHub::removeFromScene(MasterScene *masterScene)
@@ -158,6 +160,8 @@ void CameraHub::removeFromScene(MasterScene *masterScene)
         o3d::Camera *camera = it->second;
         m_instances.erase(it);
         delete camera;
+
+        O3D_MESSAGE("CameraHub deleted from scene");
     }
 }
 
@@ -192,5 +196,7 @@ void CameraHub::syncWithScene(MasterScene *masterScene)
         // o3d => hub
 
         // nothing to do
+
+        O3D_MESSAGE("CameraHub synced into scene");
     }
 }

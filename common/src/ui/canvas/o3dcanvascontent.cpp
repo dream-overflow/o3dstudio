@@ -26,7 +26,7 @@ O3DCanvasContent::O3DCanvasContent(const LightRef &ref, Bool debug, QWidget *par
     m_drawer(nullptr),
     m_timer(nullptr),
     m_queryRefresh(0),
-    m_refreshBehavior(SEMI_AUTO_UPDATE),
+    m_refreshBehavior(FULL_FREQUENCY_UPDATE),//SEMI_AUTO_UPDATE),
     m_repaint(False),
     m_private(nullptr)
 {

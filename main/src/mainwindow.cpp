@@ -872,7 +872,7 @@ MainWindow::MainWindow(BaseObject *) :
 
     // message
     common::Messenger& messenger = common::Application::instance()->messenger();
-    messenger.onNewMessage.connect(this, &MainWindow::onMessage);
+    messenger.onNewMessage.connect(this, &MainWindow::onMessage, CONNECTION_ASYNCH);
 
     o3d::studio::common::UiController &ui = common::Application::instance()->ui();
 
@@ -973,7 +973,7 @@ o3d::Bool MainWindow::commitSettings()
     return True;
 }
 
-void MainWindow::onMessage(o3d::UInt32 msgType, const String &message)
+void MainWindow::onMessage(o3d::UInt32 msgType, String message)
 {
     if (msgType == common::Messenger::INFO_MSG) {
         m_qtMainWindow->statusBar()->showMessage(toQString(message));

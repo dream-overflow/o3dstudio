@@ -19,6 +19,9 @@
 #include "global.h"
 
 namespace o3d {
+
+class DebugInfo;
+
 namespace studio {
 namespace common {
 
@@ -51,7 +54,11 @@ public:
 
 public:
 
-    Signal<UInt32, const String&> onNewMessage{this};
+    Signal<UInt32, String> onNewMessage{this};
+
+public /*slots*/:
+
+    void onDebugInfo(DebugInfo info);
 
 protected:
 

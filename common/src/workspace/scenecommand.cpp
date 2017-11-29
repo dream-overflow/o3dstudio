@@ -50,17 +50,17 @@ void SceneHubCommand::process(MasterScene *masterScene)
             return;
         }
 
-        if (!project->lookup(m_ref)) {
-            // invalid or deleted hub
-            return;
-        }
-
         if (m_cmdType == CREATE) {
-            m_hub->createToScene(masterScene);
+           m_hub->createToScene(masterScene);
         } else if (m_cmdType == DELETE) {
-            m_hub->removeFromScene(masterScene);
+           m_hub->removeFromScene(masterScene);
         } else if (m_cmdType == SYNC) {
-            m_hub->syncWithScene(masterScene);
+            if (!project->lookup(m_ref)) {
+                // invalid or deleted hub
+                return;
+            }
+
+           m_hub->syncWithScene(masterScene);
         }
     }
 }

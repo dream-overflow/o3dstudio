@@ -47,7 +47,7 @@ MainConsole::MainConsole(o3d::BaseObject *parent) :
     m_qtMainConsole = new QtMainConsole();
 
     common::Messenger& messenger = common::Application::instance()->messenger();
-    messenger.onNewMessage.connect(this, &MainConsole::onMessage);
+    messenger.onNewMessage.connect(this, &MainConsole::onMessage, CONNECTION_ASYNCH);
 }
 
 MainConsole::~MainConsole()
@@ -70,7 +70,7 @@ Qt::DockWidgetArea MainConsole::dockWidgetArea() const
     return Qt::BottomDockWidgetArea;
 }
 
-void MainConsole::onMessage(UInt32 msgType, const String &message)
+void MainConsole::onMessage(UInt32 msgType, String message)
 {
     QIcon icon = QIcon::fromTheme("dialog-question");
 
