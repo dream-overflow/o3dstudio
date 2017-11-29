@@ -129,6 +129,11 @@ void MasterScene::addCommand(SceneCommand *command)
 {
     if (command) {
         m_commands.push_front(command);
+
+        // need refresh to process
+        if (m_content) {
+            m_content->queryRefresh();
+        }
     }
 }
 
@@ -151,17 +156,7 @@ void MasterScene::initialize(Bool debug)
 void MasterScene::paintDrawer()
 {
     // process commands (FIFO)
-    SceneCommand *command = nullptr;
-    while (m_commands.size() > 0) {
-        command = m_commands.front();
-        m_commands.pop_front();
-
-        if (m_scene) {
-            command->process(this);
-        }
-
-        delete command;
-    }
+    processCommands();
 
     if (m_scene) {
         // CPU and GPU, need GL context
@@ -190,15 +185,7 @@ void MasterScene::terminateDrawer()
         m_content->makeCurrent();
 
         // process remaining commands
-        for (SceneCommand *command : m_commands) {
-            if (m_scene) {
-                command->process(this);
-            }
-
-            delete command;
-        }
-
-        m_commands.clear();
+        processCommands();
     }
 
     if (m_scene) {
@@ -363,6 +350,22 @@ o3d::Bool MasterScene::enterEvent(const Event &/*event*/)
 o3d::Bool MasterScene::leaveEvent(const Event &/*event*/)
 {
     return False;
+}
+
+void MasterScene::processCommands()
+{
+    // process commands (FIFO)
+    SceneCommand *command = nullptr;
+    while (m_commands.size() > 0) {
+        command = m_commands.front();
+        m_commands.pop_front();
+
+        if (m_scene) {
+            command->process(this);
+        }
+
+        delete command;
+    }
 }
 
 void MasterScene::initializeDrawer()

@@ -24,7 +24,8 @@ SceneCommand::~SceneCommand()
 
 
 SceneHubCommand::SceneHubCommand(Hub *hub, SceneHubCommand::CommandType cmdType) :
-    m_hub(hub)
+    m_hub(hub),
+    m_cmdType(cmdType)
 {
     O3D_ASSERT(hub != nullptr);
 
@@ -53,13 +54,13 @@ void SceneHubCommand::process(MasterScene *masterScene)
             // invalid or deleted hub
             return;
         }
-    }
 
-    if (m_cmdType == CREATE) {
-        m_hub->createToScene(masterScene);
-    } else if (m_cmdType == DELETE) {
-        m_hub->removeFromScene(masterScene);
-    } else if (m_cmdType == SYNC) {
-        m_hub->syncWithScene(masterScene);
+        if (m_cmdType == CREATE) {
+            m_hub->createToScene(masterScene);
+        } else if (m_cmdType == DELETE) {
+            m_hub->removeFromScene(masterScene);
+        } else if (m_cmdType == SYNC) {
+            m_hub->syncWithScene(masterScene);
+        }
     }
 }

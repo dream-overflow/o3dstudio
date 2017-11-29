@@ -115,6 +115,8 @@ private:
     //! Ordered list of command to process during the moment where the context is set to current.
     //! In others words it is the pass of synchronization that will be executed here.
     std::list<SceneCommand*> m_commands;
+
+    void processCommands();
 };
 
 } // namespace common

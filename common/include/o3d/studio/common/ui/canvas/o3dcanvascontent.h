@@ -14,13 +14,36 @@
 #include "o3ddrawer.h"
 #include "../../objectref.h"
 
+#include <o3d/core/baseobject.h>
+
 namespace o3d {
 namespace studio {
 namespace common {
 
+class O3S_API O3DCanvasContentPrivate : public BaseObject
+{
+public:
+
+    O3DCanvasContentPrivate(class O3DCanvasContent *content, BaseObject *parent = nullptr);
+
+public /* slots */:
+
+    void queryRefresh();
+
+public /*signals*/:
+
+    Signal<> onQueryRefresh{this};
+
+private:
+
+    class O3DCanvasContent *m_content;
+};
+
 class O3S_API O3DCanvasContent : public GLCanvasContent
 {
     Q_OBJECT
+
+    friend class O3DCanvasContentPrivate;
 
 public:
 
@@ -91,6 +114,10 @@ private:
     RefreshBehavior m_refreshBehavior;  //!< Current refresh behavior
 
     Bool m_repaint;
+
+    O3DCanvasContentPrivate *m_private;
+
+    void queryRefreshPrivate();
 };
 
 } // namespace common

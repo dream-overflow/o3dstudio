@@ -27,7 +27,8 @@ O3DCanvasContent::O3DCanvasContent(const LightRef &ref, Bool debug, QWidget *par
     m_timer(nullptr),
     m_queryRefresh(0),
     m_refreshBehavior(SEMI_AUTO_UPDATE),
-    m_repaint(False)
+    m_repaint(False),
+    m_private(nullptr)
 {
     setWindowTitle(tr("Display"));
     setWindowIcon(QIcon(":/icons/videogame_asset_black.svg"));
@@ -38,6 +39,8 @@ O3DCanvasContent::O3DCanvasContent(const LightRef &ref, Bool debug, QWidget *par
         common::Project *project = workspaces->current()->project(ref);
         setWindowTitle(tr("Display %1").arg(toQString(project->name())));
     }
+
+    m_private = new O3DCanvasContentPrivate(this);
 }
 
 O3DCanvasContent::~O3DCanvasContent()
@@ -50,6 +53,8 @@ O3DCanvasContent::~O3DCanvasContent()
     if (m_drawer) {
         m_drawer->terminateDrawer();
     }
+
+    deletePtr(m_private);
 }
 
 o3d::String O3DCanvasContent::elementName() const
@@ -120,22 +125,7 @@ void O3DCanvasContent::setDrawer(O3DDrawer *drawer)
 
 void O3DCanvasContent::queryRefresh()
 {
-    if (m_queryRefresh <= 0) {
-        // only for manual and semi auto behaviors
-        if (m_refreshBehavior == MANUAL_UPDATE || m_refreshBehavior == SEMI_AUTO_UPDATE) {
-            // query 50 refresh
-            m_queryRefresh = 50;
-
-            // need a temporary timer at 8 ms
-            if (!m_timer) {
-                m_timer = new QTimer(this);
-                connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
-                m_timer->start(8);
-            } else {
-                m_timer->setInterval(8);
-            }
-        }
-    }
+    m_private->onQueryRefresh();
 }
 
 o3d::Bool O3DCanvasContent::isDebug() const
@@ -472,4 +462,39 @@ void O3DCanvasContent::leaveEvent(QEvent *event)
     }
 
     QWidget::leaveEvent(event);
+}
+
+void O3DCanvasContent::queryRefreshPrivate()
+{
+    if (m_queryRefresh <= 0) {
+        // only for manual and semi auto behaviors
+        if (m_refreshBehavior == MANUAL_UPDATE || m_refreshBehavior == SEMI_AUTO_UPDATE) {
+            // query 50 refresh
+            m_queryRefresh = 50;
+
+            // need a temporary timer at 8 ms
+            if (!m_timer) {
+                m_timer = new QTimer(this);
+                connect(m_timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+                m_timer->start(8);
+            } else {
+                m_timer->setInterval(8);
+            }
+        }
+    }
+}
+
+O3DCanvasContentPrivate::O3DCanvasContentPrivate(O3DCanvasContent *content, BaseObject *parent) :
+    BaseObject(parent),
+    m_content(content)
+{
+    O3D_ASSERT(m_content != nullptr);
+
+    // sync with main thread
+    onQueryRefresh.connect(this, &O3DCanvasContentPrivate::queryRefresh, CONNECTION_ASYNCH);
+}
+
+void O3DCanvasContentPrivate::queryRefresh()
+{
+    m_content->queryRefreshPrivate();
 }
