@@ -19,6 +19,10 @@ class Entity;
 class Project;
 class Hub;
 
+/**
+ * @brief The Component abstract class. A component offers the way to instanciate a
+ * new hub for a project.
+ */
 class O3S_API Component
 {
 public:
@@ -49,9 +53,6 @@ public:
      */
     const TypeRef& targetTypeRef() const;
 
-    // @todo soit ComponentUi object or directly label, icon.. action ?
-    // const QString& label() const;
-
     /**
      * @brief Setup the component once registered.
      */
@@ -65,6 +66,22 @@ public:
      */
     virtual Hub* buildHub(const String &name, Project *project, Entity *parent) = 0;
 
+    //
+    // ui part
+    //
+
+    /**
+     * @brief Display label and tooltip.
+     */
+    const String& label() const;
+
+    /**
+     * @brief Resource name of the icon.
+     */
+    const String& icon() const;
+
+    // @todo a ComponentUi object when acting
+
 protected:
 
     TypeRef m_typeRef;
@@ -72,6 +89,9 @@ protected:
 
     TypeRef m_targetTypeRef;
     String m_targetName;
+
+    String m_label;
+    String m_icon;
 };
 
 } // namespace common

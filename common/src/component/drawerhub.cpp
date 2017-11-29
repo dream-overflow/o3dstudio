@@ -22,6 +22,9 @@ DrawerHubComponent::DrawerHubComponent() :
 {
     m_name = "o3s::common::component::drawerhub";
     m_targetName = "o3s::common::hub::drawer";
+
+    m_label = "Scene Drawer Hub";
+    m_icon = ":/icons/blur_on_black.svg";
 }
 
 DrawerHubComponent::~DrawerHubComponent()

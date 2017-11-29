@@ -28,12 +28,12 @@ class Hub;
 /**
  * @brief The CameraComponent class
  */
-class O3S_API CameraComponent : public Component
+class O3S_API CameraHubComponent : public Component
 {
 public:
 
-    CameraComponent();
-    virtual ~CameraComponent();
+    CameraHubComponent();
+    virtual ~CameraHubComponent();
 
     virtual void setup() override;
     virtual Hub* buildHub(const String &name, Project *project, Entity *parent) override;

@@ -11,7 +11,9 @@
 using namespace o3d::studio::common;
 
 
-Component::Component()
+Component::Component() :
+    m_label(""),
+    m_icon(":/icons/call_split_black.svg")
 {
 
 }
@@ -49,4 +51,14 @@ void Component::setTargetTypeRef(const  TypeRef &typeRef)
 const TypeRef &Component::targetTypeRef() const
 {
     return m_targetTypeRef;
+}
+
+const o3d::String &Component::label() const
+{
+    return m_label;
+}
+
+const o3d::String &Component::icon() const
+{
+    return m_icon;
 }

@@ -6,8 +6,8 @@
  * @details
  */
 
-#ifndef _O3DS_COMMON_DUMMYHUB_H
-#define _O3DS_COMMON_DUMMYHUB_H
+#ifndef _O3DS_COMMON_DRAWERHUB_H
+#define _O3DS_COMMON_DRAWERHUB_H
 
 #include "component.h"
 #include "../workspace/hub.h"
@@ -80,4 +80,4 @@ protected:
 } // namespace studio
 } // namespace o3d
 
-#endif // _O3DS_COMMON_DUMMYHUB_H
+#endif // _O3DS_COMMON_DRAWERHUB_H

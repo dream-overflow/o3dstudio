@@ -8,11 +8,10 @@
 
 #include "maintoolbar.h"
 #include "mainwindow.h"
+#include "toolbar/hubcomponenttoolbar.h"
 
 #include <QtWidgets/QLineEdit>
 #include <QtCore/QList>
-#include <QtGui/QPixmap>
-#include <QtGui/QImage>
 
 #include "o3d/studio/common/command/commandmanager.h"
 #include "o3d/studio/common/command/hub/addhubcommand.h"
@@ -60,7 +59,7 @@ QToolBar *MainToolBar::ui()
 
 o3d::String MainToolBar::elementName() const
 {
-    return "o3s::main::maintoolbar";
+    return "o3s::main::toolbar::main";
 }
 
 Qt::ToolBarArea MainToolBar::toolBarArea() const
@@ -72,8 +71,7 @@ void MainToolBar::onProjectActivated(common::LightRef ref)
 {
     if (ref.isValid()) {
         QList<QAction*> actionsList = m_qtMainToolBar->actions();
-        QAction *action = nullptr;
-        foreach (action, actionsList) {
+        for (QAction *action : actionsList) {
             action->setEnabled(true);
         }
     }
@@ -83,8 +81,7 @@ void MainToolBar::onProjectRemoved(common::LightRef ref)
 {
     if (ref.isValid()) {
         QList<QAction*> actionsList = m_qtMainToolBar->actions();
-        QAction *action = nullptr;
-        foreach (action, actionsList) {
+        for (QAction *action : actionsList) {
             action->setEnabled(false);
         }
     }
@@ -155,6 +152,13 @@ void QtMainToolBar::onCreateHub()
             return;
         }
 
+        QPoint qpos = this->mapToGlobal(this->pos());
+        Point2i pos(qpos.x() + 50, qpos.y() + 25);
+        // HubComponentToolBar *popupToolBar = new HubComponentToolBar(pos);
+        HubComponentToolBar popupToolBar(pos);
+        popupToolBar.show();
+        // deletePtr(popupToolBar);
+        /*
         const std::set<common::SelectionItem*> hubs = selection.filterCurrentByBaseType(common::TypeRef::hub());
         if (hubs.size() > 1) {
             return;
@@ -173,7 +177,7 @@ void QtMainToolBar::onCreateHub()
         } else {
             common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), component->typeRef(), String());
             common::Application::instance()->command().addCommand(cmd);
-        }
+        }*/
     }
 }
 

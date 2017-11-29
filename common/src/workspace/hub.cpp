@@ -467,8 +467,8 @@ o3d::Bool Hub::serializeContent(OutStream &stream) const
         hub = cit2->second;
 
         // uuid and type ref, for instanciation
-        stream << ref().uuid()
-               << ref().strong().typeName()
+        stream << hub->ref().uuid()
+               << hub->ref().strong().typeName()
                << *hub;
     }
 

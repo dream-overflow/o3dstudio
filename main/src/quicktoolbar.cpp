@@ -34,7 +34,7 @@ QToolBar* QuickToolBar::ui()
 
 o3d::String QuickToolBar::elementName() const
 {
-    return "o3s::main::quicktoolbar";
+    return "o3s::main::toolbar::quick";
 }
 
 Qt::ToolBarArea QuickToolBar::toolBarArea() const

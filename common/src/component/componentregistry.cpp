@@ -42,11 +42,15 @@ ComponentRegistry::~ComponentRegistry()
 
 #include "o3d/studio/common/component/dummyhub.h"
 #include "o3d/studio/common/component/viewporthub.h"
+#include "o3d/studio/common/component/camerahub.h"
+#include "o3d/studio/common/component/drawerhub.h"
 
 void ComponentRegistry::initialize()
 {
     registerComponent(new DummyHubComponent());
     registerComponent(new ViewPortComponent());
+    registerComponent(new CameraHubComponent());
+    registerComponent(new DrawerHubComponent());
 }
 
 void ComponentRegistry::registerComponent(Component *component)
@@ -207,4 +211,15 @@ const Component *ComponentRegistry::componentByTarget(const String &name) const
     }
 
     return nullptr;
+}
+
+std::list<const Component *> ComponentRegistry::componentList() const
+{
+    std::list<const Component*> results;
+
+    for (auto cit = m_components.begin(); cit != m_components.end(); ++cit) {
+        results.push_back(cit->second);
+    }
+
+    return results;
 }

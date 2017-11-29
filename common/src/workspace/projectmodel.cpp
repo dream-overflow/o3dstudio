@@ -16,6 +16,8 @@
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/typeregistry.h"
+#include "o3d/studio/common/component/component.h"
+#include "o3d/studio/common/component/componentregistry.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
 
 #include "o3d/studio/common/command/commandmanager.h"
@@ -298,10 +300,12 @@ ProjectItem *ProjectModel::addHub(common::Hub *hub)
 
     beginInsertRows(parentIndex, n, n);
 
+    common::Component *component = common::Application::instance()->components().componentByTarget(hub->typeRef().name());
+
     ProjectItem *item = new ProjectItem(hub,
                                         hub->ref().light(),
                                         hub->name(),
-                                        UiUtils::tintIcon(":/icons/device_hub_black.svg"),
+                                        UiUtils::tintIcon(toQString(component->icon())),
                                         parentItem);
     parentItem->insertChild(item, n);
 

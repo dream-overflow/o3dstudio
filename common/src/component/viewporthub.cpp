@@ -23,6 +23,9 @@ ViewPortComponent::ViewPortComponent()
 {
     m_name = "o3s::common::component::viewporthub";
     m_targetName = "o3s::common::hub::viewport";
+
+    m_label = "Screen ViewPort Hub";
+    m_icon = ":/icons/desktop_windows_black.svg";
 }
 
 ViewPortComponent::~ViewPortComponent()
@@ -46,18 +49,7 @@ Hub *ViewPortComponent::buildHub(const String &name, Project *project, Entity *p
     }
 
     ViewPortHub *viewportHub = new ViewPortHub(name, parent);
-    viewportHub->setProject(project);
     viewportHub->setTypeRef(m_targetTypeRef);
-
-    if (parent->ref().light().baseTypeOf(TypeRef::project())) {
-        project->addHub(viewportHub);
-    } else if (parent->ref().light().baseTypeOf(TypeRef::hub())) {
-        Hub *parentHub = static_cast<Hub*>(parent);
-        parentHub->addHub(viewportHub);
-    } else {
-        delete viewportHub;
-        return nullptr;
-    }
 
     return viewportHub;
 }

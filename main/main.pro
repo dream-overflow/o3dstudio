@@ -43,7 +43,8 @@ SOURCES += \
     src/property/workspacesection.cpp \
     src/property/projectsection.cpp \
     src/dock/propertydock.cpp \
-    src/messenger.cpp
+    src/messenger.cpp \
+    src/toolbar/hubcomponenttoolbar.cpp
 
 
 HEADERS += \
@@ -62,7 +63,8 @@ HEADERS += \
     src/dock/workspacedock.h \
     src/property/workspacesection.h \
     src/property/projectsection.h \
-    src/dock/propertydock.h
+    src/dock/propertydock.h \
+    src/toolbar/hubcomponenttoolbar.h
 
 
 RESOURCES += \

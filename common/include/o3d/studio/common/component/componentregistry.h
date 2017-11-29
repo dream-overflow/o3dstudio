@@ -57,6 +57,8 @@ public:
     Component* componentByTarget(const String &name);
     const Component* componentByTarget(const String &name) const;
 
+    std::list<const Component*> componentList() const;
+
 public /*signals*/:
 
     Signal<String> onComponentRegistered{this};

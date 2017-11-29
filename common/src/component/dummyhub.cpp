@@ -17,6 +17,9 @@ DummyHubComponent::DummyHubComponent() :
 {
     m_name = "o3s::common::component::dummyhub";
     m_targetName = "o3s::common::hub::dummy";
+
+    m_label = "Dummy Hub";
+    m_icon = ":/icons/call_split_black.svg";
 }
 
 DummyHubComponent::~DummyHubComponent()

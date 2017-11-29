@@ -17,23 +17,26 @@
 using namespace o3d::studio::common;
 
 
-CameraComponent::CameraComponent()
+CameraHubComponent::CameraHubComponent()
 {
     m_name = "o3s::common::component::camerahub";
     m_targetName = "o3s::common::hub::camera";
+
+    m_label = "Camera Hub";
+    m_icon = ":/icons/videocam_black.svg";
 }
 
-CameraComponent::~CameraComponent()
+CameraHubComponent::~CameraHubComponent()
 {
 
 }
 
-void CameraComponent::setup()
+void CameraHubComponent::setup()
 {
 
 }
 
-Hub *CameraComponent::buildHub(const String &name, Project *project, Entity *parent)
+Hub *CameraHubComponent::buildHub(const String &name, Project *project, Entity *parent)
 {
     if (!project) {
         return nullptr;
@@ -44,18 +47,7 @@ Hub *CameraComponent::buildHub(const String &name, Project *project, Entity *par
     }
 
     CameraHub *cameraHub = new CameraHub(name, parent);
-    cameraHub->setProject(project);
     cameraHub->setTypeRef(m_targetTypeRef);
-
-    if (parent->ref().light().baseTypeOf(TypeRef::project())) {
-        project->addHub(cameraHub);
-    } else if (parent->ref().light().baseTypeOf(TypeRef::hub())) {
-        Hub *parentHub = static_cast<Hub*>(parent);
-        parentHub->addHub(cameraHub);
-    } else {
-        delete cameraHub;
-        return nullptr;
-    }
 
     return cameraHub;
 }

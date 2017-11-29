@@ -19,8 +19,6 @@ namespace o3d {
 namespace studio {
 namespace main {
 
-using o3d::studio::common::LightRef;
-
 class MainToolBar : public BaseObject, public common::ToolBar
 {
 public:
@@ -36,15 +34,12 @@ private /*slots*/:
 
     void onChangeCurrentWorkspace(const String &name);
 
-    void onProjectActivated(LightRef ref);
-    void onProjectRemoved(LightRef ref);
+    void onProjectActivated(common::LightRef ref);
+    void onProjectRemoved(common::LightRef ref);
 
 private:
 
     class QtMainToolBar *m_qtMainToolBar;
-
-    void setupButtons();
-    QIcon tintIcon(const QString &filename);
 
     void setupUi();
 };
@@ -67,7 +62,6 @@ private slots:
 private:
 
     void setupButtons();
-    QIcon tintIcon(const QString &filename);
 };
 
 } // namespace main
