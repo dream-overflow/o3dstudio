@@ -85,7 +85,9 @@ SOURCES += \
     src/workspace/scenecommand.cpp \
     src/command/renameentitycommand.cpp \
     src/command/asset/addassetcommand.cpp \
-    src/command/asset/removeassetcommand.cpp
+    src/command/asset/removeassetcommand.cpp \
+    src/ui/scene/grid.cpp \
+    src/ui/scene/sceneuielement.cpp
 
 
 HEADERS += \ 
@@ -162,7 +164,9 @@ HEADERS += \
     include/o3d/studio/common/ui/wheelevent.h \
     include/o3d/studio/common/command/renameentitycommand.h \
     include/o3d/studio/common/command/asset/addassetcommand.h \
-    include/o3d/studio/common/command/asset/removeassetcommand.h
+    include/o3d/studio/common/command/asset/removeassetcommand.h \
+    include/o3d/studio/common/ui/scene/grid.h \
+    include/o3d/studio/common/ui/scene/sceneuielement.h
 
 LIBS += -lobjective3d-dbg
 

@@ -30,6 +30,7 @@ namespace common {
 class O3DCanvasContent;
 class QtRenderer;
 class SceneCommand;
+class SceneUIElement;
 
 class Event;
 class KeyEvent;
@@ -65,6 +66,13 @@ public:
     //
 
     void addCommand(SceneCommand *command);
+
+    //
+    // scene UI elements
+    //
+
+    void addSceneUIElement(SceneUIElement *elt);
+    void removeSceneUIElement(SceneUIElement *elt);
 
     //
     // drawer
@@ -115,6 +123,9 @@ private:
     //! Ordered list of command to process during the moment where the context is set to current.
     //! In others words it is the pass of synchronization that will be executed here.
     std::list<SceneCommand*> m_commands;
+
+    //! Attached scene UI elements
+    std::list<SceneUIElement*> m_sceneUIElements;
 
     void processCommands();
 };

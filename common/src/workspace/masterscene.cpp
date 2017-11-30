@@ -29,6 +29,7 @@
 #define __glext_h_
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
+#include "o3d/studio/common/ui/scene/grid.h"
 
 #include "o3d/studio/common/ui/keyevent.h"
 //#include "o3d/studio/common/ui/mouseevent.h"
@@ -137,6 +138,24 @@ void MasterScene::addCommand(SceneCommand *command)
     }
 }
 
+void MasterScene::addSceneUIElement(SceneUIElement *elt)
+{
+    auto it = std::find(m_sceneUIElements.begin(), m_sceneUIElements.end(), elt);
+    if (it != m_sceneUIElements.end()) {
+        O3D_ERROR(E_ValueRedefinition("Redefinition of a SceneUIElement"));
+    }
+
+    m_sceneUIElements.push_back(elt);
+}
+
+void MasterScene::removeSceneUIElement(SceneUIElement *elt)
+{
+    auto it = std::find(m_sceneUIElements.begin(), m_sceneUIElements.end(), elt);
+    if (it != m_sceneUIElements.end()) {
+        m_sceneUIElements.erase(it);
+    }
+}
+
 void MasterScene::initialize(Bool debug)
 {
     if (m_content || m_scene || m_renderer) {
@@ -181,16 +200,44 @@ void MasterScene::resizeDrawer(int w, int h)
 
 void MasterScene::terminateDrawer()
 {
+    // make current context
     if (m_content) {
         m_content->makeCurrent();
 
         // process remaining commands
         processCommands();
+
+        // remove any scene ui elements from the scene
+        for (SceneUIElement *elt : m_sceneUIElements) {
+            if (!elt->isDirectDraw()) {
+                elt->removeFromScene(this);
+            }
+        }
     }
 
+    // delete remaining commands (should be normally deleted just above)
+    // but if the context is missing we have to do that
+    if (!m_commands.empty()) {
+        for (SceneCommand *cmd : m_commands) {
+            delete cmd;
+        }
+
+        m_commands.clear();
+    }
+
+    // remove the scene ui elements
+    if (!m_sceneUIElements.empty()) {
+        for (SceneUIElement *elt : m_sceneUIElements) {
+            delete elt;
+        }
+
+        m_sceneUIElements.clear();
+    }
+
+    // clear the scene
     if (m_scene) {
-//        m_scene->getHierarchyTree()->getRootNode()->removeSon(*m_camera);
-//        deletePtr(m_camera->getNode());
+        // m_scene->getHierarchyTree()->getRootNode()->removeSon(*m_camera);
+        // deletePtr(m_camera->getNode());
 
         m_camera = nullptr;
         m_viewport = nullptr;
@@ -200,6 +247,7 @@ void MasterScene::terminateDrawer()
         m_scene = nullptr;
     }
 
+    // done with context
     if (m_content) {
         m_content->doneCurrent();
     }
@@ -390,5 +438,11 @@ void MasterScene::initializeDrawer()
 
         // default all symbolics objects are drawn
         m_scene->drawAllSymbolicObject();
+
+        // add an helper grid
+        Int32 gridStep = (Int32)(50.f / m_camera.get()->getZfar());
+        Int32 gridHW = (Int32)((m_camera.get()->getZfar() - m_camera.get()->getZnear()) * 0.8f);
+
+        addSceneUIElement(new Grid(Point3f(), Point2i(gridHW, gridHW), Point2i(gridStep, gridStep)));
     }
 }

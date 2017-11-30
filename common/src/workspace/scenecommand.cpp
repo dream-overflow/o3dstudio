@@ -51,12 +51,17 @@ void SceneHubCommand::process(MasterScene *masterScene)
         }
 
         if (m_cmdType == CREATE) {
+            if (!project->lookup(m_ref)) {
+                // normaly added into project before this command
+                return;
+            }
+
            m_hub->createToScene(masterScene);
         } else if (m_cmdType == DELETE) {
            m_hub->removeFromScene(masterScene);
         } else if (m_cmdType == SYNC) {
             if (!project->lookup(m_ref)) {
-                // invalid or deleted hub
+                // normaly deleted from the project brefore this command
                 return;
             }
 
