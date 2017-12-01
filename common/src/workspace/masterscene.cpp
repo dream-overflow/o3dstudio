@@ -180,6 +180,12 @@ void MasterScene::paintDrawer()
     if (m_scene) {
         // CPU and GPU, need GL context
         m_scene->display();
+
+        for (SceneUIElement *elt: m_sceneUIElements) {
+            if (elt->isDirectDraw()) {
+                elt->directRendering(this);
+            }
+        }
     }
 }
 
@@ -440,8 +446,8 @@ void MasterScene::initializeDrawer()
         m_scene->drawAllSymbolicObject();
 
         // add an helper grid
-        Int32 gridStep = (Int32)(50.f / m_camera.get()->getZfar());
-        Int32 gridHW = (Int32)((m_camera.get()->getZfar() - m_camera.get()->getZnear()) * 0.8f);
+        Int32 gridStep = (Int32)(50.f / m_camera.get()->getZnear());
+        Int32 gridHW = (Int32)((m_camera.get()->getZfar() - m_camera.get()->getZnear()) * 0.8f) + 1;
 
         addSceneUIElement(new Grid(Point3f(), Point2i(gridHW, gridHW), Point2i(gridStep, gridStep)));
     }

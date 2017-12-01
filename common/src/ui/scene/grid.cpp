@@ -57,37 +57,85 @@ void Grid::directRendering(MasterScene *masterScene)
     // setup modelview
     primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix());
 
+    primitive->modelView().push();
+    primitive->modelView().translate(m_pos);
+    primitive->setModelviewProjection();
+
+    // line half width
+    const Float hw = 0.5f * scene->getActiveCamera()->getZnear();
+
+    // scene->getContext()->setAntiAliasing(Context::AA_HINT_NICEST);
     scene->getContext()->setLineSize(2.0f);
+    primitive->setColor(1.f, 1.f, 1.f);
 
+    primitive->beginDraw(P_TRIANGLE_STRIP); // @todo with triangle strip for width of 2
+    // primitive->beginDraw(P_LINES);
+
+    Color light(0.8f, 0.8f, 0.8f);
+    Color dark(0.6f, 0.6f, 0.6f);
+/*
     // on Y axis
-    primitive->setColor(0.8f, 0.8f, 0.8f);
-    for (UInt32 y = -m_halfSize.y() ; y < 0 ; y += m_step.y()) {
+    for (Int32 y = -m_halfSize.y() ; y < 0 ; y += m_step.y()) {
+        //primitive->addVertex(Vector3(-m_halfSize.x(), 0, y), light);
+        //primitive->addVertex(Vector3(m_halfSize.x(), 0, y), light);
 
+        primitive->addVertex(Vector3(-m_halfSize.x(), 0, y-hw), light);
+        primitive->addVertex(Vector3(m_halfSize.x(), 0, y-hw), light);
+        primitive->addVertex(Vector3(-m_halfSize.x(), 0, y+hw), light);
+        primitive->addVertex(Vector3(m_halfSize.x(), 0, y+hw), light);
     }
-
+*/
     // origin line
-    primitive->setColor(0.4f, 0.4f, 0.4f);
-    // @todo
+//    primitive->addVertex(Vector3(-m_halfSize.x(), 0, 0), dark);
+//    primitive->addVertex(Vector3(m_halfSize.x(), 0, 0), dark);
 
-    primitive->setColor(0.8f, 0.8f, 0.8f);
-    for (UInt32 y = m_step.y() ; y < m_halfSize.y(); y += m_step.y()) {
+    primitive->addVertex(Vector3(-m_halfSize.x(), 0, -hw), dark);
+    primitive->addVertex(Vector3(-m_halfSize.x(), 0, hw), dark);
+    primitive->addVertex(Vector3(m_halfSize.x(), 0, -hw), dark);
+    primitive->addVertex(Vector3(m_halfSize.x(), 0, hw), dark);
 
+  /*  for (Int32 y = m_step.y() ; y <= m_halfSize.y(); y += m_step.y()) {
+//        primitive->addVertex(Vector3(-m_halfSize.x(), 0, y), light);
+//        primitive->addVertex(Vector3(m_halfSize.x(), 0, y), light);
+
+        primitive->addVertex(Vector3(-m_halfSize.x(), 0, y-hw), light);
+        primitive->addVertex(Vector3(m_halfSize.x(), 0, y-hw), light);
+        primitive->addVertex(Vector3(-m_halfSize.x(), 0, y+hw), light);
+        primitive->addVertex(Vector3(m_halfSize.x(), 0, y+hw), light);
     }
 
     // on X axis
-    primitive->setColor(0.8f, 0.8f, 0.8f);
-    for (UInt32 y = -m_halfSize.y() ; y < 0 ; y += m_step.y()) {
+    for (Int32 x = -m_halfSize.x() ; x < 0 ; x += m_step.x()) {
+//        primitive->addVertex(Vector3(x, 0, -m_halfSize.y()), light);
+//        primitive->addVertex(Vector3(x, 0, m_halfSize.y()), light);
 
+        primitive->addVertex(Vector3(x-hw, 0, -m_halfSize.y()), light);
+        primitive->addVertex(Vector3(x-hw, 0, m_halfSize.y()), light);
+        primitive->addVertex(Vector3(x+hw, 0, -m_halfSize.y()), light);
+        primitive->addVertex(Vector3(x+hw, 0, m_halfSize.y()), light);
     }
-
+*/
     // origin line
-    primitive->setColor(0.4f, 0.4f, 0.4f);
-    // @todo
+//    primitive->addVertex(Vector3(0, 0, -m_halfSize.y()), dark);
+//    primitive->addVertex(Vector3(0, 0, m_halfSize.y()), dark);
 
-    primitive->setColor(0.8f, 0.8f, 0.8f);
-    for (UInt32 y = m_step.y() ; y < m_halfSize.y(); y += m_step.y()) {
+    primitive->addVertex(Vector3(-hw, 0, -m_halfSize.y()), dark);
+    primitive->addVertex(Vector3(-hw, 0, m_halfSize.y()), dark);
+    primitive->addVertex(Vector3(hw, 0, -m_halfSize.y()), dark);
+    primitive->addVertex(Vector3(hw, 0, m_halfSize.y()), dark);
+/*
+    for (Int32 x = m_step.x() ; x <= m_halfSize.x(); x += m_step.x()) {
+//        primitive->addVertex(Vector3(x, 0, -m_halfSize.y()), light);
+//        primitive->addVertex(Vector3(x, 0, m_halfSize.y()), light);
 
+        primitive->addVertex(Vector3(x-hw, 0, -m_halfSize.y()), light);
+        primitive->addVertex(Vector3(x-hw, 0, m_halfSize.y()), light);
+        primitive->addVertex(Vector3(x+hw, 0, -m_halfSize.y()), light);
+        primitive->addVertex(Vector3(x+hw, 0, m_halfSize.y()), light);
     }
+*/
+    primitive->endDraw();
+    primitive->modelView().pop();
 
     scene->getContext()->setDefaultLineSize();
 }

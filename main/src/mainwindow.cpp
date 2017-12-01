@@ -186,7 +186,7 @@ const o3d::String& QtMainWindow::theme() const
     {
         lpInterface = qobject_cast<o3scommon::GuiPluginInterface *>(lpPlugin);
 
-        if (lpInterface != NULL)
+        if (lpInterface != nullptr)
             m_modules.push_back(lpInterface);
     }
 
@@ -203,7 +203,7 @@ const o3d::String& QtMainWindow::theme() const
 
             lpInterface = qobject_cast<o3scommon::GuiPluginInterface *>(lLoader.instance());
 
-            if (lpInterface != NULL)
+            if (lpInterface != nullptr)
                 m_modules.push_back(lpInterface);
         }
     }
@@ -213,7 +213,7 @@ const o3d::String& QtMainWindow::theme() const
 
     foreach(o3scommon::GuiPluginInterface * lpInterface, m_modules)
     {
-        if (lpInterface != NULL)
+        if (lpInterface != nullptr)
         {
             if (!lpInterface->GetMenuItemName().isEmpty())
             {
