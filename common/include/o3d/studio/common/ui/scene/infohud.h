@@ -32,7 +32,13 @@ class O3S_API InfoHUD : public SceneUIElement
 {
 public:
 
-    InfoHUD(BaseObject *parent, const Point2i &pos, Text2D *font);
+    /**
+     * @brief InfoHUD
+     * @param parent Parent object
+     * @param pos Position in percent of the display
+     * @param font Text font used for display
+     */
+    InfoHUD(BaseObject *parent, const Point2f &pos, Text2D *font);
     virtual ~InfoHUD();
 
     virtual void createToScene(MasterScene *masterScene);
@@ -42,7 +48,7 @@ public:
 
 protected:
 
-    Point2i m_pos;
+    Point2f m_pos;
 
     SmartObject<Text2D> m_font;
 

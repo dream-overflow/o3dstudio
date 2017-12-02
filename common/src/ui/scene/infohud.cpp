@@ -21,7 +21,7 @@
 using namespace o3d::studio::common;
 
 
-InfoHUD::InfoHUD(BaseObject *parent, const Point2i &pos, Text2D *font) :
+InfoHUD::InfoHUD(BaseObject *parent, const Point2f &pos, Text2D *font) :
     SceneUIElement(parent, SCENE_UI_2D, POST_DRAW, True),
     m_pos(pos),
     m_font(this, font),
@@ -58,6 +58,8 @@ void InfoHUD::directRendering(Scene *scene)
 
     // setup modelview
     primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix());
+
+
 
     // @todo one line per property
 }

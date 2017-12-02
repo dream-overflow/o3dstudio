@@ -26,11 +26,18 @@
 #include <o3d/engine/object/ftransform.h>
 #include <o3d/engine/context.h>
 
+#include <o3d/gui/gui.h>
+#include <o3d/gui/fontmanager.h>
+#include <o3d/gui/truetypefont.h>
+
 #define __gl_h_
 #define __glext_h_
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
+
 #include "o3d/studio/common/ui/scene/grid.h"
+#include "o3d/studio/common/ui/scene/infohud.h"
+#include "o3d/studio/common/ui/scene/cameramanipulator.h"
 
 #include "o3d/studio/common/ui/keyevent.h"
 //#include "o3d/studio/common/ui/mouseevent.h"
@@ -40,7 +47,7 @@ using namespace o3d::studio::common;
 
 
 MasterScene::MasterScene(Entity *parent) :
-    BaseObject(nullptr),  // @todo may entity be baseobject ?
+    BaseObject(nullptr),
     m_parent(parent),
     m_content(nullptr),
     m_renderer(nullptr),
@@ -141,18 +148,30 @@ void MasterScene::addCommand(SceneCommand *command)
 
 void MasterScene::addSceneUIElement(SceneUIElement *elt)
 {
+    if (!m_sceneDrawer.isValid()) {
+        O3D_ERROR(E_InvalidPrecondition("The master scene must be initialized before adding scene UI elements"));
+    }
+
     auto it = std::find(m_sceneUIElements.begin(), m_sceneUIElements.end(), elt);
     if (it != m_sceneUIElements.end()) {
         O3D_ERROR(E_ValueRedefinition("Redefinition of a SceneUIElement"));
     }
 
     m_sceneUIElements.push_back(elt);
+
+    // add to the scene drawer to be displayed
+    m_sceneDrawer.get()->addSceneUIElement(elt);
 }
 
 void MasterScene::removeSceneUIElement(SceneUIElement *elt)
 {
     auto it = std::find(m_sceneUIElements.begin(), m_sceneUIElements.end(), elt);
     if (it != m_sceneUIElements.end()) {
+        // remove from the scene drawer if initialized
+        if (m_sceneDrawer.isValid()) {
+            m_sceneDrawer.get()->removeSceneUIElement(*it);
+        }
+
         m_sceneUIElements.erase(it);
     }
 }
@@ -451,6 +470,16 @@ void MasterScene::initializeDrawer()
         Grid *grid = new Grid(this, Point3f(), Point2i(gridHW, gridHW), Point2i(gridStep, gridStep));
         addSceneUIElement(grid);
 
-        m_sceneDrawer.get()->addSceneUIElement(grid);
+        // add a HUD for common info about current scene
+        TrueTypeFont::initializeFreeType();  // @todo later done by using O3D GUI
+
+        TrueTypeFont *font2d = new TrueTypeFont(m_scene);
+        font2d->load("rc/fonts/arial.ttf", TrueTypeFont::CHARSET_LATIN1);
+        InfoHUD *infoHUD = new InfoHUD(this, Point2f(0.02f, 0.02f), font2d);
+        addSceneUIElement(infoHUD);
+
+        // and a camera helper
+        CameraManipulator *cameraManipulator = new CameraManipulator(this, Point2f(0.9f, 0.1f), 1.f);
+        addSceneUIElement(cameraManipulator);
     }
 }

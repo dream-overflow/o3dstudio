@@ -89,7 +89,8 @@ SOURCES += \
     src/ui/scene/grid.cpp \
     src/ui/scene/sceneuielement.cpp \
     src/ui/scene/infohud.cpp \
-    src/workspace/masterscenedrawer.cpp
+    src/workspace/masterscenedrawer.cpp \
+    src/ui/scene/cameramanipulator.cpp
 
 
 HEADERS += \ 
@@ -171,13 +172,19 @@ HEADERS += \
     include/o3d/studio/common/ui/scene/sceneuielement.h \
     include/o3d/studio/common/ui/scene/infohud.h \
     include/o3d/studio/common/workspace/masterscenedrawer.h \
-    include/o3d/studio/common/commontype.h
+    include/o3d/studio/common/commontype.h \
+    include/o3d/studio/common/ui/scene/cameramanipulator.h
 
 LIBS += -lobjective3d-dbg
 
 # INCLUDEPATH += $$(PREFIX)/lib/objective3d-dbg/
 
+RC_FILES += \
+    $$TARGETPATH/rc/fonts
+
+
 copyToDestdir($$TRANSLATIONS_FILES, languages)
+copyToDestdir($$RC_FILES, rc)
 
 RESOURCES += \
     rc/common.qrc
@@ -196,4 +203,5 @@ INSTALLS += ts_target  # share_target
 
 DISTFILES += \
     languages/o3scommon_en.ts \
-    languages/o3scommon_fr.ts
+    languages/o3scommon_fr.ts \
+    rc/fonts/arial.ttf
