@@ -1,5 +1,5 @@
 /**
- * @brief Common UI scene grid controller
+ * @brief Common UI scene grid view
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-11-30
@@ -32,13 +32,13 @@ public:
      * @param halfSize Half size on X and Y (must be a multiple of step)
      * @param step Increment of the grid lines
      */
-    Grid(const Point3f &pos, const Point2i &halfSize, const Point2i &step);
+    Grid(BaseObject *parent, const Point3f &pos, const Point2i &halfSize, const Point2i &step);
     virtual ~Grid();
 
     virtual void createToScene(MasterScene *masterScene);
     virtual void removeFromScene(MasterScene *masterScene);
     virtual void syncWithScene(MasterScene *masterScene);
-    virtual void directRendering(MasterScene *MasterScene);
+    virtual void directRendering(Scene *scene);
 
 protected:
 

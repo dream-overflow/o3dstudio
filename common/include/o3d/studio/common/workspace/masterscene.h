@@ -36,6 +36,7 @@ class Event;
 class KeyEvent;
 class MouseEvent;
 class FocusEvent;
+class MasterSceneDrawer;
 
 class O3S_API MasterScene : public BaseObject, public O3DDrawer
 {
@@ -118,7 +119,7 @@ private:
     o3d::SmartObject<o3d::ViewPort> m_viewport;
 
     //! Main working drawer, cannot be deleted
-    o3d::SmartObject<o3d::SceneDrawer> m_sceneDrawer;
+    o3d::SmartObject<MasterSceneDrawer> m_sceneDrawer;
 
     //! Ordered list of command to process during the moment where the context is set to current.
     //! In others words it is the pass of synchronization that will be executed here.

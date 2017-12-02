@@ -14,6 +14,7 @@
 #include "o3d/studio/common/ui/qtrenderer.h"
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
+#include "o3d/studio/common/workspace/masterscenedrawer.h"
 
 #include <o3d/engine/scene/scene.h>
 #include <o3d/engine/object/camera.h>
@@ -180,12 +181,6 @@ void MasterScene::paintDrawer()
     if (m_scene) {
         // CPU and GPU, need GL context
         m_scene->display();
-
-        for (SceneUIElement *elt: m_sceneUIElements) {
-            if (elt->isDirectDraw()) {
-                elt->directRendering(this);
-            }
-        }
     }
 }
 
@@ -234,9 +229,13 @@ void MasterScene::terminateDrawer()
     // remove the scene ui elements
     if (!m_sceneUIElements.empty()) {
         for (SceneUIElement *elt : m_sceneUIElements) {
+            // remove it from the scene drawer
+            m_sceneDrawer.get()->removeSceneUIElement(elt);
+
             delete elt;
         }
 
+        // and from the master scene
         m_sceneUIElements.clear();
     }
 
@@ -439,7 +438,7 @@ void MasterScene::initializeDrawer()
         Node *cameraNode = m_scene->getHierarchyTree()->addNode(m_camera.get());
         cameraNode->addTransform(new FTransform());
 
-        m_sceneDrawer = new o3d::ShadowVolumeForward(m_scene);
+        m_sceneDrawer = new MasterSceneDrawer(m_scene);
         m_viewport = m_scene->getViewPortManager()->addScreenViewPort(m_camera.get(), m_sceneDrawer.get(), 0);
 
         // default all symbolics objects are drawn
@@ -449,6 +448,9 @@ void MasterScene::initializeDrawer()
         Int32 gridStep = (Int32)(50.f / m_camera.get()->getZnear());
         Int32 gridHW = (Int32)((m_camera.get()->getZfar() - m_camera.get()->getZnear()) * 0.8f) + 1;
 
-        addSceneUIElement(new Grid(Point3f(), Point2i(gridHW, gridHW), Point2i(gridStep, gridStep)));
+        Grid *grid = new Grid(this, Point3f(), Point2i(gridHW, gridHW), Point2i(gridStep, gridStep));
+        addSceneUIElement(grid);
+
+        m_sceneDrawer.get()->addSceneUIElement(grid);
     }
 }
