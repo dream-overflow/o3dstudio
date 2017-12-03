@@ -27,7 +27,6 @@ namespace common {
 
 class Workspace;
 class MasterScene;
-class O3DCanvasContent;
 class ProjectFile;
 class ProjectInfo;
 class Hub;

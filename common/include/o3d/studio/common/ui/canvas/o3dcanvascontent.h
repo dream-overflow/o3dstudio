@@ -10,13 +10,15 @@
 #define _O3DS_COMMON_O3DCANVASCONTENT_H
 
 #include "glcanvascontent.h"
-#include "../qtrenderer.h"
 #include "o3ddrawer.h"
 #include "../../objectref.h"
 
 #include <o3d/core/baseobject.h>
 
 namespace o3d {
+
+class Renderer;
+
 namespace studio {
 namespace common {
 
@@ -60,10 +62,10 @@ public:
 
     virtual String elementName() const override;
 
-    void setRenderer(QtRenderer *renderer);
+    void setRenderer(Renderer *renderer);
 
-    const QtRenderer *renderer() const;
-    QtRenderer *renderer();
+    const Renderer *renderer() const;
+    Renderer *renderer();
 
     /**
      * @brief setBehavior
@@ -105,7 +107,7 @@ protected:
 private:
 
     Bool m_debug;                       //!< Renderer in debug mode
-    QtRenderer *m_renderer;             //!< Attached renderer
+    Renderer *m_renderer;               //!< Attached renderer
 
     O3DDrawer *m_drawer;                //!< Attached drawer
     QTimer *m_timer;                    //!< Refresh timer

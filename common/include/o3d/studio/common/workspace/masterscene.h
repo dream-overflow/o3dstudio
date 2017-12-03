@@ -23,12 +23,12 @@ class Scene;
 class Camera;
 class ViewPort;
 class SceneDrawer;
+class Renderer;
 
 namespace studio {
 namespace common {
 
 class O3DCanvasContent;
-class QtRenderer;
 class SceneCommand;
 class SceneUIElement;
 
@@ -53,7 +53,7 @@ public:
     const Project* project() const;
     Project* project();
 
-    QtRenderer* renderer();
+    Renderer* renderer();
     O3DCanvasContent* widget();
 
     o3d::Scene* scene();
@@ -105,7 +105,7 @@ private:
     Entity *m_parent;             //!< Parent entity (project, fragment)
 
     O3DCanvasContent *m_content;  //!< Attached widget
-    QtRenderer *m_renderer;       //!< Attached renderer
+    o3d::Renderer *m_renderer;    //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
 
     Point2i m_lockedPos;

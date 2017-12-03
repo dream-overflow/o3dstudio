@@ -40,8 +40,8 @@ GLCanvasContent::GLCanvasContent(const LightRef &ref, QWidget *parent) :
     format.setAlphaBufferSize(8);
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
-    format.setSamples(4);  // @todo why stay to 0 ?
-    format.setVersion(4, 5);
+    // format.setSamples(4);  // @todo why stay to 0 ?
+    // format.setVersion(4, 5);
     format.setRenderableType(QSurfaceFormat::OpenGL);
     format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
     format.setProfile(QSurfaceFormat::CoreProfile);

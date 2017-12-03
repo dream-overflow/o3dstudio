@@ -1242,7 +1242,7 @@ o3d::Bool MainWindow::setCurrentContentWidget(const String &name)
         return True;
     }
 
-    return false;
+    return False;
 }
 
 o3d::studio::common::Content *MainWindow::contentWidget(const String &name)

@@ -7,16 +7,14 @@
  * @details
  */
 
-#include "o3d/studio/common/ui/qtrenderer.h"
-
-#include <o3d/engine/context.h>
-#include <o3d/engine/glextensionmanager.h>
-
-#define __gl_h_
-#define __glext_h_
-
 #include <QtWidgets/QOpenGLWidget>
 #include <QtGui/QOpenGLContext>
+
+#include "o3d/studio/common/ui/qtrenderer.h"
+
+#include <o3d/engine/glextdefines.h>
+#include <o3d/engine/glextensionmanager.h>
+#include <o3d/engine/context.h>
 
 using namespace o3d::studio::common;
 
@@ -45,6 +43,8 @@ void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug)
         return;
     }
 
+    o3d::GLExtensionManager::init();
+
     m_state.enable(STATE_DEFINED);
 
     m_version = o3d::Renderer::Version(
@@ -61,8 +61,6 @@ void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug)
     m_depth = m_glWidget->context()->format().depthBufferSize();
     m_stencil = m_glWidget->context()->format().stencilBufferSize();
     m_samples = m_glWidget->context()->format().samples();
-
-    o3d::GLExtensionManager::initialize();
 
     m_glContext = new o3d::Context(this);
 
@@ -138,7 +136,7 @@ o3d::Bool QtRenderer::isVerticalRefresh() const
         return m_glWidget->format().swapInterval() > 0;
     }
 
-    return false;
+    return False;
 }
 
 QOpenGLWidget *QtRenderer::ui()

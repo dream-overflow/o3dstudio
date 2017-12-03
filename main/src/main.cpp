@@ -122,10 +122,6 @@ int main(int argc, char *argv[])
 
     atexit(onExit);
 
-    qInstallMessageHandler(o3sMessageHandler);
-
-    QApplication lApp(argc, argv);
-
     // o3d initialization
     o3d::AppSettings settings;
 
@@ -150,6 +146,10 @@ int main(int argc, char *argv[])
     }
 
     int lExitcode = 0;
+
+    qInstallMessageHandler(o3sMessageHandler);
+
+    QApplication lApp(argc, argv);
 
     QCoreApplication::setOrganizationName("Dream Overflow");
     QCoreApplication::setApplicationName("Objective-3D Studio");

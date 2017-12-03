@@ -15,7 +15,7 @@
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/project.h"
 
-#include <o3d/engine/context.h>
+#include <o3d/engine/renderer.h>
 
 using namespace o3d::studio::common;
 
@@ -62,17 +62,17 @@ o3d::String O3DCanvasContent::elementName() const
     return String("o3s::main::o3dcanvascontent::") + m_ref.longId();
 }
 
-void O3DCanvasContent::setRenderer(QtRenderer *renderer)
+void O3DCanvasContent::setRenderer(Renderer *renderer)
 {
     m_renderer = renderer;
 }
 
-const QtRenderer *O3DCanvasContent::renderer() const
+const o3d::Renderer *O3DCanvasContent::renderer() const
 {
     return m_renderer;
 }
 
-QtRenderer* O3DCanvasContent::renderer()
+o3d::Renderer *O3DCanvasContent::renderer()
 {
     return m_renderer;
 }

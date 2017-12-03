@@ -9,8 +9,7 @@
 #ifndef _O3DS_COMMON_GLCANVASCONTENT_H
 #define _O3DS_COMMON_GLCANVASCONTENT_H
 
-#include <QtWidgets/QWidget>
-#include <QtOpenGL>
+#include <QtOpenGL/QtOpenGL>
 
 #include "../content.h"
 #include "../../objectref.h"

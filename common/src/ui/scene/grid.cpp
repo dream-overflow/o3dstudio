@@ -14,6 +14,7 @@
 #include <o3d/engine/context.h>
 #include <o3d/engine/object/primitivemanager.h>
 #include <o3d/engine/object/camera.h>
+#include <o3d/engine/scene/scene.h>
 
 #include "o3d/studio/common/workspace/masterscene.h"
 

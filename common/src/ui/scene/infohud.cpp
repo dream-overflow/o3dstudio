@@ -15,6 +15,7 @@
 #include <o3d/engine/object/primitivemanager.h>
 #include <o3d/engine/object/camera.h>
 #include <o3d/engine/text2d.h>
+#include <o3d/engine/scene/scene.h>
 
 #include "o3d/studio/common/workspace/masterscene.h"
 
@@ -54,10 +55,10 @@ void InfoHUD::syncWithScene(MasterScene *)
 
 void InfoHUD::directRendering(Scene *scene)
 {
-    PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
+    //PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
 
     // setup modelview
-    primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix());
+    //primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix());
 
 
 

@@ -23,6 +23,7 @@
 
 #include <o3d/core/application.h>
 #include <o3d/core/filemanager.h>
+#include <o3d/core/gl.h>
 
 using namespace o3d::studio::common;
 
@@ -31,7 +32,7 @@ Application* Application::m_instance = nullptr;
 Application::Application() :
     m_started(False)
 {
-    qRegisterMetaType<LightRef>("LightRef");
+    // qRegisterMetaType<LightRef>("LightRef");
 
     // avoid recursive call when ctor call himself
     m_instance = (Application*)this;

@@ -14,6 +14,7 @@
 #include <o3d/engine/context.h>
 #include <o3d/engine/object/primitivemanager.h>
 #include <o3d/engine/object/camera.h>
+#include <o3d/engine/scene/scene.h>
 
 #include "o3d/studio/common/workspace/masterscene.h"
 
@@ -50,7 +51,7 @@ void CameraManipulator::syncWithScene(MasterScene *)
 
 void CameraManipulator::directRendering(Scene *scene)
 {
-    PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
+    /*PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
 
     // setup modelview
     primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix());
@@ -66,5 +67,5 @@ void CameraManipulator::directRendering(Scene *scene)
     primitive->modelView().pop();
 
     // restore
-    scene->getContext()->setAntiAliasing(aa);
+    scene->getContext()->setAntiAliasing(aa);*/
 }

@@ -12,10 +12,11 @@
 #include "../../global.h"
 
 #include <o3d/core/smartobject.h>
-#include <o3d/engine/scene/sceneobject.h>
-#include <o3d/engine/shader/shadable.h>
 
 namespace o3d {
+
+class Scene;
+
 namespace studio {
 namespace common {
 

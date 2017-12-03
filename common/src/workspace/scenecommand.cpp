@@ -24,8 +24,8 @@ SceneCommand::~SceneCommand()
 
 
 SceneHubCommand::SceneHubCommand(Hub *hub, SceneHubCommand::CommandType cmdType) :
-    m_hub(hub),
-    m_cmdType(cmdType)
+    m_cmdType(cmdType),
+    m_hub(hub)
 {
     O3D_ASSERT(hub != nullptr);
 

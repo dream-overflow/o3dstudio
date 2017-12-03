@@ -6,8 +6,6 @@
  * @details
  */
 
-#include <o3d/engine/glextensionmanager.h>
-
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/workspace/masterscene.h"
 #include "o3d/studio/common/workspace/project.h"
@@ -15,6 +13,9 @@
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
 #include "o3d/studio/common/workspace/masterscenedrawer.h"
+
+#include <o3d/engine/glextdefines.h>
+#include <o3d/engine/glextensionmanager.h>
 
 #include <o3d/engine/scene/scene.h>
 #include <o3d/engine/object/camera.h>
@@ -30,9 +31,6 @@
 #include <o3d/gui/fontmanager.h>
 #include <o3d/gui/truetypefont.h>
 
-#define __gl_h_
-#define __glext_h_
-
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
 #include "o3d/studio/common/ui/scene/grid.h"
@@ -42,6 +40,9 @@
 #include "o3d/studio/common/ui/keyevent.h"
 //#include "o3d/studio/common/ui/mouseevent.h"
 //#include "o3d/studio/common/ui/focusevent.h"
+
+#include <QtWidgets/QOpenGLWidget>
+#include <QtGui/QOpenGLContext>
 
 using namespace o3d::studio::common;
 
@@ -104,7 +105,7 @@ Project *MasterScene::project()
     return m_parent->project();
 }
 
-QtRenderer *MasterScene::renderer()
+o3d::Renderer *MasterScene::renderer()
 {
     return m_renderer;
 }
@@ -249,7 +250,7 @@ void MasterScene::terminateDrawer()
     if (!m_sceneUIElements.empty()) {
         for (SceneUIElement *elt : m_sceneUIElements) {
             // remove it from the scene drawer
-            m_sceneDrawer.get()->removeSceneUIElement(elt);
+       //     m_sceneDrawer.get()->removeSceneUIElement(elt);
 
             delete elt;
         }
