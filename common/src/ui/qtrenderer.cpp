@@ -32,9 +32,10 @@ QtRenderer::~QtRenderer()
 
 }
 
-void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug)
+void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug, Renderer *sharing)
 {
     Q_UNUSED(appWindow)
+    Q_UNUSED(sharing)
 
     if (!m_glWidget) {
         return;
@@ -72,14 +73,6 @@ void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug)
     if (debug) {
         initDebug();
     }
-}
-
-void QtRenderer::share(o3d::Renderer *sharing, o3d::AppWindow *appWindow, o3d::Bool debug)
-{
-    Q_UNUSED(appWindow)
-
-    // @todo
-    throw;
 }
 
 void QtRenderer::destroy()

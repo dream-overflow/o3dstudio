@@ -35,9 +35,7 @@ public:
     //! Virtual destructor.
     virtual ~QtRenderer();
 
-    virtual void create(o3d::AppWindow *appWindow, o3d::Bool debug = False) override;
-    virtual void share(o3d::Renderer *sharing, o3d::AppWindow *appWindow, o3d::Bool debug = False) override;
-
+    virtual void create(o3d::AppWindow *appWindow, o3d::Bool debug = False, o3d::Renderer *sharing = nullptr) override;
     virtual void destroy() override;
 
     virtual o3d::Bool isCurrent() const override;

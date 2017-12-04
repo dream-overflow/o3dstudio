@@ -162,6 +162,11 @@ public:
         return (void*)m_qGLContext->getProcAddress(ext);
     }
 
+    virtual void swapBuffers(void *surface)
+    {
+        m_qGLContext->swapBuffers(reinterpret_cast<QSurface*>(surface));
+    }
+
 private:
 
     QOpenGLContext *m_qGLContext;
