@@ -12,6 +12,7 @@
 
 #include "o3d/studio/common/ui/qtrenderer.h"
 
+#include <o3d/core/gl.h>
 #include <o3d/engine/glextdefines.h>
 #include <o3d/engine/glextensionmanager.h>
 #include <o3d/engine/context.h>
@@ -43,7 +44,11 @@ void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug)
         return;
     }
 
-    o3d::GLExtensionManager::init();
+    try {
+        GLExtensionManager::init();
+    } catch(E_BaseException &e) {
+        return;
+    }
 
     m_state.enable(STATE_DEFINED);
 

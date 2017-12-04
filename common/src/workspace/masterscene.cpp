@@ -280,6 +280,10 @@ void MasterScene::terminateDrawer()
 
 o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 {
+    if (!m_scene) {
+        return False;
+    }
+
     if (event.button(Mouse::LEFT)) {
         m_rotateCam = True;
     } else if (event.button(Mouse::RIGHT)) {
@@ -299,6 +303,10 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 
 o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
 {
+    if (!m_scene) {
+        return False;
+    }
+
     if (event.button(Mouse::LEFT)) {
         m_rotateCam = False;
     } else if (event.button(Mouse::RIGHT)) {
@@ -322,6 +330,10 @@ o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &/*event*/)
 
 o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
 {
+    if (!m_scene) {
+        return False;
+    }
+
     Float elapsed = m_scene->getFrameManager()->getFrameDuration();
     Int32 deltaX = event.globalPos().x() - m_lockedPos.x();
     Int32 deltaY = event.globalPos().y() - m_lockedPos.y();
@@ -375,6 +387,10 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
 
 o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
 {
+    if (!m_scene) {
+        return False;
+    }
+
     Float elapsed = m_scene->getFrameManager()->getFrameDuration();
     // Int32 deltaX = event.angleDelta().x();  // too rarely supported
     Int32 deltaY = event.angleDelta().y();

@@ -16,6 +16,8 @@
 #include "o3d/studio/common/workspace/project.h"
 
 #include <o3d/engine/renderer.h>
+#include <o3d/core/gl.h>
+#include <o3d/core/callback.h>
 
 using namespace o3d::studio::common;
 
@@ -145,8 +147,30 @@ void O3DCanvasContent::closeEvent(QCloseEvent *)
 //    }
 }
 
+class QGLContextGetProcAddressCallbackMethod : public o3d::GL::GetProcAddressCallbackMethod
+{
+public:
+
+    QGLContextGetProcAddressCallbackMethod(QOpenGLContext *qGLCtx) :
+        m_qGLContext(qGLCtx)
+    {
+
+    }
+
+    virtual void* call(const o3d::Char* ext)
+    {
+        return (void*)m_qGLContext->getProcAddress(ext);
+    }
+
+private:
+
+    QOpenGLContext *m_qGLContext;
+};
+
 void O3DCanvasContent::initializeGL()
 {
+    GL::setProcAddress(new QGLContextGetProcAddressCallbackMethod(context()));
+
     if (!m_renderer) {
         return;
     }
