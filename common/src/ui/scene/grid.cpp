@@ -68,6 +68,7 @@ void Grid::directRendering(Scene *scene)
 //    scene->getContext()->setCullingMode(CULLING_BACK_FACE);
 //    scene->getContext()->enableDoubleSide();
     scene->getContext()->enableDepthTest();
+    scene->getContext()->setLineWidth(2.0f);
 
     primitive->modelView().push();
     primitive->modelView().translate(m_pos);
@@ -78,8 +79,8 @@ void Grid::directRendering(Scene *scene)
     // @todo need a shader @see https://forum.libcinder.org/topic/smooth-thick-lines-using-geometry-shader
     // and finaly may be a material
 
-    // Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_HINT_NICEST);
-    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_NONE);
+    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_HINT_NICEST);
+    // Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_NONE);
 
     // intensity
     primitive->setColor(1.f, 1.f, 1.f);
@@ -172,5 +173,6 @@ void Grid::directRendering(Scene *scene)
     primitive->modelView().pop();
 
     // restore
+    scene->getContext()->setDefaultLineWidth();
     scene->getContext()->setAntiAliasing(aa);
 }
