@@ -467,13 +467,20 @@ void MasterScene::initializeDrawer()
         }
 
         m_scene = new o3d::Scene(nullptr, path.getFullPathName(), m_renderer);
-        // m_scene->setGlobalAmbient();
-        m_scene->getContext()->setBackgroundColor(0.633f,0.792f,.914f,0.0f);
 
+        m_scene->getContext()->setBackgroundColor(0.633f,0.792f,.914f,0.0f);
+        // m_scene->setGlobalAmbient();
+
+        // working camera
         m_camera = new o3d::Camera(m_scene);
+        m_camera.get()->setZnear(0.25f);
+        m_camera.get()->setZfar(10000.f);
+        m_camera.get()->disableVisibility();   // never visible
+
         Node *cameraNode = m_scene->getHierarchyTree()->addNode(m_camera.get());
         cameraNode->addTransform(new FTransform());
 
+        // working drawer and viewport
         m_sceneDrawer = new MasterSceneDrawer(m_scene);
         m_viewport = m_scene->getViewPortManager()->addScreenViewPort(m_camera.get(), m_sceneDrawer.get(), 0);
 
@@ -481,8 +488,9 @@ void MasterScene::initializeDrawer()
         m_scene->drawAllSymbolicObject();
 
         // add an helper grid
-        Int32 gridStep = (Int32)(50.f / m_camera.get()->getZnear());
-        Int32 gridHW = (Int32)((m_camera.get()->getZfar() - m_camera.get()->getZnear()) * 0.8f) + 1;
+        Int32 gridStep = (Int32)(200.f * m_camera.get()->getZnear());
+        Float size = o3d::min(m_camera.get()->getZfar() * 0.8f, 1000.f);
+        Int32 gridHW = (Int32)(size);
 
         Grid *grid = new Grid(this, Point3f(), Point2i(gridHW, gridHW), Point2i(gridStep, gridStep));
         addSceneUIElement(grid);
