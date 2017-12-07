@@ -68,7 +68,6 @@ void Grid::directRendering(Scene *scene)
 //    scene->getContext()->setCullingMode(CULLING_BACK_FACE);
 //    scene->getContext()->enableDoubleSide();
     scene->getContext()->enableDepthTest();
-    scene->getContext()->setLineWidth(2.0f);
 
     primitive->modelView().push();
     primitive->modelView().translate(m_pos);
@@ -81,6 +80,8 @@ void Grid::directRendering(Scene *scene)
 
     Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_HINT_NICEST);
     // Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_NONE);
+
+    scene->getContext()->setLineWidth(2.0f);
 
     // intensity
     primitive->setColor(1.f, 1.f, 1.f);

@@ -41,8 +41,7 @@ public:
     virtual o3d::Bool isCurrent() const override;
     virtual void setCurrent() override;
 
-    virtual void setVerticalRefresh(o3d::Bool use) override;
-    virtual o3d::Bool isVerticalRefresh() const override;
+    virtual Bool setVSyncMode(VSyncMode mode = VSYNC_YES) override;
 
     QOpenGLWidget *ui();
 

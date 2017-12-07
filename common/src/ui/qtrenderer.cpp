@@ -121,20 +121,40 @@ void QtRenderer::setCurrent()
     }
 }
 
-void QtRenderer::setVerticalRefresh(o3d::Bool use)
+o3d::Bool QtRenderer::setVSyncMode(VSyncMode mode)
 {
-    if (m_glWidget) {
-        m_glWidget->format().setSwapInterval(use ? 1 : 0);
-    }
-}
-
-o3d::Bool QtRenderer::isVerticalRefresh() const
-{
-    if (m_glWidget) {
-        return m_glWidget->format().swapInterval() > 0;
+    if (!m_glWidget) {
+        return False;
     }
 
-    return False;
+    if (!m_state.getBit(STATE_DEFINED)) {
+        return False;
+    }
+
+    int value = 0;
+
+    if (mode == VSYNC_NONE) {
+        value = 0;
+    } else if (mode == VSYNC_YES) {
+        value = 1;
+    } else if (mode == VSYNC_ADAPTIVE) {
+        value = -1;
+    }
+
+    m_glWidget->format().setSwapInterval(value);
+
+    if (mode == VSYNC_NONE) {
+        m_state.setBit(STATE_VSYNC, False);
+        m_state.setBit(STATE_ADAPTIVE_VSYNC, False);
+    } else if (mode == VSYNC_YES) {
+        m_state.setBit(STATE_VSYNC, True);
+        m_state.setBit(STATE_ADAPTIVE_VSYNC, False);
+    } else if (mode == VSYNC_ADAPTIVE) {
+        m_state.setBit(STATE_VSYNC, True);
+        m_state.setBit(STATE_ADAPTIVE_VSYNC, True);
+    }
+
+    return True;
 }
 
 QOpenGLWidget *QtRenderer::ui()
