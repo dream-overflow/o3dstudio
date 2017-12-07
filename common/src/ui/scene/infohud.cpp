@@ -53,7 +53,7 @@ void InfoHUD::syncWithScene(MasterScene *)
 
 }
 
-void InfoHUD::directRendering(Scene *scene)
+void InfoHUD::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
 {
     //PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
 

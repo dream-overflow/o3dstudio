@@ -32,7 +32,7 @@ public:
     O3D_DECLARE_DYNAMIC_CLASS(MasterSceneDrawer)
 
     //! Constructor. Take a parent objets.
-    MasterSceneDrawer(BaseObject *parent);
+    MasterSceneDrawer(BaseObject *parent, MasterScene *masterScene = nullptr);
 
     //! Draw process.
     virtual void draw();
@@ -47,6 +47,8 @@ public:
     void removeSceneUIElement(SceneUIElement *elt);
 
 protected:
+
+    MasterScene *m_masterScene;
 
     std::list<SceneUIElement*> m_preDraw;
     std::list<SceneUIElement*> m_postDraw;

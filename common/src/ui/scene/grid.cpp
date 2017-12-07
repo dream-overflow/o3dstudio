@@ -50,8 +50,14 @@ void Grid::syncWithScene(MasterScene *)
 
 }
 
-void Grid::directRendering(Scene *scene)
+void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
 {
+    // only on ambient pass
+    if (drawInfo.pass != DrawInfo::AMBIENT_PASS) {
+        return;
+    }
+
+    Scene *scene = masterScene->scene();
     PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
 
     // setup modelview

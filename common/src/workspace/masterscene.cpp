@@ -26,6 +26,7 @@
 #include <o3d/engine/utils/framemanager.h>
 #include <o3d/engine/object/ftransform.h>
 #include <o3d/engine/context.h>
+#include <o3d/engine/picking.h>
 
 #include <o3d/gui/gui.h>
 #include <o3d/gui/fontmanager.h>
@@ -441,6 +442,11 @@ o3d::Bool MasterScene::leaveEvent(const Event &/*event*/)
     return False;
 }
 
+void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
+{
+    // @todo
+}
+
 void MasterScene::processCommands()
 {
     // process commands (FIFO)
@@ -481,7 +487,7 @@ void MasterScene::initializeDrawer()
         cameraNode->addTransform(new FTransform());
 
         // working drawer and viewport
-        m_sceneDrawer = new MasterSceneDrawer(m_scene);
+        m_sceneDrawer = new MasterSceneDrawer(m_scene, this);
         m_viewport = m_scene->getViewPortManager()->addScreenViewPort(m_camera.get(), m_sceneDrawer.get(), 0);
 
         // default all symbolics objects are drawn
@@ -506,5 +512,9 @@ void MasterScene::initializeDrawer()
         // and a camera helper
         CameraManipulator *cameraManipulator = new CameraManipulator(this, Point2f(0.9f, 0.1f), 1.f);
         addSceneUIElement(cameraManipulator);
+
+        // picking slot
+        m_scene->getPicking()->setMode(Picking::COLOR);
+        m_scene->getPicking()->onHit.connect(this, &MasterScene::pickingHit);
     }
 }

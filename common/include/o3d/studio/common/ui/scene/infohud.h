@@ -44,7 +44,7 @@ public:
     virtual void createToScene(MasterScene *masterScene);
     virtual void removeFromScene(MasterScene *masterScene);
     virtual void syncWithScene(MasterScene *masterScene);
-    virtual void directRendering(Scene *scene);
+    virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene);
 
 protected:
 

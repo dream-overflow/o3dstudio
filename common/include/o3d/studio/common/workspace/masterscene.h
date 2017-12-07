@@ -16,6 +16,7 @@
 
 #include <o3d/core/baseobject.h>
 #include <o3d/core/smartobject.h>
+#include <o3d/core/vector3.h>
 
 namespace o3d {
 
@@ -24,6 +25,7 @@ class Camera;
 class ViewPort;
 class SceneDrawer;
 class Renderer;
+class Pickable;
 
 namespace studio {
 namespace common {
@@ -99,6 +101,10 @@ public:
 
     virtual Bool enterEvent(const Event &event) override;
     virtual Bool leaveEvent(const Event &event) override;
+
+public /*slots*/:
+
+    void pickingHit(Pickable* pickable, Vector3 pos);
 
 private:
 

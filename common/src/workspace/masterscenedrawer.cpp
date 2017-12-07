@@ -32,8 +32,9 @@ using namespace o3d::studio::common;
 
 O3D_IMPLEMENT_DYNAMIC_CLASS1(MasterSceneDrawer, MASTER_SCENE_DRAWER, ShadowVolumeForward)
 
-MasterSceneDrawer::MasterSceneDrawer(BaseObject *parent) :
-    ShadowVolumeForward(parent)
+MasterSceneDrawer::MasterSceneDrawer(BaseObject *parent, MasterScene *masterScene) :
+    ShadowVolumeForward(parent),
+    m_masterScene(masterScene)
 {
 }
 
@@ -71,7 +72,7 @@ void MasterSceneDrawer::draw()
 
     // pre draw
     for (auto it = m_preDraw.begin(); it != m_preDraw.end(); ++it) {
-        (*it)->directRendering(getScene());
+        (*it)->directRendering(drawInfo, m_masterScene);
     }
 
     // landscape
@@ -123,7 +124,7 @@ void MasterSceneDrawer::draw()
 
     // post draw
     for (auto it = m_postDraw.begin(); it != m_postDraw.end(); ++it) {
-        (*it)->directRendering(getScene());
+        (*it)->directRendering(drawInfo, m_masterScene);
     }
 
     context.setAntiAliasing(Context::AA_NONE);
@@ -144,8 +145,18 @@ void MasterSceneDrawer::drawPicking()
     DrawInfo drawInfo(DrawInfo::PICKING_PASS);
     drawInfo.setFromCamera(&camera);
 
+    // pre draw
+    for (auto it = m_preDraw.begin(); it != m_preDraw.end(); ++it) {
+        (*it)->directRendering(drawInfo, m_masterScene);
+    }
+
     // world objects
     getScene()->getVisibilityManager()->draw(drawInfo);
+
+    // post draw
+    for (auto it = m_postDraw.begin(); it != m_postDraw.end(); ++it) {
+        (*it)->directRendering(drawInfo, m_masterScene);
+    }
 
     // TODO
     //getScene()->getContext()->disableDepthWrite();

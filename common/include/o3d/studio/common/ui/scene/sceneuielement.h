@@ -16,6 +16,7 @@
 namespace o3d {
 
 class Scene;
+class DrawInfo;
 
 namespace studio {
 namespace common {
@@ -79,7 +80,7 @@ public:
     /**
      * @brief Or uses of a direct rendering. Called during scene drawer paint.
      */
-    virtual void directRendering(Scene *scene) = 0;
+    virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene) = 0;
 
 protected:
 
