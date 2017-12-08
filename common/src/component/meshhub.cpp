@@ -13,6 +13,10 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/masterscene.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
+#include "o3d/studio/common/component/spacialnodehub.h"
+
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/typeregistry.h"
 
 using namespace o3d::studio::common;
 
@@ -71,10 +75,7 @@ MeshHub::MeshHub(const String &name, Entity *parent) :
 
 MeshHub::~MeshHub()
 {
-    for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
-        o3d::Mesh *mesh= it->second;
-        delete mesh;
-    }
+    O3D_ASSERT(m_instances.empty());
 }
 
 void MeshHub::create()
@@ -121,14 +122,54 @@ o3d::Bool MeshHub::deserializeContent(InStream &stream)
     return True;
 }
 
+#include <o3d/engine/object/primitive.h>
+#include <o3d/engine/material/ambientmaterial.h>
+#include <o3d/engine/material/lambertmaterial.h>
+#include <o3d/engine/material/pickingmaterial.h>
+
 void MeshHub::createToScene(MasterScene *masterScene)
 {
     if (!masterScene) {
         return;
     }
 
+//    o3d::Mesh *mesh = new o3d::Mesh(masterScene->scene());
+//    mesh->setName(m_name);
+
+    // Add a simple plane for simulate a ground to project shadow on
+    Surface surface(1000, 1000, 4, 4);
     o3d::Mesh *mesh = new o3d::Mesh(masterScene->scene());
     mesh->setName(m_name);
+    MeshData *meshData = new MeshData(mesh);
+
+    GeometryData *surfaceGeometry = new GeometryData(meshData, surface);
+    surfaceGeometry->genNormals();
+    //surfaceGeometry->genTangentSpace();
+
+    meshData->setGeometry(surfaceGeometry);
+    meshData->computeBounding(GeometryData::BOUNDING_BOX);
+    meshData->createGeometry();
+
+    mesh->setMeshData(meshData);
+
+    mesh->setNumMaterialProfiles(1);
+    mesh->getMaterialProfile(0).setNumTechniques(1);
+    mesh->getMaterialProfile(0).getTechnique(0).setNumPass(1);
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setMaterial(Material::AMBIENT, new AmbientMaterial(mesh));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setMaterial(Material::LIGHTING, new LambertMaterial(mesh));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setMaterial(Material::PICKING, new PickingMaterial(mesh));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setMaterial(Material::DEFERRED, new LambertMaterial(mesh));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setAmbient(Color(0.0f, 0.0f, 0.0f, 1.f));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setDiffuse(Color(1.0f, 1.0f, 1.0f, 1.f));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setSpecular(Color(0.0f, 0.0f, 0.0f, 1.f));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setShine(1.f);
+    mesh->initMaterialProfiles();
+
+    // if the parent hub is a spacial node add the mesh the it
+    if (parent() && parent()->typeRef() == Application::instance()->types().typeRef("o3s::common::hub::spacialhub")) {
+        SpacialNodeHub *parentHub = static_cast<SpacialNodeHub*>(parent());
+        parentHub->addChildToScene(masterScene, mesh);
+    }
 
     m_instances[masterScene] = mesh;
 
@@ -143,7 +184,7 @@ void MeshHub::removeFromScene(MasterScene *masterScene)
     if (it != m_instances.end()) {
         o3d::Mesh *mesh = it->second;
         m_instances.erase(it);
-        delete mesh;
+        mesh->getParent()->deleteChild(mesh);
 
         O3D_MESSAGE("MeshHub deleted from scene");
     }

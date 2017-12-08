@@ -61,7 +61,7 @@ DrawerHub::DrawerHub(const String &name, Entity *parent) :
 
 DrawerHub::~DrawerHub()
 {
-
+    // O3D_ASSERT(m_instances.empty());
 }
 
 void DrawerHub::create()

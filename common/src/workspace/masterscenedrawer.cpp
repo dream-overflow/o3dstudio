@@ -75,6 +75,8 @@ void MasterSceneDrawer::draw(ViewPort *)
         (*it)->directRendering(drawInfo, m_masterScene);
     }
 
+    m_masterScene->updateCounters(0);
+
     // landscape
     getScene()->getLandscape()->draw();
 
@@ -88,6 +90,8 @@ void MasterSceneDrawer::draw(ViewPort *)
         getScene()->getAlphaPipeline()->sort();
         getScene()->getAlphaPipeline()->draw(drawInfo);
     context.setDefaultDepthWrite();
+
+    m_masterScene->updateCounters(1);
 
     //
     // Process the effectives lights
@@ -122,10 +126,14 @@ void MasterSceneDrawer::draw(ViewPort *)
     // post effects
     //getScene()->getSpecialEffectsManager()->drawPost(drawInfo);
 
+    m_masterScene->updateCounters(2);
+
     // post draw
     for (auto it = m_postDraw.begin(); it != m_postDraw.end(); ++it) {
         (*it)->directRendering(drawInfo, m_masterScene);
     }
+
+    m_masterScene->updateCounters(3);
 
     context.setAntiAliasing(Context::AA_NONE);
 

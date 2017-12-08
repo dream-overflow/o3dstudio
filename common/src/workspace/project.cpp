@@ -43,10 +43,6 @@ Project::Project(const String &name, Workspace *workspace) :
 
 Project::~Project()
 {
-    delete m_masterScene;
-    delete m_projectFile;
-    delete m_info;
-
     // force deletion of deferred entities
     Entity *entity = nullptr;
     for (auto it = m_deferredDelete.begin(); it != m_deferredDelete.end(); ++it) {
@@ -58,6 +54,8 @@ Project::~Project()
     Fragment *fragment = nullptr;
     for (auto it = m_fragments.begin(); it != m_fragments.end(); ++it) {
         fragment = it->second;
+
+        // @todo could need a scene cleaning step
         deletePtr(fragment);
     }
 
@@ -65,6 +63,13 @@ Project::~Project()
     Hub *hub = nullptr;
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         hub = it->second;
+        // first clean from scene
+        hub->removeFromScene(m_masterScene);
+    }
+
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+        // next we can finally delete
         deletePtr(hub);
     }
     m_hubsOrder.clear();
@@ -75,6 +80,11 @@ Project::~Project()
         asset = it->second;
         deletePtr(asset);
     }
+
+    // now we can safely delete the master scene with the o3d scene
+    delete m_masterScene;
+    delete m_projectFile;
+    delete m_info;
 }
 
 Project *Project::project()

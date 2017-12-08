@@ -70,10 +70,7 @@ CameraHub::CameraHub(const String &name, Entity *parent) :
 
 CameraHub::~CameraHub()
 {
-    for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
-        o3d::Camera *camera = it->second;
-        delete camera;
-    }
+    O3D_ASSERT(m_instances.empty());
 }
 
 void CameraHub::create()

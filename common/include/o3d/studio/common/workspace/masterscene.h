@@ -102,6 +102,18 @@ public:
     virtual Bool enterEvent(const Event &event) override;
     virtual Bool leaveEvent(const Event &event) override;
 
+    //
+    // miscs
+    //
+
+    void updateCounters(UInt32 pass);
+
+    UInt32 numVertices(UInt32 pass) const;
+    UInt32 numTriangles(UInt32 pass) const;
+    UInt32 numLines(UInt32 pass) const;
+    UInt32 numPoints(UInt32 pass) const;
+
+
 public /*slots*/:
 
     void pickingHit(Pickable* pickable, Vector3 pos);
@@ -117,6 +129,11 @@ private:
     Point2i m_lockedPos;
     Bool m_rotateCam;
     Bool m_moveCam;
+
+    UInt32 m_verticesCount[4];
+    UInt32 m_trianglesCount[4];
+    UInt32 m_linesCount[4];
+    UInt32 m_pointCount[4];
 
     //! Main working camera, cannot be deleted
     o3d::SmartObject<o3d::Camera> m_camera;

@@ -90,10 +90,10 @@ void InfoHUD::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
 
     // one line per property
     Int32 i = 0;
-    m_font->writeAtRow(i++, 0, String("Vertices : {0}").arg(scene->getFrameManager()->getNumVertices()));
-    m_font->writeAtRow(i++, 0, String("Triangles : {0}").arg(scene->getFrameManager()->getNumTriangles()));
-    m_font->writeAtRow(i++, 0, String("Lines: {0}").arg(scene->getFrameManager()->getNumLines()));
-    m_font->writeAtRow(i++, 0, String("Points : {0}").arg(scene->getFrameManager()->getNumPoints()));
+    m_font->writeAtRow(i++, 0, String("Vertices : {0}").arg(masterScene->numVertices(1)));
+    m_font->writeAtRow(i++, 0, String("Triangles : {0}").arg(masterScene->numTriangles(1)));
+    m_font->writeAtRow(i++, 0, String("Lines: {0}").arg(masterScene->numLines(1)));
+    m_font->writeAtRow(i++, 0, String("Points : {0}").arg(masterScene->numPoints(1)));
 
     // restore
     scene->getContext()->setAntiAliasing(aa);

@@ -17,6 +17,7 @@
 namespace o3d {
 
 class Node;
+class SceneObject;
 
 namespace studio {
 namespace common {
@@ -79,6 +80,22 @@ public:
     //
 
     // @todo manage children, transformations and animations
+
+    /**
+     * @brief Add the scene object to the node of the corresponding master scene.
+     * @param masterScene Target master scene.
+     * @param sceneObject Valid scene object to setup into.
+     * @return True if master scene exists, and added into it.
+     */
+    virtual Bool addChildToScene(MasterScene *masterScene, SceneObject *sceneObject);
+
+    /**
+     * @brief Remove the scene object to the node of the corresponding master scene.
+     * @param masterScene Target master scene.
+     * @param sceneObject Valid scene object to remove from (not delete).
+     * @return True if master scene exists, object found and removed from it.
+     */
+    virtual Bool removeChildFromScene(MasterScene *masterScene, SceneObject *sceneObject);
 
 protected:
 

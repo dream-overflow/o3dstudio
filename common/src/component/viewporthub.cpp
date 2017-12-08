@@ -70,7 +70,7 @@ ViewPortHub::ViewPortHub(const String &name, Entity *parent) :
 
 ViewPortHub::~ViewPortHub()
 {
-
+    // O3D_ASSERT(m_instances.empty());
 }
 
 void ViewPortHub::create()

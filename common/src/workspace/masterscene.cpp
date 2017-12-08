@@ -442,6 +442,55 @@ o3d::Bool MasterScene::leaveEvent(const Event &/*event*/)
     return False;
 }
 
+void MasterScene::updateCounters(o3d::UInt32 pass)
+{
+    if (m_scene && pass < 4) {
+        m_verticesCount[pass] = m_scene->getFrameManager()->getNumVertices();
+        m_trianglesCount[pass] = m_scene->getFrameManager()->getNumTriangles();
+        m_linesCount[pass] = m_scene->getFrameManager()->getNumLines();
+        m_pointCount[pass] = m_scene->getFrameManager()->getNumPoints();
+
+        if (pass > 0) {
+            m_verticesCount[pass] -= m_verticesCount[pass-1];
+            m_trianglesCount[pass] -= m_trianglesCount[pass-1];
+            m_linesCount[pass] -= m_linesCount[pass-1];
+            m_pointCount[pass] -= m_pointCount[pass-1];
+        }
+    }
+}
+
+o3d::UInt32 MasterScene::numVertices(UInt32 pass) const
+{
+    if (pass < 4) {
+        return m_verticesCount[pass];
+    }
+    return 0;
+}
+
+o3d::UInt32 MasterScene::numTriangles(UInt32 pass) const
+{
+    if (pass < 4) {
+        return m_trianglesCount[pass];
+    }
+    return 0;
+}
+
+o3d::UInt32 MasterScene::numLines(UInt32 pass) const
+{
+    if (pass < 4) {
+        return m_linesCount[pass];
+    }
+    return 0;
+}
+
+o3d::UInt32 MasterScene::numPoints(UInt32 pass) const
+{
+    if (pass < 4) {
+        return m_pointCount[pass];
+    }
+    return 0;
+}
+
 void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 {
     // @todo

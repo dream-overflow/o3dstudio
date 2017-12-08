@@ -72,10 +72,7 @@ SpacialNodeHub::SpacialNodeHub(const String &name, Entity *parent) :
 
 SpacialNodeHub::~SpacialNodeHub()
 {
-    for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
-        o3d::Node *node = it->second;
-        node->getParent()->deleteChild(node);
-    }
+    O3D_ASSERT(m_instances.empty());
 }
 
 void SpacialNodeHub::create()
@@ -184,4 +181,40 @@ void SpacialNodeHub::syncWithScene(MasterScene *masterScene)
 
         O3D_MESSAGE("SpacialNodeHub synced into scene");
     }
+}
+
+o3d::Bool SpacialNodeHub::addChildToScene(MasterScene *masterScene, o3d::SceneObject *sceneObject)
+{
+    if (!masterScene || !sceneObject) {
+        return False;
+    }
+
+    auto it = m_instances.find(masterScene);
+    if (it == m_instances.end()) {
+        return False;
+    }
+
+    o3d::Node *node = it->second;
+    node->addSonLast(sceneObject);
+
+    return True;
+}
+
+o3d::Bool SpacialNodeHub::removeChildFromScene(MasterScene *masterScene, o3d::SceneObject *sceneObject)
+{
+    if (!masterScene || !sceneObject) {
+        return False;
+    }
+
+    auto it = m_instances.find(masterScene);
+    if (it == m_instances.end()) {
+        return False;
+    }
+
+    o3d::Node *node = it->second;
+    if (node->hasSon(sceneObject)) {
+        node->removeSon(sceneObject);
+    }
+
+    return True;
 }
