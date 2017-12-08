@@ -60,8 +60,11 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     Scene *scene = masterScene->scene();
     PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
 
+    const Box2i &vp = scene->getContext()->getViewPort();
+    const Float factor = 600.f;
+
     // Get ratio from active scene camera (could do it from primary viewport)
-    Float ratio = scene->getActiveCamera()->getRatio();
+    // Float ratio = scene->getActiveCamera()->getRatio();
 
     scene->getContext()->enableDepthTest();
     scene->getContext()->enableDepthWrite();
@@ -71,12 +74,14 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     // setup modelview
     Matrix4 mv;
     mv.setRotation(scene->getActiveCamera()->getModelviewMatrix().getRotation());
-    mv.setTranslation(0.45f*ratio, 0.4f, 0.f);
+    // mv.setTranslation(0.45f*ratio, 0.4f, 0.f);
+    mv.setTranslation(vp.x2() - m_scale * factor*0.1f, vp.y2() - m_scale * factor*0.1f, 0.f);
     primitive->modelView().set(mv);
 
     // and project to ortho
     Matrix4 pj;
-    pj.buildOrtho(-0.5f*ratio, 0.5f*ratio, -0.5f, 0.5f, -1.f, 1.f);
+    pj.buildOrtho(vp.x(), vp.x2(), vp.y(), vp.y2(), m_scale * -(factor*0.1f), m_scale * factor*0.1f);
+    // pj.buildOrtho(-0.5f*ratio, 0.5f*ratio, -0.5f, 0.5f, -1.f, 1.f);
     primitive->projection().set(pj);
 
     // @todo adjust coef to keep a fixed screen size
@@ -91,7 +96,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     primitive->modelView().push();
     primitive->setColor(0.6f, 0.6f, 0.6f);
 
-    Float xs = m_scale, ys = m_scale, zs = m_scale;
+    Float xs = m_scale*factor, ys = m_scale*factor, zs = m_scale*factor;
 
     // 5% of the scale
     Vector3 vscale(xs*0.05f, ys*0.05f, zs*0.05f);

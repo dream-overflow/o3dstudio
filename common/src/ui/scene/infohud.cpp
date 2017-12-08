@@ -16,6 +16,7 @@
 #include <o3d/engine/object/camera.h>
 #include <o3d/engine/text2d.h>
 #include <o3d/engine/scene/scene.h>
+#include <o3d/engine/utils/framemanager.h>
 
 #include "o3d/studio/common/workspace/masterscene.h"
 
@@ -55,12 +56,45 @@ void InfoHUD::syncWithScene(MasterScene *)
 
 void InfoHUD::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
 {
-    //PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
+    Scene *scene = masterScene->scene();
+
+    const Box2i &vp = scene->getContext()->getViewPort();
 
     // setup modelview
-    //primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix());
+    scene->getContext()->modelView().set(scene->getActiveCamera()->getModelviewMatrix());
 
+    scene->getContext()->enableDepthTest();
+    scene->getContext()->enableDepthWrite();
+    scene->getContext()->setDefaultDepthTest();
+    scene->getContext()->setDefaultDepthFunc();
 
+    // setup modelview
+    Matrix4 mv;
+    mv.setTranslation(5, 5+m_font.get()->getTextHeight(), 0.f);
+    scene->getContext()->modelView().set(mv);
 
-    // @todo one line per property
+    // and project to ortho
+    Matrix4 pj;
+    pj.buildOrtho(vp.x(), vp.x2(), vp.y2(), vp.y(), -1.f, 1.f);
+    scene->getContext()->projection().set(pj);
+
+//    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_HINT_NICEST);
+    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);
+
+    scene->getContext()->setCullingMode(CULLING_BACK_FACE);
+    scene->getContext()->disableDoubleSide();
+    scene->getContext()->disableDepthTest();
+    scene->getContext()->disableDepthWrite();
+
+    m_font->setColor(Color(0.1f, 0.9f, 0.1f));
+
+    // one line per property
+    Int32 i = 0;
+    m_font->writeAtRow(i++, 0, String("Vertices : {0}").arg(scene->getFrameManager()->getNumVertices()));
+    m_font->writeAtRow(i++, 0, String("Triangles : {0}").arg(scene->getFrameManager()->getNumTriangles()));
+    m_font->writeAtRow(i++, 0, String("Lines: {0}").arg(scene->getFrameManager()->getNumLines()));
+    m_font->writeAtRow(i++, 0, String("Points : {0}").arg(scene->getFrameManager()->getNumPoints()));
+
+    // restore
+    scene->getContext()->setAntiAliasing(aa);
 }

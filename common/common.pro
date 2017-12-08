@@ -173,7 +173,8 @@ HEADERS += \
     include/o3d/studio/common/ui/scene/infohud.h \
     include/o3d/studio/common/workspace/masterscenedrawer.h \
     include/o3d/studio/common/commontype.h \
-    include/o3d/studio/common/ui/scene/cameramanipulator.h
+    include/o3d/studio/common/ui/scene/cameramanipulator.h \
+    include/o3d/studio/common/ui/panel.h
 
 LIBS += -lobjective3d-dbg
 

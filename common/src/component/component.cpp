@@ -62,3 +62,13 @@ const o3d::String &Component::icon() const
 {
     return m_icon;
 }
+
+SceneUIElement *Component::sceneUiElement(SceneUIElement::Mode)
+{
+    return nullptr;
+}
+
+Panel *Component::panel(Panel::PanelType panelType)
+{
+    return nullptr;
+}

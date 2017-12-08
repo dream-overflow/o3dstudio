@@ -44,6 +44,12 @@ public:
         POST_DRAW       //!< draw after the scene
     };
 
+    enum Mode
+    {
+        MODE_SELECTION,      //!< scene object selection mode
+        MODE_EDITION         //!< scene object edition mode
+    };
+
     SceneUIElement(BaseObject *parent, UIType uiType, DrawStep drawStep, Bool directDraw);
 
     virtual ~SceneUIElement();

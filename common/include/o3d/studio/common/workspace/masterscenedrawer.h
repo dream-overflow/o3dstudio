@@ -35,10 +35,10 @@ public:
     MasterSceneDrawer(BaseObject *parent, MasterScene *masterScene = nullptr);
 
     //! Draw process.
-    virtual void draw();
+    virtual void draw(ViewPort *viewPort);
 
     //! Process a simpler draw for the picking pass.
-    virtual void drawPicking();
+    virtual void drawPicking(ViewPort *viewPort);
 
     //! Add scene UI element.
     void addSceneUIElement(SceneUIElement *elt);

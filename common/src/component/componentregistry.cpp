@@ -44,6 +44,8 @@ ComponentRegistry::~ComponentRegistry()
 #include "o3d/studio/common/component/viewporthub.h"
 #include "o3d/studio/common/component/camerahub.h"
 #include "o3d/studio/common/component/drawerhub.h"
+#include "o3d/studio/common/component/spacialnodehub.h"
+#include "o3d/studio/common/component/meshhub.h"
 
 void ComponentRegistry::initialize()
 {
@@ -51,6 +53,8 @@ void ComponentRegistry::initialize()
     registerComponent(new ViewPortComponent());
     registerComponent(new CameraHubComponent());
     registerComponent(new DrawerHubComponent());
+    registerComponent(new SpacialNodeComponent());
+    registerComponent(new MeshComponent());
 }
 
 void ComponentRegistry::registerComponent(Component *component)

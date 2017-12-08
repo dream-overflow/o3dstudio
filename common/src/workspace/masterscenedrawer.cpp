@@ -38,7 +38,7 @@ MasterSceneDrawer::MasterSceneDrawer(BaseObject *parent, MasterScene *masterScen
 {
 }
 
-void MasterSceneDrawer::draw()
+void MasterSceneDrawer::draw(ViewPort *)
 {
     // The camera modelview should be set before draw()
     if (getScene()->getActiveCamera() == nullptr) {
@@ -133,7 +133,7 @@ void MasterSceneDrawer::draw()
     camera.clearCameraChanged();
 }
 
-void MasterSceneDrawer::drawPicking()
+void MasterSceneDrawer::drawPicking(ViewPort *)
 {
     // The camera modelview should be set before draw()
     if (getScene()->getActiveCamera() == nullptr) {

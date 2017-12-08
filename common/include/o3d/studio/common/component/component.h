@@ -10,6 +10,8 @@
 #define _O3DS_COMMON_COMPONENT_H
 
 #include "../objectref.h"
+#include "../ui/scene/sceneuielement.h"
+#include "../ui/panel.h"
 
 namespace o3d {
 namespace studio {
@@ -80,7 +82,19 @@ public:
      */
     const String& icon() const;
 
-    // @todo a ComponentUi object when acting
+    /**
+     * @brief Get a scene ui element (actor) according to a specified mode.
+     * @param mode Scene action mode (edition, selection...).
+     * @return null by default, could return a different ui element per mode.
+     */
+    SceneUIElement* sceneUiElement(SceneUIElement::Mode mode);
+
+    /**
+     * @brief panel Returns a panel according to the asked type.
+     * @param panelType Type and position of the displayed panel.
+     * @return null by default.
+     */
+    Panel* panel(Panel::PanelType panelType);
 
 protected:
 
