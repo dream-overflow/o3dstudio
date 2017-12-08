@@ -101,4 +101,10 @@ void MainConsole::onMessage(UInt32 msgType, String message)
     item->setToolTip(toQString(message));
 
     m_qtMainConsole->m_listWidget->addItem(item);
+
+    if (m_qtMainConsole->m_listWidget->count() > MAX_NUM_MESSAGES) {
+        m_qtMainConsole->m_listWidget->takeItem(0);
+    }
+
+    m_qtMainConsole->m_listWidget->scrollToBottom();
 }

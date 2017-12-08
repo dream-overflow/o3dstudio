@@ -33,7 +33,12 @@ void Messenger::message(UInt32 msgType, const String &message)
     lmessage.message = message;
 
     m_mutex.lock();
-    m_messages[lmessage.dateTime] = lmessage;
+    m_messages.push_back(lmessage);
+
+    if (m_messages.size() > 1000) {
+        m_messages.pop_front();
+    }
+
     m_mutex.unlock();
 
     onNewMessage(lmessage.msgType, lmessage.message);

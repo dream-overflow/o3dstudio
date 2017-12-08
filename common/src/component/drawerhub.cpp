@@ -116,6 +116,8 @@ void DrawerHub::createToScene(MasterScene *masterScene)
 
 void DrawerHub::removeFromScene(MasterScene *masterScene)
 {
+    Hub::removeFromScene(masterScene);
+
     // @todo
 }
 

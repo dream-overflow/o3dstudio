@@ -121,15 +121,18 @@ public:
 
     /**
      * @brief Destroy the related entities fomr the engine scene.
+     * @note This default implemantation process recursively,
+     * and starting by removing the leaves throught, and up to this hub.
+     * This default implementation can be used at begining of each specialization.
      */
-    virtual void removeFromScene(MasterScene *masterScene) = 0;
+    virtual void removeFromScene(MasterScene *masterScene);
 
     /**
      * @brief Bi-directionnal synchronization with the engine scene.
      */
     virtual void syncWithScene(MasterScene *masterScene) = 0;
 
-private:
+protected:
 
     Project *m_project;               //!< Owner project;
 

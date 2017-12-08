@@ -9,7 +9,7 @@
 #ifndef _O3DS_COMMON_MESSENGER_H
 #define _O3DS_COMMON_MESSENGER_H
 
-#include <map>
+#include <list>
 
 #include <o3d/core/baseobject.h>
 #include <o3d/core/mutex.h>
@@ -31,6 +31,8 @@ namespace common {
 class O3S_API Messenger : public BaseObject
 {
 public:
+
+    const UInt32 MAX_NUM_MESSAGES = 200;
 
     enum MessageType
     {
@@ -72,7 +74,7 @@ protected:
     };
 
     FastMutex m_mutex;
-    std::map<DateTime, Message> m_messages;
+    std::list<Message> m_messages;
 };
 
 } // namespace common

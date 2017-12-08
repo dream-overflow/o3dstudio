@@ -155,6 +155,8 @@ void CameraHub::createToScene(MasterScene *masterScene)
 
 void CameraHub::removeFromScene(MasterScene *masterScene)
 {
+    Hub::removeFromScene(masterScene);
+
     auto it = m_instances.find(masterScene);
     if (it != m_instances.end()) {
         o3d::Camera *camera = it->second;

@@ -137,6 +137,8 @@ void MeshHub::createToScene(MasterScene *masterScene)
 
 void MeshHub::removeFromScene(MasterScene *masterScene)
 {
+    Hub::removeFromScene(masterScene);
+
     auto it = m_instances.find(masterScene);
     if (it != m_instances.end()) {
         o3d::Mesh *mesh = it->second;

@@ -26,6 +26,8 @@ class MainConsole : public BaseObject, public common::Dock
 {
 public:
 
+    const Int32 MAX_NUM_MESSAGES = 200;
+
     MainConsole(BaseObject *parent = nullptr);
     virtual ~MainConsole();
 

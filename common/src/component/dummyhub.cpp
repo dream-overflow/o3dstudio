@@ -104,15 +104,17 @@ o3d::Bool DummyHub::deserializeContent(InStream &stream)
 
 void DummyHub::createToScene(MasterScene */*masterScene*/)
 {
-
+    // nothing into the scene
 }
 
-void DummyHub::removeFromScene(MasterScene */*masterScene*/)
+void DummyHub::removeFromScene(MasterScene *masterScene)
 {
+    Hub::removeFromScene(masterScene);
 
+    // nothing more
 }
 
 void DummyHub::syncWithScene(MasterScene */*masterScene*/)
 {
-
+    // nothing to do with the scene
 }

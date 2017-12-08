@@ -7,7 +7,7 @@
  */
 
 #include <o3d/engine/scene/scene.h>
-#include <o3d/engine/hierarchy/node.h>
+#include <o3d/engine/hierarchy/hierarchytree.h>
 
 #include "o3d/studio/common/component/spacialnodehub.h"
 #include "o3d/studio/common/workspace/project.h"
@@ -73,8 +73,8 @@ SpacialNodeHub::SpacialNodeHub(const String &name, Entity *parent) :
 SpacialNodeHub::~SpacialNodeHub()
 {
     for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
-        o3d::Node *node= it->second;
-        delete node;
+        o3d::Node *node = it->second;
+        node->getParent()->deleteChild(node);
     }
 }
 
@@ -131,6 +131,24 @@ void SpacialNodeHub::createToScene(MasterScene *masterScene)
     o3d::Node *node = new o3d::Node(masterScene->scene());
     node->setName(m_name);
 
+    // determine where to put this node
+    if (parent() && parent()->typeRef() == typeRef()) {
+        // the parent hub is also a spacial node so take its node as parent
+        SpacialNodeHub *parentHub = static_cast<SpacialNodeHub*>(parent());
+
+        auto it = parentHub->m_instances.find(masterScene);
+        if (it != m_instances.end()) {
+            o3d::Node *parentNode = it->second;
+            parentNode->addSonLast(node);
+        } else {
+            // parent node not found
+            masterScene->scene()->getHierarchyTree()->getRootNode()->addSonLast(node);
+        }
+    } else {
+        // not spacial hub as parent
+        masterScene->scene()->getHierarchyTree()->getRootNode()->addSonLast(node);
+    }
+
     m_instances[masterScene] = node;
 
     O3D_MESSAGE("SpacialNodeHub created into scene");
@@ -138,11 +156,14 @@ void SpacialNodeHub::createToScene(MasterScene *masterScene)
 
 void SpacialNodeHub::removeFromScene(MasterScene *masterScene)
 {
+    Hub::removeFromScene(masterScene);
+
     auto it = m_instances.find(masterScene);
     if (it != m_instances.end()) {
         o3d::Node *node = it->second;
         m_instances.erase(it);
-        delete node;
+
+        node->getParent()->deleteChild(node);
 
         O3D_MESSAGE("SpacialNodeHub deleted from scene");
     }
