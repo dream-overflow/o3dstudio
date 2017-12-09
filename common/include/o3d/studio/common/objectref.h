@@ -359,7 +359,7 @@ public:
 
     String longUuid() const
     {
-        return String::print("%s:%s", m_projectUuid.toString(), m_uuid.toString());
+        return m_projectUuid.toString() + ":" + m_uuid.toString();
     }
 
 private:

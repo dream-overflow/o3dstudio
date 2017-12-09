@@ -39,8 +39,8 @@ public:
     virtual void setup() override;
     virtual Hub* buildHub(const String &name, Project *project, Entity *parent) override;
 
-    SceneUIElement *sceneUiElement(SceneUIElement::Mode mode);
-    Panel* panel(Panel::PanelType panelType);
+    virtual SceneUIElement *sceneUiElement(SceneUIElement::Mode mode) override;
+    virtual Panel* panel(Panel::PanelType panelType, Hub *hub) override;
 
 protected:
 };
@@ -102,6 +102,29 @@ protected:
     NodePolicy m_nodePolicy;
 
     std::map<MasterScene*, o3d::Node*> m_instances;
+};
+
+/**
+ * @brief The SpacialNodePropertyPanel
+ */
+class SpacialNodePropertyPanel : public Panel
+{
+    Q_DECLARE_TR_FUNCTIONS(SpacialNodePropertyPanel)
+
+public:
+
+    SpacialNodePropertyPanel(SpacialNodeHub *hub);
+    virtual ~SpacialNodePropertyPanel();
+
+    virtual String elementName() const;
+
+    virtual QWidget* ui();
+
+    virtual PanelType panelType() const;
+
+private:
+
+    SpacialNodeHub *m_hub;
 };
 
 } // namespace common

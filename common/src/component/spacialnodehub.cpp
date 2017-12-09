@@ -8,6 +8,8 @@
 
 #include <o3d/engine/scene/scene.h>
 #include <o3d/engine/hierarchy/hierarchytree.h>
+#include <QGroupBox>
+#include <QVBoxLayout>
 
 #include "o3d/studio/common/component/spacialnodehub.h"
 #include "o3d/studio/common/workspace/project.h"
@@ -52,13 +54,28 @@ Hub *SpacialNodeComponent::buildHub(const String &name, Project *project, Entity
     return spacialNodeHub;
 }
 
-SceneUIElement *SpacialNodeComponent::sceneUiElement(SceneUIElement::Mode mode)
+SceneUIElement *SpacialNodeComponent::sceneUiElement(SceneUIElement::Mode /*mode*/)
 {
     return nullptr;
 }
 
-Panel *SpacialNodeComponent::panel(Panel::PanelType panelType)
+Panel *SpacialNodeComponent::panel(Panel::PanelType panelType, Hub *hub)
 {
+    if (!hub) {
+        return nullptr;
+    }
+
+    if (hub->ref().strong().typeName() != m_targetName) {
+        // not a spacial node hub
+        return nullptr;
+    }
+
+    SpacialNodeHub *lhub = static_cast<SpacialNodeHub*>(hub);
+
+    if (panelType == Panel::PANEL_PROPERTY) {
+        return new SpacialNodePropertyPanel(lhub);
+    }
+
     return nullptr;
 }
 
@@ -217,4 +234,38 @@ o3d::Bool SpacialNodeHub::removeChildFromScene(MasterScene *masterScene, o3d::Sc
     }
 
     return True;
+}
+
+SpacialNodePropertyPanel::SpacialNodePropertyPanel(SpacialNodeHub *hub) :
+    m_hub(hub)
+{
+
+}
+
+SpacialNodePropertyPanel::~SpacialNodePropertyPanel()
+{
+
+}
+
+o3d::String SpacialNodePropertyPanel::elementName() const
+{
+    return "o3s::common::component::panel::property::spacialnode";
+}
+
+QWidget *SpacialNodePropertyPanel::ui()
+{
+    QWidget *widget = new QWidget();
+
+    QGroupBox *group = new QGroupBox();
+    group->setTitle(tr("Spacial Node Hub"));
+
+    widget->setLayout(new QVBoxLayout());
+    widget->layout()->addWidget(group);
+
+    return widget;
+}
+
+Panel::PanelType SpacialNodePropertyPanel::panelType() const
+{
+    return PANEL_PROPERTY;
 }

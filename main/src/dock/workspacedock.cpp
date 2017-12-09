@@ -83,7 +83,9 @@ void WorkspaceDock::onAddProject(LightRef ref)
 
     // add a new project item
     if (project) {
-        projectModel->addProject(project);
+        common::ProjectItem *item = projectModel->addProject(project);
+        QModelIndex index = projectModel->index(item->row(), 0, QModelIndex());
+        m_qtWorkspaceDock->m_treeView->expand(index);
     }
 }
 

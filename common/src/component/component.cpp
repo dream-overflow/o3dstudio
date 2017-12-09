@@ -68,7 +68,7 @@ SceneUIElement *Component::sceneUiElement(SceneUIElement::Mode)
     return nullptr;
 }
 
-Panel *Component::panel(Panel::PanelType panelType)
+Panel *Component::panel(Panel::PanelType /*panelType*/, Hub */*hub*/)
 {
     return nullptr;
 }

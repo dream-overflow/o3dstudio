@@ -127,6 +127,27 @@ o3d::Bool UiController::addToolBar(ToolBar *toolBar)
     return True;
 }
 
+o3d::Bool UiController::addPanel(Panel *panel)
+{
+    if (panel == nullptr) {
+        return False;
+    }
+
+    auto it = std::find(m_panels.begin(), m_panels.end(), panel);
+    if (it != m_panels.end()) {
+        return False;
+    }
+
+    if (panel->ui()) {
+        panel->ui()->setProperty("name", toQString(panel->elementName()));
+    }
+
+    m_panels.push_back(panel);
+    attachPanel(panel->elementName(), panel);
+
+    return True;
+}
+
 o3d::Bool UiController::removeContent(Content *content)
 {
     if (content == nullptr) {
@@ -218,6 +239,12 @@ o3d::Bool UiController::removeToolBar(const String &name)
 {
     ToolBar *ltoolBar = toolBar(name);
     return removeToolBar(ltoolBar);
+}
+
+o3d::Bool UiController::removePanel(const o3d::String &name)
+{
+    Panel *lpanel= panel(name);
+    return removePanel(lpanel);
 }
 
 o3d::Bool UiController::setActiveContent(Content *content, o3d::Bool showHide)
@@ -333,19 +360,46 @@ const ToolBar *UiController::toolBar(const String &name) const
     return nullptr;
 }
 
-o3d::Int32 UiController::numContents() const
+Panel *UiController::panel(const String &name)
 {
-    return (Int32)m_contents.size();
+    for (Panel *panel: m_panels) {
+        if (panel->elementName() == name) {
+            return panel;
+        }
+    }
+
+    return nullptr;
 }
 
-o3d::Int32 UiController::numToolBars() const
+const Panel *UiController::panel(const String &name) const
 {
-    return (Int32)m_toolBars.size();
+    for (const Panel *panel: m_panels) {
+        if (panel->elementName() == name) {
+            return panel;
+        }
+    }
+
+    return nullptr;
 }
 
-o3d::Int32 UiController::numDocks() const
+o3d::UInt32 UiController::numContents() const
 {
-    return (Int32)m_docks.size();
+    return (UInt32)m_contents.size();
+}
+
+o3d::UInt32 UiController::numToolBars() const
+{
+    return (UInt32)m_toolBars.size();
+}
+
+o3d::UInt32 UiController::numDocks() const
+{
+    return (UInt32)m_docks.size();
+}
+
+o3d::UInt32 UiController::numPanels() const
+{
+    return (UInt32)m_panels.size();
 }
 
 Content *UiController::previousContent()
@@ -396,4 +450,27 @@ Content *UiController::nextContent()
     }
 
     return (*it);
+}
+
+o3d::Bool UiController::removePanel(Panel *panel)
+{
+    if (panel == nullptr) {
+        return False;
+    }
+
+    auto it = std::find(m_panels.begin(), m_panels.end(), panel);
+    if (it != m_panels.end()) {
+        m_panels.erase(it);
+
+        detachPanel(panel->elementName(), panel);
+
+        if (panel->ui()) {
+            panel->ui()->setProperty("name", "");
+        }
+
+        panel->ui()->setParent(nullptr);
+        return True;
+    }
+
+    return False;
 }

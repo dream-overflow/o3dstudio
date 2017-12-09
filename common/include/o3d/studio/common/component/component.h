@@ -87,14 +87,15 @@ public:
      * @param mode Scene action mode (edition, selection...).
      * @return null by default, could return a different ui element per mode.
      */
-    SceneUIElement* sceneUiElement(SceneUIElement::Mode mode);
+    virtual SceneUIElement* sceneUiElement(SceneUIElement::Mode mode);
 
     /**
      * @brief panel Returns a panel according to the asked type.
      * @param panelType Type and position of the displayed panel.
+     * @param hub Related hub.
      * @return null by default.
      */
-    Panel* panel(Panel::PanelType panelType);
+    virtual Panel* panel(Panel::PanelType panelType, Hub *hub);
 
 protected:
 

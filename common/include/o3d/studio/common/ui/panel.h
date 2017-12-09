@@ -28,6 +28,8 @@ public:
     };
 
     virtual QWidget* ui() = 0;
+
+    virtual PanelType panelType() const = 0;
 };
 
 } // namespace common

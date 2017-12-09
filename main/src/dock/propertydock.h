@@ -12,9 +12,14 @@
 class QTreeView;
 
 #include <QtWidgets/QDockWidget>
+
 #include "o3d/studio/common/ui/dock.h"
+#include "o3d/studio/common/ui/panel.h"
+#include "o3d/studio/common/objectref.h"
 
 #include <o3d/core/baseobject.h>
+
+#include <map>
 
 namespace o3d {
 namespace studio {
@@ -35,7 +40,12 @@ public /*slots*/:
 
     void onSelectionChanged();
 
+    void onAttachPanel(String name, common::Panel* panel);
+    void onDetachPanel(String name, common::Panel* panel);
+
 private:
+
+    std::map<common::LightRef, common::Panel*> m_panels;   //!< Current panels
 
     class QtPropertyDock *m_qtPropertyDock;
 
