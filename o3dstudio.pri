@@ -33,6 +33,11 @@ O3S_BIN_DIR = $$join($$list($$top_builddir, "bin"), "/")
 
 CONFIG += c++14 # declarative_debug
 
+*-g++* {
+    QMAKE_CXXFLAGS += -fno-rtti
+    QMAKE_CXXFLAGS_RELEASE += -O2 -DNDEBUG -ffunction-sections  # -fvisibility=hidden
+}
+
 darwin:!minQtVersion(5, 7, 0) {
     # Qt 5.6 still sets deployment target 10.7, which does not work
     # with all C++11/14 features (e.g. std::future)
