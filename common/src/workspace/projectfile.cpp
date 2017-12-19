@@ -53,7 +53,7 @@ o3d::String ProjectFile::filename() const
     return m_project->path().makeFullFileName("project.o3dstudio");
 }
 
-const o3d::Dir &ProjectFile::path() const
+const o3d::BaseDir &ProjectFile::path() const
 {
     return m_project->path();
 }

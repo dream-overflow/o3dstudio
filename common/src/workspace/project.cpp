@@ -183,7 +183,7 @@ o3d::String Project::filename() const
     return m_path.makeFullFileName("project.o3dstudio");
 }
 
-const o3d::DiskDir &Project::path() const
+const o3d::LocalDir &Project::path() const
 {
     return m_path;
 }
@@ -201,7 +201,7 @@ ProjectInfo &Project::info()
     return *m_info;
 }
 
-o3d::Bool Project::setLocation(const DiskDir &path)
+o3d::Bool Project::setLocation(const LocalDir &path)
 {
     if (!path.exists()) {
         return False;
@@ -251,7 +251,7 @@ o3d::Bool Project::save()
 
 o3d::Bool Project::exists() const
 {
-    return m_path.exists() && m_path.check("project.o3dstudio") == Dir::SUCCESS;
+    return m_path.exists() && m_path.check("project.o3dstudio") == BaseDir::SUCCESS;
 }
 
 MasterScene *Project::masterScene()

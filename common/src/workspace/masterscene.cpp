@@ -516,7 +516,7 @@ void MasterScene::initializeDrawer()
 {
     if (!m_scene && m_renderer && m_parent && project()) {
         // once GL context is ready
-        DiskDir path(project()->path());
+        LocalDir path(project()->path());
         if (!path.isAbsolute()) {
             path.makeAbsolute();
         }

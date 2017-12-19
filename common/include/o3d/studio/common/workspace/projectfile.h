@@ -11,7 +11,7 @@
 
 #include <QtCore/QCoreApplication>
 
-#include <o3d/core/diskdir.h>
+#include <o3d/core/localdir.h>
 
 #include "../global.h"
 
@@ -42,7 +42,7 @@ public:
 
     const String& name() const;
     String filename() const;
-    const Dir& path() const;
+    const BaseDir& path() const;
 
     /**
      * @brief Initialize a new project at the specified path with name.

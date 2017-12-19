@@ -132,7 +132,6 @@ int main(int argc, char *argv[])
         // cleared log out file with new header
         o3d::Debug::instance()->setDefaultLog("objective3d.log");
         o3d::Debug::instance()->getDefaultLog().clearLog();
-        o3d::Debug::instance()->getDefaultLog().writeHeaderLog();
 
         o3d::MemoryManager::instance()->enableLog(o3d::MemoryManager::MEM_RAM, 128);
         o3d::MemoryManager::instance()->enableLog(o3d::MemoryManager::MEM_GFX);
@@ -155,8 +154,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Objective-3D Studio");
 
     o3d::FileManager::instance()->setPackExt("*.zip|*.dat|*.rc");
-    o3d::FileManager::instance()->mountArchive("o3smainresources.zip");
-    // o3d::FileManager::instance()->mountArchive("o3scommonresource.zip");
+    o3d::FileManager::instance()->mountAsset("zip://", "o3smainresources.zip");
+    // o3d::FileManager::instance()->mountAsset("zip://", "o3scommonresource.zip");
 
     o3d::studio::common::Application::instance()->start();
 
@@ -195,7 +194,6 @@ int main(int argc, char *argv[])
     o3d::studio::common::Application::instance()->stop();
     o3d::studio::common::Application::destroy();
 
-    o3d::Debug::instance()->getDefaultLog().writeFooterLog();
     o3d::Application::quit();
 
     return lExitcode;

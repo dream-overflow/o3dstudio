@@ -22,10 +22,10 @@ WorkspaceManager::WorkspaceManager() :
     BaseObject()
 {
     String homePath = fromQString(QDir::home().absolutePath());
-    DiskDir homeDir(homePath);
+    LocalDir homeDir(homePath);
 
-    if (homeDir.check(".o3dstudio") != Dir::SUCCESS) {
-        if (homeDir.makeDir(".o3dstudio") != Dir::SUCCESS) {
+    if (homeDir.check(".o3dstudio") != BaseDir::SUCCESS) {
+        if (homeDir.makeDir(".o3dstudio") != BaseDir::SUCCESS) {
             throw;
         }
     }
@@ -35,7 +35,7 @@ WorkspaceManager::WorkspaceManager() :
         throw;
     }
 
-    if (m_defaultPath.check("projects") != Dir::SUCCESS) {
+    if (m_defaultPath.check("projects") != BaseDir::SUCCESS) {
         m_defaultPath.makeDir("projects");
     }
 
@@ -49,7 +49,7 @@ WorkspaceManager::WorkspaceManager() :
         throw;
     }
 
-    if (m_defaultPath.check("workspaces") != Dir::SUCCESS) {
+    if (m_defaultPath.check("workspaces") != BaseDir::SUCCESS) {
         m_defaultPath.makeDir("workspaces");
     }
 
@@ -190,17 +190,17 @@ o3d::Bool WorkspaceManager::closeCurrent()
     return False;
 }
 
-const o3d::DiskDir &WorkspaceManager::defaultPath() const
+const o3d::LocalDir &WorkspaceManager::defaultPath() const
 {
     return m_defaultPath;
 }
 
-const o3d::DiskDir &WorkspaceManager::defaultProjectsPath() const
+const o3d::LocalDir &WorkspaceManager::defaultProjectsPath() const
 {
     return m_defaultProjectsPath;
 }
 
-const o3d::DiskDir &WorkspaceManager::defaultWorkspacesPath() const
+const o3d::LocalDir &WorkspaceManager::defaultWorkspacesPath() const
 {
     return m_defaultWorkspacesPath;
 }

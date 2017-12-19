@@ -9,7 +9,7 @@
 #ifndef _O3DS_COMMON_WORKSPACEMANAGER_H
 #define _O3DS_COMMON_WORKSPACEMANAGER_H
 
-#include <o3d/core/diskdir.h>
+#include <o3d/core/localdir.h>
 #include <o3d/core/stringlist.h>
 #include <o3d/core/baseobject.h>
 
@@ -64,10 +64,10 @@ public:
      * @brief Default workspaces location directory.
      * @return
      */
-    const DiskDir& defaultPath() const;
+    const LocalDir& defaultPath() const;
 
-    const DiskDir& defaultProjectsPath() const;
-    const DiskDir& defaultWorkspacesPath() const;
+    const LocalDir& defaultProjectsPath() const;
+    const LocalDir& defaultWorkspacesPath() const;
 
 public /*signals*/:
 
@@ -76,9 +76,9 @@ public /*signals*/:
 
 private:
 
-    DiskDir m_defaultPath;
-    DiskDir m_defaultProjectsPath;
-    DiskDir m_defaultWorkspacesPath;
+    LocalDir m_defaultPath;
+    LocalDir m_defaultProjectsPath;
+    LocalDir m_defaultWorkspacesPath;
 
     T_StringList m_foundWorkspaces;
     Workspace* m_current{nullptr};

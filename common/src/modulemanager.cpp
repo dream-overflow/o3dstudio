@@ -13,7 +13,7 @@
 
 #include <o3d/core/debug.h>
 #include <o3d/core/dynamiclibrary.h>
-#include <o3d/core/diskdir.h>
+#include <o3d/core/localdir.h>
 
 #include <algorithm>
 
@@ -90,7 +90,7 @@ void ModuleManager::setPluginsFilters(const String &filters)
 void ModuleManager::searchModules()
 {
     // lookup for plugins directory
-    DiskDir dir(Application::instance()->appDir() + '/'  + m_path);
+    LocalDir dir(Application::instance()->appDir() + '/'  + m_path);
     if (!dir.isAbsolute()) {
         dir.makeAbsolute();
     }

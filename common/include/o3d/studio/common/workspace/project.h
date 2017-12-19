@@ -19,7 +19,7 @@
 #include "../exception.h"
 #include "../objectref.h"
 
-#include <o3d/core/diskdir.h>
+#include <o3d/core/localdir.h>
 
 namespace o3d {
 namespace studio {
@@ -75,9 +75,9 @@ public:
     virtual Bool deletable() const override;
 
     String filename() const;
-    const DiskDir& path() const;
+    const LocalDir& path() const;
 
-    Bool setLocation(const DiskDir &path);
+    Bool setLocation(const LocalDir &path);
 
     const ProjectInfo& info() const;
     ProjectInfo& info();
@@ -226,7 +226,7 @@ private:
     Workspace *m_workspace;    //!< Workspace where the projet is currently loaded
 
     String m_filename;         //!< Project file name
-    DiskDir m_path;            //!< Project path
+    LocalDir m_path;            //!< Project path
 
     ProjectFile *m_projectFile;
 

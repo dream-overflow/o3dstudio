@@ -15,7 +15,7 @@
 #include "o3d/studio/common/settings.h"
 #include "o3d/studio/common/messenger.h"
 
-#include <o3d/core/diskdir.h>
+#include <o3d/core/localdir.h>
 #include <o3d/core/timer.h>
 
 using namespace o3d::studio::common;
@@ -181,11 +181,11 @@ o3d::Bool Workspace::closeProject(const LightRef &ref)
 
 o3d::Bool Workspace::hasProject(String location) const
 {
-    DiskDir path(location);
+    LocalDir path(location);
 
     auto cit = m_loadedProjects.cbegin();
     while (cit != m_loadedProjects.cend()) {
-        if (cit->second->path() == DiskDir(location)) {
+        if (cit->second->path() == LocalDir(location)) {
             return True;
         }
 

@@ -39,23 +39,23 @@ void Store::initProject(Project *project, Version /*version*/)
         O3D_ERROR(E_StoreException(fromQString(tr("Project path exists"))));
     }
 
-    if (Application::instance()->workspaces().defaultProjectsPath().makeDir(project->name()) != Dir::SUCCESS) {
+    if (Application::instance()->workspaces().defaultProjectsPath().makeDir(project->name()) != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Unable to create the project directory"));
     }
 
-    if (project->path().makeDir("items") != Dir::SUCCESS) {
+    if (project->path().makeDir("items") != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Unable to create the project items directory"));
     }
 
-    if (project->path().makeDir("cache") != Dir::SUCCESS) {
+    if (project->path().makeDir("cache") != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Unable to create the project cache directory"));
     }
 
-    if (project->path().makeDir("tmp") != Dir::SUCCESS) {
+    if (project->path().makeDir("tmp") != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Unable to create the project temporary directory"));
     }
 
-    if (project->path().makeDir("targets") != Dir::SUCCESS) {
+    if (project->path().makeDir("targets") != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Unable to create the project targets path"));
     }
 
@@ -83,31 +83,31 @@ void Store::loadProject(Project *project)
         O3D_ERROR(E_StoreException(fromQString(tr("Project directory doesn't exists"))));
     }
 
-    if (project->path().check("items") != Dir::SUCCESS) {
+    if (project->path().check("items") != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Project items directory is missing"));
     }
 
-    if (project->path().check("cache") != Dir::SUCCESS) {
+    if (project->path().check("cache") != BaseDir::SUCCESS) {
         O3D_WARNING("Project cache directory is missing");
 
-        if (project->path().makeDir("cache") != Dir::SUCCESS) {
+        if (project->path().makeDir("cache") != BaseDir::SUCCESS) {
             O3D_ERROR(E_StoreException("Unable to create the project cache directory"));
         }
     }
 
-    if (project->path().check("tmp") != Dir::SUCCESS) {
+    if (project->path().check("tmp") != BaseDir::SUCCESS) {
         O3D_WARNING("Project temporary directory is missing");
 
-        if (project->path().makeDir("tmp") != Dir::SUCCESS) {
+        if (project->path().makeDir("tmp") != BaseDir::SUCCESS) {
             O3D_ERROR(E_StoreException("Unable to create the project temporary directory"));
         }
     }
 
-    if (project->path().check("targets") != Dir::SUCCESS) {
+    if (project->path().check("targets") != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Project targets directory is missing"));
     }
 
-    if (project->path().check("README.txt") != Dir::SUCCESS) {
+    if (project->path().check("README.txt") != BaseDir::SUCCESS) {
         O3D_WARNING("Project readme file is missing");
 
         FileOutStream readmeFile(project->path().makeFullFileName("README.txt"));
@@ -115,7 +115,7 @@ void Store::loadProject(Project *project)
         readmeFile.close();
     }
 
-    if (project->path().check("LICENSE.txt") != Dir::SUCCESS) {
+    if (project->path().check("LICENSE.txt") != BaseDir::SUCCESS) {
         O3D_WARNING("Project license file is missing");
 
         FileOutStream licenseFile(project->path().makeFullFileName("LICENSE.txt"));
@@ -123,7 +123,7 @@ void Store::loadProject(Project *project)
         licenseFile.close();
     }
 
-    if (project->path().check("INFO.txt") != Dir::SUCCESS) {
+    if (project->path().check("INFO.txt") != BaseDir::SUCCESS) {
         O3D_WARNING("Project information file is missing");
 
         FileOutStream infoFile(project->path().makeFullFileName("INFO.txt"));
@@ -143,31 +143,31 @@ void Store::saveProject(Project *project)
         O3D_ERROR(E_StoreException(fromQString(tr("Project directory doesn't exists"))));
     }
 
-    if (project->path().check("items") != Dir::SUCCESS) {
+    if (project->path().check("items") != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Project items directory is missing"));
     }
 
-    if (project->path().check("cache") != Dir::SUCCESS) {
+    if (project->path().check("cache") != BaseDir::SUCCESS) {
         O3D_WARNING("Project cache directory is missing");
 
-        if (project->path().makeDir("cache") != Dir::SUCCESS) {
+        if (project->path().makeDir("cache") != BaseDir::SUCCESS) {
             O3D_ERROR(E_StoreException("Unable to create the project cache directory"));
         }
     }
 
-    if (project->path().check("tmp") != Dir::SUCCESS) {
+    if (project->path().check("tmp") != BaseDir::SUCCESS) {
         O3D_WARNING("Project temporary directory is missing");
 
-        if (project->path().makeDir("tmp") != Dir::SUCCESS) {
+        if (project->path().makeDir("tmp") != BaseDir::SUCCESS) {
             O3D_ERROR(E_StoreException("Unable to create the project temporary directory"));
         }
     }
 
-    if (project->path().check("targets") != Dir::SUCCESS) {
+    if (project->path().check("targets") != BaseDir::SUCCESS) {
         O3D_ERROR(E_StoreException("Project targets directory is missing"));
     }
 
-    if (project->path().check("README.txt") != Dir::SUCCESS) {
+    if (project->path().check("README.txt") != BaseDir::SUCCESS) {
         O3D_WARNING("Project readme file is missing");
 
         FileOutStream readmeFile(project->path().makeFullFileName("README.txt"));
@@ -175,7 +175,7 @@ void Store::saveProject(Project *project)
         readmeFile.close();
     }
 
-    if (project->path().check("LICENSE.txt") != Dir::SUCCESS) {
+    if (project->path().check("LICENSE.txt") != BaseDir::SUCCESS) {
         O3D_WARNING("Project license file is missing");
 
         FileOutStream licenseFile(project->path().makeFullFileName("LICENSE.txt"));
@@ -183,7 +183,7 @@ void Store::saveProject(Project *project)
         licenseFile.close();
     }
 
-    if (project->path().check("INFO.txt") != Dir::SUCCESS) {
+    if (project->path().check("INFO.txt") != BaseDir::SUCCESS) {
         O3D_WARNING("Project information file is missing");
 
         FileOutStream infoFile(project->path().makeFullFileName("INFO.txt"));
@@ -198,52 +198,52 @@ void Store::deleteProject(Project *project)
         return;
     }
 
-    DiskDir path(project->path());
+    LocalDir path(project->path());
 
     if (!path.exists()) {
         O3D_ERROR(E_StoreException(fromQString(tr("Project directory doesn't exists"))));
     }
 
     // items
-    if (path.check("items") == Dir::SUCCESS) {
+    if (path.check("items") == BaseDir::SUCCESS) {
         // @todo delete all its content
 
         path.removeDir("items");
     }
 
     // cache
-    if (path.check("cache") == Dir::SUCCESS) {
+    if (path.check("cache") == BaseDir::SUCCESS) {
         // @todo delete all its content
 
         path.removeDir("cache");
     }
 
     // tmp
-    if (path.check("tmp") == Dir::SUCCESS) {
+    if (path.check("tmp") == BaseDir::SUCCESS) {
         // @todo delete all its content
 
         path.removeDir("tmp");
     }
 
     // targets
-    if (path.check("targets") == Dir::SUCCESS) {
+    if (path.check("targets") == BaseDir::SUCCESS) {
         // @todo delete all its content
 
         path.removeDir("targets");
     }
 
     // README
-    if (path.check("README.txt") == Dir::SUCCESS) {
+    if (path.check("README.txt") == BaseDir::SUCCESS) {
         path.removeFile("README.txt");
     }
 
     // LICENSE
-    if (path.check("LICENSE.txt") == Dir::SUCCESS) {
+    if (path.check("LICENSE.txt") == BaseDir::SUCCESS) {
         path.removeFile("LICENSE.txt");
     }
 
     // INFO
-    if (path.check("INFO.txt") == Dir::SUCCESS) {
+    if (path.check("INFO.txt") == BaseDir::SUCCESS) {
         path.removeFile("INFO.txt");
     }
 
