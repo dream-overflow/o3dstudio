@@ -9,7 +9,11 @@
 #include <o3d/engine/scene/scene.h>
 #include <o3d/engine/hierarchy/hierarchytree.h>
 #include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
 #include <QVBoxLayout>
+
+#include "o3d/studio/common/ui/uiutils.h"
 
 #include "o3d/studio/common/component/spacialnodehub.h"
 #include "o3d/studio/common/workspace/project.h"
@@ -256,11 +260,19 @@ QWidget *SpacialNodePropertyPanel::ui()
 {
     QWidget *widget = new QWidget();
 
-    QGroupBox *group = new QGroupBox();
-    group->setTitle(tr("Spacial Node Hub"));
-
+    // @todo so we need a vlayout
+    // a btn group, just use the name
+    // plus
     widget->setLayout(new QVBoxLayout());
-    widget->layout()->addWidget(group);
+
+    QPushButton *groupButton = new QPushButton(
+                UiUtils::tintIcon(":/icons/arrow_drop_down_circle_black.svg"),
+                tr("Spacial Node Hub"));
+
+    // groupButton->setStyleSheet("border: 1px solid grey");
+    groupButton->setMinimumHeight(24);
+    groupButton->setMaximumHeight(24);
+    widget->layout()->addWidget(groupButton);
 
     return widget;
 }

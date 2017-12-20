@@ -124,7 +124,7 @@ void PropertyDock::onSelectionChanged()
             panel = it->second;
             m_panels.erase(it);
 
-            // @todo sync...
+            // @todo sync data before delete or done by dtor...
             delete panel;
 
             QString objName = toQString(hub->ref().light().longId());
@@ -197,6 +197,8 @@ void PropertyDock::setupUi()
 
     QWidget *widget = new QWidget();
     widget->setLayout(new QVBoxLayout());
+    widget->layout()->setAlignment(Qt::AlignTop);
+    widget->layout()->setContentsMargins(0, 2, 0, 2);
 
     m_qtPropertyDock->setWidget(widget);
 }
