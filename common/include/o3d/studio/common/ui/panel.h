@@ -1,5 +1,5 @@
 /**
- * @brief Common UI panrel element
+ * @brief Common UI panel element and toolset
  * @copyright Copyright (C) 2017 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
  * @date 2017-12-08

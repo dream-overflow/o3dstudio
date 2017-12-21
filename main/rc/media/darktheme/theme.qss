@@ -629,6 +629,27 @@ QPushButton:pressed
     padding-bottom: -17px;
 }
 
+QPushButton:flat,QPushButton:flat:focus
+{
+    background: transparent;
+    border: 0px none;
+    border-radius: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+QPushButton:flat:hover
+{
+    border: 0px none;
+    background: #111111;
+}
+
+QPushButton:flat:pressed
+{
+    border: 0px none;
+    background: #222222;
+}
+
 QComboBox
 {
     selection-background-color: #3daee9;

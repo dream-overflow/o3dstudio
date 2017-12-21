@@ -8,12 +8,9 @@
 
 #include <o3d/engine/scene/scene.h>
 #include <o3d/engine/hierarchy/hierarchytree.h>
-#include <QGroupBox>
-#include <QLabel>
-#include <QPushButton>
-#include <QVBoxLayout>
 
 #include "o3d/studio/common/ui/uiutils.h"
+#include "o3d/studio/common/ui/panelbuilder.h"
 
 #include "o3d/studio/common/component/spacialnodehub.h"
 #include "o3d/studio/common/workspace/project.h"
@@ -28,7 +25,7 @@ SpacialNodeComponent::SpacialNodeComponent()
     m_name = "o3s::common::component::spacialhub";
     m_targetName = "o3s::common::hub::spacialhub";
 
-    m_label = "Spacial Node Hub";
+    m_label = "Spacial node hub";
     m_icon = ":/icons/3d_rotation_black.svg";
 }
 
@@ -258,23 +255,10 @@ o3d::String SpacialNodePropertyPanel::elementName() const
 
 QWidget *SpacialNodePropertyPanel::ui()
 {
-    QWidget *widget = new QWidget();
+    PanelBuilder pb(this, fromQString(tr("Spacial node hub")));
+    pb.addVector3(fromQString(tr("Position")), "position");
 
-    // @todo so we need a vlayout
-    // a btn group, just use the name
-    // plus
-    widget->setLayout(new QVBoxLayout());
-
-    QPushButton *groupButton = new QPushButton(
-                UiUtils::tintIcon(":/icons/arrow_drop_down_circle_black.svg"),
-                tr("Spacial Node Hub"));
-
-    // groupButton->setStyleSheet("border: 1px solid grey");
-    groupButton->setMinimumHeight(24);
-    groupButton->setMaximumHeight(24);
-    widget->layout()->addWidget(groupButton);
-
-    return widget;
+    return pb.ui();
 }
 
 Panel::PanelType SpacialNodePropertyPanel::panelType() const

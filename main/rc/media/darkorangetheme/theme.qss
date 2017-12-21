@@ -122,6 +122,27 @@ QPushButton:pressed
     background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #2d2d2d, stop: 0.1 #2b2b2b, stop: 0.5 #292929, stop: 0.9 #282828, stop: 1 #252525);
 }
 
+QPushButton:flat
+{
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+QPushButton:flat:hover
+{
+    border: 0px none;
+    background: #111111;
+}
+
+QPushButton:flat:pressed
+{
+    border: 0px none;
+    background: #222222;
+}
+
 QComboBox
 {
     selection-background-color: #ffaa00;

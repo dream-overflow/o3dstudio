@@ -90,7 +90,9 @@ SOURCES += \
     src/ui/scene/sceneuielement.cpp \
     src/ui/scene/infohud.cpp \
     src/workspace/masterscenedrawer.cpp \
-    src/ui/scene/cameramanipulator.cpp
+    src/ui/scene/cameramanipulator.cpp \
+    src/ui/panelbuilder.cpp \
+    src/ui/panelproperty/panelproperty.cpp
 
 
 HEADERS += \ 
@@ -174,7 +176,10 @@ HEADERS += \
     include/o3d/studio/common/workspace/masterscenedrawer.h \
     include/o3d/studio/common/commontype.h \
     include/o3d/studio/common/ui/scene/cameramanipulator.h \
-    include/o3d/studio/common/ui/panel.h
+    include/o3d/studio/common/ui/panel.h \
+    include/o3d/studio/common/ui/panelbuilder.h \
+    include/o3d/studio/common/ui/property/panelproperty.h \
+    include/o3d/studio/common/ui/property/vector3property.h
 
 LIBS += -lobjective3d-dbg
 
