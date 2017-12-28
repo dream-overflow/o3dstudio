@@ -99,7 +99,11 @@ o3d::Int32 processEvtManager(void *) {
 
 o3d::Int32 mainTimer(void *data) {
     // o3d::System::print(o3d::String::print("1> %i", o3d::System::getMsTime()), "");
-    o3d::Application::run(o3d::True);
+    // o3d::Application::run(o3d::True);
+    if (o3d::EvtManager::instance()->isPendingEvent()) {
+        o3d::EvtManager::instance()->processEvent();
+    }
+
     return 0;
 }
 
@@ -130,8 +134,8 @@ int main(int argc, char *argv[])
         o3d::EvtManager::instance()->setWakeUpCallback(new o3d::CallbackFunction(processEvtManager));
 
         // cleared log out file with new header
-        o3d::Debug::instance()->setDefaultLog("objective3d.log");
-        o3d::Debug::instance()->getDefaultLog().clearLog();
+        // o3d::Debug::instance()->setDefaultLog("objective3d.log");
+        // o3d::Debug::instance()->getDefaultLog().clearLog();
 
         o3d::MemoryManager::instance()->enableLog(o3d::MemoryManager::MEM_RAM, 128);
         o3d::MemoryManager::instance()->enableLog(o3d::MemoryManager::MEM_GFX);

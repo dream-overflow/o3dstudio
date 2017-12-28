@@ -53,9 +53,8 @@ void QtRenderer::create(o3d::AppWindow *appWindow, o3d::Bool debug, Renderer *sh
 
     m_state.enable(STATE_DEFINED);
 
-    m_version = o3d::Renderer::Version(
-                    m_glWidget->context()->format().version().first * 100 +
-                    m_glWidget->context()->format().version().second * 10);
+    m_version = m_glWidget->context()->format().version().first * 100 +
+                m_glWidget->context()->format().version().second * 10;
 
     m_appWindow = nullptr;
 
@@ -97,7 +96,7 @@ void QtRenderer::destroy()
         m_depth = m_bpp = m_stencil = m_samples = 0;
 
         m_state.zero();
-        m_version = OGL_UNDEFINED;
+        m_version = 0;
 
         m_glErrno = GL_NO_ERROR;
     }
