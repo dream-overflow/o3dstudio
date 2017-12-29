@@ -99,10 +99,10 @@ o3d::Int32 processEvtManager(void *) {
 
 o3d::Int32 mainTimer(void *data) {
     // o3d::System::print(o3d::String::print("1> %i", o3d::System::getMsTime()), "");
-    // o3d::Application::run(o3d::True);
-    if (o3d::EvtManager::instance()->isPendingEvent()) {
-        o3d::EvtManager::instance()->processEvent();
-    }
+    o3d::Application::run(o3d::True);
+//    if (o3d::EvtManager::instance()->isPendingEvent()) {
+//        o3d::EvtManager::instance()->processEvent();
+//    }
 
     return 0;
 }
