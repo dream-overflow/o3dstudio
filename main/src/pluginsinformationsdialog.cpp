@@ -229,10 +229,14 @@ void PluginsInformationsDialog::setupCategories()
     // add loaded modules
     QString moduleName = "";
     common::PluginItem *itemParent = nullptr;
-    common::PluginItem *rootItem = static_cast<common::PluginItem*>(model->index(0, 0, QModelIndex()).internalPointer());
+    common::PluginItem *rootItem = model->rootItem();
 
     for (String moduleName : moduleManager->moduleList()) {
         const common::Module* module = moduleManager->module(moduleName);
+        if (!module) {
+            continue;
+        }
+
         const common::ModuleInfo info = module->provideInfo();
 
         QList<QVariant> data;

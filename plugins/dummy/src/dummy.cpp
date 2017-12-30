@@ -29,7 +29,7 @@ Dummy::Dummy(const String &name, DynamicLibrary *library) :
 
     m_properties["vendor"] = "Dream Overflow";
     m_properties["group"] = "Build system";
-    m_properties["url"] = "http://o3d.dreamoverflow.com";
+    m_properties["url"] = "http://o3dstudio.dreamoverflow.org";
     m_properties["plateforms"] = "all";
 
     m_properties["version"] = "1.0.0";

@@ -231,11 +231,19 @@ o3d::Bool Application::start()
 
     m_commandManager->begin();
 
-    // alway load o3sdummy for testing
-    Module *o3sdummy = ModuleManager::instance()->load("o3sdummy");
-    if (o3sdummy != nullptr) {
-        o3sdummy->start();
+    // auto load all found modules (@todo need an auto load list)
+    T_StringList modules = ModuleManager::instance()->moduleList();
+    for (String name : modules) {
+        Module *module = ModuleManager::instance()->load(name);
+        if (module != nullptr) {
+            module->start();
+        }
     }
+
+//    Module *o3sdummy = ModuleManager::instance()->load("o3sdummy");
+//    if (o3sdummy != nullptr) {
+//        o3sdummy->start();
+//    }
 
     m_started = True;
     return True;

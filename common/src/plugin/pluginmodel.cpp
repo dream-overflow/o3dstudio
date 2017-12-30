@@ -143,6 +143,11 @@ QVariant PluginModel::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
+PluginItem *PluginModel::rootItem()
+{
+    return m_rootItem;
+}
+
 static QString makeParentPath(const QStringList &path, int minus) {
     QString parentPath = "";
     for (int i = 0; i < path.length() - minus; ++i) {
