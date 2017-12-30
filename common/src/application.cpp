@@ -20,6 +20,8 @@
 #include "o3d/studio/common/command/commandmanager.h"
 #include "o3d/studio/common/storage/store.h"
 #include "o3d/studio/common/workspace/selection.h"
+#include "o3d/studio/common/importer/importerregistry.h"
+#include "o3d/studio/common/builder/builderregistry.h"
 
 #include <o3d/core/application.h>
 #include <o3d/core/filemanager.h>
@@ -44,6 +46,8 @@ Application::Application() :
     // instanciate, take care of ordering
     m_typeRegistry = new TypeRegistry();
     m_messenger = new Messenger();
+    m_importerRegistry = new ImporterRegistry();
+    m_builderRegistry = new BuilderRegistry();
     m_selection = new Selection();
     m_commandManager = new CommandManager();
     m_store = new Store();
@@ -54,6 +58,8 @@ Application::Application() :
     // initialize
     m_commandManager->initialize();
     m_componentRegistry->initialize();
+    m_importerRegistry->initialize();
+    m_builderRegistry->initialize();
 }
 
 Application::~Application()
@@ -65,6 +71,8 @@ Application::~Application()
     delete m_commandManager;
     delete m_store;
     delete m_componentRegistry;
+    delete m_importerRegistry;
+    delete m_builderRegistry;
     delete m_messenger;
     delete m_typeRegistry;
 }
@@ -191,6 +199,26 @@ TypeRegistry &Application::types()
 const TypeRegistry &Application::types() const
 {
     return *m_typeRegistry;
+}
+
+ImporterRegistry &Application::importers()
+{
+    return *m_importerRegistry;
+}
+
+const ImporterRegistry &Application::importers() const
+{
+    return *m_importerRegistry;
+}
+
+BuilderRegistry &Application::builders()
+{
+    return *m_builderRegistry;
+}
+
+const BuilderRegistry &Application::builders() const
+{
+    return *m_builderRegistry;
 }
 
 o3d::Bool Application::start()

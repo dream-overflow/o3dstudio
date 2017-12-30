@@ -42,6 +42,18 @@ const TypeRef &TypeRef::component()
     return projectTypeRef;
 }
 
+const TypeRef &TypeRef::importer()
+{
+    static TypeRef projectTypeRef = TypeRef(IMPORTER_TYPE_ID, IMPORTER_TYPE_ID, IMPORTER_TYPE_STRING);
+    return projectTypeRef;
+}
+
+const TypeRef &TypeRef::builder()
+{
+    static TypeRef projectTypeRef = TypeRef(BUILDER_TYPE_ID, BUILDER_TYPE_ID, BUILDER_TYPE_STRING);
+    return projectTypeRef;
+}
+
 TypeRef::TypeRef() :
     m_id(0),
     m_name()

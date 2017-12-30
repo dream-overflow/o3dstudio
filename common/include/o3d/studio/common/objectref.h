@@ -31,7 +31,9 @@ enum EntityBaseType
     FRAGMENT_TYPE_ID = 3,
     ASSET_TYPE_ID = 4,
     COMPONENT_TYPE_ID = 5,
-    MAX_TYPE_ID = COMPONENT_TYPE_ID
+    IMPORTER_TYPE_ID = 6,
+    BUILDER_TYPE_ID = 7,
+    MAX_TYPE_ID = BUILDER_TYPE_ID
 };
 
 constexpr char PROJECT_TYPE_STRING[] = "o3s::project";
@@ -39,6 +41,8 @@ constexpr char HUB_TYPE_STRING[] = "o3s::hub";
 constexpr char FRAGMENT_TYPE_STRING[] = "o3s::fragment";
 constexpr char ASSET_TYPE_STRING[] = "o3s::asset";
 constexpr char COMPONENT_TYPE_STRING[] = "o3s::component";
+constexpr char IMPORTER_TYPE_STRING[] = "o3s::importer";
+constexpr char BUILDER_TYPE_STRING[] = "o3s::builder";
 
 /**
  * @brief Permit the identification of a type.
@@ -54,6 +58,8 @@ public:
     static const TypeRef& fragment();
     static const TypeRef& asset();
     static const TypeRef& component();
+    static const TypeRef& importer();
+    static const TypeRef& builder();
 
     TypeRef();
     TypeRef(EntityBaseType baseType, UInt32 id, const String &name);

@@ -26,6 +26,8 @@ class Selection;
 class Messenger;
 class ComponentRegistry;
 class TypeRegistry;
+class ImporterRegistry;
+class BuilderRegistry;
 
 class O3S_API Application
 {
@@ -90,6 +92,12 @@ public:
     TypeRegistry& types();
     const TypeRegistry& types() const;
 
+    ImporterRegistry& importers();
+    const ImporterRegistry& importers() const;
+
+    BuilderRegistry& builders();
+    const BuilderRegistry& builders() const;
+
     //
     // Factories
     //
@@ -109,6 +117,8 @@ private:
     Messenger *m_messenger;
     ComponentRegistry *m_componentRegistry;
     TypeRegistry *m_typeRegistry;
+    ImporterRegistry *m_importerRegistry;
+    BuilderRegistry *m_builderRegistry;
 
     Bool m_started;               //!< Started application
 

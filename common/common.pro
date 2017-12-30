@@ -92,7 +92,9 @@ SOURCES += \
     src/workspace/masterscenedrawer.cpp \
     src/ui/scene/cameramanipulator.cpp \
     src/ui/panelbuilder.cpp \
-    src/ui/panelproperty/panelproperty.cpp
+    src/ui/panelproperty/panelproperty.cpp \
+    src/importer/importerregistry.cpp \
+    src/builder/builderregistry.cpp
 
 
 HEADERS += \ 
@@ -179,7 +181,9 @@ HEADERS += \
     include/o3d/studio/common/ui/panel.h \
     include/o3d/studio/common/ui/panelbuilder.h \
     include/o3d/studio/common/ui/property/panelproperty.h \
-    include/o3d/studio/common/ui/property/vector3property.h
+    include/o3d/studio/common/ui/property/vector3property.h \
+    include/o3d/studio/common/importer/importerregistry.h \
+    include/o3d/studio/common/builder/builderregistry.h
 
 LIBS += -lobjective3d-dbg
 

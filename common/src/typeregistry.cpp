@@ -21,11 +21,15 @@ TypeRegistry::TypeRegistry(BaseObject *parent) :
     m_typeRefs[FRAGMENT_TYPE_STRING] = TypeRef::fragment();
     m_typeRefs[ASSET_TYPE_STRING] = TypeRef::asset();
     m_typeRefs[COMPONENT_TYPE_STRING] = TypeRef::component();
+    m_typeRefs[IMPORTER_TYPE_STRING] = TypeRef::importer();
+    m_typeRefs[BUILDER_TYPE_STRING] = TypeRef::builder();
 
     m_typeRefsById[TypeRef::project().id()] = TypeRef::project();
     m_typeRefsById[TypeRef::hub().id()] = TypeRef::hub();
     m_typeRefsById[TypeRef::fragment().id()] = TypeRef::fragment();
     m_typeRefsById[TypeRef::component().id()] = TypeRef::component();
+    m_typeRefsById[TypeRef::importer().id()] = TypeRef::importer();
+    m_typeRefsById[TypeRef::builder().id()] = TypeRef::builder();
 
     m_nextId = MAX_TYPE_ID + 1;
 }
