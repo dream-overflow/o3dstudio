@@ -57,8 +57,8 @@ public:
     Hub* hub();
     const Hub* hub() const;
 
-    virtual Bool serializeContent(OutStream &stream) const;
-    virtual Bool deserializeContent(InStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const override;
+    virtual Bool deserializeContent(InStream &stream) override;
 
 private:
 

@@ -1,10 +1,9 @@
 !isEmpty(O3DSTUDIO_PRI_INCLUDED):error("qtcreator.pri already included")
 O3DSTUDIO_PRI_INCLUDED = 1
 
-O3DSTUDIO_VERSION = 0.1
-VERSION = $$O3DSTUDIO_VERSION
-O3DSTUDIO_COPYRIGHT_YEAR = 2017
-BINARY_ARTIFACTS_BRANCH = master
+#
+# Environment and compiler switch
+#
 
 O3S_BUILD_ENV = $$getenv(VIRTUAL_ENV)
 isEmpty($$O3S_BUILD_ENV) {
@@ -17,26 +16,55 @@ isEmpty(BUILD_PREFIX) {
     macx: BUILD_PREFIX = /usr/local
 }
 
+ENV_CC = $$getenv(CC)
+!isEmpty($$ENV_CC) {
+    QMAKE_CC = $$ENV_CC
+}
+
+ENV_CXX = $$getenv(CXX)
+!isEmpty($$ENV_CXX) {
+    QMAKE_CXX = $$ENV_CXX
+}
+
+ENV_AR = $$getenv(AR)
+!isEmpty($$ENV_AR) {
+    QMAKE_AR_CMD = $$ENV_AR
+}
+
+#ENV_LD = $$getenv(LD)
+#!isEmpty($$ENV_LD) {
+#    QMAKE_LINK = $$ENV_LD
+#}
+
+#
+# Global
+#
+
+O3DSTUDIO_VERSION = 0.1
+VERSION = $$O3DSTUDIO_VERSION
+O3DSTUDIO_COPYRIGHT_YEAR = 2017
+BINARY_ARTIFACTS_BRANCH = master
+
 O3S_BIN_DIR = $$join($$list($$top_builddir, "bin"), "/")
 
-#CONFIG(debug, debug|release) {
+CONFIG(debug, debug|release) {
 #    O3S_BUILD_TARGET_MODE = "-dbg"
-#} else {
+} else {
 #    CONFIG(profile, profile|release) {
 #        O3S_BUILD_TARGET_MODE = "-pro"
 #    } else {
 #        O3S_BUILD_TARGET_MODE = ""
 #    }
-#}
+}
 
 # O3S_BIN_DIR = $$absolute_path($$join($$list($$PWD, "..", "build-o3dstudio-$$O3S_BUILD_ENV$$O3S_BUILD_TARGET_MODE", "bin"), "/"))
 
-CONFIG += c++14 # declarative_debug
+CONFIG += c++14  # declarative_debug
 
-*-g++* {
+# *-g++* {
     QMAKE_CXXFLAGS += -fno-rtti
     QMAKE_CXXFLAGS_RELEASE += -O2 -DNDEBUG -ffunction-sections  # -fvisibility=hidden
-}
+# }
 
 darwin:!minQtVersion(5, 7, 0) {
     # Qt 5.6 still sets deployment target 10.7, which does not work

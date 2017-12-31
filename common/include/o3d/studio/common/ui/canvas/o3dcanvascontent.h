@@ -86,23 +86,23 @@ public slots:
 
 protected:
 
-    virtual void closeEvent(QCloseEvent*);
+    virtual void closeEvent(QCloseEvent*) override;
 
     virtual void initializeGL() override;
     virtual void paintGL() override;
     virtual void resizeGL(int w, int h) override;
 
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseReleaseEvent(QMouseEvent *event);
-    virtual void mouseDoubleClickEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent *event);
-    virtual void wheelEvent(QWheelEvent *event);
-    virtual void keyPressEvent(QKeyEvent *event);
-    virtual void keyReleaseEvent(QKeyEvent *event);
-    virtual void focusInEvent(QFocusEvent *event);
-    virtual void focusOutEvent(QFocusEvent *event);
-    virtual void enterEvent(QEvent *event);
-    virtual void leaveEvent(QEvent *event);
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    virtual void mouseMoveEvent(QMouseEvent *event) override;
+    virtual void wheelEvent(QWheelEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void keyReleaseEvent(QKeyEvent *event) override;
+    virtual void focusInEvent(QFocusEvent *event) override;
+    virtual void focusOutEvent(QFocusEvent *event) override;
+    virtual void enterEvent(QEvent *event) override;
+    virtual void leaveEvent(QEvent *event) override;
 
 private:
 
