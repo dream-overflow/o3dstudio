@@ -132,3 +132,6 @@ defineTest(copyToDestdir) {
 
 # o3d in debug @todo for both
 INCLUDEPATH += $$(PREFIX)/lib/objective3d-dbg/
+
+DISTFILES += \
+    $$PWD/cmake/FindObjective3DStudio.cmake

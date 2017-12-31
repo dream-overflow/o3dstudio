@@ -231,12 +231,17 @@ o3d::Bool Application::start()
 
     m_commandManager->begin();
 
-    // auto load all found modules (@todo need an auto load list)
+    // auto load all found modules
+    // @todo need an auto load list
     T_StringList modules = ModuleManager::instance()->moduleList();
     for (String name : modules) {
         Module *module = ModuleManager::instance()->load(name);
         if (module != nullptr) {
-            module->start();
+            try {
+                module->start();
+            } catch (E_BaseException &e) {
+                // continue with next
+            }
         }
     }
 
