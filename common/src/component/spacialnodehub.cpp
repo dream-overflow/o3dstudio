@@ -8,9 +8,13 @@
 
 #include <o3d/engine/scene/scene.h>
 #include <o3d/engine/hierarchy/hierarchytree.h>
+#include <o3d/engine/object/mtransform.h>
+#include <o3d/engine/object/ftransform.h>
+#include <o3d/engine/object/dqtransform.h>
 
 #include "o3d/studio/common/ui/uiutils.h"
 #include "o3d/studio/common/ui/panelbuilder.h"
+#include "o3d/studio/common/ui/property/vector3property.h"
 
 #include "o3d/studio/common/component/spacialnodehub.h"
 #include "o3d/studio/common/workspace/project.h"
@@ -85,7 +89,8 @@ SpacialNodeHub::SpacialNodeHub(const String &name, Entity *parent) :
     m_nodePolicy(POLICY_DEFAULT),
     m_instances()
 {
-
+    MTransform *mainTransform = new MTransform;
+    m_transforms.push_back(mainTransform);
 }
 
 SpacialNodeHub::~SpacialNodeHub()
@@ -194,11 +199,31 @@ void SpacialNodeHub::syncWithScene(MasterScene *masterScene)
         node->setName(m_name);
 
         // o3d => hub
+        o3d::Transform *nodeTransform = node->getTransform();
+        if (nodeTransform) {
+            o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
 
-        // nothing to do
+            nodeTransform->setPosition(mainTransform->getPosition());
+            nodeTransform->setRotation(mainTransform->getRotation());
+        }
 
         O3D_MESSAGE("SpacialNodeHub synced into scene");
     }
+}
+
+void SpacialNodeHub::setPosition(o3d::UInt32 transformIndex, const o3d::Vector3f &pos)
+{
+    o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
+    mainTransform->setPosition(pos);
+}
+
+void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f &pos)
+{
+    o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
+    o3d::Quaternion q;
+    q.fromEuler(pos);
+
+    mainTransform->setRotation(q);
 }
 
 o3d::Bool SpacialNodeHub::addChildToScene(MasterScene *masterScene, o3d::SceneObject *sceneObject)
@@ -256,7 +281,12 @@ o3d::String SpacialNodePropertyPanel::elementName() const
 QWidget *SpacialNodePropertyPanel::ui()
 {
     PanelBuilder pb(this, fromQString(tr("Spacial node hub")));
-    pb.addVector3(fromQString(tr("Position")), "position");
+
+    m_position = new Vector3Property(this, "position", fromQString(tr("Position")));
+    pb.addPanelProperty(m_position);
+
+    m_rotation = new Vector3Property(this, "rotation", fromQString(tr("Rotation")));
+    pb.addPanelProperty(m_rotation);
 
     return pb.ui();
 }
@@ -264,4 +294,17 @@ QWidget *SpacialNodePropertyPanel::ui()
 Panel::PanelType SpacialNodePropertyPanel::panelType() const
 {
     return PANEL_PROPERTY;
+}
+
+void SpacialNodePropertyPanel::commit()
+{
+    if (m_hub) {
+        m_hub->setPosition(0, m_position->value());
+        m_hub->setRotation(0, m_rotation->value());
+    }
+}
+
+void SpacialNodePropertyPanel::update()
+{
+
 }

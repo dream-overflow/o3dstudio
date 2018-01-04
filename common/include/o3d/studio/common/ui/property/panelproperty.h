@@ -26,7 +26,7 @@ class O3S_API PanelProperty : public EvtHandler
 public:
 
     //! Constructor
-    PanelProperty(Panel *panel, const String &label);
+    PanelProperty(Panel *panel, const String &name, const String &label);
 
     //! Destructor
     virtual ~PanelProperty();
@@ -34,7 +34,10 @@ public:
     //! Get the resulting widget.
     QWidget* ui();
 
-private:
+protected:
+
+    String m_name;
+    String m_label;
 
     Panel *m_panel;
     Int32 m_index;

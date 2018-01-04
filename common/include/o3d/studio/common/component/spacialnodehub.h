@@ -12,12 +12,15 @@
 #include "component.h"
 #include "../workspace/hub.h"
 
+#include <o3d/core/vector3.h>
+
 #include <map>
 
 namespace o3d {
 
 class Node;
 class SceneObject;
+class Transform;
 
 namespace studio {
 namespace common {
@@ -25,6 +28,7 @@ namespace common {
 class Entity;
 class Project;
 class Hub;
+class Vector3Property;
 
 /**
  * @brief The SpacialNodeComponent class
@@ -75,6 +79,15 @@ public:
     virtual void removeFromScene(MasterScene *masterScene) override;
     virtual void syncWithScene(MasterScene *masterScene) override;
 
+    // assume one transform for the moment
+    void setPosition(UInt32 transformIndex, const o3d::Vector3f &pos);
+    void setRotation(UInt32 transformIndex, const o3d::Vector3f &pos);
+
+//    UInt32 getNumTransforms() const;
+//    UInt32 addTransform(UInt32 type);
+//    UInt32 insertTransform(UInt32 type, UInt32 at);
+//    void removeTransform(UInt32 at);
+
     //
     // Properties
     //
@@ -102,6 +115,8 @@ protected:
     NodePolicy m_nodePolicy;
 
     std::map<MasterScene*, o3d::Node*> m_instances;
+
+    std::list<o3d::Transform*> m_transforms;
 };
 
 /**
@@ -122,9 +137,16 @@ public:
 
     virtual PanelType panelType() const;
 
+    virtual void commit() override;
+    virtual void update() override;
+
 private:
 
     SpacialNodeHub *m_hub;
+
+    // @todo multi transforms
+    Vector3Property *m_position;
+    Vector3Property *m_rotation;
 };
 
 } // namespace common

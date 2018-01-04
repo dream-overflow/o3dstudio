@@ -27,9 +27,25 @@ public:
         PANEL_WIDGET       //!< Into a pure o3d widget
     };
 
+    /**
+     * @brief Returns the UI object.
+     */
     virtual QWidget* ui() = 0;
 
+    /**
+     * @brief Type of panel.
+     */
     virtual PanelType panelType() const = 0;
+
+    /**
+     * @brief Commit the changes done on this panel to its target element (hub...).
+     */
+    virtual void commit() = 0;
+
+    /**
+     * @brief Update the changes from the target element (hub...).
+     */
+    virtual void update() = 0;
 };
 
 } // namespace common

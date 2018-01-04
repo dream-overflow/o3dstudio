@@ -10,6 +10,7 @@
 #define _O3DS_COMMON_VECTOR3PROPERTY_H
 
 #include "panelproperty.h"
+#include <o3d/core/vector3.h>
 
 namespace o3d {
 namespace studio {
@@ -23,13 +24,15 @@ class O3S_API Vector3Property : public PanelProperty
 public:
 
     //! Constructor
-    Vector3Property(Panel *panel, const String &label);
+    Vector3Property(Panel *panel, const String &name, const String &label);
 
     //! Destructor
     virtual ~Vector3Property();
 
     //! Get the resulting widget.
     QWidget* ui();
+
+    o3d::Vector3f value() const;
 
 public /*signals*/:
 

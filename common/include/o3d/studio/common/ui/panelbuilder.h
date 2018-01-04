@@ -16,6 +16,8 @@ namespace o3d {
 namespace studio {
 namespace common {
 
+class PanelProperty;
+
 class O3S_API PanelBuilder
 {
 public:
@@ -29,7 +31,7 @@ public:
     //! Get the resulting widget.
     QWidget* ui();
 
-    void addVector3(const String &label, const String &name);
+    void addPanelProperty(PanelProperty *pp);
 
 private:
 

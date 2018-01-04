@@ -8,6 +8,7 @@
 
 #include "o3d/studio/common/ui/panelbuilder.h"
 #include "o3d/studio/common/ui/uiutils.h"
+#include "o3d/studio/common/ui/property/panelproperty.h"
 
 #include <QGroupBox>
 #include <QLabel>
@@ -78,57 +79,12 @@ QWidget *PanelBuilder::ui()
     return m_widget;
 }
 
-void PanelBuilder::addVector3(const o3d::String &label, const o3d::String &name)
+void PanelBuilder::addPanelProperty(PanelProperty *pp)
 {
-    QVBoxLayout *l = new QVBoxLayout();
-    l->setContentsMargins(0, 0, 0, 1);
-    l->setSpacing(0);
+    if (!pp) {
+        return;
+    }
 
-    QWidget *valueGroup = new QWidget();
-    valueGroup->setLayout(l);
-
-    l->addWidget(new QLabel(toQString(label)));
-
-    QHBoxLayout *pl = new QHBoxLayout();
-    pl->setContentsMargins(0, 0, 0, 1);
-    pl->setSpacing(8);
-
-    QWidget *pw = new QWidget();
-    pw->setLayout(pl);
-
-    // x
-    QDoubleSpinBox *x = new QDoubleSpinBox();
-    x->setRange(-1000000000, 1000000000);
-    x->setDecimals(3);
-    x->setSingleStep(0.1);
-    x->setPrefix("x:");
-    x->setValue(0);
-    x->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    x->setMinimumWidth(75);
-    pl->addWidget(x);
-
-    // y
-    QDoubleSpinBox *y = new QDoubleSpinBox();
-    y->setRange(-1000000000, 1000000000);
-    y->setDecimals(3);
-    y->setSingleStep(0.1);
-    y->setPrefix("y:");
-    y->setValue(0);
-    y->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    y->setMinimumWidth(75);
-    pl->addWidget(y);
-
-    // z
-    QDoubleSpinBox *z = new QDoubleSpinBox();
-    z->setRange(-1000000000, 1000000000);
-    z->setDecimals(3);
-    z->setSingleStep(0.1);
-    z->setPrefix("z:");
-    z->setValue(0);
-    z->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    z->setMinimumWidth(75);
-    pl->addWidget(z);
-
-    l->addWidget(pw);
-    m_widget->layout()->addWidget(valueGroup);
+    QWidget *widget = pp->ui();
+    m_widget->layout()->addWidget(widget);
 }

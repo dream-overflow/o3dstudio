@@ -92,9 +92,10 @@ SOURCES += \
     src/workspace/masterscenedrawer.cpp \
     src/ui/scene/cameramanipulator.cpp \
     src/ui/panelbuilder.cpp \
-    src/ui/panelproperty/panelproperty.cpp \
     src/importer/importerregistry.cpp \
-    src/builder/builderregistry.cpp
+    src/builder/builderregistry.cpp \
+    src/ui/property/panelproperty.cpp \
+    src/ui/property/vector3property.cpp
 
 
 HEADERS += \ 

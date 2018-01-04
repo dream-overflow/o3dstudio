@@ -19,13 +19,13 @@
 using namespace o3d::studio::common;
 
 
-PanelProperty::PanelProperty(Panel *panel, const o3d::String &label) :
+PanelProperty::PanelProperty(Panel *panel, const String &name, const o3d::String &label) :
     EvtHandler(),
+    m_name(name),
+    m_label(label),
     m_panel(panel)
 {
     O3D_ASSERT(m_panel != nullptr);
-
-
 }
 
 PanelProperty::~PanelProperty()
