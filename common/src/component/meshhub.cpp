@@ -122,7 +122,7 @@ o3d::Bool MeshHub::deserializeContent(InStream &stream)
     return True;
 }
 
-#include <o3d/engine/object/primitive.h>
+#include <o3d/engine/primitive/surface.h>
 #include <o3d/engine/material/ambientmaterial.h>
 #include <o3d/engine/material/lambertmaterial.h>
 #include <o3d/engine/material/pickingmaterial.h>

@@ -445,24 +445,24 @@ o3d::Bool MasterScene::leaveEvent(const Event &/*event*/)
 void MasterScene::updateCounters(o3d::UInt32 pass)
 {
     if (m_scene && pass < 4) {
-        m_verticesCount[pass] = m_scene->getFrameManager()->getNumVertices();
-        m_trianglesCount[pass] = m_scene->getFrameManager()->getNumTriangles();
-        m_linesCount[pass] = m_scene->getFrameManager()->getNumLines();
-        m_pointCount[pass] = m_scene->getFrameManager()->getNumPoints();
+        m_verticesCount[pass] = m_scene->getFrameManager()->getCurrentNumVertices();
+        m_trianglesCount[pass] = m_scene->getFrameManager()->getCurrentNumTriangles();
+        m_linesCount[pass] = m_scene->getFrameManager()->getCurrentNumLines();
+        m_pointCount[pass] = m_scene->getFrameManager()->getCurrentNumPoints();
 
-        if (pass > 0) {
-            m_verticesCount[pass] -= m_verticesCount[pass-1];
-            m_trianglesCount[pass] -= m_trianglesCount[pass-1];
-            m_linesCount[pass] -= m_linesCount[pass-1];
-            m_pointCount[pass] -= m_pointCount[pass-1];
-        }
+//        if (pass > 0) {
+//            m_verticesCount[pass] -= m_verticesCount[pass-1];
+//            m_trianglesCount[pass] -= m_trianglesCount[pass-1];
+//            m_linesCount[pass] -= m_linesCount[pass-1];
+//            m_pointCount[pass] -= m_pointCount[pass-1];
+//        }
     }
 }
 
 o3d::UInt32 MasterScene::numVertices(UInt32 pass) const
 {
     if (pass < 4) {
-        return m_verticesCount[pass];
+        return m_verticesCount[pass] - (pass >= 1 ? m_verticesCount[pass-1] : 0);
     }
     return 0;
 }
@@ -470,7 +470,7 @@ o3d::UInt32 MasterScene::numVertices(UInt32 pass) const
 o3d::UInt32 MasterScene::numTriangles(UInt32 pass) const
 {
     if (pass < 4) {
-        return m_trianglesCount[pass];
+        return m_trianglesCount[pass] - (pass >= 1 ? m_trianglesCount[pass-1] : 0);
     }
     return 0;
 }
@@ -478,7 +478,7 @@ o3d::UInt32 MasterScene::numTriangles(UInt32 pass) const
 o3d::UInt32 MasterScene::numLines(UInt32 pass) const
 {
     if (pass < 4) {
-        return m_linesCount[pass];
+        return m_linesCount[pass] - (pass >= 1 ? m_linesCount[pass-1] : 0);
     }
     return 0;
 }
@@ -486,7 +486,7 @@ o3d::UInt32 MasterScene::numLines(UInt32 pass) const
 o3d::UInt32 MasterScene::numPoints(UInt32 pass) const
 {
     if (pass < 4) {
-        return m_pointCount[pass];
+        return m_pointCount[pass] - (pass >= 1 ? m_pointCount[pass-1] : 0);
     }
     return 0;
 }

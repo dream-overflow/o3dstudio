@@ -97,17 +97,10 @@ void MasterSceneDrawer::draw(ViewPort *)
     // Process the effectives lights
     //
 
-//	 TODO a manager to get visible objects for any active light
-//    for each light
-//      for each visible mesh
-//        if light volume intersects mesh
-//          render
-
-    const String lights[] = { "light1", "light2", "light3", "light4" };
-
-    for (UInt32 i = 0; i < 4; ++i) {
-        Light *light = dynamicCast<Light*>(getScene()->getSceneObjectManager()->searchName(lights[i]));
-        processLight(light);
+    // process each effective light with the world
+    const TemplateArray<Light*> lights = getScene()->getVisibilityManager()->getEffectiveLights();
+    for (Int32 i = 0; i < lights.getSize(); ++i) {
+        processLight(lights[i]);
     }
 
     context.disableStencilTest();
