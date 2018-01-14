@@ -288,7 +288,7 @@ o3d::Bool Application::stop()
         Module *module = ModuleManager::instance()->module(name);
         if (module != nullptr && module->started()) {
             try {
-                // register in appropriates registries
+                // unregister from appropriates registries
                 if (module->hasCapacity(CAPACITY_IMPORTER)) {
                     m_importerRegistry->unregisterImporter(module->importer()->typeRef());
                 }
