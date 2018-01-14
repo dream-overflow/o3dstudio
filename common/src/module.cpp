@@ -85,3 +85,13 @@ o3d::Bool Module::restart()
 
     return m_started;
 }
+
+Importer* Module::importer()
+{
+    return nullptr;
+}
+
+Builder* Module::builder()
+{
+    return nullptr;
+}

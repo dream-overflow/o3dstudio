@@ -14,6 +14,8 @@
 #include "o3d/studio/common/workspace/scenecommand.h"
 #include "o3d/studio/common/workspace/masterscenedrawer.h"
 
+#include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
+
 #include <o3d/engine/glextdefines.h>
 #include <o3d/engine/glextensionmanager.h>
 
@@ -31,8 +33,6 @@
 #include <o3d/gui/gui.h>
 #include <o3d/gui/fontmanager.h>
 #include <o3d/gui/truetypefont.h>
-
-#include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
 #include "o3d/studio/common/ui/scene/grid.h"
 #include "o3d/studio/common/ui/scene/infohud.h"

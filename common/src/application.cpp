@@ -23,6 +23,9 @@
 #include "o3d/studio/common/importer/importerregistry.h"
 #include "o3d/studio/common/builder/builderregistry.h"
 
+#include "o3d/studio/common/importer/importer.h"
+#include "o3d/studio/common/builder/builder.h"
+
 #include <o3d/core/application.h>
 #include <o3d/core/filemanager.h>
 #include <o3d/core/gl.h>
@@ -239,6 +242,17 @@ o3d::Bool Application::start()
         if (module != nullptr) {
             try {
                 module->start();
+
+                // register in appropriates registries
+                if (module->hasCapacity(CAPACITY_IMPORTER)) {
+                    m_importerRegistry->registerImporter(module->importer());
+                }
+
+                if (module->hasCapacity(CAPACITY_BUILDER)) {
+                    m_builderRegistry->registerBuilder(module->builder());
+                }
+
+                // @todo the others
             } catch (E_BaseException &e) {
                 // continue with next
             }
@@ -249,6 +263,10 @@ o3d::Bool Application::start()
 //    if (o3sdummy != nullptr) {
 //        o3sdummy->start();
 //    }
+
+    // dev only test to import FBX @todo remove me
+    Importer *fbxi = m_importerRegistry->importer("o3s::plugin::importer::fbxi");
+    fbxi->import("/home/frederic/cube.fbx", nullptr, nullptr);
 
     m_started = True;
     return True;
@@ -262,6 +280,29 @@ o3d::Bool Application::stop()
 
     while (m_commandManager->hasPendingCommands() || m_commandManager->hasRunningCommands()) {
         System::waitMs(20);
+    }
+
+    // unload all modules
+    T_StringList modules = ModuleManager::instance()->moduleList();
+    for (String name : modules) {
+        Module *module = ModuleManager::instance()->module(name);
+        if (module != nullptr && module->started()) {
+            try {
+                // register in appropriates registries
+                if (module->hasCapacity(CAPACITY_IMPORTER)) {
+                    m_importerRegistry->unregisterImporter(module->importer()->typeRef());
+                }
+
+                if (module->hasCapacity(CAPACITY_BUILDER)) {
+                    m_builderRegistry->unregisterBuilder(module->builder()->typeRef());
+                }
+
+                // @todo the others
+                module->stop();
+            } catch (E_BaseException &e) {
+                // continue with next
+            }
+        }
     }
 
     ModuleManager::instance()->unloadAll();

@@ -24,6 +24,9 @@ class DynamicLibrary;
 namespace studio {
 namespace common {
 
+class Importer;
+class Builder;
+
 class O3S_API Module
 {
 public:
@@ -52,6 +55,16 @@ public:
      * @return
      */
     bool restart();
+
+    /**
+     * @brief Return a singleton instance of the importer or null.
+     */
+    virtual Importer* importer();
+
+    /**
+     * @brief Return a singleton instance of the builder or null.
+     */
+    virtual Builder* builder();
 
 protected:
 

@@ -101,18 +101,11 @@ public:
     /**
      * @brief Import from a specified file name the content into a parent entity
      * @param filename File name of the content to import.
+     * @param options Option (filters, conversion) during importation.
      * @param parent Parent must be the project, or the parent hub, or the container asset.
      * @return True if success.
      */
     virtual Bool import(const String &filename, ImporterOption *options, Entity *parent) = 0;
-
-    /**
-     * @brief Read from a specified file name the content into a parent entity
-     * @param filename File name of the content to import.
-     * @param parent Parent must be the project, or the parent hub, or the container asset.
-     * @return True if success.
-     */
-    virtual Bool import(const String &filename, Entity *parent) = 0;
 
     /**
      * @brief Array of capacities of the importer (not what is imported but what is importable).
