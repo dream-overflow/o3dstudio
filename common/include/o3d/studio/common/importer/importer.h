@@ -22,6 +22,7 @@ namespace studio {
 namespace common {
 
 class Entity;
+class ImportDefinition;
 
 /**
  * @brief Importer options base class. Import can be fully or partial, necessiting somes
@@ -94,18 +95,21 @@ public:
     /**
      * @brief Introspect the content file. Does not proceed to importation of datas
      * @param filename File name of the content to introspect.
-     * @return True if success.
+     * @return ImportDefinition object if success, null else.
      */
-    virtual Bool introspect(const String &filename) = 0;
+    virtual ImportDefinition* introspect(const String &filename) = 0;
 
     /**
      * @brief Import from a specified file name the content into a parent entity
      * @param filename File name of the content to import.
      * @param options Option (filters, conversion) during importation.
      * @param parent Parent must be the project, or the parent hub, or the container asset.
-     * @return True if success.
+     * @return ImportDefinition object if success, null else.
      */
-    virtual Bool import(const String &filename, ImporterOption *options, Entity *parent) = 0;
+    virtual ImportDefinition* import(
+            const String &filename,
+            ImporterOption *options,
+            Entity *parent) = 0;
 
     /**
      * @brief Array of capacities of the importer (not what is imported but what is importable).

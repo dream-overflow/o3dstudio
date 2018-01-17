@@ -161,7 +161,6 @@ HEADERS += \
     include/o3d/studio/common/component/camerahub.h \
     include/o3d/studio/common/component/meshhub.h \
     include/o3d/studio/common/component/dummyhub.h \
-    include/o3d/studio/common/importer/importer.h \
     include/o3d/studio/common/builder/builder.h \
     include/o3d/studio/common/component/drawerhub.h \
     include/o3d/studio/common/workspace/scenecommand.h \
@@ -184,7 +183,9 @@ HEADERS += \
     include/o3d/studio/common/ui/property/panelproperty.h \
     include/o3d/studio/common/ui/property/vector3property.h \
     include/o3d/studio/common/importer/importerregistry.h \
-    include/o3d/studio/common/builder/builderregistry.h
+    include/o3d/studio/common/builder/builderregistry.h \
+    include/o3d/studio/common/importer/importer.h \
+    include/o3d/studio/common/importer/importdefinition.h
 
 LIBS += -lobjective3d-dbg
 

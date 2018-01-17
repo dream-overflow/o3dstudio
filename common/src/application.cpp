@@ -24,6 +24,7 @@
 #include "o3d/studio/common/builder/builderregistry.h"
 
 #include "o3d/studio/common/importer/importer.h"
+#include "o3d/studio/common/importer/importdefinition.h"
 #include "o3d/studio/common/builder/builder.h"
 
 #include <o3d/core/application.h>
@@ -266,7 +267,8 @@ o3d::Bool Application::start()
 
     // dev only test to import FBX @todo remove me
     Importer *fbxi = m_importerRegistry->importer("o3s::plugin::importer::fbxi");
-    fbxi->import("/home/frederic/cube.fbx", nullptr, nullptr);
+    ImportDefinition *def = fbxi->import("/home/frederic/cube.fbx", nullptr, nullptr);
+    deletePtr(def);
 
     m_started = True;
     return True;

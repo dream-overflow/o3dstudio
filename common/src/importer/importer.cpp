@@ -7,8 +7,14 @@
  */
 
 #include "o3d/studio/common/importer/importer.h"
+#include "o3d/studio/common/importer/importdefinition.h"
 
 using namespace o3d::studio::common;
+
+ImportDefinition::~ImportDefinition()
+{
+
+}
 
 ImporterOption::ImporterOption()
 {
@@ -20,12 +26,12 @@ ImporterOption::~ImporterOption()
 
 }
 
-o3d::Bool ImporterOption::readFromFile(o3d::InStream &istream)
+o3d::Bool ImporterOption::readFromFile(o3d::InStream &/*istream*/)
 {
     return True;
 }
 
-o3d::Bool ImporterOption::writeToFile(o3d::OutStream &ostream)
+o3d::Bool ImporterOption::writeToFile(o3d::OutStream &/*ostream*/)
 {
     return True;
 }

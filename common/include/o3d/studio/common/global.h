@@ -20,6 +20,22 @@
 #  define O3S_API Q_DECL_IMPORT
 #endif
 
+#if (defined(O3D_UNIX) || defined(O3D_MACOSX) || defined(SWIG))
+  #if __GNUC__ >= 4
+    #define O3S_PLUGIN_API __attribute__ ((visibility ("default")))
+    #define O3S_PLUGIN_API_PRIVATE __attribute__ ((visibility ("hidden")))
+    #define O3S_PLUGIN_API_TEMPLATE
+  #else
+    #define O3S_PLUGIN_API
+    #define O3S_PLUGIN_API_PRIVATE
+    #define O3S_PLUGIN_API_TEMPLATE
+  #endif
+#elif defined(O3D_WINDOWS)
+#define O3S_PLUGIN_API __declspec(dllexport)
+#define O3S_PLUGIN_API_PRIVATE
+#define O3S_PLUGIN_API_TEMPLATE
+#endif
+
 #ifndef CONV_STRING
 #define CONV_STRING
 
