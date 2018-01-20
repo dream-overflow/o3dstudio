@@ -85,8 +85,8 @@ public:
     void setRevision(UInt32 rev);
     UInt32 revision() const;
 
-    void setCreationTimestamp(const DateTime &date);
-    const DateTime& creationTimestamp() const;
+    void setCreationTimeStamp(const DateTime &date);
+    const DateTime& creationTimeStamp() const;
 
 private:
 
@@ -98,7 +98,7 @@ private:
     VersionStatus m_versionStatus;  //!< version status (alpha, beta... stable)...
     UInt32 m_revision;              //!< revision number (counter)
 
-    DateTime m_creationTimestamp;
+    DateTime m_creationTimeStamp;
 };
 
 /**

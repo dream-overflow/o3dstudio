@@ -20,6 +20,7 @@
 #include "o3d/studio/common/command/commandmanager.h"
 #include "o3d/studio/common/storage/store.h"
 #include "o3d/studio/common/workspace/selection.h"
+#include "o3d/studio/common/workspace/asset.h"
 #include "o3d/studio/common/importer/importerregistry.h"
 #include "o3d/studio/common/builder/builderregistry.h"
 
@@ -267,7 +268,10 @@ o3d::Bool Application::start()
 
     // dev only test to import FBX @todo remove me
     Importer *fbxi = m_importerRegistry->importer("o3s::plugin::importer::fbxi");
-    ImportDefinition *def = fbxi->import("/home/frederic/cube.fbx", nullptr, nullptr);
+    ImportDefinition *def = fbxi->import(
+                                "/home/frederic/cube.fbx",
+                                new ImporterOption(),
+                                new Asset("Test Asset", nullptr));
     deletePtr(def);
 
     m_started = True;

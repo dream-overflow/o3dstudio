@@ -70,6 +70,9 @@ public:
     DateTime& modificationDate() { return m_modificationDate; }
     const DateTime& modificationDate() const { return m_modificationDate; }
 
+    Float& unit() { return m_unit; }
+    Float unit() const { return m_unit; }
+
     Bool writeToFile(OutStream &os);
     Bool readFromFile(InStream &is);
 
@@ -85,6 +88,7 @@ private:
     Int32 m_revisionState;
     DateTime m_creationDate;
     DateTime m_modificationDate;
+    Float m_unit;
 };
 
 } // namespace common

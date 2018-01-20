@@ -16,7 +16,8 @@ using namespace o3d::studio::common;
 ProjectInfo::ProjectInfo() :
     m_version("1.0.0"),
     m_revision(1),
-    m_revisionState(STATE_DEVELOPMENT)
+    m_revisionState(STATE_DEVELOPMENT),
+    m_unit(1.0)
 {
     m_creationDate = m_modificationDate = DateTime(True);
 }
@@ -44,15 +45,17 @@ o3d::Bool ProjectInfo::writeToFile(OutStream &os)
        << m_creationDate
        << m_modificationDate;
 
+    os << m_unit;
+
     return True;
 }
 
 o3d::Bool ProjectInfo::readFromFile(o3d::InStream &is)
 {
    is >> m_verboseName
-           >> m_description
-           >> m_copyright
-           >> m_vendor;
+      >> m_description
+      >> m_copyright
+      >> m_vendor;
 
    Int32 num;
    String author;
@@ -63,10 +66,12 @@ o3d::Bool ProjectInfo::readFromFile(o3d::InStream &is)
    }
 
    is >> m_version
-           >> m_revision
-           >> m_revisionState
-           >> m_creationDate
-           >> m_modificationDate;
+      >> m_revision
+      >> m_revisionState
+      >> m_creationDate
+      >> m_modificationDate;
+
+   is >> m_unit;
 
    return True;
 }

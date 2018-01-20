@@ -158,12 +158,12 @@ o3d::UInt32 Asset::revision() const
     return m_revision;
 }
 
-void Asset::setCreationTimestamp(const o3d::DateTime &date)
+void Asset::setCreationTimeStamp(const o3d::DateTime &date)
 {
-    m_creationTimestamp = date;
+    m_creationTimeStamp = date;
 }
 
-const o3d::DateTime &Asset::creationTimestamp() const
+const o3d::DateTime &Asset::creationTimeStamp() const
 {
-    return m_creationTimestamp;
+    return m_creationTimeStamp;
 }
