@@ -91,3 +91,79 @@ o3d::Bool Asset::deserializeContent(InStream &stream)
 
     return False;
 }
+
+void Asset::setCreator(const o3d::String &creator)
+{
+    m_creator = creator;
+}
+
+const o3d::String &Asset::creator() const
+{
+    return m_creator;
+}
+
+void Asset::setDescription(const o3d::String &descr)
+{
+    m_description = descr;
+}
+
+const o3d::String &Asset::description() const
+{
+    return m_description;
+}
+
+void Asset::setComment(const o3d::String &comment)
+{
+    m_comment = comment;
+}
+
+const o3d::String &Asset::comment()
+{
+    return m_comment;
+}
+
+void Asset::setVersion(o3d::UInt32 majorVers, o3d::UInt32 minorVers, o3d::UInt32 subVers)
+{
+    m_version[0] = majorVers;
+    m_version[1] = minorVers;
+    m_version[2] = subVers;
+}
+
+o3d::UInt32 Asset::version(o3d::UInt32 part) const
+{
+    if (part > 2) {
+        O3D_ERROR(E_IndexOutOfRange("Version part index between 0..2"));
+    }
+
+    return m_version[part];
+}
+
+void Asset::setVersionStatus(Asset::VersionStatus status)
+{
+    m_versionStatus = status;
+}
+
+Asset::VersionStatus Asset::versionStatus() const
+{
+    return m_versionStatus;
+}
+
+void Asset::setRevision(o3d::UInt32 rev)
+{
+    m_revision = rev;
+}
+
+o3d::UInt32 Asset::revision() const
+{
+    return m_revision;
+}
+
+void Asset::setCreationTimestamp(const o3d::DateTime &date)
+{
+    m_creationTimestamp = date;
+}
+
+const o3d::DateTime &Asset::creationTimestamp() const
+{
+    return m_creationTimestamp;
+}

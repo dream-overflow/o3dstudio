@@ -17,6 +17,8 @@
 #include "../exception.h"
 #include "../objectref.h"
 
+#include <o3d/core/datetime.h>
+
 #include "entity.h"
 
 namespace o3d {
@@ -33,6 +35,16 @@ class O3S_API Asset : public Entity
     Q_DECLARE_TR_FUNCTIONS(Asset)
 
 public:
+
+    enum VersionStatus
+    {
+        PROTO_VERSION,
+        ALPHA_VERSION,
+        NIGHTLY_VERSION,
+        BETA_VERSION,
+        RC_VERSION,
+        STABLE_VERSION
+    };
 
     Asset(const String &name, Entity *parent = nullptr);
     virtual ~Asset();
@@ -55,9 +67,38 @@ public:
     virtual Bool serializeContent(OutStream &stream) const override;
     virtual Bool deserializeContent(InStream &stream) override;
 
+    void setCreator(const String &creator);
+    const String& creator() const;
+
+    void setDescription(const String &descr);
+    const String& description() const;
+
+    void setComment(const String &comment);
+    const String& comment();
+
+    void setVersion(UInt32 majorVers, UInt32 minorVers, UInt32 subVers);
+    UInt32 version(UInt32 part) const;
+
+    void setVersionStatus(VersionStatus status);
+    VersionStatus versionStatus() const;
+
+    void setRevision(UInt32 rev);
+    UInt32 revision() const;
+
+    void setCreationTimestamp(const DateTime &date);
+    const DateTime& creationTimestamp() const;
+
 private:
 
-    // @todo
+    String m_creator;
+    String m_description;
+    String m_comment;
+
+    UInt32 m_version[3];            //!< major, minor, sub-minor
+    VersionStatus m_versionStatus;  //!< version status (alpha, beta... stable)...
+    UInt32 m_revision;              //!< revision number (counter)
+
+    DateTime m_creationTimestamp;
 };
 
 /**

@@ -67,8 +67,8 @@ public:
 
     virtual Bool exists() const override;
 
-    virtual Bool serializeContent(OutStream &stream) const;
-    virtual Bool deserializeContent(InStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const override;
+    virtual Bool deserializeContent(InStream &stream) override;
 
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;

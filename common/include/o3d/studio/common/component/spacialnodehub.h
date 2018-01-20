@@ -72,8 +72,8 @@ public:
 
     virtual Bool exists() const override;
 
-    virtual Bool serializeContent(OutStream &stream) const;
-    virtual Bool deserializeContent(InStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const override;
+    virtual Bool deserializeContent(InStream &stream) override;
 
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;
@@ -131,11 +131,11 @@ public:
     SpacialNodePropertyPanel(SpacialNodeHub *hub);
     virtual ~SpacialNodePropertyPanel();
 
-    virtual String elementName() const;
+    virtual String elementName() const override;
 
-    virtual QWidget* ui();
+    virtual QWidget* ui() override;
 
-    virtual PanelType panelType() const;
+    virtual PanelType panelType() const override;
 
     virtual void commit() override;
     virtual void update() override;

@@ -38,8 +38,8 @@ public:
     virtual void setup() override;
     virtual Hub* buildHub(const String &name, Project *project, Entity *parent) override;
 
-    SceneUIElement* sceneUiElement(SceneUIElement::Mode mode);
-    Panel* panel(Panel::PanelType panelType);
+    virtual SceneUIElement* sceneUiElement(SceneUIElement::Mode mode) override;
+    virtual Panel* panel(Panel::PanelType panelType, Hub *hub) override;
 
 protected:
 };
@@ -62,8 +62,8 @@ public:
 
     virtual Bool exists() const override;
 
-    virtual Bool serializeContent(OutStream &stream) const;
-    virtual Bool deserializeContent(InStream &stream);
+    virtual Bool serializeContent(OutStream &stream) const override;
+    virtual Bool deserializeContent(InStream &stream) override;
 
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;

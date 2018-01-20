@@ -61,7 +61,7 @@ SceneUIElement *MeshComponent::sceneUiElement(SceneUIElement::Mode mode)
     return nullptr;
 }
 
-Panel *MeshComponent::panel(Panel::PanelType panelType)
+Panel *MeshComponent::panel(Panel::PanelType panelType, Hub *hub)
 {
     return nullptr;
 }

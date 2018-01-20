@@ -12,16 +12,17 @@
 #include <QtCore/QtGlobal>
 #include <QtCore/QString>
 
+#include <o3d/core/types.h>
 #include <o3d/core/string.h>
 
-#if defined(MYSHAREDLIB_LIBRARY)
+#if defined(O3S_EXPORT_LIBRARY)
 #  define O3S_API Q_DECL_EXPORT
 #else
 #  define O3S_API Q_DECL_IMPORT
 #endif
 
 #if (defined(O3D_UNIX) || defined(O3D_MACOSX) || defined(SWIG))
-  #if __GNUC__ >= 4
+  #if (__GNUC__ >= 4) || defined(__clang__)
     #define O3S_PLUGIN_API __attribute__ ((visibility ("default")))
     #define O3S_PLUGIN_API_PRIVATE __attribute__ ((visibility ("hidden")))
     #define O3S_PLUGIN_API_TEMPLATE
