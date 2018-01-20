@@ -11,6 +11,7 @@
 
 #include <o3d/core/string.h>
 #include <o3d/core/datetime.h>
+#include <o3d/image/color.h>
 
 #include "../global.h"
 
@@ -34,6 +35,7 @@ public:
     virtual String creator() const = 0;
     virtual DateTime creationDateTime() const = 0;
     virtual Float unit() const = 0;
+    virtual Color ambientColor() const = 0;
 
     virtual UInt32 numModel() const = 0;
     virtual UInt32 numGeometry() const = 0;
