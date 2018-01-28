@@ -266,10 +266,10 @@ o3d::Bool Application::start()
 //        o3sdummy->start();
 //    }
 
-    // dev only test to import FBX @todo remove me
+    // dev only test to import FBX @todo remove me after
     Importer *fbxi = m_importerRegistry->importer("o3s::plugin::importer::fbxi");
     ImportDefinition *def = fbxi->import(
-                                "/home/frederic/cube.fbx",
+                                "../../../../test/fbx/cube.fbx",
                                 new ImporterOption(),
                                 new Asset("Test Asset", nullptr));
     deletePtr(def);
