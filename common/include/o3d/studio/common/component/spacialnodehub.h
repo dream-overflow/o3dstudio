@@ -61,6 +61,13 @@ public:
         POLICY_DEFAULT = 0
     };
 
+    enum TransformType
+    {
+        MATRIX_TRANSFORM = 0,       //!< Common SRT transform
+        FPS_TRANSFORM,              //!< First person view transform
+        DUAL_QUATERNION_TRANSFORM   //!< Dual quaternion based transform
+    };
+
     explicit SpacialNodeHub(const String &name, Entity *parent = nullptr);
     virtual ~SpacialNodeHub();
 
@@ -79,20 +86,25 @@ public:
     virtual void removeFromScene(MasterScene *masterScene) override;
     virtual void syncWithScene(MasterScene *masterScene) override;
 
+    //
+    // Transformations
+    //
+
     // assume one transform for the moment
     void setPosition(UInt32 transformIndex, const o3d::Vector3f &pos);
-    void setRotation(UInt32 transformIndex, const o3d::Vector3f &pos);
+    void setRotation(UInt32 transformIndex, const o3d::Vector3f &rot);
+    void setScale(UInt32 transformIndex, const o3d::Vector3f &scale);
 
-//    UInt32 getNumTransforms() const;
-//    UInt32 addTransform(UInt32 type);
-//    UInt32 insertTransform(UInt32 type, UInt32 at);
+    UInt32 getNumTransforms() const;
+//    UInt32 addTransform(TransformType type);
+//    UInt32 insertTransform(TransformType type, UInt32 at);
 //    void removeTransform(UInt32 at);
 
     //
     // Properties
     //
 
-    // @todo manage children, transformations and animations
+    // @todo manage children and animations
 
     /**
      * @brief Add the scene object to the node of the corresponding master scene.

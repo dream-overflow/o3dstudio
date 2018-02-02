@@ -89,6 +89,7 @@ SpacialNodeHub::SpacialNodeHub(const String &name, Entity *parent) :
     m_nodePolicy(POLICY_DEFAULT),
     m_instances()
 {
+    // with at least one default MTransform
     MTransform *mainTransform = new MTransform;
     m_transforms.push_back(mainTransform);
 }
@@ -96,6 +97,10 @@ SpacialNodeHub::SpacialNodeHub(const String &name, Entity *parent) :
 SpacialNodeHub::~SpacialNodeHub()
 {
     O3D_ASSERT(m_instances.empty());
+
+    for (auto it = m_transforms.begin(); it != m_transforms.end(); ++it) {
+        delete(*it);
+    }
 }
 
 void SpacialNodeHub::create()
@@ -217,13 +222,24 @@ void SpacialNodeHub::setPosition(o3d::UInt32 transformIndex, const o3d::Vector3f
     mainTransform->setPosition(pos);
 }
 
-void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f &pos)
+void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f &rot)
 {
     o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
     o3d::Quaternion q;
-    q.fromEuler(pos);
+    q.fromEuler(rot);
 
     mainTransform->setRotation(q);
+}
+
+void SpacialNodeHub::setScale(o3d::UInt32 transformIndex, const o3d::Vector3f &scale)
+{
+    o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
+    mainTransform->setScale(scale);
+}
+
+o3d::UInt32 SpacialNodeHub::getNumTransforms() const
+{
+    return (UInt32)m_transforms.size();
 }
 
 o3d::Bool SpacialNodeHub::addChildToScene(MasterScene *masterScene, o3d::SceneObject *sceneObject)
