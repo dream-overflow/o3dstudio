@@ -322,12 +322,13 @@ void Project::addHub(Hub *hub, Int32 index)
         O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a hub that is created for another project"))));
     }
 
+    UInt64 hubId = hub->ref().light().id();
+
     // already exists
-    if (m_hubs.find(hub->ref().light().id()) != m_hubs.end()) {
+    if (m_hubs.find(hubId) != m_hubs.end()) {
         O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added hub, or with a similar id"))));
     }
 
-    UInt64 hubId = hub->ref().light().id();
     addEntity(hub);
 
     // position index

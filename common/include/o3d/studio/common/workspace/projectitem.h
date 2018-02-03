@@ -24,7 +24,7 @@ class Entity;
 class Project;
 class Hub;
 class Fragment;
-class Asset;
+//class Asset;
 
 class O3S_API ProjectItem
 {
@@ -66,7 +66,7 @@ public:
     Bool isProject() const;
     Bool isHub() const;
     Bool isFragment() const;
-    Bool isAsset() const;
+//    Bool isAsset() const;
 
     TypeRef typeRef() const;
 
@@ -79,8 +79,8 @@ public:
     const Fragment* fragment() const;
     Fragment* fragment();
 
-    const Asset* asset() const;
-    Asset* asset();
+//    const Asset* asset() const;
+//    Asset* asset();
 
 private:
 

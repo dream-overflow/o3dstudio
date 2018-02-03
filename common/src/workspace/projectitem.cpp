@@ -14,7 +14,7 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/hub.h"
 #include "o3d/studio/common/workspace/fragment.h"
-#include "o3d/studio/common/workspace/asset.h"
+//#include "o3d/studio/common/workspace/asset.h"
 
 #include <QtCore/qobjectdefs.h>
 
@@ -266,14 +266,14 @@ o3d::Bool ProjectItem::isFragment() const
     }
 }
 
-o3d::Bool ProjectItem::isAsset() const
-{
-    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
-        return True;
-    } else {
-        return False;
-    }
-}
+//o3d::Bool ProjectItem::isAsset() const
+//{
+//    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
+//        return True;
+//    } else {
+//        return False;
+//    }
+//}
 
 const Project *ProjectItem::project() const
 {
@@ -369,26 +369,26 @@ Fragment *ProjectItem::fragment()
     return nullptr;
 }
 
-const Asset *ProjectItem::asset() const
-{
-    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
-        const Workspace *workspace = Application::instance()->workspaces().current();
-        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
-                return static_cast<const Asset*>(m_entity);
-        }
-    }
+//const Asset *ProjectItem::asset() const
+//{
+//    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
+//        const Workspace *workspace = Application::instance()->workspaces().current();
+//        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
+//                return static_cast<const Asset*>(m_entity);
+//        }
+//    }
 
-    return nullptr;
-}
+//    return nullptr;
+//}
 
-Asset *ProjectItem::asset()
-{
-    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
-        const Workspace *workspace = Application::instance()->workspaces().current();
-        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
-                return static_cast<Asset*>(m_entity);
-        }
-    }
+//Asset *ProjectItem::asset()
+//{
+//    if (m_entity && m_ref.isValid() && m_ref.baseTypeOf(TypeRef::asset())) {
+//        const Workspace *workspace = Application::instance()->workspaces().current();
+//        if (workspace->project(m_entity->project()->ref().light()) == m_entity->project()) {
+//                return static_cast<Asset*>(m_entity);
+//        }
+//    }
 
-    return nullptr;
-}
+//    return nullptr;
+//}

@@ -103,7 +103,7 @@ public:
      * @brief Import from a specified file name the content into a parent entity
      * @param filename File name of the content to import.
      * @param options Option (filters, conversion) during importation.
-     * @param parent Parent must be the project, or the parent hub, or the container asset.
+     * @param parent Parent must be the project, or the parent hub.
      * @return ImportDefinition object if success, null else.
      */
     virtual ImportDefinition* import(

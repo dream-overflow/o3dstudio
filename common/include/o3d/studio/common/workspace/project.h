@@ -162,7 +162,9 @@ public:
      */
     const Hub* findHub(const Uuid &uuid) const;
 
-
+    /**
+     * @brief Return the number of direct hub children.
+     */
     size_t numHubs() const;
 
     /**

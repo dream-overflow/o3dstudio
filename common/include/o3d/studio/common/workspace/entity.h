@@ -42,6 +42,8 @@ public:
     explicit Entity(const String &name, Entity *parent = nullptr);
     virtual ~Entity();
 
+    void setParent(Entity *entity);
+
     Entity* parent();
     const Entity* parent() const;
 

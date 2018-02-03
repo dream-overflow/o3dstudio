@@ -26,6 +26,11 @@ Entity::~Entity()
 
 }
 
+void Entity::setParent(Entity *entity)
+{
+    m_parent = entity;
+}
+
 void Entity::setRef(const ObjectRef &ref)
 {
     m_ref = ref;

@@ -16,7 +16,7 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/hub.h"
 #include "o3d/studio/common/workspace/fragment.h"
-#include "o3d/studio/common/workspace/asset.h"
+//#include "o3d/studio/common/workspace/asset.h"
 #include "o3d/studio/common/workspace/projectmodel.h"
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/selectionitem.h"
@@ -27,7 +27,7 @@
 #include "o3d/studio/common/command/commandmanager.h"
 #include "o3d/studio/common/command/hub/removehubcommand.h"
 #include "o3d/studio/common/command/fragment/removefragmentcommand.h"
-#include "o3d/studio/common/command/asset/removeassetcommand.h"
+//#include "o3d/studio/common/command/asset/removeassetcommand.h"
 
 #include <QtWidgets/QTreeView>
 
@@ -161,25 +161,25 @@ void WorkspaceDock::onProjectFragmentRemoved(LightRef ref)
     projectModel->removeFragment(ref);
 }
 
-void WorkspaceDock::onProjectAssetAdded(LightRef ref)
-{
-    common::Workspace* workspace = common::Application::instance()->workspaces().current();
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
-    common::Asset *asset = workspace->asset(ref);
+//void WorkspaceDock::onProjectAssetAdded(LightRef ref)
+//{
+//    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+//    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+//    common::Asset *asset = workspace->asset(ref);
 
-    // add a new project asset
-    if (asset) {
-        projectModel->addAsset(asset);
-    }
-}
+//    // add a new project asset
+//    if (asset) {
+//        projectModel->addAsset(asset);
+//    }
+//}
 
-void WorkspaceDock::onProjectAssetRemoved(LightRef ref)
-{
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+//void WorkspaceDock::onProjectAssetRemoved(LightRef ref)
+//{
+//    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
 
-    // remove a project asset
-    projectModel->removeAsset(ref);
-}
+//    // remove a project asset
+//    projectModel->removeAsset(ref);
+//}
 
 void WorkspaceDock::onProjectEntityChanged(o3d::studio::common::LightRef ref, o3d::BitSet64 changes)
 {
@@ -243,8 +243,8 @@ void WorkspaceDock::onChangeCurrentWorkspace(const String &/*name*/)
         workspace->onProjectFragmentAdded.connect(this, &WorkspaceDock::onProjectFragmentAdded, CONNECTION_ASYNCH);
         workspace->onProjectFragmentRemoved.connect(this, &WorkspaceDock::onProjectFragmentRemoved, CONNECTION_ASYNCH);
 
-        workspace->onProjectAssetAdded.connect(this, &WorkspaceDock::onProjectAssetAdded, CONNECTION_ASYNCH);
-        workspace->onProjectAssetRemoved.connect(this, &WorkspaceDock::onProjectAssetRemoved, CONNECTION_ASYNCH);
+//        workspace->onProjectAssetAdded.connect(this, &WorkspaceDock::onProjectAssetAdded, CONNECTION_ASYNCH);
+//        workspace->onProjectAssetRemoved.connect(this, &WorkspaceDock::onProjectAssetRemoved, CONNECTION_ASYNCH);
 
         workspace->onProjectEntityChanged.connect(this, &WorkspaceDock::onProjectEntityChanged, CONNECTION_ASYNCH);
     }
@@ -323,11 +323,11 @@ void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QMode
             if (fragment) {
                 common::Application::instance()->selection().select(fragment);
             }
-        } else if (projectItem->ref().baseTypeOf(common::TypeRef::asset())) {
-            common::Asset *asset = project->asset(projectItem->ref());
-            if (asset) {
-                common::Application::instance()->selection().select(asset);
-            }
+//        } else if (projectItem->ref().baseTypeOf(common::TypeRef::asset())) {
+//            common::Asset *asset = project->asset(projectItem->ref());
+//            if (asset) {
+//                common::Application::instance()->selection().select(asset);
+//            }
         } else if (projectItem->ref().baseTypeOf(common::TypeRef::project())) {
             common::Application::instance()->selection().select(project);
         }
@@ -368,11 +368,11 @@ void QtWorkspaceDock::onSelectItem(const QModelIndex &index)
                 if (fragment) {
                     common::Application::instance()->selection().select(fragment);
                 }
-            } else if (baseType == common::TypeRef::asset()) {
-                common::Asset *asset = project->asset(projectItem->ref());
-                if (asset) {
-                    common::Application::instance()->selection().select(asset);
-                }
+//            } else if (baseType == common::TypeRef::asset()) {
+//                common::Asset *asset = project->asset(projectItem->ref());
+//                if (asset) {
+//                    common::Application::instance()->selection().select(asset);
+//                }
             } else if (baseType == common::TypeRef::project()) {
                 common::Application::instance()->selection().select(project);
             }
@@ -400,9 +400,9 @@ void QtWorkspaceDock::keyPressEvent(QKeyEvent *event)
             } else if (projectItem->isFragment()) {
                 common::RemoveFragmentCommand *cmd = new common::RemoveFragmentCommand(projectItem->ref(), projectItem->parentItem()->ref());
                 common::Application::instance()->command().addCommand(cmd);
-            } else if (projectItem->isAsset()) {
-                common::RemoveAssetCommand *cmd = new common::RemoveAssetCommand(projectItem->ref(), projectItem->parentItem()->ref());
-                common::Application::instance()->command().addCommand(cmd);
+//            } else if (projectItem->isAsset()) {
+//                common::RemoveAssetCommand *cmd = new common::RemoveAssetCommand(projectItem->ref(), projectItem->parentItem()->ref());
+//                common::Application::instance()->command().addCommand(cmd);
             }
         }
     }

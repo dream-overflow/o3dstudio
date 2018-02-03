@@ -16,6 +16,7 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/fragment.h"
 #include "o3d/studio/common/workspace/hub.h"
+#include "o3d/studio/common/workspace/asset.h"
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/selectionitem.h"
 
@@ -48,6 +49,10 @@ o3d::String AddHubCommand::commandLabel() const
     return fromQString(tr("Add a hub"));
 }
 
+#include "o3d/studio/common/importer/importerregistry.h"
+#include "o3d/studio/common/importer/importer.h"
+#include "o3d/studio/common/importer/importdefinition.h"
+
 o3d::Bool AddHubCommand::doCommand()
 {
     Workspace* workspace = common::Application::instance()->workspaces().current();
@@ -79,6 +84,16 @@ o3d::Bool AddHubCommand::doCommand()
                 parentHub->addHub(hub);
 
                 m_storedHubRef = hub->ref();
+
+                // dev only test to import FBX @todo remove me after
+                Importer *fbxi = Application::instance()->importers().importer("o3s::plugin::importer::fbxi");
+                ImportDefinition *def = fbxi->import(
+                                            "../../../../test/fbx/cube.fbx",
+                                            new ImporterOption(),
+                                            hub);
+
+                deletePtr(def);
+
                 return True;
             }
         }

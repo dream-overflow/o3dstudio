@@ -22,7 +22,7 @@ namespace common {
 class Project;
 class Hub;
 class Fragment;
-class Asset;
+//class Asset;
 
 class O3S_API ProjectModel : public QAbstractItemModel
 {
@@ -59,8 +59,8 @@ public:
     ProjectItem *addFragment(common::Fragment *fragment);
     void removeFragment(const common::LightRef &ref);
 
-    ProjectItem *addAsset(common::Asset *asset);
-    void removeAsset(const common::LightRef &ref);
+//    ProjectItem *addAsset(common::Asset *asset);
+//    void removeAsset(const common::LightRef &ref);
 
     void updatePresentation(const LightRef &ref);
 

@@ -109,6 +109,7 @@ void Hub::addHub(Hub *hub, Int32 index)
 
     hub->setProject(project());
 
+    // structure change
     setDirty();
 
     // signal throught project->workspace
@@ -121,12 +122,13 @@ void Hub::removeHub(const LightRef &_ref)
         O3D_ERROR(E_HubException(fromQString(tr("Trying to remove a reference for another project"))));
     }
 
-    auto it = m_hubs.find(_ref.id());
+    UInt64 hubId = _ref.id();
+
+    auto it = m_hubs.find(hubId);
     if (it == m_hubs.end()) {
         O3D_ERROR(E_HubException(fromQString(tr("Trying to remove an unknown reference"))));
     }
 
-    UInt64 hubId = _ref.id();
     Hub *hub = it->second;
     m_hubs.erase(it);
 
@@ -136,6 +138,7 @@ void Hub::removeHub(const LightRef &_ref)
         m_hubsOrder.erase(it2);
     }
 
+    // structure change
     setDirty();
 
     // remove from project, deferred deletion...
@@ -163,6 +166,7 @@ void Hub::removeHub(UInt64 id)
         m_hubsOrder.erase(it2);
     }
 
+    // structure change
     setDirty();
 
     // remove from project, deferred deletion...

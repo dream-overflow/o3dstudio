@@ -139,7 +139,8 @@ const O3DCanvasContent *MasterScene::content() const
 void MasterScene::addCommand(SceneCommand *command)
 {
     if (command) {
-        m_commands.push_front(command);
+        // m_commands.push_front(command);
+        m_commands.push_back(command);
 
         // need refresh to process
         if (m_content) {
