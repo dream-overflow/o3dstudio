@@ -27,6 +27,11 @@ Hub::Hub(const String &name, Entity *parent) :
 {
     m_typeRef = TypeRef::hub();
     m_ref = ObjectRef(TypeRef::hub());
+
+    if (parent) {
+        // auto set project from parent
+        m_project = parent->project();
+    }
 }
 
 Hub::~Hub()
