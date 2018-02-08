@@ -8,13 +8,14 @@
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/storage/store.h"
+#include "o3d/studio/common/typeregistry.h"
 
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/masterscene.h"
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/hub.h"
+#include "o3d/studio/common/workspace/roothub.h"
 #include "o3d/studio/common/workspace/fragment.h"
-#include "o3d/studio/common/workspace/asset.h"
 #include "o3d/studio/common/workspace/projectinfo.h"
 #include "o3d/studio/common/workspace/projectfile.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
@@ -31,7 +32,8 @@ Project::Project(const String &name, Workspace *workspace) :
     m_projectFile(nullptr),
     m_nextId(1),
     m_info(nullptr),
-    m_masterScene(nullptr)
+    m_masterScene(nullptr),
+    m_rootHub(nullptr)
 {
     m_typeRef = TypeRef::project();
 
@@ -39,6 +41,14 @@ Project::Project(const String &name, Workspace *workspace) :
     m_masterScene = new MasterScene(this);
     m_projectFile = new ProjectFile(this, ProjectFile::PROJECT_VERSION_1_0_0);
     m_info = new ProjectInfo();
+
+    // create the virtual root hub
+    m_rootHub = new RootHub("RootHub", this);
+
+    m_rootHub->setTypeRef(Application::instance()->types().typeRef("o3s::common::hub::root"));
+
+    // valid but invalid if project id is changed before usage and after ctor
+    m_rootHub->setRef(ObjectRef::buildRef(this, m_rootHub->typeRef()));
 }
 
 Project::~Project()
@@ -60,26 +70,8 @@ Project::~Project()
     }
 
     // hubs
-    Hub *hub = nullptr;
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        hub = it->second;
-        // first clean from scene
-        hub->removeFromScene(m_masterScene);
-    }
-
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        hub = it->second;
-        // next we can finally delete
-        deletePtr(hub);
-    }
-    m_hubsOrder.clear();
-
-    // and finally assets
-    Asset *asset = nullptr;
-    for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
-        asset = it->second;
-        deletePtr(asset);
-    }
+    m_rootHub->removeFromScene(m_masterScene);
+    delete m_rootHub;
 
     // now we can safely delete the master scene with the o3d scene
     delete m_masterScene;
@@ -124,17 +116,11 @@ o3d::Int32 Project::childIndexOf(Entity *entity) const
         return -1;
     }
 
-    UInt64 id = entity->ref().light().id();
-    Int32 n = 0;
+//    UInt64 id = entity->ref().light().id();
+//    Int32 n = 0;
 
-    if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
-        for (auto cit = m_hubsOrder.begin(); cit != m_hubsOrder.end(); ++cit) {
-            if ((*cit) == id) {
-                return n;
-            }
-
-            ++n;
-        }
+    if (entity->ref().light().baseTypeOf(TypeRef::hub()) && entity->name() == "RootHub") {
+        return 0;
     }
 
     return -1;
@@ -313,349 +299,6 @@ const Entity *Project::lookup(const Uuid &uuid) const
     }
 
     return nullptr;
-}
-
-void Project::addHub(Hub *hub, Int32 index)
-{
-    // not created for this project
-    if (hub->ref().light().projectId() != ref().light().id()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a hub that is created for another project"))));
-    }
-
-    UInt64 hubId = hub->ref().light().id();
-
-    // already exists
-    if (m_hubs.find(hubId) != m_hubs.end()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added hub, or with a similar id"))));
-    }
-
-    addEntity(hub);
-
-    // position index
-    if (index >= 0) {
-        Int32 n = 0;
-        auto it = m_hubsOrder.begin();
-        while (n < index) {
-            if (it == m_hubsOrder.end()) {
-                break;
-            }
-
-            ++n;
-            ++it;
-        }
-
-        m_hubsOrder.emplace(it, hubId);
-    } else {
-        m_hubsOrder.push_back(hubId);
-    }
-
-    m_hubs[hubId] = hub;
-
-    hub->setProject(this);
-
-    // structure change
-    setDirty();
-
-    // signal throught workspace
-    workspace()->onProjectHubAdded(hub->ref().light());
-}
-
-void Project::removeHub(const LightRef &_ref)
-{
-    if (_ref.projectId() != ref().light().id()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove a reference for another project"))));
-    }
-
-    UInt64 hubId = _ref.id();
-
-    auto it = m_hubs.find(hubId);
-    if (it == m_hubs.end()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
-    }
-
-    Hub *hub = it->second;
-    m_hubs.erase(it);
-
-    // erase its order
-    auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hub->ref().light().id());
-    if (it2 != m_hubsOrder.end()) {
-        m_hubsOrder.erase(it2);
-    }
-
-    // structure change
-    setDirty();
-
-    // remove from project, deferred deletion...
-    removeEntity(hub);
-
-    // signal throught workspace
-    workspace()->onProjectHubRemoved(_ref);
-}
-
-void Project::removeHub(UInt64 id)
-{
-    auto it = m_hubs.find(id);
-    if (it == m_hubs.end()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
-    }
-
-    Hub *hub = it->second;
-    LightRef _ref = hub->ref().light();
-    m_hubs.erase(it);
-
-    // erase its order
-    auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), id);
-    if (it2 != m_hubsOrder.end()) {
-        m_hubsOrder.erase(it2);
-    }
-
-    // structure change
-    setDirty();
-
-    // remove from project, deferred deletion...
-    removeEntity(hub);
-
-    // signal throught workspace
-    workspace()->onProjectHubRemoved(_ref);
-}
-
-void Project::removeHub(Hub *hub)
-{
-    if (!hub) {
-        return;
-    }
-
-    UInt64 hubId = hub->ref().light().id();
-    auto it = m_hubs.find(hubId);
-
-    if (it != m_hubs.end()) {
-        LightRef _ref = hub->ref().light();
-        m_hubs.erase(it);
-
-        // erase its order
-        auto it2 = std::find(m_hubsOrder.begin(), m_hubsOrder.end(), hubId);
-        if (it2 != m_hubsOrder.end()) {
-            m_hubsOrder.erase(it2);
-        }
-
-        // structure change
-        setDirty();
-
-        // remove from project, deferred deletion...
-        removeEntity(hub);
-
-        // signal throught workspace
-        workspace()->onProjectHubRemoved(_ref);
-
-        return;
-    }
-}
-
-Hub* Project::hub(const LightRef &_ref)
-{
-    if (_ref.projectId() != ref().light().id()) {
-        return nullptr;
-    }
-
-    auto it = m_hubs.find(_ref.id());
-    if (it != m_hubs.end()) {
-        return it->second;
-    }
-
-    return nullptr;
-}
-
-const Hub* Project::hub(const LightRef &_ref) const
-{
-    if (_ref.projectId() != ref().light().id()) {
-        return nullptr;
-    }
-
-    auto cit = m_hubs.find(_ref.id());
-    if (cit != m_hubs.cend()) {
-        return cit->second;
-    }
-
-    return nullptr;
-}
-
-Hub* Project::hub(UInt64 id)
-{
-    auto it = m_hubs.find(id);
-    if (it != m_hubs.end()) {
-        return it->second;
-    }
-
-    return nullptr;
-}
-
-const Hub* Project::hub(UInt64 id) const
-{
-    auto cit = m_hubs.find(id);
-    if (cit != m_hubs.cend()) {
-        return cit->second;
-    }
-
-    return nullptr;
-}
-
-std::list<Hub *> Project::searchHub(const String &name)
-{
-    std::list<Hub*> results;
-
-    Hub *hub;
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        hub = it->second;
-
-        if (hub->name() == name) {
-            results.push_back(hub);
-        }
-    }
-
-    return results;
-}
-
-std::list<const Hub*> Project::searchHub(const String &name) const
-{
-    std::list<const Hub*> results;
-
-    const Hub *hub;
-    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
-        hub = cit->second;
-
-        if (hub->name() == name) {
-            results.push_back(hub);
-        }
-    }
-
-    return results;
-}
-
-Hub *Project::findHub(UInt64 id)
-{
-    // first level
-    Hub *result = nullptr;
-    Hub *hub = nullptr;
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        hub = it->second;
-
-        result = hub->findHub(id);
-        if (result != nullptr) {
-            return result;
-        }
-    }
-
-    return nullptr;
-}
-
-const Hub *Project::findHub(UInt64 id) const
-{
-    // first level
-    const Hub *result = nullptr;
-    const Hub *hub = nullptr;
-    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
-        hub = cit->second;
-
-        result = hub->findHub(id);
-        if (result != nullptr) {
-            return result;
-        }
-    }
-
-    return nullptr;
-}
-
-Hub *Project::findHub(const Uuid &uuid)
-{
-    // first level
-    Hub *result = nullptr;
-    Hub *hub = nullptr;
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        hub = it->second;
-
-        result = hub->findHub(uuid);
-        if (result != nullptr) {
-            return result;
-        }
-    }
-
-    return nullptr;
-}
-
-const Hub *Project::findHub(const Uuid &uuid) const
-{
-    // first level
-    const Hub *result = nullptr;
-    const Hub *hub = nullptr;
-    for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
-        hub = cit->second;
-
-        result = hub->findHub(uuid);
-        if (result != nullptr) {
-            return result;
-        }
-    }
-
-    return nullptr;
-}
-
-size_t Project::numHubs() const
-{
-    return m_hubs.size();
-}
-
-std::list<Hub*> Project::hubs(Bool recurse)
-{
-    // first level
-    std::list<Hub*> results;
-    std::list<Hub*> childResults;
-    Hub *hub = nullptr;
-
-    if (recurse) {
-        for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-            hub = it->second;
-
-            results.push_back(hub);
-
-            childResults = hub->hubs(recurse);
-            results.insert(results.end(), childResults.begin(), childResults.end());
-        }
-    } else {
-        for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-            hub = it->second;
-
-            results.push_back(hub);
-        }
-    }
-
-    return results;
-}
-
-std::list<const Hub *> Project::hubs(Bool recurse) const
-{
-    // first level
-    std::list<const Hub*> results;
-    std::list<const Hub*> childResults;
-    const Hub *hub = nullptr;
-
-    if (recurse) {
-        for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
-            hub = cit->second;
-
-            results.push_back(hub);
-
-            childResults = hub->hubs(recurse);
-            results.insert(results.end(), childResults.begin(), childResults.end());
-        }
-    } else {
-        for (auto cit = m_hubs.cbegin(); cit != m_hubs.cend(); ++cit) {
-            hub = cit->second;
-
-            results.push_back(hub);
-        }
-    }
-
-    return results;
 }
 
 void Project::addFragment(Fragment *fragment)
@@ -859,207 +502,6 @@ std::list<const Fragment *> Project::fragments() const
     return results;
 }
 
-void Project::addAsset(Asset *asset)
-{
-    // not created for this project
-    if (asset->ref().light().projectId() != ref().light().id()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add an asset that is created for another project"))));
-    }
-
-    // already exists
-    if (m_assets.find(asset->ref().light().id()) != m_assets.end()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to add a previously added asset, or with a similar id"))));
-    }
-
-    m_assets[asset->ref().light().id()] = asset;
-    addEntity(asset);
-
-    // structure change
-    setDirty();
-
-    // signal throught workspace
-    workspace()->onProjectAssetAdded(asset->ref().light());
-}
-
-void Project::removeAsset(const LightRef &_ref)
-{
-    if (_ref.projectId() != ref().light().id()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove a reference for another project"))));
-    }
-
-    auto it = m_assets.find(_ref.id());
-    if (it == m_assets.end()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
-    }
-
-    Asset *asset = it->second;
-    m_assets.erase(it);
-
-    // structure change
-    setDirty();
-
-    // remove from project, deferred deletion...
-    removeEntity(asset);
-
-    // signal throught workspace
-    workspace()->onProjectAssetRemoved(_ref);
-}
-
-void Project::removeAsset(UInt64 id)
-{
-    auto it = m_assets.find(id);
-    if (it == m_assets.end()) {
-        O3D_ERROR(E_ProjectException(fromQString(tr("Trying to remove an unknown reference"))));
-    }
-
-    Asset *asset = it->second;
-    LightRef _ref = asset->ref().light();
-    m_assets.erase(it);
-
-    // structure change
-    setDirty();
-
-    // remove from project, deferred deletion...
-    removeEntity(asset);
-
-    // signal throught workspace
-    workspace()->onProjectAssetRemoved(_ref);
-}
-
-void Project::removeAsset(Asset *asset)
-{
-    if (!asset) {
-        return;
-    }
-
-    UInt64 assetId = asset->ref().light().id();
-    auto it = m_assets.find(assetId);
-
-    if (it != m_assets.end()) {
-        LightRef _ref = asset->ref().light();
-        m_assets.erase(it);
-
-        // structure change
-        setDirty();
-
-        // remove from project, deferred deletion...
-        removeEntity(asset);
-
-        // signal throught workspace
-        workspace()->onProjectAssetRemoved(_ref);
-
-        return;
-    }
-}
-
-Asset *Project::asset(const LightRef &_ref)
-{
-    if (_ref.projectId() != ref().light().id()) {
-        return nullptr;
-    }
-
-    auto it = m_assets.find(_ref.id());
-    if (it != m_assets.end()) {
-        return it->second;
-    }
-
-    return nullptr;
-}
-
-const Asset *Project::asset(const LightRef &_ref) const
-{
-    if (_ref.projectId() != ref().light().id()) {
-        return nullptr;
-    }
-
-    auto cit = m_assets.find(_ref.id());
-    if (cit != m_assets.cend()) {
-        return cit->second;
-    }
-
-    return nullptr;
-}
-
-Asset *Project::asset(UInt64 id)
-{
-    auto it = m_assets.find(id);
-    if (it != m_assets.end()) {
-        return it->second;
-    }
-
-    return nullptr;
-}
-
-const Asset *Project::asset(UInt64 id) const
-{
-    auto cit = m_assets.find(id);
-    if (cit != m_assets.cend()) {
-        return cit->second;
-    }
-
-    return nullptr;
-}
-
-std::list<Asset *> Project::searchAsset(const String &name)
-{
-    std::list<Asset*> results;
-
-    Asset *asset;
-    for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
-        asset = it->second;
-
-        if (asset->name() == name) {
-            results.push_back(asset);
-        }
-    }
-
-    return results;
-}
-
-std::list<const Asset *> Project::searchAsset(const String &name) const
-{
-    std::list<const Asset*> results;
-
-    const Asset *asset;
-    for (auto cit = m_assets.cbegin(); cit != m_assets.cend(); ++cit) {
-        asset = cit->second;
-
-        if (asset->name() == name) {
-            results.push_back(asset);
-        }
-    }
-
-    return results;
-}
-
-std::list<Asset *> Project::assets()
-{
-    // first level
-    std::list<Asset*> results;
-    Asset *asset= nullptr;
-
-    for (auto it = m_assets.begin(); it != m_assets.end(); ++it) {
-        asset = it->second;
-        results.push_back(asset);
-    }
-
-    return results;
-}
-
-std::list<const Asset *> Project::assets() const
-{
-    // first level
-    std::list<const Asset*> results;
-    const Asset *asset = nullptr;
-
-    for (auto cit = m_assets.cbegin(); cit != m_assets.cend(); ++cit) {
-        asset = cit->second;
-        results.push_back(asset);
-    }
-
-    return results;
-}
-
 void Project::addEntity(Entity *entity)
 {
     if (!entity) {
@@ -1118,4 +560,14 @@ void Project::purgeEntities()
             ++it;
         }
     }
+}
+
+Hub *Project::rootHub()
+{
+    return m_rootHub;
+}
+
+Hub *Project::rootHub() const
+{
+    return m_rootHub;
 }

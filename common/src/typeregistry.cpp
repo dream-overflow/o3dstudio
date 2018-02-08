@@ -32,6 +32,9 @@ TypeRegistry::TypeRegistry(BaseObject *parent) :
     m_typeRefsById[TypeRef::builder().id()] = TypeRef::builder();
 
     m_nextId = MAX_TYPE_ID + 1;
+
+    // register the root hub because it is unique and static and no have component
+    registerType(HUB_TYPE_ID, "o3s::common::hub::root");
 }
 
 TypeRegistry::~TypeRegistry()

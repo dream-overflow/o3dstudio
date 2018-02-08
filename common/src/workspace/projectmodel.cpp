@@ -226,7 +226,10 @@ ProjectItem *ProjectModel::addProject(Project *project)
 
     // and add the initial structure of hubs
     {
-        std::list<Hub*> hubs = project->hubs(true);
+        // root hub, but could be hidden
+        addHub(project->rootHub());
+
+        std::list<Hub*> hubs = project->rootHub()->hubs(true);
         for (Hub *hub : hubs) {
             addHub(hub);
         }
@@ -239,14 +242,6 @@ ProjectItem *ProjectModel::addProject(Project *project)
             addFragment(fragment);
         }
     }
-
-    // ...assets
-//    {
-//        std::list<Asset*> assets = project->assets();
-//        for (Asset *asset : assets) {
-//            addAsset(asset);
-//        }
-//    }
 
     endInsertRows();
 
@@ -301,11 +296,12 @@ ProjectItem *ProjectModel::addHub(common::Hub *hub)
     beginInsertRows(parentIndex, n, n);
 
     common::Component *component = common::Application::instance()->components().componentByTarget(hub->typeRef().name());
+    String icon = component ? component->icon() : ":/icons/apps_black.svg";
 
     ProjectItem *item = new ProjectItem(hub,
                                         hub->ref().light(),
                                         hub->name(),
-                                        UiUtils::tintIcon(toQString(component->icon())),
+                                        UiUtils::tintIcon(toQString(icon)),
                                         parentItem);
     parentItem->insertChild(item, n);
 

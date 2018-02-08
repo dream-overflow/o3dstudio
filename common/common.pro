@@ -95,7 +95,8 @@ SOURCES += \
     src/importer/importerregistry.cpp \
     src/builder/builderregistry.cpp \
     src/ui/property/panelproperty.cpp \
-    src/ui/property/vector3property.cpp
+    src/ui/property/vector3property.cpp \
+    src/workspace/roothub.cpp
 
 
 HEADERS += \ 
@@ -185,7 +186,8 @@ HEADERS += \
     include/o3d/studio/common/importer/importerregistry.h \
     include/o3d/studio/common/builder/builderregistry.h \
     include/o3d/studio/common/importer/importer.h \
-    include/o3d/studio/common/importer/importdefinition.h
+    include/o3d/studio/common/importer/importdefinition.h \
+    include/o3d/studio/common/workspace/roothub.h
 
 LIBS += -lobjective3d-dbg
 

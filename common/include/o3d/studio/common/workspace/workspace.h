@@ -29,6 +29,7 @@ namespace common {
 
 class Project;
 class Messenger;
+class Asset;
 
 /**
  * @brief The Workspace final class.
@@ -140,12 +141,12 @@ public:
     const Fragment* fragment(const LightRef &ref) const;
 
     /**
-     * @brief Get a specific asset from a loaded project.
+     * @brief Get a specific asset from the library.
      */
     Asset* asset(const LightRef &ref);
 
     /**
-     * @brief Get a specific asset from a loaded project (const version).
+     * @brief Get a specific asset from a the library (const version).
      */
     const Asset* asset(const LightRef &ref) const;
 
@@ -165,10 +166,10 @@ public /*signals*/:
     //! Fragment is removed, later delete, but cannot be retrieved into its parent or project into this signal
     Signal<LightRef> onProjectFragmentRemoved{this};
 
-    //! Asset is added, and it can be retrieved into its parent and its project
-    Signal<LightRef> onProjectAssetAdded{this};
-    //! Asset is removed, later delete, but cannot be retrieved into its parent or project into this signal
-    Signal<LightRef> onProjectAssetRemoved{this};
+    //! Asset is added, and it can be retrieved into its parent and its library
+    Signal<LightRef> onLibraryAssetAdded{this};
+    //! Asset is removed, later delete, but cannot be retrieved into its library into this signal
+    Signal<LightRef> onLibraryAssetRemoved{this};
 
     //! A changes occurs on a entity that belongs to this project, the bitset contains details about changes
     Signal<LightRef, BitSet64 /*changeFlags*/> onProjectEntityChanged{this};

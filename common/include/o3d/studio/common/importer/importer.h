@@ -21,7 +21,7 @@ namespace o3d {
 namespace studio {
 namespace common {
 
-class Entity;
+class Hub;
 class ImportDefinition;
 
 /**
@@ -100,7 +100,7 @@ public:
     virtual ImportDefinition* introspect(const String &filename) = 0;
 
     /**
-     * @brief Import from a specified file name the content into a parent entity
+     * @brief Import from a specified file name the content into a parent hub
      * @param filename File name of the content to import.
      * @param options Option (filters, conversion) during importation.
      * @param parent Parent must be the project, or the parent hub.
@@ -109,7 +109,7 @@ public:
     virtual ImportDefinition* import(
             const String &filename,
             ImporterOption *options,
-            Entity *parent) = 0;
+            Hub *parent) = 0;
 
     /**
      * @brief Array of capacities of the importer (not what is imported but what is importable).

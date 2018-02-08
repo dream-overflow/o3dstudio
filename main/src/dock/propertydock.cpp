@@ -104,7 +104,7 @@ void PropertyDock::onSelectionChanged()
                 return;
             }
 
-            hub = project->findHub(selectionItem->ref().id());
+            hub = project->rootHub()->findHub(selectionItem->ref().id());
             if (!hub) {
                 continue;
             }
@@ -145,7 +145,7 @@ void PropertyDock::onSelectionChanged()
                 return;
             }
 
-            hub = project->findHub(selectionItem->ref().id());
+            hub = project->rootHub()->findHub(selectionItem->ref().id());
             if (!hub) {
                 continue;
             }

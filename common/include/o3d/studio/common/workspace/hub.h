@@ -122,7 +122,7 @@ public:
     virtual void createToScene(MasterScene *masterScene) = 0;
 
     /**
-     * @brief Destroy the related entities fomr the engine scene.
+     * @brief Destroy the related entities from the engine scene.
      * @note This default implemantation process recursively,
      * and starting by removing the leaves throught, and up to this hub.
      * This default implementation can be used at begining of each specialization.

@@ -52,20 +52,7 @@ o3d::Bool RemoveHubCommand::doCommand()
     if (workspace) {
         Project *project = workspace->project(m_parent);
 
-        // first level hub, direct to project
-        if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Hub *hub = project->hub(m_hub);
-            if (hub) {
-                // backup
-                DataOutStream stream(m_data);
-                stream << *hub;
-                m_storedHubRef = hub->ref();
-                m_nodePos = project->childIndexOf(hub);
-
-                project->removeHub(m_hub);
-                return True;
-            }
-        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
+        if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 Hub *hub = parentHub->hub(m_hub);
@@ -97,29 +84,7 @@ o3d::Bool RemoveHubCommand::undoCommand()
             return False;
         }
 
-        // first level hub, direct to project
-        if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Hub *hub = component->buildHub("", project, project);
-            hub->setProject(project);
-
-            // restore content
-            DataInStream stream(m_data);
-            stream >> *hub;
-            hub->setRef(m_storedHubRef);
-
-            m_data.destroy();
-
-            project->addHub(hub, m_nodePos);
-
-            // iterator over children
-            common::Hub *node = nullptr;
-            foreach (node, hub->hubs(true)) {
-                // signal throught project->workspace
-                project->workspace()->onProjectHubAdded(node->ref().light());
-            }
-
-            return True;
-        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
+        if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 Hub *hub = component->buildHub("", project, parentHub);
@@ -155,19 +120,7 @@ o3d::Bool RemoveHubCommand::redoCommand()
     if (workspace) {
         Project *project = workspace->project(m_parent);
 
-        // first level hub, direct to project
-        if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Hub *hub = project->hub(m_hub);
-            if (hub) {
-                // backup
-                DataOutStream stream(m_data);
-                stream << *hub;
-                m_storedHubRef = hub->ref();
-
-                project->removeHub(m_hub);
-                return True;
-            }
-        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
+        if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 Hub *hub = parentHub->hub(m_hub);

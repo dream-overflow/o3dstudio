@@ -31,7 +31,7 @@ class ProjectFile;
 class ProjectInfo;
 class Hub;
 class Fragment;
-class Asset;
+class RootHub;
 
 /**
  * @brief The Project final class
@@ -127,57 +127,15 @@ public:
     // hub
     //
 
-    void addHub(Hub *hub, Int32 index = -1);
-
-    void removeHub(const LightRef &ref);
-    void removeHub(UInt64 id);
-    void removeHub(Hub *hub);
-
-    Hub* hub(const LightRef &ref);
-    const Hub* hub(const LightRef &ref) const;
-
-    Hub* hub(UInt64 id);
-    const Hub* hub(UInt64 id) const;
-
-    std::list<Hub*> searchHub(const String &name);
-    std::list<const Hub*> searchHub(const String &name) const;
+    /**
+     * @brief Return the virtual root hub.
+     */
+    Hub* rootHub();
 
     /**
-     * @brief Recursively find for a hub instance.
+     * @brief Return the virtual root hub (read only)
      */
-    Hub* findHub(UInt64 id);
-
-    /**
-     * @brief Recursively find for a hub instance (const version).
-     */
-    const Hub* findHub(UInt64 id) const;
-
-    /**
-     * @brief Recursively find for a hub instance.
-     */
-    Hub* findHub(const Uuid &uuid);
-
-    /**
-     * @brief Recursively find for a hub instance (const version).
-     */
-    const Hub* findHub(const Uuid &uuid) const;
-
-    /**
-     * @brief Return the number of direct hub children.
-     */
-    size_t numHubs() const;
-
-    /**
-     * @brief List of hubs of the project
-     * @param recurse Default false, returns only projet level hubs, true recurse over all children.
-     */
-    std::list<Hub*> hubs(Bool recurse = false);
-
-    /**
-     * @brief List of hubs of the project (const version).
-     * @param recurse Default false, returns only projet level hubs, true recurse over all children.
-     */
-    std::list<const Hub*> hubs(Bool recurse = false) const;
+    Hub* rootHub() const;
 
     //
     // fragment
@@ -201,28 +159,6 @@ public:
     std::list<Fragment*> fragments();
     std::list<const Fragment*> fragments() const;
 
-    //
-    // asset
-    //
-
-    void addAsset(Asset *asset);
-
-    void removeAsset(const LightRef &ref);
-    void removeAsset(UInt64 id);
-    void removeAsset(Asset *asset);
-
-    Asset* asset(const LightRef &ref);
-    const Asset* asset(const LightRef &ref) const;
-
-    Asset* asset(UInt64 id);
-    const Asset* asset(UInt64 id) const;
-
-    std::list<Asset*> searchAsset(const String &name);
-    std::list<const Asset*> searchAsset(const String &name) const;
-
-    std::list<Asset*> assets();
-    std::list<const Asset*> assets() const;
-
 private:
 
     Workspace *m_workspace;    //!< Workspace where the projet is currently loaded
@@ -238,16 +174,13 @@ private:
     MasterScene *m_masterScene;
 
     std::map<UInt64, Fragment*> m_fragments;   //!< Children fragment.
-    std::map<UInt64, Hub*> m_hubs;             //!< Children hubs (direct).
-    std::map<UInt64, Asset*> m_assets;         //!< Children assets.
+
+    RootHub *m_rootHub;
 
     //! Global map by UUID
     std::map<Uuid, Entity*> m_entitiesByUuid;
     //! Global map by ID
     std::map<UInt64, Entity*> m_entitiesById;
-
-    //! Hub children ordering, not usefull for runtime, but for visualization
-    std::list<UInt64> m_hubsOrder;
 
     //! Contains the entities to later at a safe time
     std::list<Entity*> m_deferredDelete;

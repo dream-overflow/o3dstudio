@@ -133,7 +133,7 @@ o3d::Bool Fragment::deserializeContent(InStream &stream)
 
     if (!uuid.isNull()) {
         // @todo could create a entity map during import based on the index... optimized...
-        m_hub = project()->findHub(uuid);
+        m_hub = project()->rootHub()->findHub(uuid);
 
         if (m_hub) {
             m_hubRef = m_hub->ref();

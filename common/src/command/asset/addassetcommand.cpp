@@ -51,7 +51,8 @@ o3d::Bool AddAssetCommand::doCommand()
             // with new ref id
             asset->setRef(ObjectRef::buildRef(project, TypeRef::asset()));
 
-            project->addAsset(asset);
+            // @todo library
+            // project->addAsset(asset);
 
             m_asset = asset->ref();
             return True;
@@ -67,7 +68,8 @@ o3d::Bool AddAssetCommand::undoCommand()
     if (workspace) {
         Project *project = workspace->project(m_project);
         if (project) {
-            project->removeAsset(m_asset);
+            // @todo library
+            //project->removeAsset(m_asset);
             return True;
         }
     }
@@ -85,7 +87,9 @@ o3d::Bool AddAssetCommand::redoCommand()
             // reuse ref id
             asset->setRef(m_asset);
 
-            project->addAsset(asset);
+            // @todo library
+            // project->addAsset(asset);
+
             return True;
         }
     }

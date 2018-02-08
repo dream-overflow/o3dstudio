@@ -64,17 +64,7 @@ o3d::Bool AddHubCommand::doCommand()
             return False;
         }
 
-        // first level hub, direct to project
-        if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Hub *hub = component->buildHub(m_hubName, project, project);
-            // with new ref id
-            hub->setRef(ObjectRef::buildRef(project, hub->typeRef()));
-
-            project->addHub(hub);
-
-            m_storedHubRef = hub->ref();
-            return True;
-        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
+        if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 Hub *hub = component->buildHub(m_hubName, project, parentHub);
@@ -108,11 +98,7 @@ o3d::Bool AddHubCommand::undoCommand()
     if (workspace) {
         Project *project = workspace->project(m_parent);
 
-        // first level hub, direct to project
-        if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            project->removeHub(m_storedHubRef.light());
-            return True;
-        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
+        if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 parentHub->removeHub(m_storedHubRef.light());
@@ -135,15 +121,7 @@ o3d::Bool AddHubCommand::redoCommand()
             return False;
         }
 
-        // first level hub, direct to project
-        if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Hub *hub = component->buildHub(m_hubName, project, project);
-            // reuse ref id
-            hub->setRef(m_storedHubRef);
-
-            project->addHub(hub);
-            return True;
-        } else if (project && m_parent.baseTypeOf(TypeRef::hub())) {
+        if (project && m_parent.baseTypeOf(TypeRef::hub())) {
             Hub *parentHub = workspace->findHub(m_parent);
             if (parentHub) {
                 Hub *hub = component->buildHub(m_hubName, project, parentHub);

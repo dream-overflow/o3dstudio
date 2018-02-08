@@ -127,6 +127,7 @@ QtHubComponentToolBar::~QtHubComponentToolBar()
 void QtHubComponentToolBar::onCreateHub()
 {
     String name = fromQString(sender()->property("name").toString());
+    close();
 
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace) {
@@ -148,18 +149,19 @@ void QtHubComponentToolBar::onCreateHub()
             return;
         }
 
+        // @todo could disable unusable buttons
+
         // add as sub-hub
         if (hubs.size() == 1) {
             auto it = hubs.begin();
             common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), component->typeRef(), String());
             common::Application::instance()->command().addCommand(cmd);
-        } else {
-            common::AddHubCommand *cmd = new common::AddHubCommand(project->ref().light(), component->typeRef(), String());
+        }/* else {
+            common::AddHubCommand *cmd = new common::AddHubCommand(project->rootHub()->ref().light(), component->typeRef(), String());
             common::Application::instance()->command().addCommand(cmd);
-        }
+        }*/
     }
 
-    close();
     deleteLater();
 }
 

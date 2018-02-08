@@ -10,6 +10,7 @@
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/selectionitem.h"
+#include "o3d/studio/common/workspace/hub.h"
 
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/settings.h"
@@ -265,7 +266,7 @@ Hub *Workspace::hub(const LightRef &ref)
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.end()) {
             Project *project = it->second;
-            return project->hub(ref.id());
+            return project->rootHub()->hub(ref.id());
         }
     }
 
@@ -278,7 +279,7 @@ const Hub *Workspace::hub(const LightRef &ref) const
         auto cit = m_loadedProjects.find(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
             const Project *project = cit->second;
-            return project->hub(ref.id());
+            return project->rootHub()->hub(ref.id());
         }
     }
 
@@ -291,7 +292,7 @@ Hub *Workspace::findHub(const LightRef &ref)
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.cend()) {
             Project *project = it->second;
-            return project->findHub(ref.id());
+            return project->rootHub()->findHub(ref.id());
         }
     }
 
@@ -304,7 +305,7 @@ const Hub *Workspace::findHub(const LightRef &ref) const
         auto cit = m_loadedProjects.find(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
             const Project *project = cit->second;
-            return project->findHub(ref.id());
+            return project->rootHub()->findHub(ref.id());
         }
     }
 
@@ -339,26 +340,28 @@ const Fragment *Workspace::fragment(const LightRef &ref) const
 
 Asset *Workspace::asset(const LightRef &ref)
 {
-    if (ref.baseTypeOf(TypeRef::asset())) {
-        auto it = m_loadedProjects.find(ref.projectId());
-        if (it != m_loadedProjects.end()) {
-            Project *project = it->second;
-            return project->asset(ref.id());
-        }
-    }
+    // @todo
+//    if (ref.baseTypeOf(TypeRef::asset())) {
+//        auto it = m_loadedProjects.find(ref.projectId());
+//        if (it != m_loadedProjects.end()) {
+//            Project *project = it->second;
+//            return project->asset(ref.id());
+//        }
+//    }
 
     return nullptr;
 }
 
 const Asset *Workspace::asset(const LightRef &ref) const
 {
-    if (ref.baseTypeOf(TypeRef::asset())) {
-        auto cit = m_loadedProjects.find(ref.projectId());
-        if (cit != m_loadedProjects.cend()) {
-            const Project *project = cit->second;
-            return project->asset(ref.id());
-        }
-    }
+// @todo
+//    if (ref.baseTypeOf(TypeRef::asset())) {
+//        auto cit = m_loadedProjects.find(ref.projectId());
+//        if (cit != m_loadedProjects.cend()) {
+//            const Project *project = cit->second;
+//            return project->asset(ref.id());
+//        }
+//    }
 
     return nullptr;
 }

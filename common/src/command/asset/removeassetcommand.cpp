@@ -48,16 +48,17 @@ o3d::Bool RemoveAssetCommand::doCommand()
 
         // first level asset, direct to project
         if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Asset *asset = project->asset(m_asset);
-            if (asset) {
-                // backup
-                DataOutStream stream(m_data);
-                stream << *asset;
-                m_storedAssetRef = asset->ref();
+            // @todo
+//            Asset *asset = project->asset(m_asset);
+//            if (asset) {
+//                // backup
+//                DataOutStream stream(m_data);
+//                stream << *asset;
+//                m_storedAssetRef = asset->ref();
 
-                project->removeAsset(m_asset);
-                return True;
-            }
+//                project->removeAsset(m_asset);
+//                return True;
+//            }
         }
     }
 
@@ -72,19 +73,20 @@ o3d::Bool RemoveAssetCommand::undoCommand()
 
         // first level asset, direct to project
         if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Asset *asset = new Asset("", project);
-            asset->setProject(project);
+            // @todo
+//            Asset *asset = new Asset("", project);
+//            asset->setProject(project);
 
-            // restore content
-            DataInStream stream(m_data);
-            stream >> *asset;
-            asset->setRef(m_storedAssetRef);
+//            // restore content
+//            DataInStream stream(m_data);
+//            stream >> *asset;
+//            asset->setRef(m_storedAssetRef);
 
-            m_data.destroy();
+//            m_data.destroy();
 
-            project->addAsset(asset);
+//            project->addAsset(asset);
 
-            return True;
+//            return True;
         }
     }
 
@@ -99,16 +101,17 @@ o3d::Bool RemoveAssetCommand::redoCommand()
 
         // first level asset, direct to project
         if (project && m_parent.baseTypeOf(TypeRef::project())) {
-            Asset *asset = project->asset(m_asset);
-            if (asset) {
-                // backup
-                DataOutStream stream(m_data);
-                stream << *asset;
-                m_storedAssetRef = asset->ref();
+            // @todo
+//            Asset *asset = project->asset(m_asset);
+//            if (asset) {
+//                // backup
+//                DataOutStream stream(m_data);
+//                stream << *asset;
+//                m_storedAssetRef = asset->ref();
 
-                project->removeAsset(m_asset);
-                return True;
-            }
+//                project->removeAsset(m_asset);
+//                return True;
+//            }
         }
     }
 
