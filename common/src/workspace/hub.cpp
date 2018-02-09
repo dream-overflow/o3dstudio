@@ -40,6 +40,8 @@ Hub::~Hub()
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         hub = it->second;
         delete hub;
+        // here or by project... will see
+        // project()->deleteEntity(hub);
     }
 }
 
@@ -63,6 +65,22 @@ void Hub::create()
     setDirty();
 }
 
+void Hub::destroy()
+{
+    // std::list<Hub*> hubs = hubs(True);
+    Hub *hub;
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+        hub->destroy();
+    }
+
+    // remove from project, deferred deletion...
+    project()->removeEntity(this);
+
+    // signal throught project->workspace
+    project()->workspace()->onProjectHubRemoved(ref().light());
+}
+
 o3d::Bool Hub::load()
 {
     return True;
@@ -76,6 +94,20 @@ o3d::Bool Hub::save()
 o3d::Bool Hub::exists() const
 {
     return Entity::exists();
+}
+
+o3d::Bool Hub::deletable() const
+{
+    Hub *hub;
+    // undeletable before all children are deletables
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+        if (!hub->deletable()) {
+            return False;
+        }
+    }
+
+    return True;
 }
 
 void Hub::addHub(Hub *hub, Int32 index)
@@ -146,11 +178,17 @@ void Hub::removeHub(const LightRef &_ref)
     // structure change
     setDirty();
 
-    // remove from project, deferred deletion...
-    project()->removeEntity(hub);
+    // recursively remove its children and related entities
+    hub->destroy();
 
-    // signal throught project->workspace
-    project()->workspace()->onProjectHubRemoved(_ref);
+    // add for a deferred deletion @todo peut on le faire plus tard ?
+    project()->deleteEntity(hub);
+
+//    // remove from project, deferred deletion...
+//    project()->removeEntity(hub);
+
+//    // signal throught project->workspace
+//    project()->workspace()->onProjectHubRemoved(_ref);
 }
 
 void Hub::removeHub(UInt64 id)
@@ -174,11 +212,17 @@ void Hub::removeHub(UInt64 id)
     // structure change
     setDirty();
 
-    // remove from project, deferred deletion...
-    project()->removeEntity(hub);
+    // recursively remove its children and related entities
+    hub->destroy();
 
-    // signal throught project->workspace
-    project()->workspace()->onProjectHubRemoved(_ref);
+    // add for a deferred deletion @todo peut on le faire plus tard ?
+    project()->deleteEntity(hub);
+
+//    // remove from project, deferred deletion...
+//    project()->removeEntity(hub);
+
+//    // signal throught project->workspace
+//    project()->workspace()->onProjectHubRemoved(_ref);
 }
 
 void Hub::removeHub(Hub *hub)
@@ -202,11 +246,16 @@ void Hub::removeHub(Hub *hub)
 
         setDirty();
 
-        // remove from project, deferred deletion...
-        project()->removeEntity(hub);
+        hub->destroy();
 
-        // signal throught project->workspace
-        project()->workspace()->onProjectHubRemoved(_ref);
+        // add for a deferred deletion @todo peut on le faire plus tard ?
+        project()->deleteEntity(hub);
+
+//        // remove from project, deferred deletion...
+//        project()->removeEntity(hub);
+
+//        // signal throught project->workspace
+//        project()->workspace()->onProjectHubRemoved(_ref);
 
         return;
     }

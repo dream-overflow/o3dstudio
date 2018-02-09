@@ -63,6 +63,11 @@ void Asset::create()
     setDirty();
 }
 
+void Asset::destroy()
+{
+
+}
+
 o3d::Bool Asset::deletable() const
 {
     return True;

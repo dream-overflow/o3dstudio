@@ -72,6 +72,11 @@ void Fragment::create()
     setDirty();
 }
 
+void Fragment::destroy()
+{
+
+}
+
 o3d::Bool Fragment::deletable() const
 {
     // @todo

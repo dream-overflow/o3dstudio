@@ -42,17 +42,17 @@ public:
     /**
      * @brief Does nothing virtual root.
      */
-    virtual void createToScene(MasterScene *masterScene);
+    virtual void createToScene(MasterScene *masterScene) override;
 
     /**
      * @brief Remove children recursively.
      */
-    virtual void removeFromScene(MasterScene *masterScene);
+    virtual void removeFromScene(MasterScene *masterScene) override;
 
     /**
      * @brief syncWithScene Does nothing, virtual root.
      */
-    virtual void syncWithScene(MasterScene *masterScene);
+    virtual void syncWithScene(MasterScene *masterScene) override;
 };
 
 } // namespace common

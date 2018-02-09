@@ -70,14 +70,29 @@ public:
     virtual void syncWithScene(MasterScene *masterScene) override;
 
     //
-    // Properties
+    // Geometry
     //
 
-    // @todo manage material and geometry
+    // @todo temporary but need to used a GeometryResource
+    void setVertices(const SmartArrayFloat &v);
+    void setNormals(const SmartArrayFloat &v);
+    void setUVs(const SmartArrayFloat &v);
+    void addIndices(const SmartArrayUInt32 &indices);
+
+    //
+    // Materials
+    //
+
+    // @todo temporary but need to used a MaterialResource
 
 protected:
 
     std::map<MasterScene*, o3d::Mesh*> m_instances;
+
+    SmartArrayFloat m_vertices;
+    SmartArrayFloat m_normals;
+    SmartArrayFloat m_uvs;
+    SmartArrayUInt32 m_indices;
 };
 
 } // namespace common

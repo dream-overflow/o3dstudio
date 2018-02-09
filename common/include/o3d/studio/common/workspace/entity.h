@@ -65,6 +65,11 @@ public:
     virtual void create() = 0;
 
     /**
+     * @brief Destroy in correct order its children and then this.
+     */
+    virtual void destroy() = 0;
+
+    /**
      * @brief Returns true if the entity can be safely deleted.
      */
     virtual Bool deletable() const = 0;

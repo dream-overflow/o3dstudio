@@ -159,9 +159,14 @@ void Project::create()
     setDirty();
 }
 
+void Project::destroy()
+{
+
+}
+
 o3d::Bool Project::deletable() const
 {
-    return m_deferredDelete.empty();
+    return m_deferredDelete.empty() && m_rootHub->deletable();
 }
 
 o3d::String Project::filename() const
@@ -540,9 +545,16 @@ void Project::removeEntity(Entity *entity)
         // sync with the master scene
         SceneCommand *sceneCommand = new SceneHubCommand(static_cast<Hub*>(entity), SceneHubCommand::DELETE);
         m_masterScene->addCommand(sceneCommand);
+    }    
+}
+
+void Project::deleteEntity(Entity *entity)
+{
+    if (!entity) {
+        return;
     }
 
-    // and set as deferred delete
+    // att to deferred delete
     m_deferredDelete.push_back(entity);
 }
 
@@ -554,7 +566,7 @@ void Project::purgeEntities()
         entity = *it;
 
         if (entity->deletable()) {
-            delete(entity);
+           delete(entity);
             it = m_deferredDelete.erase(it);
         } else {
             ++it;

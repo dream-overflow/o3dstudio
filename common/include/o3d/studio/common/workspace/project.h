@@ -72,6 +72,8 @@ public:
      * @param stream
      */
     virtual void create() override;
+    virtual void destroy() override;
+
     virtual Bool deletable() const override;
 
     String filename() const;
@@ -118,9 +120,27 @@ public:
      */
     const Entity* lookup(const Uuid &uuid) const;
 
+    /**
+     * @brief Add an entity to the scenes and to lookups tables per project.
+     * @note The add to scene command of the hub is generated.
+     */
     void addEntity(Entity *entity);
+
+    /**
+     * @brief Remove an entity from the scens and from lookups tables per project.
+     * @note The remove to scene command of the hub is generated.
+     */
     void removeEntity(Entity *entity);
 
+    /**
+     * @brief Add the entity to the purge, for a later delete, and only when it
+     * is deletable.
+     */
+    void deleteEntity(Entity *entity);
+
+    /**
+     * @brief Purge defered entities deletetion. Called by workspace at interval.
+     */
     void purgeEntities();
 
     //

@@ -45,11 +45,13 @@ public:
     virtual const Project* project() const override;
 
     virtual void create() override;
+    virtual void destroy() override;
 
     virtual Bool load() override;
     virtual Bool save() override;
 
     virtual Bool exists() const override;
+    virtual Bool deletable() const override;
 
     virtual Bool serializeContent(OutStream &stream) const override;
     virtual Bool deserializeContent(InStream &stream) override;

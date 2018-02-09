@@ -133,20 +133,38 @@ void MeshHub::createToScene(MasterScene *masterScene)
         return;
     }
 
-//    o3d::Mesh *mesh = new o3d::Mesh(masterScene->scene());
-//    mesh->setName(m_name);
-
-    // Add a simple plane for simulate a ground to project shadow on
-    Surface surface(1000, 1000, 4, 4);
     o3d::Mesh *mesh = new o3d::Mesh(masterScene->scene());
     mesh->setName(m_name);
+
     MeshData *meshData = new MeshData(mesh);
 
-    GeometryData *surfaceGeometry = new GeometryData(meshData, surface);
-    surfaceGeometry->genNormals();
-    //surfaceGeometry->genTangentSpace();
+    if (m_vertices.isEmpty()) {
+        // Add a simple plane for simulate a ground to project shadow on
+        Surface surface(1000, 1000, 4, 4);
 
-    meshData->setGeometry(surfaceGeometry);
+        GeometryData *surfaceGeometry = new GeometryData(meshData, surface);
+        surfaceGeometry->genNormals();
+        //surfaceGeometry->genTangentSpace();
+
+        meshData->setGeometry(surfaceGeometry);
+    } else {
+        GeometryData *geometry = new GeometryData(meshData);
+
+        geometry->createElement(V_VERTICES_ARRAY, m_vertices);
+        geometry->createElement(V_NORMALS_ARRAY, m_normals);
+
+        if (m_uvs.isValid()) {
+            geometry->createElement(V_UV_MAP_ARRAY, m_uvs);
+        }
+
+        FaceArrayUInt32 *faceArray = new FaceArrayUInt32(masterScene->scene()->getContext());
+        faceArray->setFaces(m_indices);
+
+        geometry->addFaceArray(0, faceArray);
+
+        meshData->setGeometry(geometry);
+    }
+
     meshData->computeBounding(GeometryData::BOUNDING_BOX);
     meshData->createGeometry();
 
@@ -205,4 +223,24 @@ void MeshHub::syncWithScene(MasterScene *masterScene)
 
         O3D_MESSAGE("MeshHub synced into scene");
     }
+}
+
+void MeshHub::setVertices(const o3d::SmartArrayFloat &v)
+{
+    m_vertices = v;
+}
+
+void MeshHub::setNormals(const o3d::SmartArrayFloat &v)
+{
+    m_normals = v;
+}
+
+void MeshHub::setUVs(const o3d::SmartArrayFloat &v)
+{
+    m_uvs = v;
+}
+
+void MeshHub::addIndices(const o3d::SmartArrayUInt32 &indices)
+{
+    m_indices = indices;
 }
