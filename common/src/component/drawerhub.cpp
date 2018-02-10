@@ -66,7 +66,8 @@ DrawerHub::~DrawerHub()
 
 void DrawerHub::create()
 {
-
+    Hub::create();
+    // @todo create command
 }
 
 o3d::Bool DrawerHub::deletable() const

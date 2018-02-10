@@ -279,8 +279,8 @@ void Asset::addHub(Hub *hub, Int32 index)
     // structure change
     setDirty();
 
-    // signal throught project->workspace
-    project()->workspace()->onProjectHubAdded(hub->ref().light());
+    // create the hub now
+    hub->create();
 }
 
 void Asset::removeHub(const LightRef &_ref)
@@ -308,8 +308,8 @@ void Asset::removeHub(const LightRef &_ref)
     // structure change
     setDirty();
 
-    // remove from project, deferred deletion...
-    project()->removeEntity(hub);
+    // deferred deletion
+    project()->deleteEntity(hub);
 
     // signal throught project->workspace
     project()->workspace()->onProjectHubRemoved(_ref);
@@ -335,8 +335,8 @@ void Asset::removeHub(UInt64 id)
     // structure change
     setDirty();
 
-    // remove from project, deferred deletion...
-    project()->removeEntity(hub);
+    // deferred deletion
+    project()->deleteEntity(hub);
 
     // signal throught project->workspace
     project()->workspace()->onProjectHubRemoved(_ref);
@@ -364,8 +364,8 @@ void Asset::removeHub(Hub *hub)
         // structure change
         setDirty();
 
-        // remove from project, deferred deletion...
-        project()->removeEntity(hub);
+        // deferred deletion
+        project()->deleteEntity(hub);
 
         // signal throught project->workspace
         project()->workspace()->onProjectHubRemoved(_ref);

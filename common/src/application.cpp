@@ -65,6 +65,7 @@ Application::Application() :
     m_componentRegistry->initialize();
     m_importerRegistry->initialize();
     m_builderRegistry->initialize();
+    m_selection->initialize();
 }
 
 Application::~Application()

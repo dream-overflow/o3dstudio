@@ -104,7 +104,7 @@ void PropertyDock::onSelectionChanged()
                 return;
             }
 
-            hub = project->rootHub()->findHub(selectionItem->ref().id());
+            hub = static_cast<common::Hub*>(project->lookup(selectionItem->ref()));
             if (!hub) {
                 continue;
             }
@@ -145,7 +145,7 @@ void PropertyDock::onSelectionChanged()
                 return;
             }
 
-            hub = project->rootHub()->findHub(selectionItem->ref().id());
+            hub = static_cast<common::Hub*>(project->lookup(selectionItem->ref()));
             if (!hub) {
                 continue;
             }

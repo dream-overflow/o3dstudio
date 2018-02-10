@@ -34,7 +34,10 @@ RootHub::~RootHub()
 
 void RootHub::create()
 {
+    // like hub but without signal
     setDirty();
+
+    project()->addEntity(this);
 }
 
 o3d::Bool RootHub::deletable() const
@@ -54,6 +57,7 @@ void RootHub::syncWithScene(MasterScene *)
 
 void RootHub::removeFromScene(MasterScene *masterScene)
 {
+    // @todo does nothing
     // remove recursively all children, starting by leaves
     for (auto it1 = m_hubs.begin(); it1 != m_hubs.end(); ++it1) {
         it1->second->removeFromScene(masterScene);
@@ -86,6 +90,9 @@ o3d::Bool RootHub::serializeContent(OutStream &stream) const
 o3d::Bool RootHub::deserializeContent(InStream &stream)
 {
     Hub *hub = nullptr;
+
+    // setup now
+    create();
 
     String typeName;
     Uuid uuid;
@@ -122,7 +129,8 @@ o3d::Bool RootHub::deserializeContent(InStream &stream)
         m_hubs[hubId] = hub;
         m_hubsOrder.push_back(hubId);
 
-        project()->addEntity(hub);
+        // called by create
+        // project()->addEntity(hub);
     }
 
     return True;

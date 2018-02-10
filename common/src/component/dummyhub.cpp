@@ -61,7 +61,7 @@ DummyHub::~DummyHub()
 
 void DummyHub::create()
 {
-
+    Hub::create();
 }
 
 o3d::Bool DummyHub::deletable() const

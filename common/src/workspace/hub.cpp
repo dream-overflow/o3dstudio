@@ -39,9 +39,12 @@ Hub::~Hub()
     Hub *hub = nullptr;
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         hub = it->second;
+
+        // remove the hub reference
+        project()->removeEntity(hub);
+
+        // safely delete now
         delete hub;
-        // here or by project... will see
-        // project()->deleteEntity(hub);
     }
 }
 
@@ -63,19 +66,21 @@ const Project *Hub::project() const
 void Hub::create()
 {
     setDirty();
+
+    project()->addEntity(this);
+
+    // signal throught project->workspace
+    project()->workspace()->onProjectHubAdded(ref().light());
 }
 
 void Hub::destroy()
 {
-    // std::list<Hub*> hubs = hubs(True);
+    // recursive destroy, because of the order, leaves before
     Hub *hub;
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         hub = it->second;
         hub->destroy();
     }
-
-    // remove from project, deferred deletion...
-    project()->removeEntity(this);
 
     // signal throught project->workspace
     project()->workspace()->onProjectHubRemoved(ref().light());
@@ -125,7 +130,8 @@ void Hub::addHub(Hub *hub, Int32 index)
     UInt64 hubId = hub->ref().light().id();
     m_hubs[hubId] = hub;
 
-    project()->addEntity(hub);
+    // called by create below
+    // project()->addEntity(hub);
 
     if (index >= 0) {
         Int32 n = 0;
@@ -146,11 +152,11 @@ void Hub::addHub(Hub *hub, Int32 index)
 
     hub->setProject(project());
 
-    // structure change
-    setDirty();
+    // structure change (called by create)
+    // setDirty();
 
-    // signal throught project->workspace
-    project()->workspace()->onProjectHubAdded(hub->ref().light());
+    // create the hub now
+    hub->create();
 }
 
 void Hub::removeHub(const LightRef &_ref)
@@ -181,14 +187,8 @@ void Hub::removeHub(const LightRef &_ref)
     // recursively remove its children and related entities
     hub->destroy();
 
-    // add for a deferred deletion @todo peut on le faire plus tard ?
+    // add for a deferred deletion
     project()->deleteEntity(hub);
-
-//    // remove from project, deferred deletion...
-//    project()->removeEntity(hub);
-
-//    // signal throught project->workspace
-//    project()->workspace()->onProjectHubRemoved(_ref);
 }
 
 void Hub::removeHub(UInt64 id)
@@ -215,14 +215,8 @@ void Hub::removeHub(UInt64 id)
     // recursively remove its children and related entities
     hub->destroy();
 
-    // add for a deferred deletion @todo peut on le faire plus tard ?
+    // add for a deferred deletion
     project()->deleteEntity(hub);
-
-//    // remove from project, deferred deletion...
-//    project()->removeEntity(hub);
-
-//    // signal throught project->workspace
-//    project()->workspace()->onProjectHubRemoved(_ref);
 }
 
 void Hub::removeHub(Hub *hub)
@@ -248,14 +242,8 @@ void Hub::removeHub(Hub *hub)
 
         hub->destroy();
 
-        // add for a deferred deletion @todo peut on le faire plus tard ?
+        // add for a deferred deletion
         project()->deleteEntity(hub);
-
-//        // remove from project, deferred deletion...
-//        project()->removeEntity(hub);
-
-//        // signal throught project->workspace
-//        project()->workspace()->onProjectHubRemoved(_ref);
 
         return;
     }
@@ -548,6 +536,9 @@ o3d::Bool Hub::deserializeContent(InStream &stream)
     }
 
     Hub *hub = nullptr;
+
+    // setup now
+    create();
 
     String typeName;
     Uuid uuid;

@@ -72,6 +72,8 @@ public:
     virtual ~SpacialNodeHub();
 
     virtual void create() override;
+    virtual void destroy() override;
+
     virtual Bool deletable() const override;
 
     virtual Bool load() override;

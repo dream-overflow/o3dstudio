@@ -30,15 +30,14 @@ public:
     virtual ~Selection();
 
     /**
-     * @brief initialize with a different workspace
-     * @param workspace
+     * @brief initialize after creation.
      */
-    void initialize(Workspace *workspace);
+    void initialize();
 
     /**
-     * @brief terminate Cleanup for current workspace
+     * @brief Clear any selection.
      */
-    void terminate();
+    void clear();
 
     /**
      * @brief begin a multiple selection that will be validated and thrown at endSelection call.
@@ -76,12 +75,16 @@ public /*signals*/:
 
     Signal<> selectionChanged{this};
 
+public /*slots*/:
+
+    void onChangeCurrentWorkspace(const String& name);
+    void onProjectHubRemoved(LightRef ref);
+    void onProjectFragmentRemoved(LightRef ref);
+    void onProjectRemoved(LightRef ref);
+
 private:
 
     Bool m_selecting;
-
-    //! Related workspace
-    Workspace *m_workspace;
 
     //! Current set of selected items
     std::set<SelectionItem*> m_currentSelection;
@@ -90,6 +93,8 @@ private:
 
     //! Current set of selected items
     std::set<Entity*> m_selectingSet;
+
+    void cleanupAll();
 };
 
 } // namespace common

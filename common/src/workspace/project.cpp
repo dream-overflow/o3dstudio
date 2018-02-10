@@ -42,13 +42,12 @@ Project::Project(const String &name, Workspace *workspace) :
     m_projectFile = new ProjectFile(this, ProjectFile::PROJECT_VERSION_1_0_0);
     m_info = new ProjectInfo();
 
-    // create the virtual root hub
+    // create the virtual root hub (created at project add)
     m_rootHub = new RootHub("RootHub", this);
-
     m_rootHub->setTypeRef(Application::instance()->types().typeRef("o3s::common::hub::root"));
 
     // valid but invalid if project id is changed before usage and after ctor
-    m_rootHub->setRef(ObjectRef::buildRef(this, m_rootHub->typeRef()));
+    m_rootHub->setRef(ObjectRef::buildRef(this, m_rootHub->typeRef()));    
 }
 
 Project::~Project()
@@ -345,8 +344,8 @@ void Project::removeFragment(const LightRef &_ref)
     // structure change
     setDirty();
 
-    // remove from project, deferred deletion...
-    removeEntity(fragment);
+    // deferred deletion
+    deleteEntity(fragment);
 
     // signal throught workspace
     workspace()->onProjectFragmentRemoved(_ref);
@@ -366,8 +365,8 @@ void Project::removeFragment(UInt64 id)
     // structure change
     setDirty();
 
-    // remove from project, deferred deletion...
-    removeEntity(fragment);
+    // deferred deletion
+    deleteEntity(fragment);
 
     // signal throught workspace
     workspace()->onProjectFragmentRemoved(_ref);
@@ -389,8 +388,8 @@ void Project::removeFragment(Fragment *fragment)
         // structure change
         setDirty();
 
-        // remove from project, deferred deletion...
-        removeEntity(fragment);
+        // deferred deletion
+        deleteEntity(fragment);
 
         // signal throught workspace
         workspace()->onProjectFragmentRemoved(_ref);
@@ -518,6 +517,7 @@ void Project::addEntity(Entity *entity)
     m_entitiesById[id] = entity;
     m_entitiesByUuid[entity->ref().uuid()] = entity;
 
+    // @todo must be in the Hub::create() and how to add to when a new fragment is linked to ?
     if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
         // sync with the master scene
         SceneCommand *sceneCommand = new SceneHubCommand(static_cast<Hub*>(entity), SceneHubCommand::CREATE);
@@ -541,11 +541,8 @@ void Project::removeEntity(Entity *entity)
         m_entitiesByUuid.erase(it3);
     }
 
-    if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
-        // sync with the master scene
-        SceneCommand *sceneCommand = new SceneHubCommand(static_cast<Hub*>(entity), SceneHubCommand::DELETE);
-        m_masterScene->addCommand(sceneCommand);
-    }    
+    // reset the reference
+    entity->setRef(ObjectRef((entity->typeRef())));
 }
 
 void Project::deleteEntity(Entity *entity)

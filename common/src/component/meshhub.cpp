@@ -80,7 +80,27 @@ MeshHub::~MeshHub()
 
 void MeshHub::create()
 {
+    Hub::create();
+    // @todo create command
+}
 
+void MeshHub::destroy()
+{
+    // recursive destroy, because of the order, leaves before
+    Hub *hub;
+    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
+        hub = it->second;
+        hub->destroy();
+    }
+
+    // signal throught project->workspace
+    project()->workspace()->onProjectHubRemoved(ref().light());
+
+    for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
+        // sync with master scenes
+        SceneCommand *sceneCommand = new SceneHubCommand(this, SceneHubCommand::DELETE);
+        it->first->addCommand(sceneCommand);
+    }
 }
 
 o3d::Bool MeshHub::deletable() const

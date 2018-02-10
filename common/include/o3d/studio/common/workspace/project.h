@@ -127,8 +127,8 @@ public:
     void addEntity(Entity *entity);
 
     /**
-     * @brief Remove an entity from the scens and from lookups tables per project.
-     * @note The remove to scene command of the hub is generated.
+     * @brief Remove an entity from lookups tables per project.
+     * @note That means entity is no longer referenced by any projects.
      */
     void removeEntity(Entity *entity);
 

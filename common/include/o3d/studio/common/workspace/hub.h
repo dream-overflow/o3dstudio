@@ -125,6 +125,7 @@ public:
 
     /**
      * @brief Destroy the related entities from the engine scene.
+     * @todo should not be recusrive, only for himself...
      * @note This default implemantation process recursively,
      * and starting by removing the leaves throught, and up to this hub.
      * This default implementation can be used at begining of each specialization.

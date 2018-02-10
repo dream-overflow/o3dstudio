@@ -166,12 +166,7 @@ public /*signals*/:
     //! Fragment is removed, later delete, but cannot be retrieved into its parent or project into this signal
     Signal<LightRef> onProjectFragmentRemoved{this};
 
-    //! Asset is added, and it can be retrieved into its parent and its library
-    Signal<LightRef> onLibraryAssetAdded{this};
-    //! Asset is removed, later delete, but cannot be retrieved into its library into this signal
-    Signal<LightRef> onLibraryAssetRemoved{this};
-
-    //! A changes occurs on a entity that belongs to this project, the bitset contains details about changes
+    //! A changes occurs on an entity that belongs to this project, the bitset contains details about changes
     Signal<LightRef, BitSet64 /*changeFlags*/> onProjectEntityChanged{this};
 
 public /*slots*/:

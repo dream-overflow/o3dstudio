@@ -59,6 +59,8 @@ public:
     virtual ~CameraHub();
 
     virtual void create() override;
+    virtual void destroy() override;
+
     virtual Bool deletable() const override;
 
     virtual Bool load() override;
