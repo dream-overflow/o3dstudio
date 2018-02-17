@@ -61,9 +61,11 @@ CONFIG(debug, debug|release) {
 
 CONFIG += c++14  # declarative_debug
 
+# @todo gcc and clang else for msvc
 # *-g++* {
     QMAKE_CXXFLAGS += -fno-rtti
     QMAKE_CXXFLAGS_RELEASE += -O2 -DNDEBUG -ffunction-sections  # -fvisibility=hidden
+    QMAKE_CXXFLAGS_DEBUG += -O0 -D_DEBUG -glldb  # -ggdb
 # }
 
 darwin:!minQtVersion(5, 7, 0) {

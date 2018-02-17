@@ -78,7 +78,7 @@ o3d::Bool AddHubCommand::doCommand()
                 // dev only test to import FBX @todo remove me after
                 Importer *fbxi = Application::instance()->importers().importer("o3s::plugin::importer::fbxi");
                 ImportDefinition *def = fbxi->import(
-                                            "../../../../test/fbx/a.fbx",
+                                            "../../../../test/fbx/shaderBall/shaderBall.fbx",
                                             new ImporterOption(),
                                             hub);
 

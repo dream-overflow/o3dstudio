@@ -86,6 +86,7 @@ public:
     //
 
     // @todo temporary but need to used a MaterialResource
+    void setDiffuseMap(const String &map);
 
 protected:
 
@@ -95,6 +96,7 @@ protected:
     SmartArrayFloat m_normals;
     SmartArrayFloat m_uvs;
     SmartArrayUInt32 m_indices;
+    String m_diffuseMap;
 };
 
 } // namespace common

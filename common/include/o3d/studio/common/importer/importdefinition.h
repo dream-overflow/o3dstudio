@@ -32,6 +32,8 @@ public:
 
     virtual ~ImportDefinition() = 0;
 
+    virtual String basePath() const = 0;
+
     virtual String creator() const = 0;
     virtual DateTime creationDateTime() const = 0;
     virtual Float unit() const = 0;

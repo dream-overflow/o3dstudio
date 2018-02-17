@@ -147,6 +147,9 @@ o3d::Bool MeshHub::deserializeContent(InStream &stream)
 #include <o3d/engine/material/lambertmaterial.h>
 #include <o3d/engine/material/pickingmaterial.h>
 
+#include <o3d/engine/texture/texturemanager.h>
+#include <o3d/engine/texture/texture2d.h>
+
 void MeshHub::createToScene(MasterScene *masterScene)
 {
     if (!masterScene) {
@@ -197,11 +200,19 @@ void MeshHub::createToScene(MasterScene *masterScene)
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setMaterial(Material::LIGHTING, new LambertMaterial(mesh));
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setMaterial(Material::PICKING, new PickingMaterial(mesh));
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setMaterial(Material::DEFERRED, new LambertMaterial(mesh));
-    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setAmbient(Color(0.0f, 0.0f, 0.0f, 1.f));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setAmbient(Color(1.0f, 1.0f, 1.0f, 1.f));
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setDiffuse(Color(1.0f, 1.0f, 1.0f, 1.f));
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setSpecular(Color(0.0f, 0.0f, 0.0f, 1.f));
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setShine(1.f);
     mesh->initMaterialProfiles();
+
+    // @todo material hub and texture resource
+    // @todo as ambient to because no light for the moment
+    if (m_diffuseMap.isValid()) {
+        Texture2D *diffuseMap = masterScene->scene()->getTextureManager()->addTexture2D(m_diffuseMap, True);
+        mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setDiffuseMap(diffuseMap);
+        mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setAmbientMap(diffuseMap);
+    }
 
     // if the parent hub is a spacial node add the mesh the it
     if (parent() && parent()->typeRef() == Application::instance()->types().typeRef("o3s::common::hub::spacialhub")) {
@@ -263,4 +274,9 @@ void MeshHub::setUVs(const o3d::SmartArrayFloat &v)
 void MeshHub::addIndices(const o3d::SmartArrayUInt32 &indices)
 {
     m_indices = indices;
+}
+
+void MeshHub::setDiffuseMap(const o3d::String &map)
+{
+    m_diffuseMap = map;
 }
