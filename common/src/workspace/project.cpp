@@ -68,8 +68,12 @@ Project::~Project()
         deletePtr(fragment);
     }
 
-    // hubs
-    m_rootHub->removeFromScene(m_masterScene);
+    // @todo need context setup and
+    // hubs (previously cleaned on fragment just before)
+    std::list<Hub*> hubs = m_rootHub->hubs(True);
+    for (auto rit = hubs.rbegin(); rit != hubs.rend(); ++rit) {
+        (*rit)->removeFromScene(m_masterScene);
+    }
     delete m_rootHub;
 
     // now we can safely delete the master scene with the o3d scene
@@ -516,13 +520,6 @@ void Project::addEntity(Entity *entity)
 
     m_entitiesById[id] = entity;
     m_entitiesByUuid[entity->ref().uuid()] = entity;
-
-    // @todo must be in the Hub::create() and how to add to when a new fragment is linked to ?
-    if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
-        // sync with the master scene
-        SceneCommand *sceneCommand = new SceneHubCommand(static_cast<Hub*>(entity), SceneHubCommand::CREATE);
-        m_masterScene->addCommand(sceneCommand);
-    }
 }
 
 void Project::removeEntity(Entity *entity)

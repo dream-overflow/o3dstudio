@@ -30,6 +30,12 @@ const TypeRef& TypeRef::TypeRef::fragment()
     return fragmentTypeRef;
 }
 
+const TypeRef &TypeRef::resource()
+{
+    static TypeRef fragmentTypeRef = TypeRef(RESOURCE_TYPE_ID, RESOURCE_TYPE_ID, RESOURCE_TYPE_STRING);
+    return fragmentTypeRef;
+}
+
 const TypeRef& TypeRef::asset()
 {
     static TypeRef projectTypeRef = TypeRef(ASSET_TYPE_ID, ASSET_TYPE_ID, ASSET_TYPE_STRING);

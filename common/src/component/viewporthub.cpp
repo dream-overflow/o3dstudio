@@ -146,8 +146,6 @@ void ViewPortHub::createToScene(MasterScene *masterScene)
 
 void ViewPortHub::removeFromScene(MasterScene *masterScene)
 {
-    Hub::removeFromScene(masterScene);
-
     // @todo
 }
 

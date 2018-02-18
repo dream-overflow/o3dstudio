@@ -122,7 +122,6 @@ public:
 
     /**
      * @brief Add an entity to the scenes and to lookups tables per project.
-     * @note The add to scene command of the hub is generated.
      */
     void addEntity(Entity *entity);
 

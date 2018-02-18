@@ -17,7 +17,7 @@ namespace studio {
 namespace common {
 
 /**
- * @brief The Panel property abstract model.
+ * @brief Vector of 3 float property.
  */
 class O3S_API Vector3Property : public PanelProperty
 {
@@ -32,11 +32,17 @@ public:
     //! Get the resulting widget.
     QWidget* ui();
 
+    void setMinMax(Float min, Float max);
+
     o3d::Vector3f value() const;
 
 public /*signals*/:
 
-    Signal<Float, Float, Float> onValueChanged{this};
+    Signal<o3d::Vector3f> onValueChanged{this};
+
+private:
+
+    class QDoubleSpinBox *m_v[3];
 };
 
 } // namespace common

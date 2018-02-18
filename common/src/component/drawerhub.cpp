@@ -11,6 +11,8 @@
 #include <o3d/engine/deferred/deferreddrawer.h>
 #include <o3d/engine/shadow/shadowvolumeforward.h>
 
+#include "o3d/studio/common/workspace/masterscene.h"
+#include "o3d/studio/common/workspace/scenecommand.h"
 #include "o3d/studio/common/component/drawerhub.h"
 #include "o3d/studio/common/workspace/project.h"
 
@@ -67,7 +69,10 @@ DrawerHub::~DrawerHub()
 void DrawerHub::create()
 {
     Hub::create();
-    // @todo create command
+
+    // sync with the master scene
+    SceneCommand *sceneCommand = new SceneHubCommand(this, SceneHubCommand::CREATE);
+    project()->masterScene()->addCommand(sceneCommand);
 }
 
 o3d::Bool DrawerHub::deletable() const
@@ -117,8 +122,6 @@ void DrawerHub::createToScene(MasterScene *masterScene)
 
 void DrawerHub::removeFromScene(MasterScene *masterScene)
 {
-    Hub::removeFromScene(masterScene);
-
     // @todo
 }
 

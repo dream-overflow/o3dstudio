@@ -125,12 +125,8 @@ public:
 
     /**
      * @brief Destroy the related entities from the engine scene.
-     * @todo should not be recusrive, only for himself...
-     * @note This default implemantation process recursively,
-     * and starting by removing the leaves throught, and up to this hub.
-     * This default implementation can be used at begining of each specialization.
      */
-    virtual void removeFromScene(MasterScene *masterScene);
+    virtual void removeFromScene(MasterScene *masterScene) = 0;
 
     /**
      * @brief Bi-directionnal synchronization with the engine scene.

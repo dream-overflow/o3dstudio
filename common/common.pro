@@ -96,7 +96,16 @@ SOURCES += \
     src/builder/builderregistry.cpp \
     src/ui/property/panelproperty.cpp \
     src/ui/property/vector3property.cpp \
-    src/workspace/roothub.cpp
+    src/workspace/roothub.cpp \
+    src/workspace/resource.cpp \
+    src/component/lighthub.cpp \
+    src/component/skinhub.cpp \
+    src/component/boneshub.cpp \
+    src/ui/property/floatproperty.cpp \
+    src/ui/property/vector2property.cpp \
+    src/ui/property/vector4property.cpp \
+    src/ui/property/colorproperty.cpp \
+    src/ui/property/boolproperty.cpp
 
 
 HEADERS += \ 
@@ -187,7 +196,16 @@ HEADERS += \
     include/o3d/studio/common/builder/builderregistry.h \
     include/o3d/studio/common/importer/importer.h \
     include/o3d/studio/common/importer/importdefinition.h \
-    include/o3d/studio/common/workspace/roothub.h
+    include/o3d/studio/common/workspace/roothub.h \
+    include/o3d/studio/common/workspace/resource.h \
+    include/o3d/studio/common/component/lighthub.h \
+    include/o3d/studio/common/component/skinhub.h \
+    include/o3d/studio/common/component/boneshub.h \
+    include/o3d/studio/common/ui/property/floatproperty.h \
+    include/o3d/studio/common/ui/property/vector2property.h \
+    include/o3d/studio/common/ui/property/vector4property.h \
+    include/o3d/studio/common/ui/property/colorproperty.h \
+    include/o3d/studio/common/ui/property/boolproperty.h
 
 LIBS += -lobjective3d-dbg
 

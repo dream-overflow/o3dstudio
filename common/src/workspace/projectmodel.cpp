@@ -229,10 +229,11 @@ ProjectItem *ProjectModel::addProject(Project *project)
         // root hub, but could be hidden
         addHub(project->rootHub());
 
-        std::list<Hub*> hubs = project->rootHub()->hubs(true);
-        for (Hub *hub : hubs) {
-            addHub(hub);
-        }
+        // children added by root
+//        std::list<Hub*> hubs = project->rootHub()->hubs(true);
+//        for (Hub *hub : hubs) {
+//            addHub(hub);
+//        }
     }
 
     // ...fragments

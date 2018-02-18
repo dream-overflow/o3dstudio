@@ -497,14 +497,6 @@ o3d::Int32 Hub::childIndexOf(Entity *entity) const
     return -1;
 }
 
-void Hub::removeFromScene(MasterScene *masterScene)
-{
-    // remove recursively all children, starting by leaves
-    for (auto it1 = m_hubs.begin(); it1 != m_hubs.end(); ++it1) {
-        it1->second->removeFromScene(masterScene);
-    }
-}
-
 o3d::Bool Hub::serializeContent(OutStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {

@@ -55,13 +55,9 @@ void RootHub::syncWithScene(MasterScene *)
     // does nothing
 }
 
-void RootHub::removeFromScene(MasterScene *masterScene)
+void RootHub::removeFromScene(MasterScene *)
 {
-    // @todo does nothing
-    // remove recursively all children, starting by leaves
-    for (auto it1 = m_hubs.begin(); it1 != m_hubs.end(); ++it1) {
-        it1->second->removeFromScene(masterScene);
-    }
+    // does nothing
 }
 
 o3d::Bool RootHub::serializeContent(OutStream &stream) const
@@ -128,9 +124,6 @@ o3d::Bool RootHub::deserializeContent(InStream &stream)
 
         m_hubs[hubId] = hub;
         m_hubsOrder.push_back(hubId);
-
-        // called by create
-        // project()->addEntity(hub);
     }
 
     return True;

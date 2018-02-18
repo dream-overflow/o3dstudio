@@ -1,14 +1,14 @@
 /**
- * @brief Vector3 panel property abstract model.
+ * @brief Panel property with 4 components vector.
  * @copyright Copyright (C) 2018 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
- * @date 2018-01-04
+ * @date 2018-02-17
  * @details
  */
 
 #include <QDoubleSpinBox>
 
-#include "o3d/studio/common/ui/property/vector3property.h"
+#include "o3d/studio/common/ui/property/colorproperty.h"
 #include "o3d/studio/common/ui/panel.h"
 #include "o3d/studio/common/ui/uiutils.h"
 
@@ -20,8 +20,13 @@
 using namespace o3d::studio::common;
 
 
-Vector3Property::Vector3Property(Panel *panel, const String &name, const o3d::String &label) :
-    PanelProperty(panel, name, label)
+ColorProperty::ColorProperty(
+        Panel *panel,
+        const String &name,
+        const o3d::String &label,
+        ColorFormat format) :
+    PanelProperty(panel, name, label),
+    m_format(format)
 {
     QVBoxLayout *l = new QVBoxLayout();
     l->setContentsMargins(0, 0, 0, 1);
@@ -39,74 +44,76 @@ Vector3Property::Vector3Property(Panel *panel, const String &name, const o3d::St
     QWidget *pw = new QWidget();
     pw->setLayout(pl);
 
-    // x
+    // r
     m_v[0] = new QDoubleSpinBox();
-    m_v[0]->setRange(-1000000000, 1000000000);
+    m_v[0]->setRange(0, 1);
     m_v[0]->setDecimals(6);
     m_v[0]->setSingleStep(0.1);
-    m_v[0]->setPrefix("x:");
+    m_v[0]->setPrefix("r:");
     m_v[0]->setValue(0);
     m_v[0]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     m_v[0]->setMinimumWidth(75);
     pl->addWidget(m_v[0]);
 
-    // y
+    // g
     m_v[1] = new QDoubleSpinBox();
-    m_v[1]->setRange(-1000000000, 1000000000);
+    m_v[1]->setRange(0, 1);
     m_v[1]->setDecimals(6);
     m_v[1]->setSingleStep(0.1);
-    m_v[1]->setPrefix("y:");
+    m_v[1]->setPrefix("g:");
     m_v[1]->setValue(0);
     m_v[1]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     m_v[1]->setMinimumWidth(75);
     pl->addWidget(m_v[1]);
 
-    // z
+    // b
     m_v[2] = new QDoubleSpinBox();
-    m_v[2]->setRange(-1000000000, 1000000000);
+    m_v[2]->setRange(0, 1);
     m_v[2]->setDecimals(6);
     m_v[2]->setSingleStep(0.1);
-    m_v[2]->setPrefix("z:");
+    m_v[2]->setPrefix("b:");
     m_v[2]->setValue(0);
     m_v[2]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     m_v[2]->setMinimumWidth(75);
     pl->addWidget(m_v[2]);
 
+    // a
+    m_v[3] = new QDoubleSpinBox();
+    m_v[3]->setRange(0, 1);
+    m_v[3]->setDecimals(6);
+    m_v[3]->setSingleStep(0.1);
+    m_v[3]->setPrefix("a:");
+    m_v[3]->setValue(0);
+    m_v[3]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    m_v[3]->setMinimumWidth(75);
+    pl->addWidget(m_v[3]);
+
     l->addWidget(pw);
     m_widget = valueGroup;
 }
 
-Vector3Property::~Vector3Property()
+ColorProperty::ColorFormat ColorProperty::colorFormat() const
+{
+    return m_format;
+}
+
+ColorProperty::~ColorProperty()
 {
 //    if (m_widget) {
 //        m_widget->deleteLater();
 //    }
 }
 
-QWidget *Vector3Property::ui()
+QWidget *ColorProperty::ui()
 {
     return m_widget;
 }
 
-void Vector3Property::setMinMax(o3d::Float min, o3d::Float max)
+o3d::Color ColorProperty::value() const
 {
     if (m_v[0]) {
-        m_v[0]->setMinimum(min);
-        m_v[0]->setMaximum(max);
-
-        m_v[1]->setMinimum(min);
-        m_v[1]->setMaximum(max);
-
-        m_v[2]->setMinimum(min);
-        m_v[2]->setMaximum(max);
-    }
-}
-
-o3d::Vector3f Vector3Property::value() const
-{
-    if (m_v[0]) {
-        return Vector3f(m_v[0]->value(), m_v[1]->value(), m_v[2]->value());
+        return Color(m_v[0]->value(), m_v[1]->value(), m_v[2]->value(), m_v[3]->value());
     } else {
-        return o3d::Vector3f(0, 0, 0);
+        return o3d::Color();
     }
 }

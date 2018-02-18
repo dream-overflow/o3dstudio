@@ -29,16 +29,18 @@ enum EntityBaseType
     MIN_TYPE_ID = PROJECT_TYPE_ID,
     HUB_TYPE_ID = 2,
     FRAGMENT_TYPE_ID = 3,
-    ASSET_TYPE_ID = 4,
-    COMPONENT_TYPE_ID = 5,
-    IMPORTER_TYPE_ID = 6,
-    BUILDER_TYPE_ID = 7,
+    RESOURCE_TYPE_ID = 4,
+    ASSET_TYPE_ID = 5,
+    COMPONENT_TYPE_ID = 6,
+    IMPORTER_TYPE_ID = 7,
+    BUILDER_TYPE_ID = 8,
     MAX_TYPE_ID = BUILDER_TYPE_ID
 };
 
 constexpr char PROJECT_TYPE_STRING[] = "o3s::project";
 constexpr char HUB_TYPE_STRING[] = "o3s::hub";
 constexpr char FRAGMENT_TYPE_STRING[] = "o3s::fragment";
+constexpr char RESOURCE_TYPE_STRING[] = "o3s::resource";
 constexpr char ASSET_TYPE_STRING[] = "o3s::asset";
 constexpr char COMPONENT_TYPE_STRING[] = "o3s::component";
 constexpr char IMPORTER_TYPE_STRING[] = "o3s::importer";
@@ -56,6 +58,7 @@ public:
     static const TypeRef& project();
     static const TypeRef& hub();
     static const TypeRef& fragment();
+    static const TypeRef& resource();
     static const TypeRef& asset();
     static const TypeRef& component();
     static const TypeRef& importer();

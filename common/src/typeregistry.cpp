@@ -19,6 +19,7 @@ TypeRegistry::TypeRegistry(BaseObject *parent) :
     m_typeRefs[PROJECT_TYPE_STRING] = TypeRef::project();
     m_typeRefs[HUB_TYPE_STRING] = TypeRef::hub();
     m_typeRefs[FRAGMENT_TYPE_STRING] = TypeRef::fragment();
+    m_typeRefs[RESOURCE_TYPE_STRING] = TypeRef::resource();
     m_typeRefs[ASSET_TYPE_STRING] = TypeRef::asset();
     m_typeRefs[COMPONENT_TYPE_STRING] = TypeRef::component();
     m_typeRefs[IMPORTER_TYPE_STRING] = TypeRef::importer();
@@ -27,6 +28,7 @@ TypeRegistry::TypeRegistry(BaseObject *parent) :
     m_typeRefsById[TypeRef::project().id()] = TypeRef::project();
     m_typeRefsById[TypeRef::hub().id()] = TypeRef::hub();
     m_typeRefsById[TypeRef::fragment().id()] = TypeRef::fragment();
+    m_typeRefsById[TypeRef::resource().id()] = TypeRef::resource();
     m_typeRefsById[TypeRef::component().id()] = TypeRef::component();
     m_typeRefsById[TypeRef::importer().id()] = TypeRef::importer();
     m_typeRefsById[TypeRef::builder().id()] = TypeRef::builder();

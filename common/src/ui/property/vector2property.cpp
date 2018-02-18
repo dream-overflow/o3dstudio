@@ -1,14 +1,14 @@
 /**
- * @brief Vector3 panel property abstract model.
+ * @brief Vector2 panel property abstract model.
  * @copyright Copyright (C) 2018 Dream Overflow. All rights reserved.
  * @author Frederic SCHERMA (frederic.scherma@dreamoverflow.org)
- * @date 2018-01-04
+ * @date 2018-02-17
  * @details
  */
 
 #include <QDoubleSpinBox>
 
-#include "o3d/studio/common/ui/property/vector3property.h"
+#include "o3d/studio/common/ui/property/vector2property.h"
 #include "o3d/studio/common/ui/panel.h"
 #include "o3d/studio/common/ui/uiutils.h"
 
@@ -20,7 +20,7 @@
 using namespace o3d::studio::common;
 
 
-Vector3Property::Vector3Property(Panel *panel, const String &name, const o3d::String &label) :
+Vector2Property::Vector2Property(Panel *panel, const String &name, const o3d::String &label) :
     PanelProperty(panel, name, label)
 {
     QVBoxLayout *l = new QVBoxLayout();
@@ -61,34 +61,23 @@ Vector3Property::Vector3Property(Panel *panel, const String &name, const o3d::St
     m_v[1]->setMinimumWidth(75);
     pl->addWidget(m_v[1]);
 
-    // z
-    m_v[2] = new QDoubleSpinBox();
-    m_v[2]->setRange(-1000000000, 1000000000);
-    m_v[2]->setDecimals(6);
-    m_v[2]->setSingleStep(0.1);
-    m_v[2]->setPrefix("z:");
-    m_v[2]->setValue(0);
-    m_v[2]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    m_v[2]->setMinimumWidth(75);
-    pl->addWidget(m_v[2]);
-
     l->addWidget(pw);
     m_widget = valueGroup;
 }
 
-Vector3Property::~Vector3Property()
+Vector2Property::~Vector2Property()
 {
 //    if (m_widget) {
 //        m_widget->deleteLater();
 //    }
 }
 
-QWidget *Vector3Property::ui()
+QWidget *Vector2Property::ui()
 {
     return m_widget;
 }
 
-void Vector3Property::setMinMax(o3d::Float min, o3d::Float max)
+void Vector2Property::setMinMax(o3d::Float min, o3d::Float max)
 {
     if (m_v[0]) {
         m_v[0]->setMinimum(min);
@@ -96,17 +85,14 @@ void Vector3Property::setMinMax(o3d::Float min, o3d::Float max)
 
         m_v[1]->setMinimum(min);
         m_v[1]->setMaximum(max);
-
-        m_v[2]->setMinimum(min);
-        m_v[2]->setMaximum(max);
     }
 }
 
-o3d::Vector3f Vector3Property::value() const
+o3d::Vector2f Vector2Property::value() const
 {
     if (m_v[0]) {
-        return Vector3f(m_v[0]->value(), m_v[1]->value(), m_v[2]->value());
+        return Vector2f(m_v[0]->value(), m_v[1]->value());
     } else {
-        return o3d::Vector3f(0, 0, 0);
+        return o3d::Vector2f(0, 0);
     }
 }

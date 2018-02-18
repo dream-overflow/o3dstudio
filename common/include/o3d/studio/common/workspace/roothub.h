@@ -45,7 +45,7 @@ public:
     virtual void createToScene(MasterScene *masterScene) override;
 
     /**
-     * @brief Remove children recursively.
+     * @brief Does nothing virtual root.
      */
     virtual void removeFromScene(MasterScene *masterScene) override;
 

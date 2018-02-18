@@ -43,18 +43,24 @@ ComponentRegistry::~ComponentRegistry()
 #include "o3d/studio/common/component/dummyhub.h"
 #include "o3d/studio/common/component/viewporthub.h"
 #include "o3d/studio/common/component/camerahub.h"
+#include "o3d/studio/common/component/lighthub.h"
 #include "o3d/studio/common/component/drawerhub.h"
 #include "o3d/studio/common/component/spacialnodehub.h"
 #include "o3d/studio/common/component/meshhub.h"
+#include "o3d/studio/common/component/skinhub.h"
+#include "o3d/studio/common/component/boneshub.h"
 
 void ComponentRegistry::initialize()
 {
     registerComponent(new DummyHubComponent());
     registerComponent(new ViewPortComponent());
     registerComponent(new CameraHubComponent());
+    registerComponent(new LightHubComponent());
     registerComponent(new DrawerHubComponent());
     registerComponent(new SpacialNodeComponent());
     registerComponent(new MeshComponent());
+    registerComponent(new BonesComponent());
+    registerComponent(new SkinComponent());
 }
 
 void ComponentRegistry::registerComponent(Component *component)
