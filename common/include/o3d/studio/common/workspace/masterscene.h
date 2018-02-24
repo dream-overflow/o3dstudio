@@ -44,6 +44,19 @@ class O3S_API MasterScene : public BaseObject, public O3DDrawer
 {
 public:
 
+    enum ActionMode
+    {
+        ACTION_NONE = 0,
+        ACTION_CAMERA_ZOOM,
+        ACTION_CAMERA_TRANSLATION,
+        ACTION_CAMERA_ROTATION,
+        ACTION_SELECTION,
+        ACTION_TRANSLATION,
+        ACTION_ROTATION,
+        ACTION_SCALE,
+        ACTION_STRETCH
+    };
+
     MasterScene(Entity *parent);
     virtual ~MasterScene();
 
@@ -63,6 +76,9 @@ public:
 
     O3DCanvasContent *content();
     const O3DCanvasContent *content() const;
+
+    Hub *hoverHub();
+    const Hub *hoverHub() const;
 
     //
     // commands
@@ -126,14 +142,15 @@ private:
     o3d::Renderer *m_renderer;    //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
 
-    Point2i m_lockedPos;
-    Bool m_rotateCam;
-    Bool m_moveCam;
+    Point2i m_lockedPos;          //!< Infinite cursor
+    ActionMode m_actionMode;      //!< Current action mode
 
     UInt32 m_verticesCount[4];
     UInt32 m_trianglesCount[4];
     UInt32 m_linesCount[4];
     UInt32 m_pointCount[4];
+
+    Hub *m_hoverHub;              //!< Current hub hovered by cursor
 
     //! Main working camera, cannot be deleted
     o3d::SmartObject<o3d::Camera> m_camera;
