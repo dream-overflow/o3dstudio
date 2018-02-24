@@ -57,6 +57,13 @@ public:
         ACTION_STRETCH
     };
 
+    enum SpeedModifier
+    {
+        SPEED_NORMAL = 0,
+        SPEED_SLOW,
+        SPEED_FAST
+    };
+
     MasterScene(Entity *parent);
     virtual ~MasterScene();
 
@@ -142,8 +149,9 @@ private:
     o3d::Renderer *m_renderer;    //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
 
-    Point2i m_lockedPos;          //!< Infinite cursor
-    ActionMode m_actionMode;      //!< Current action mode
+    Point2i m_lockedPos;            //!< Infinite cursor
+    ActionMode m_actionMode;        //!< Current action mode
+    SpeedModifier m_speedModifier;  //!< Current action speed modifier
 
     UInt32 m_verticesCount[4];
     UInt32 m_trianglesCount[4];

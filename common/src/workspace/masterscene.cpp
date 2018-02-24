@@ -57,6 +57,7 @@ MasterScene::MasterScene(Entity *parent) :
     m_renderer(nullptr),
     m_scene(nullptr),
     m_actionMode(ACTION_NONE),
+    m_speedModifier(SPEED_NORMAL),
     m_hoverHub(nullptr),
     m_camera(this),
     m_viewport(this),
@@ -372,9 +373,9 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             z = deltaY * 100.f * elapsed;
 
             // slow motion if shift is down
-            if (event.modifiers() & KeyEvent::ALT_MODIFIER) {
+            if (m_speedModifier == SPEED_SLOW) {
                 z *= 0.1;
-            } else if (event.modifiers() & KeyEvent::CTRL_MODIFIER) {
+            } else if (m_speedModifier == SPEED_FAST) {
                 z *= 10;
             }
 
@@ -386,9 +387,9 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             Float speed = 1;
 
             // slow rotation if shift is down
-            if (event.modifiers() & KeyEvent::ALT_MODIFIER) {
+            if (m_speedModifier == SPEED_SLOW) {
                 speed = 0.1;
-            } else if (event.modifiers() & KeyEvent::CTRL_MODIFIER) {
+            } else if (m_speedModifier == SPEED_FAST) {
                 speed = 10;
             }
 
@@ -404,10 +405,10 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             y = -deltaY * 100.f * elapsed;
 
             // slow motion if shift is down
-            if (event.modifiers() & KeyEvent::ALT_MODIFIER) {
+            if (m_speedModifier == SPEED_SLOW) {
                 x *= 0.1;
                 y *= 0.1;
-            } else if (event.modifiers() & KeyEvent::CTRL_MODIFIER) {
+            } else if (m_speedModifier == SPEED_FAST) {
                 x *= 10;
                 y *= 10;
             }
@@ -454,9 +455,9 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
             z = -deltaY * 100.f / 120.f * 10.f * elapsed;
 
             // slow motion if shift is down
-            if (event.modifiers() & KeyEvent::ALT_MODIFIER) {
+            if (m_speedModifier == SPEED_SLOW) {
                 z *= 0.1;
-            } else if (event.modifiers() & KeyEvent::CTRL_MODIFIER) {
+            } else if (m_speedModifier == SPEED_FAST) {
                 z *= 10;
             }
 
@@ -469,23 +470,45 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
     return False;
 }
 
-o3d::Bool MasterScene::keyPressEvent(const KeyEvent &/*event*/)
+o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
 {
+    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+        m_speedModifier = SPEED_FAST;
+    } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+        m_speedModifier = SPEED_SLOW;
+    } else {
+        m_speedModifier = SPEED_NORMAL;
+    }
+
     return False;
 }
 
-o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &/*event*/)
+o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &event)
 {
+    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+        m_speedModifier = SPEED_FAST;
+    } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+        m_speedModifier = SPEED_SLOW;
+    } else {
+        m_speedModifier = SPEED_NORMAL;
+    }
+
     return False;
 }
 
 o3d::Bool MasterScene::focusInEvent(const Event &/*event*/)
 {
+    m_speedModifier = SPEED_NORMAL;
+    m_actionMode = ACTION_NONE;
+
     return False;
 }
 
 o3d::Bool MasterScene::focusOutEvent(const Event &/*event*/)
 {
+    m_speedModifier = SPEED_NORMAL;
+    m_actionMode = ACTION_NONE;
+
     return False;
 }
 
