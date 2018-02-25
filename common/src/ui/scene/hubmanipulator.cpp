@@ -24,8 +24,18 @@ using namespace o3d::studio::common;
 
 HubManipulator::HubManipulator(BaseObject *parent, Hub* target, const Point3f &hitPos) :
     SceneUIElement(parent, SCENE_UI_3D, POST_DRAW, True),
+    m_hitPos(hitPos)
+{
+    m_targets.push_back(target);
+}
+
+HubManipulator::HubManipulator(
+        BaseObject *parent,
+        std::list<Hub *> targets,
+        const o3d::Point3f &hitPos) :
+    SceneUIElement(parent, SCENE_UI_3D, POST_DRAW, True),
     m_hitPos(hitPos),
-    m_target(target)
+    m_targets(targets)
 {
 
 }
@@ -65,7 +75,12 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
 
     // @todo an highlighted bounding volume
 
+    // @todo an highlighted version of the object
+
     // @todo rotation ball
+    if (masterScene->actionMode()) {
+
+    }
 
     // @todo translation axes
 

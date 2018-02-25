@@ -37,6 +37,12 @@ public:
     virtual String elementName() const override;
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
+    /**
+     * @brief Set the auto expand on select state.
+     */
+    void setAutoExpand(Bool s);
+    Bool isAutoExpand() const;
+
 public /*slots*/:
 
     void onChangeCurrentWorkspace(const String &name);
@@ -62,6 +68,8 @@ private:
 
     class QtWorkspaceDock *m_qtWorkspaceDock;
     common::ProjectItem *m_lastSelected;
+
+    Bool m_autoExpand;   //!< Auto expand on selection : default True
 
     void setupUi();
 };

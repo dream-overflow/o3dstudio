@@ -34,6 +34,15 @@ public:
      * @param hitPos Position where the hit (picking) occured
      */
     HubManipulator(BaseObject *parent, Hub* target, const Point3f &hitPos);
+
+    /**
+     * @brief HubManipulator
+     * @param parent Parent object
+     * @param targets Targeted list of hubs objects.
+     * @param hitPos Position where the hit (picking) occured
+     */
+    HubManipulator(BaseObject *parent, std::list<Hub*> targets, const Point3f &hitPos);
+
     virtual ~HubManipulator();
 
     virtual void createToScene(MasterScene *masterScene);
@@ -43,7 +52,7 @@ public:
 
 protected:
 
-    Hub *m_target;
+    std::list<Hub*> m_targets;
     Point3f m_hitPos;
 };
 

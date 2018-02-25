@@ -13,6 +13,8 @@
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
 #include "o3d/studio/common/workspace/masterscenedrawer.h"
+#include "o3d/studio/common/workspace/roothub.h"
+#include "o3d/studio/common/workspace/selection.h"
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
@@ -64,6 +66,9 @@ MasterScene::MasterScene(Entity *parent) :
     m_sceneDrawer(this)
 {
     O3D_ASSERT(m_parent != nullptr);
+
+    // selection manager
+    common::Application::instance()->selection().selectionChanged.connect(this, &MasterScene::onSelectionChanged);
 }
 
 MasterScene::~MasterScene()
@@ -299,8 +304,21 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         return False;
     }
 
-    if (event.button(Mouse::LEFT) && (event.modifiers() & InputEvent::META_MODIFIER)) {
-        m_actionMode = ACTION_CAMERA_ROTATION;
+    if (event.button(Mouse::LEFT)) {
+        if (event.modifiers() & InputEvent::META_MODIFIER) {
+            m_actionMode = ACTION_CAMERA_ROTATION;
+        } else if (m_hoverHub) {
+            m_actionMode = ACTION_SELECTION;
+
+            if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                // m_pickPos = m_scene->getPicking()->getPointerPos(
+//                        (UInt32)event.localPos().x(),
+//                        m_scene->getViewPortManager()->getReshapeHeight() - (UInt32)event.localPos().y());
+
+                // an object is selected
+                Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+            }
+        }
     } else if (event.button(Mouse::RIGHT) && (event.modifiers() & InputEvent::META_MODIFIER)) {
         m_actionMode = ACTION_CAMERA_TRANSLATION;
     }
@@ -311,6 +329,11 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 
         m_content->setCursor(cursor);
         m_lockedPos = event.globalPos();
+    } else if (m_actionMode == ACTION_SELECTION) {
+        // object under the cursor, setup an helper as possible
+        // @todo there is the manipulator of the unique selected
+        // @todo and a multiple selection with an highlight and related with selection controller (click)
+        // @todo adapt GUI
     }
 
     return True;
@@ -325,6 +348,22 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     if (event.button(Mouse::LEFT)) {
         if (m_actionMode == ACTION_CAMERA_ROTATION) {
             m_actionMode = ACTION_NONE;
+        } else if (m_actionMode == ACTION_SELECTION) {
+            if (m_hoverHub) {
+                if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                        // @todo remove from selection
+                    } else {
+                        // @todo append to selection
+                    }
+                } else {
+                    // first object selection on release
+                    Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+
+                    // select the object
+                    Application::instance()->selection().select(m_hoverHub);
+                }
+            }
         }
     } else if (event.button(Mouse::RIGHT)) {
         if (m_actionMode == ACTION_CAMERA_TRANSLATION) {
@@ -342,8 +381,13 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     return True;
 }
 
-o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &/*event*/)
+o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
 {
+    if (event.button(Mouse::LEFT)) {
+        // @todo double click on camera manipulator reset the rotation
+        m_camera.get()->getNode()->getTransform()->setRotation(Quaternion());
+    }
+
     return False;
 }
 
@@ -418,6 +462,8 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
     } else {
         // only at once (and could add a small timer to avoid a lot of events)
         if (!m_scene->getPicking()->isPickingToProcess() && !m_scene->getPicking()->isProcessingPicking()) {
+            m_hoverHub = nullptr;
+
             // picking or manipulation of a transformer
             m_scene->getPicking()->postPickingEvent(
                         (UInt32)event.localPos().x(),
@@ -571,15 +617,42 @@ o3d::UInt32 MasterScene::numPoints(UInt32 pass) const
     return 0;
 }
 
+MasterScene::ActionMode MasterScene::actionMode() const
+{
+    return m_actionMode;
+}
+
+MasterScene::SpeedModifier MasterScene::speedModifier() const
+{
+    return m_speedModifier;
+}
+
 void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 {
+    m_hoverHub = nullptr;
+
     SceneObject *sceneObject = o3d::dynamicCast<SceneObject*>(pickable);
     if (sceneObject) {
-        // object under the cursor, setup an helper as possible
-        // @todo there is the manipulator of the unique selected
-        // @todo and a multiple selection with an highlight and related with selection controller (click)
-        // @todo adapt GUI
-        // Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Picking on {0} at {1}").arg(sceneObject->getName()).arg(pos));
+        // o3d object to o3s hub
+        UInt32 pid = pickable->getPickableColor().rInt() |
+                     pickable->getPickableColor().gInt() << 8 |
+                     pickable->getPickableColor().bInt() << 16 |
+                     pickable->getPickableColor().aInt() << 24;
+
+        m_hoverHub = project()->lookupPickable(pid);
+        m_pickPos = pos;
+    }
+}
+
+void MasterScene::onSelectionChanged()
+{
+    const std::set<common::SelectionItem *> currentSelection =
+            common::Application::instance()->selection().filterCurrentByBaseType(common::TypeRef::hub());
+
+    common::Hub *hub = nullptr;
+
+    for (common::SelectionItem *selectionItem : currentSelection) {
+        // @todo for current hub manipulator selection
     }
 }
 
@@ -632,6 +705,7 @@ void MasterScene::initializeDrawer()
         // enable picking by color and connect its signal
         m_scene->getPicking()->setMode(Picking::COLOR);
         m_scene->getPicking()->onHit.connect(this, &MasterScene::pickingHit, EvtHandler::CONNECTION_ASYNCH);
+        m_scene->getPicking()->setCamera(m_camera.get());
 
         // add an helper grid
         Int32 gridStep = (Int32)(200.f * m_camera.get()->getZnear());

@@ -170,6 +170,9 @@ void CameraHub::createToScene(MasterScene *masterScene)
 
     m_instances[masterScene] = camera;
 
+    // scene object id is as the base of the pickable color id
+    project()->addPickable((UInt32)camera->getId(), this);
+
     O3D_MESSAGE("CameraHub created into scene");
 }
 
@@ -179,6 +182,10 @@ void CameraHub::removeFromScene(MasterScene *masterScene)
     if (it != m_instances.end()) {
         o3d::Camera *camera = it->second;
         m_instances.erase(it);
+
+        // scene object id is as the base of the pickable color id
+        project()->removePickable((UInt32)camera->getId());
+
         delete camera;
 
         O3D_MESSAGE("CameraHub deleted from scene");

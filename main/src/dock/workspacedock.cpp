@@ -35,7 +35,8 @@ using namespace o3d::studio::main;
 WorkspaceDock::WorkspaceDock(BaseObject *parent) :
     BaseObject(parent),
     common::Dock(),
-    m_lastSelected(nullptr)
+    m_lastSelected(nullptr),
+    m_autoExpand(True)
 {
     setupUi();
 
@@ -72,6 +73,16 @@ o3d::String WorkspaceDock::elementName() const
 Qt::DockWidgetArea WorkspaceDock::dockWidgetArea() const
 {
     return Qt::LeftDockWidgetArea;
+}
+
+void WorkspaceDock::setAutoExpand(o3d::Bool s)
+{
+    m_autoExpand = s;
+}
+
+o3d::Bool WorkspaceDock::isAutoExpand() const
+{
+    return m_autoExpand;
 }
 
 void WorkspaceDock::onAddProject(LightRef ref)
@@ -179,27 +190,49 @@ void WorkspaceDock::onProjectEntityChanged(o3d::studio::common::LightRef ref, o3
 
 void WorkspaceDock::onSelectManagerChange()
 {
-    const std::set<common::SelectionItem *> previousSelection = common::Application::instance()->selection().filterPreviousByBaseType(common::TypeRef::project());
-    const std::set<common::SelectionItem *> currentSelection = common::Application::instance()->selection().filterCurrentByBaseType(common::TypeRef::project());
+    const std::set<common::SelectionItem *> previousSelection = common::Application::instance()->selection().previousSelection();
+    const std::set<common::SelectionItem *> currentSelection = common::Application::instance()->selection().currentSelection();
+
+    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtWorkspaceDock->m_treeView->model());
+    common::ProjectItem *projectItem = nullptr;
+
+    QModelIndex current;
 
     common::SelectionItem *selectionItem = nullptr;
     foreach (selectionItem, previousSelection) {
+        projectItem = projectModel->find(selectionItem->ref());
 
+        if (!projectItem) {
+            continue;
+        }
+
+        current = projectModel->modelIndex(projectItem);
+        m_qtWorkspaceDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Deselect);
     }
 
     selectionItem = nullptr;
     foreach (selectionItem, currentSelection) {
+        projectItem = projectModel->find(selectionItem->ref());
+
+        if (!projectItem) {
+            continue;
+        }
+
+        current = projectModel->modelIndex(projectItem);
+        m_qtWorkspaceDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Select);
+
+        // auto expand on select
+        if (m_autoExpand) {
+            current = current.parent();
+            while (current.isValid()) {
+                if (!m_qtWorkspaceDock->m_treeView->isExpanded(current)) {
+                    m_qtWorkspaceDock->m_treeView->expand(current);
+                }
+
+                current = current.parent();
+            }
+        }
     }
-
-//    QModelIndex previous = m_treeView->currentIndex();
-//    QModelIndex current = QModelIndex();
-
-//    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_treeView->model());
-//    common::ProjectItem *projectItem = projectModel->find(ref);
-//    if (projectItem) {
-//        current = projectModel->index(projectItem->row(), 0);
-//        m_treeView->selectionModel()->select(current, QItemSelectionModel::Current);
-//    }
 }
 
 void WorkspaceDock::onChangeCurrentWorkspace(const String &/*name*/)

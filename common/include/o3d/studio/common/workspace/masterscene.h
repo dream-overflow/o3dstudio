@@ -136,10 +136,24 @@ public:
     UInt32 numLines(UInt32 pass) const;
     UInt32 numPoints(UInt32 pass) const;
 
+    //
+    // manipulation
+    //
+
+    /**
+     * @brief Current action mode.
+     */
+    ActionMode actionMode() const;
+
+    /**
+     * @brief Speed modifier related to the current action mode.
+     */
+    SpeedModifier speedModifier() const;
 
 public /*slots*/:
 
     void pickingHit(Pickable* pickable, Vector3 pos);
+    void onSelectionChanged();
 
 private:
 
@@ -159,6 +173,7 @@ private:
     UInt32 m_pointCount[4];
 
     Hub *m_hoverHub;              //!< Current hub hovered by cursor
+    o3d::Point3f m_pickPos;       //!< Current picking position
 
     //! Main working camera, cannot be deleted
     o3d::SmartObject<o3d::Camera> m_camera;

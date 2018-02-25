@@ -198,6 +198,9 @@ void SpacialNodeHub::createToScene(MasterScene *masterScene)
 
     m_instances[masterScene] = node;
 
+    // scene object id is as the base of the pickable color id
+    project()->addPickable((UInt32)node->getId(), this);
+
     O3D_MESSAGE("SpacialNodeHub created into scene");
 }
 
@@ -207,6 +210,9 @@ void SpacialNodeHub::removeFromScene(MasterScene *masterScene)
     if (it != m_instances.end()) {
         o3d::Node *node = it->second;
         m_instances.erase(it);
+
+        // scene object id is as the base of the pickable color id
+        project()->removePickable((UInt32)node->getId());
 
         node->getParent()->deleteChild(node);
 

@@ -178,12 +178,45 @@ public:
     std::list<Fragment*> fragments();
     std::list<const Fragment*> fragments() const;
 
+    //
+    // engine core id relation
+    //
+
+    /**
+     * @brief Associate a pickable engine object id to its related editor entity.
+     * @param id Engine object unique id (based on picking id)
+     * @param entity Hub object.
+     * @note It is possible to have multiple couple entry refering to the same hub
+     * in case of multiple master scene instances.
+     */
+    void addPickable(UInt32 id, Hub *hub);
+
+    /**
+     * @brief Remove a pickable engine object from its picking id.
+     * @param id Engine object pickable id.
+     */
+    void removePickable(UInt32 id);
+
+    /**
+     * @brief Retrieve from a map a hub from its pickable id.
+     * @param id Engine pickable id.
+     * @return Valid of null hub if not found.
+     */
+    Hub* lookupPickable(UInt32 id);
+
+    /**
+     * @brief Retrieve from a map a hub from its pickable id (read-only)
+     * @param id Engine pickable id.
+     * @return Valid of null hub if not found.
+     */
+    const Hub* lookupPickable(UInt32 id) const;
+
 private:
 
     Workspace *m_workspace;    //!< Workspace where the projet is currently loaded
 
     String m_filename;         //!< Project file name
-    LocalDir m_path;            //!< Project path
+    LocalDir m_path;           //!< Project path
 
     ProjectFile *m_projectFile;
 
@@ -200,6 +233,8 @@ private:
     std::map<Uuid, Entity*> m_entitiesByUuid;
     //! Global map by ID
     std::map<UInt64, Entity*> m_entitiesById;
+    //! Global map from pickable ID to entity
+    std::map<UInt32, Hub*> m_hubsByPickableId;
 
     //! Contains the entities to later at a safe time
     std::list<Entity*> m_deferredDelete;

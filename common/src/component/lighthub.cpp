@@ -154,6 +154,9 @@ void LightHub::createToScene(MasterScene *masterScene)
 
     m_instances[masterScene] = light;
 
+    // scene object id is as the base of the pickable color id
+    project()->addPickable((UInt32)light->getId(), this);
+
     O3D_MESSAGE("LightHub created into scene");
 }
 
@@ -163,6 +166,10 @@ void LightHub::removeFromScene(MasterScene *masterScene)
     if (it != m_instances.end()) {
         o3d::Light *light = it->second;
         m_instances.erase(it);
+
+        // scene object id is as the base of the pickable color id
+        project()->removePickable((UInt32)light->getId());
+
         delete light;
 
         O3D_MESSAGE("LightHub deleted from scene");
