@@ -100,6 +100,9 @@ public:
     void addSceneUIElement(SceneUIElement *elt);
     void removeSceneUIElement(SceneUIElement *elt);
 
+    // @todo void setHubManipulatorComponent(Component *component);
+    SceneUIElement* hubManipulator();
+
     //
     // drawer
     //
@@ -190,6 +193,8 @@ private:
 
     //! Attached scene UI elements
     std::list<SceneUIElement*> m_sceneUIElements;
+
+    SceneUIElement *m_hubManipulator;    //!< Current hub selection manipulator (could be contextual)
 
     void processCommands();
 };

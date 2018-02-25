@@ -13,6 +13,7 @@
 
 #include <o3d/core/vector2.h>
 #include <o3d/core/vector3.h>
+#include <o3d/core/matrix4.h>
 
 namespace o3d {
 namespace studio {
@@ -33,7 +34,7 @@ public:
      * @param target Targeted hub object.
      * @param hitPos Position where the hit (picking) occured
      */
-    HubManipulator(BaseObject *parent, Hub* target, const Point3f &hitPos);
+    HubManipulator(BaseObject *parent, Hub* target, const Matrix4 &transform);
 
     /**
      * @brief HubManipulator
@@ -41,7 +42,7 @@ public:
      * @param targets Targeted list of hubs objects.
      * @param hitPos Position where the hit (picking) occured
      */
-    HubManipulator(BaseObject *parent, std::list<Hub*> targets, const Point3f &hitPos);
+    HubManipulator(BaseObject *parent, std::list<Hub*> targets, const Matrix4 &transform);
 
     virtual ~HubManipulator();
 
@@ -53,7 +54,9 @@ public:
 protected:
 
     std::list<Hub*> m_targets;
-    Point3f m_hitPos;
+    Matrix4 m_transform;
+
+    Float m_scale;
 };
 
 } // namespace common

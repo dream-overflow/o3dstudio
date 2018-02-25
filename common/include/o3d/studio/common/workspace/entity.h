@@ -105,6 +105,11 @@ public:
     virtual Bool hasChanges() const;
 
     /**
+     * @brief Is the parent entity a hub.
+     */
+    virtual Bool isParentHub() const;
+
+    /**
      * @brief Serialize the entity content.
      */
     virtual Bool serializeContent(OutStream &stream) const;

@@ -21,6 +21,9 @@
 #include "entity.h"
 
 namespace o3d {
+
+class Matrix4;
+
 namespace studio {
 namespace common {
 
@@ -132,6 +135,22 @@ public:
      * @brief Bi-directionnal synchronization with the engine scene.
      */
     virtual void syncWithScene(MasterScene *masterScene) = 0;
+
+    //
+    // transforms
+    //
+
+    /**
+     * Return the absolute transform matrix (read only).
+     * @note Default returns an identity matrix or the parent absolute matrix if it is a
+     * spacial node.
+     */
+    virtual const Matrix4& absoluteMatrix(MasterScene *masterScene) const;
+
+    /**
+     * @brief Return true if the node contains spacial information (transforms...).
+     */
+    virtual Bool isSpacialNode() const;
 
 protected:
 

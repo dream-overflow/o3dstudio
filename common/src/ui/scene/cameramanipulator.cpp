@@ -85,9 +85,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     primitive->projection().set(pj);
 
     // @todo adjust coef to keep a fixed screen size
-
-//    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_HINT_NICEST);
-    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);
+    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);  // AA_HINT_NICEST
 
     scene->getContext()->setCullingMode(CULLING_BACK_FACE);
     scene->getContext()->disableDoubleSide();
@@ -160,6 +158,14 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
 
     primitive->modelView().pop();
 
+    scene->getContext()->disableDepthTest();
+
+    // A simple axis to distinguis plus from minus direction
+    primitive->setColor(1, 1, 1);
+    primitive->setModelviewProjection();
+    primitive->drawXYZAxis(Vector3(m_scale*15, m_scale*15, m_scale*15));
+
     // restore
+    scene->getContext()->setDefaultDepthTest();
     scene->getContext()->setAntiAliasing(aa);
 }

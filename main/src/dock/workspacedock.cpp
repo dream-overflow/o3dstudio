@@ -52,6 +52,7 @@ WorkspaceDock::WorkspaceDock(BaseObject *parent) :
 
 WorkspaceDock::~WorkspaceDock()
 {
+    // managed deletion
     // deletePtr(m_qtWorkspaceDock);
 }
 
@@ -337,7 +338,7 @@ void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QMode
     }
 }
 
-void QtWorkspaceDock::onSelectItem(const QModelIndex &index)
+void QtWorkspaceDock::onSelectItem(const QModelIndex &/*index*/)
 {
     // @todo should be unset when selection change
     // onSelectionChanged(index, index);

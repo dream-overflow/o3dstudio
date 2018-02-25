@@ -17,6 +17,7 @@
 #include "o3d/studio/common/workspace/selection.h"
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
+#include "o3d/studio/common/ui/scene/hubmanipulator.h"
 
 #include <o3d/engine/glextdefines.h>
 #include <o3d/engine/glextensionmanager.h>
@@ -63,7 +64,8 @@ MasterScene::MasterScene(Entity *parent) :
     m_hoverHub(nullptr),
     m_camera(this),
     m_viewport(this),
-    m_sceneDrawer(this)
+    m_sceneDrawer(this),
+    m_hubManipulator(nullptr)
 {
     O3D_ASSERT(m_parent != nullptr);
 
@@ -197,6 +199,11 @@ void MasterScene::removeSceneUIElement(SceneUIElement *elt)
     }
 }
 
+SceneUIElement *MasterScene::hubManipulator()
+{
+    return m_hubManipulator;
+}
+
 void MasterScene::initialize(Bool debug)
 {
     if (m_content || m_scene || m_renderer) {
@@ -208,6 +215,9 @@ void MasterScene::initialize(Bool debug)
     m_renderer = new common::QtRenderer(m_content);
     m_content->setDrawer(this);
     m_content->setRenderer(m_renderer);
+
+    // no manipulation at initialization
+    O3D_ASSERT(m_hubManipulator == nullptr);
 
     common::UiController &uiCtrl = common::Application::instance()->ui();
     uiCtrl.addContent(m_content);
@@ -278,6 +288,9 @@ void MasterScene::terminateDrawer()
         // and from the master scene
         m_sceneUIElements.clear();
     }
+
+    // deleted by the previous iteration
+    m_hubManipulator = nullptr;
 
     // clear the scene
     if (m_scene) {
@@ -651,8 +664,42 @@ void MasterScene::onSelectionChanged()
 
     common::Hub *hub = nullptr;
 
+    // delete a potentiel previous instance of manipulator
+    if (m_hubManipulator) {
+        removeSceneUIElement(m_hubManipulator);
+       // deletePtr(m_hubManipulator);
+       m_hubManipulator = nullptr; // @todo why double free corruption ?
+    }
+
+    std::list<Hub*> hubs;
+
+    Vector3 pos;
+    Quaternion rot;
+
     for (common::SelectionItem *selectionItem : currentSelection) {
         // @todo for current hub manipulator selection
+        if (selectionItem->ref().baseTypeOf(TypeRef::hub())) {
+            hub = static_cast<Hub*>(project()->lookup(selectionItem->ref()));
+            hubs.push_back(hub);
+
+            const Matrix4 &m = hub->absoluteMatrix(this);
+
+            pos += m.getTranslation();
+            rot += Quaternion(m.getRotation());
+        }
+    }
+
+    if (hubs.size()) {
+        // create the new according to the current builder (@todo not for now only the standard manipulator)
+        pos *= 1.f / hubs.size();
+        rot *= 1.f / hubs.size();
+
+        Matrix4 transform;
+        transform.setTranslation(pos);
+        transform.setRotation(rot.toMatrix3());
+
+        m_hubManipulator = new HubManipulator(this, hubs, transform);
+        addSceneUIElement(m_hubManipulator);
     }
 }
 
@@ -690,6 +737,7 @@ void MasterScene::initializeDrawer()
         m_camera = new o3d::Camera(m_scene);
         m_camera.get()->setZnear(0.25f);
         m_camera.get()->setZfar(10000.f);
+        m_camera.get()->setFov(60.f/*45.f*/);
         m_camera.get()->disableVisibility();   // never visible
 
         Node *cameraNode = m_scene->getHierarchyTree()->addNode(m_camera.get());

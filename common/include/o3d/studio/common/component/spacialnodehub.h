@@ -102,6 +102,10 @@ public:
 //    UInt32 insertTransform(TransformType type, UInt32 at);
 //    void removeTransform(UInt32 at);
 
+    virtual const o3d::Matrix4& absoluteMatrix(MasterScene *masterScene) const override;
+
+    virtual Bool isSpacialNode() const override;
+
     //
     // Properties
     //

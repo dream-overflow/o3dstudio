@@ -268,6 +268,21 @@ o3d::UInt32 SpacialNodeHub::getNumTransforms() const
     return (UInt32)m_transforms.size();
 }
 
+const o3d::Matrix4 &SpacialNodeHub::absoluteMatrix(MasterScene *masterScene) const
+{
+    auto it = m_instances.find(masterScene);
+    if (it != m_instances.end()) {
+        return it->second->getAbsoluteMatrix();
+    }
+
+    return Matrix4::getIdentity();
+}
+
+o3d::Bool SpacialNodeHub::isSpacialNode() const
+{
+    return True;
+}
+
 o3d::Bool SpacialNodeHub::addChildToScene(MasterScene *masterScene, o3d::SceneObject *sceneObject)
 {
     if (!masterScene || !sceneObject) {
