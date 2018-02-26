@@ -33,6 +33,8 @@
 #include <o3d/engine/context.h>
 #include <o3d/engine/picking.h>
 
+#include <o3d/core/keyboard.h>
+
 #include <o3d/gui/gui.h>
 #include <o3d/gui/fontmanager.h>
 #include <o3d/gui/truetypefont.h>
@@ -320,16 +322,50 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
     if (event.button(Mouse::LEFT)) {
         if (event.modifiers() & InputEvent::META_MODIFIER) {
             m_actionMode = ACTION_CAMERA_ROTATION;
-        } else if (m_hoverHub) {
+        } else {
             m_actionMode = ACTION_SELECTION;
 
-            if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-                // m_pickPos = m_scene->getPicking()->getPointerPos(
-//                        (UInt32)event.localPos().x(),
-//                        m_scene->getViewPortManager()->getReshapeHeight() - (UInt32)event.localPos().y());
+            if (m_hoverHub) {
+                if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                        // get previous selection and remove
+                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
 
-                // an object is selected
-                Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                        Application::instance()->selection().beginSelection();
+
+                        for (SelectionItem *item : previous) {
+                            if (item->ref() != m_hoverHub->ref().light()) {
+                                Application::instance()->selection().appendSelection(
+                                            static_cast<Hub*>(project()->lookup(item->ref())));
+                            }
+                        }
+
+                        Application::instance()->selection().appendSelection(m_hoverHub);
+                        Application::instance()->selection().endSelection();
+
+                        // an object is removed from selection
+                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Remove from selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                    } else {
+                        // get previous selection and append
+                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+
+                        Application::instance()->selection().beginSelection();
+
+                        for (SelectionItem *item : previous) {
+                            // himself is reselected at last
+                            if (item->ref() != m_hoverHub->ref().light()) {
+                                Application::instance()->selection().appendSelection(
+                                            static_cast<Hub*>(project()->lookup(item->ref())));
+                            }
+                        }
+
+                        Application::instance()->selection().appendSelection(m_hoverHub);
+                        Application::instance()->selection().endSelection();
+
+                        // an object is selected
+                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                    }
+                }
             }
         }
     } else if (event.button(Mouse::RIGHT) && (event.modifiers() & InputEvent::META_MODIFIER)) {
@@ -342,11 +378,6 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 
         m_content->setCursor(cursor);
         m_lockedPos = event.globalPos();
-    } else if (m_actionMode == ACTION_SELECTION) {
-        // object under the cursor, setup an helper as possible
-        // @todo there is the manipulator of the unique selected
-        // @todo and a multiple selection with an highlight and related with selection controller (click)
-        // @todo adapt GUI
     }
 
     return True;
@@ -361,21 +392,16 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     if (event.button(Mouse::LEFT)) {
         if (m_actionMode == ACTION_CAMERA_ROTATION) {
             m_actionMode = ACTION_NONE;
-        } else if (m_actionMode == ACTION_SELECTION) {
+        } else if (m_actionMode == ACTION_SELECTION) {       
             if (m_hoverHub) {
-                if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-                    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-                        // @todo remove from selection
-                    } else {
-                        // @todo append to selection
-                    }
-                } else {
-                    // first object selection on release
-                    Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                // initial selection
+                Application::instance()->selection().select(m_hoverHub);
 
-                    // select the object
-                    Application::instance()->selection().select(m_hoverHub);
-                }
+                // an object is selected
+                Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Initial selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+            } else {
+                // clear selection
+                Application::instance()->selection().unselectAll();
             }
         }
     } else if (event.button(Mouse::RIGHT)) {
@@ -539,6 +565,17 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
         m_speedModifier = SPEED_NORMAL;
     }
 
+    if (event.vKey() == o3d::VKey::KEY_SPACE) {
+        // toggle transformation mode
+        if (m_actionMode == ACTION_TRANSLATION) {
+            m_actionMode = ACTION_ROTATION;
+        } else if (m_actionMode == ACTION_ROTATION) {
+            m_actionMode = ACTION_SCALE;
+        } else if (m_actionMode == ACTION_SCALE) {
+            m_actionMode = ACTION_TRANSLATION;
+        }
+    }
+
     return False;
 }
 
@@ -700,6 +737,12 @@ void MasterScene::onSelectionChanged()
 
         m_hubManipulator = new HubManipulator(this, hubs, transform);
         addSceneUIElement(m_hubManipulator);
+
+        // default to translation when selection
+        m_actionMode = ACTION_TRANSLATION;
+    } else {
+        // or no action if no selection
+        m_actionMode = ACTION_NONE;
     }
 }
 

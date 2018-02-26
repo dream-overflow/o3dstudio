@@ -49,8 +49,8 @@ public:
     inline Int32 key() const { return m_key; }
     // inline Bool matches(VKey key) const
     // inline UInt32 nativeModifiers() const
-    inline UInt32 scanCode() const;
-    inline VKey vKey() const;
+    // inline UInt32 scanCode() const { return m_scancode; }
+    inline VKey vKey() const { return (VKey)m_vkey; }
     inline String text() const { return m_text; }
 
 protected:

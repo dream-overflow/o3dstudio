@@ -51,12 +51,18 @@ public:
     virtual void syncWithScene(MasterScene *masterScene);
     virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene);
 
+    // @todo a system of focus on a scene ui element
+    // @todo picking on axes with special color value like (255, 255, 255, 250 to 255)
+
 protected:
 
     std::list<Hub*> m_targets;
     Matrix4 m_transform;
 
     Float m_scale;
+
+    Int32 m_axe;    //!< Current axe or -1 if none
+    Float m_delta;  //!< Current delta of the transform
 };
 
 } // namespace common
