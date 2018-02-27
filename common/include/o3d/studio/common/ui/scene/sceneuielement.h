@@ -12,6 +12,7 @@
 #include "../../global.h"
 
 #include <o3d/core/smartobject.h>
+#include <o3d/core/vector3.h>
 
 namespace o3d {
 
@@ -55,6 +56,44 @@ public:
     virtual ~SceneUIElement();
 
     //
+    // global
+    //
+
+    /**
+     * @brief Setup for the given master scene.
+     * @param masterScene Valid master scene instance.
+     */
+    virtual void setup(MasterScene *masterScene);
+
+    /**
+     * @brief Release on remove from the master scene.
+     * @param masterScene Valid master scene instance.
+     */
+    virtual void release(MasterScene *masterScene);
+
+    /**
+     * @brief Set or reset focus.
+     */
+    void setFocus(Bool focus = True);
+
+    /**
+     * @brief Has current focus.
+     */
+    Bool hasFocus() const;
+
+    /**
+     * @brief A part the element is hover.
+     * @param id Element or sub-element id.
+     * @param pos Position where the hover occurs.
+     */
+    virtual void hover(UInt32 id, const Point3f &pos);
+
+    /**
+     * @brief Leave the element if previously hover.
+     */
+    virtual void leave();
+
+    //
     // engine proxy
     //
 
@@ -93,6 +132,7 @@ protected:
     UIType m_uiType;       //!< Type of scene UI element
     DrawStep m_drawStep;   //!< Draw step
     Bool m_directDraw;     //!< True mean call directRendering, else uses the 3 others methods
+    Bool m_focus;          //!< True if the ui element has current focus
 };
 
 } // namespace common

@@ -182,6 +182,8 @@ void MasterScene::addSceneUIElement(SceneUIElement *elt)
         O3D_ERROR(E_ValueRedefinition("Redefinition of a SceneUIElement"));
     }
 
+    elt->setup(this);
+
     m_sceneUIElements.push_back(elt);
 
     // add to the scene drawer to be displayed
@@ -192,6 +194,8 @@ void MasterScene::removeSceneUIElement(SceneUIElement *elt)
 {
     auto it = std::find(m_sceneUIElements.begin(), m_sceneUIElements.end(), elt);
     if (it != m_sceneUIElements.end()) {
+        elt->release(this);
+
         // remove from the scene drawer if initialized
         if (m_sceneDrawer.isValid()) {
             m_sceneDrawer.get()->removeSceneUIElement(*it);
@@ -408,6 +412,10 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
         if (m_actionMode == ACTION_CAMERA_TRANSLATION) {
             m_actionMode = ACTION_NONE;
         }
+    }
+
+    if (m_actionMode == ACTION_NONE && m_hubManipulator) {
+        m_actionMode = ACTION_TRANSLATION;
     }
 
     if (m_actionMode != ACTION_CAMERA_ROTATION && m_actionMode != ACTION_CAMERA_TRANSLATION) {
@@ -677,6 +685,28 @@ MasterScene::SpeedModifier MasterScene::speedModifier() const
     return m_speedModifier;
 }
 
+void MasterScene::registerPickingId(o3d::UInt32 id, SceneUIElement *element)
+{
+    if (!element) {
+        return;
+    }
+
+    auto it = m_pickingToSceneUIElements.find(id);
+    if (it != m_pickingToSceneUIElements.end()) {
+        O3D_ERROR(E_InvalidOperation("Picking id already registered"));
+    }
+
+    m_pickingToSceneUIElements[id] = element;
+}
+
+void MasterScene::unregisterPickingId(o3d::UInt32 id)
+{
+    auto it = m_pickingToSceneUIElements.find(id);
+    if (it != m_pickingToSceneUIElements.end()) {
+        m_pickingToSceneUIElements.erase(it);
+    }
+}
+
 void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 {
     m_hoverHub = nullptr;
@@ -691,6 +721,14 @@ void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 
         m_hoverHub = project()->lookupPickable(pid);
         m_pickPos = pos;
+    }
+}
+
+void MasterScene::elementPickingHit(o3d::UInt32 id, o3d::Vector3 pos)
+{
+    auto it = m_pickingToSceneUIElements.find(id);
+    if (it != m_pickingToSceneUIElements.end()) {
+        it->second->hover(id, pos);
     }
 }
 
@@ -796,6 +834,7 @@ void MasterScene::initializeDrawer()
         // enable picking by color and connect its signal
         m_scene->getPicking()->setMode(Picking::COLOR);
         m_scene->getPicking()->onHit.connect(this, &MasterScene::pickingHit, EvtHandler::CONNECTION_ASYNCH);
+        m_scene->getPicking()->onUnknownHit.connect(this, &MasterScene::elementPickingHit, EvtHandler::CONNECTION_ASYNCH);
         m_scene->getPicking()->setCamera(m_camera.get());
 
         // add an helper grid
@@ -817,9 +856,5 @@ void MasterScene::initializeDrawer()
         // and a camera helper
         CameraManipulator *cameraManipulator = new CameraManipulator(this, Point2f(0.9f, 0.1f), 1.f);
         addSceneUIElement(cameraManipulator);
-
-        // picking slot
-        m_scene->getPicking()->setMode(Picking::COLOR);
-        m_scene->getPicking()->onHit.connect(this, &MasterScene::pickingHit);
     }
 }

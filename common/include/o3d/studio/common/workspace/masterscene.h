@@ -10,6 +10,7 @@
 #define _O3DS_COMMON_MASTERSCENE_H
 
 #include <list>
+#include <unordered_map>
 
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/ui/canvas/o3ddrawer.h"
@@ -153,9 +154,22 @@ public:
      */
     SpeedModifier speedModifier() const;
 
+    /**
+     * @brief Map a picking id to a scene UI element.
+     * @param id Unique picking id.
+     * @param element Instance of the scene UI element.
+     */
+    void registerPickingId(UInt32 id, SceneUIElement *element);
+
+    /**
+     * @brief Unregister a picking id.
+     */
+    void unregisterPickingId(UInt32 id);
+
 public /*slots*/:
 
     void pickingHit(Pickable* pickable, Vector3 pos);
+    void elementPickingHit(UInt32 id, Vector3 pos);
     void onSelectionChanged();
 
 private:
@@ -195,6 +209,9 @@ private:
     std::list<SceneUIElement*> m_sceneUIElements;
 
     SceneUIElement *m_hubManipulator;    //!< Current hub selection manipulator (could be contextual)
+
+    //! Mapping of picking id to scene UI elements (can have multiple picking id to a same element)
+    std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;
 
     void processCommands();
 };
