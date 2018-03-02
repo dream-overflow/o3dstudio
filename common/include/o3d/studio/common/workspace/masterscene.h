@@ -102,7 +102,16 @@ public:
     void removeSceneUIElement(SceneUIElement *elt);
 
     // @todo void setHubManipulatorComponent(Component *component);
+
+    /**
+     * @brief Get current hub manipulator.
+     */
     SceneUIElement* hubManipulator();
+
+    /**
+     * @brief Get current hover scene UI element.
+     */
+    SceneUIElement* hoverSceneUIElement();
 
     //
     // drawer
@@ -170,6 +179,8 @@ public /*slots*/:
 
     void pickingHit(Pickable* pickable, Vector3 pos);
     void elementPickingHit(UInt32 id, Vector3 pos);
+    void pickingNoHit();
+
     void onSelectionChanged();
 
 private:
@@ -209,6 +220,7 @@ private:
     std::list<SceneUIElement*> m_sceneUIElements;
 
     SceneUIElement *m_hubManipulator;    //!< Current hub selection manipulator (could be contextual)
+    SceneUIElement *m_hoverUIElement;    //!< Current hover ui element
 
     //! Mapping of picking id to scene UI elements (can have multiple picking id to a same element)
     std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;

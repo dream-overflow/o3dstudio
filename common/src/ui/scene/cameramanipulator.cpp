@@ -58,7 +58,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     }
 
     Scene *scene = masterScene->scene();
-    PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
+    PrimitiveAccess primitive = scene->getPrimitiveManager()->access(drawInfo);
 
     const Box2i &vp = scene->getContext()->getViewPort();
     const Float factor = 600.f;
@@ -80,6 +80,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
 
     // and project to ortho
     Matrix4 pj;
+    Matrix4 oldPj = scene->getContext()->projection().get();
     pj.buildOrtho(vp.x(), vp.x2(), vp.y(), vp.y2(), m_scale * -(factor*0.1f), m_scale * factor*0.1f);
     // pj.buildOrtho(-0.5f*ratio, 0.5f*ratio, -0.5f, 0.5f, -1.f, 1.f);
     primitive->projection().set(pj);
@@ -167,5 +168,6 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
 
     // restore
     scene->getContext()->setDefaultDepthTest();
+    scene->getContext()->projection().set(oldPj);
     scene->getContext()->setAntiAliasing(aa);
 }

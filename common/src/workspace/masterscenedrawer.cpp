@@ -78,7 +78,7 @@ void MasterSceneDrawer::draw(ViewPort *)
     m_masterScene->updateCounters(0);
 
     // landscape
-    getScene()->getLandscape()->draw();
+    getScene()->getLandscape()->draw(drawInfo);
 
     // world objects
     getScene()->getVisibilityManager()->draw(drawInfo);

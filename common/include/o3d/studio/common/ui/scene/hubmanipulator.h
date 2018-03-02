@@ -14,6 +14,7 @@
 #include <o3d/core/vector2.h>
 #include <o3d/core/vector3.h>
 #include <o3d/core/matrix4.h>
+#include <o3d/image/color.h>
 
 namespace o3d {
 namespace studio {
@@ -77,6 +78,8 @@ protected:
 
     Int32 m_axe;    //!< Current axe or -1 if none
     Float m_delta;  //!< Current delta of the transform
+
+    Color axeColor(Axe axe);
 };
 
 } // namespace common

@@ -67,7 +67,8 @@ MasterScene::MasterScene(Entity *parent) :
     m_camera(this),
     m_viewport(this),
     m_sceneDrawer(this),
-    m_hubManipulator(nullptr)
+    m_hubManipulator(nullptr),
+    m_hoverUIElement(nullptr)
 {
     O3D_ASSERT(m_parent != nullptr);
 
@@ -201,6 +202,11 @@ void MasterScene::removeSceneUIElement(SceneUIElement *elt)
             m_sceneDrawer.get()->removeSceneUIElement(*it);
         }
 
+        // null if hover element
+        if (m_hoverUIElement == elt) {
+            m_hoverUIElement = nullptr;
+        }
+
         m_sceneUIElements.erase(it);
     }
 }
@@ -208,6 +214,11 @@ void MasterScene::removeSceneUIElement(SceneUIElement *elt)
 SceneUIElement *MasterScene::hubManipulator()
 {
     return m_hubManipulator;
+}
+
+SceneUIElement *MasterScene::hoverSceneUIElement()
+{
+    return m_hoverUIElement;
 }
 
 void MasterScene::initialize(Bool debug)
@@ -297,6 +308,7 @@ void MasterScene::terminateDrawer()
 
     // deleted by the previous iteration
     m_hubManipulator = nullptr;
+    m_hoverUIElement = nullptr;
 
     // clear the scene
     if (m_scene) {
@@ -509,8 +521,6 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
     } else {
         // only at once (and could add a small timer to avoid a lot of events)
         if (!m_scene->getPicking()->isPickingToProcess() && !m_scene->getPicking()->isProcessingPicking()) {
-            m_hoverHub = nullptr;
-
             // picking or manipulation of a transformer
             m_scene->getPicking()->postPickingEvent(
                         (UInt32)event.localPos().x(),
@@ -707,28 +717,39 @@ void MasterScene::unregisterPickingId(o3d::UInt32 id)
     }
 }
 
+void MasterScene::pickingNoHit()
+{
+    if (m_hoverHub) {
+        // @todo a leave hub
+        m_hoverHub = nullptr;
+    }
+
+    if (m_hoverUIElement) {
+        m_hoverUIElement->leave();
+        m_hoverUIElement = nullptr;
+    }
+}
+
 void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 {
-    m_hoverHub = nullptr;
+    // m_hoverHub = nullptr;
 
     SceneObject *sceneObject = o3d::dynamicCast<SceneObject*>(pickable);
     if (sceneObject) {
         // o3d object to o3s hub
-        UInt32 pid = pickable->getPickableColor().rInt() |
-                     pickable->getPickableColor().gInt() << 8 |
-                     pickable->getPickableColor().bInt() << 16 |
-                     pickable->getPickableColor().aInt() << 24;
-
-        m_hoverHub = project()->lookupPickable(pid);
+        m_hoverHub = project()->lookupPickable(pickable->getPickableId());
         m_pickPos = pos;
     }
 }
 
 void MasterScene::elementPickingHit(o3d::UInt32 id, o3d::Vector3 pos)
 {
+    // m_hoverUIElement = nullptr;
+
     auto it = m_pickingToSceneUIElements.find(id);
     if (it != m_pickingToSceneUIElements.end()) {
         it->second->hover(id, pos);
+        m_hoverUIElement = it->second;
     }
 }
 
@@ -835,6 +856,7 @@ void MasterScene::initializeDrawer()
         m_scene->getPicking()->setMode(Picking::COLOR);
         m_scene->getPicking()->onHit.connect(this, &MasterScene::pickingHit, EvtHandler::CONNECTION_ASYNCH);
         m_scene->getPicking()->onUnknownHit.connect(this, &MasterScene::elementPickingHit, EvtHandler::CONNECTION_ASYNCH);
+        m_scene->getPicking()->onNoHit.connect(this, &MasterScene::pickingNoHit, EvtHandler::CONNECTION_ASYNCH);
         m_scene->getPicking()->setCamera(m_camera.get());
 
         // add an helper grid
