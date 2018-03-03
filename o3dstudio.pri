@@ -6,7 +6,7 @@ O3DSTUDIO_PRI_INCLUDED = 1
 #
 
 O3S_BUILD_ENV = $$getenv(VIRTUAL_ENV)
-isEmpty($$O3S_BUILD_ENV) {
+isEmpty(O3S_BUILD_ENV) {
     O3S_BUILD_ENV = "amd64"
 }
 
@@ -17,12 +17,12 @@ isEmpty(BUILD_PREFIX) {
 }
 
 ENV_CC = $$getenv(CC)
-!isEmpty($$ENV_CC) {
+!isEmpty(ENV_CC) {
     QMAKE_CC = $$ENV_CC
 }
 
 ENV_CXX = $$getenv(CXX)
-!isEmpty($$ENV_CXX) {
+!isEmpty(ENV_CXX) {
     QMAKE_CXX = $$ENV_CXX
 }
 

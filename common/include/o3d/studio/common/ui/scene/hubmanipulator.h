@@ -14,9 +14,11 @@
 #include <o3d/core/vector2.h>
 #include <o3d/core/vector3.h>
 #include <o3d/core/matrix4.h>
+#include <o3d/core/quaternion.h>
 #include <o3d/image/color.h>
 
 namespace o3d {
+
 namespace studio {
 namespace common {
 
@@ -35,7 +37,7 @@ public:
      * @param target Targeted hub object.
      * @param hitPos Position where the hit (picking) occured
      */
-    HubManipulator(BaseObject *parent, Hub* target, const Matrix4 &transform);
+    HubManipulator(BaseObject *parent, Hub* target);
 
     /**
      * @brief HubManipulator
@@ -53,6 +55,11 @@ public:
     virtual void hover(UInt32 id, const Point3f &pos) override;
     virtual void leave() override;
 
+    virtual void beginTransform(MasterScene *masterScene);
+    virtual void transform(const Vector3f &v, MasterScene *masterScene);
+    virtual void endTransform();
+    virtual Bool isTransform() const;
+
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;
     virtual void syncWithScene(MasterScene *masterScene) override;
@@ -69,16 +76,32 @@ protected:
         AXE_MANY = 4
     };
 
+    enum TransformMode
+    {
+        STATIC = 0,
+        TRANSLATE,
+        ROTATE,
+        SCALE,
+        SKEW
+    };
+
     std::list<Hub*> m_targets;
+    std::list<Vector3> m_orgV;
+    std::list<Quaternion> m_orgQ;
+
     Matrix4 m_transform;
+    Vector3 m_position;
+    Quaternion m_rotation;
 
     Float m_scale;
 
     UInt32 m_pickingMask;
 
-    Int32 m_axe;    //!< Current axe or -1 if none
-    Float m_delta;  //!< Current delta of the transform
+    Int32 m_axe;                    //!< Current axe or -1 if none
+    Vector3f m_delta;               //!< Current delta of the transform
+    TransformMode m_transformMode;  //! Current transform (when beginTransform...)
 
+    void updateTransform(MasterScene *masterScene);
     Color axeColor(Axe axe);
 };
 

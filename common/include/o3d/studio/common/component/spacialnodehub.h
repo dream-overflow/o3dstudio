@@ -102,6 +102,8 @@ public:
 //    UInt32 insertTransform(TransformType type, UInt32 at);
 //    void removeTransform(UInt32 at);
 
+    const Transform& transform(UInt32 transformIndex) const;
+
     virtual const o3d::Matrix4& absoluteMatrix(MasterScene *masterScene) const override;
 
     virtual Bool isSpacialNode() const override;
@@ -134,7 +136,7 @@ protected:
 
     std::map<MasterScene*, o3d::Node*> m_instances;
 
-    std::list<o3d::Transform*> m_transforms;
+    std::vector<o3d::Transform*> m_transforms;
 };
 
 /**

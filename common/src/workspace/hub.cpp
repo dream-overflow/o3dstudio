@@ -517,6 +517,18 @@ o3d::Bool Hub::isSpacialNode() const
     return False;
 }
 
+o3d::Bool Hub::isParentSpacialNode() const
+{
+    if (m_parent && m_parent->isParentHub()) {
+        Hub* parentHub = static_cast<Hub*>(m_parent);
+        if (parentHub->isSpacialNode()) {
+            return True;
+        }
+    }
+
+    return False;
+}
+
 o3d::Bool Hub::serializeContent(OutStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {

@@ -178,6 +178,9 @@ void SpacialNodeHub::createToScene(MasterScene *masterScene)
     o3d::Node *node = new o3d::Node(masterScene->scene());
     node->setName(m_name);
 
+    // add the primary transform
+    node->addTransform(new MTransform);
+
     // determine where to put this node
     if (parent() && parent()->typeRef() == typeRef()) {
         // the parent hub is also a spacial node so take its node as parent
@@ -233,9 +236,10 @@ void SpacialNodeHub::syncWithScene(MasterScene *masterScene)
         o3d::Transform *nodeTransform = node->getTransform();
         if (nodeTransform) {
             o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
-
+            System::print(mainTransform->getPosition(), "pos"); fflush(0);
             nodeTransform->setPosition(mainTransform->getPosition());
-            nodeTransform->setRotation(mainTransform->getRotation());
+       //     nodeTransform->setRotation(mainTransform->getRotation());
+       //     nodeTransform->setScale(mainTransform->getScale());
         }
 
         O3D_MESSAGE("SpacialNodeHub synced into scene");
@@ -246,6 +250,8 @@ void SpacialNodeHub::setPosition(o3d::UInt32 transformIndex, const o3d::Vector3f
 {
     o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
     mainTransform->setPosition(pos);
+
+    setDirty();
 }
 
 void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f &rot)
@@ -255,17 +261,30 @@ void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f
     q.fromEuler(rot);
 
     mainTransform->setRotation(q);
+
+    setDirty();
 }
 
 void SpacialNodeHub::setScale(o3d::UInt32 transformIndex, const o3d::Vector3f &scale)
 {
     o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
     mainTransform->setScale(scale);
+
+    setDirty();
 }
 
 o3d::UInt32 SpacialNodeHub::getNumTransforms() const
 {
     return (UInt32)m_transforms.size();
+}
+
+const o3d::Transform &SpacialNodeHub::transform(o3d::UInt32 transformIndex) const
+{
+    if (transformIndex < m_transforms.size()) {
+        return *m_transforms[transformIndex];
+    } else {
+        O3D_ERROR(E_IndexOutOfRange("Transform index"));
+    }
 }
 
 const o3d::Matrix4 &SpacialNodeHub::absoluteMatrix(MasterScene *masterScene) const

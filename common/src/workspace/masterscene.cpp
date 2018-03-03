@@ -339,47 +339,53 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         if (event.modifiers() & InputEvent::META_MODIFIER) {
             m_actionMode = ACTION_CAMERA_ROTATION;
         } else {
-            m_actionMode = ACTION_SELECTION;
+            // action using the manipulator
+            if (m_hoverUIElement && m_hubManipulator == m_hoverUIElement) {
+                HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
+                hubManipulator->beginTransform(this);
+            } else {
+                m_actionMode = ACTION_SELECTION;
 
-            if (m_hoverHub) {
-                if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-                    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-                        // get previous selection and remove
-                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+                if (m_hoverHub) {
+                    if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                        if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                            // get previous selection and remove
+                            auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
 
-                        Application::instance()->selection().beginSelection();
+                            Application::instance()->selection().beginSelection();
 
-                        for (SelectionItem *item : previous) {
-                            if (item->ref() != m_hoverHub->ref().light()) {
-                                Application::instance()->selection().appendSelection(
-                                            static_cast<Hub*>(project()->lookup(item->ref())));
+                            for (SelectionItem *item : previous) {
+                                if (item->ref() != m_hoverHub->ref().light()) {
+                                    Application::instance()->selection().appendSelection(
+                                                static_cast<Hub*>(project()->lookup(item->ref())));
+                                }
                             }
-                        }
 
-                        Application::instance()->selection().appendSelection(m_hoverHub);
-                        Application::instance()->selection().endSelection();
+                            Application::instance()->selection().appendSelection(m_hoverHub);
+                            Application::instance()->selection().endSelection();
 
-                        // an object is removed from selection
-                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Remove from selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
-                    } else {
-                        // get previous selection and append
-                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+                            // an object is removed from selection
+                            Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Remove from selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                        } else {
+                            // get previous selection and append
+                            auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
 
-                        Application::instance()->selection().beginSelection();
+                            Application::instance()->selection().beginSelection();
 
-                        for (SelectionItem *item : previous) {
-                            // himself is reselected at last
-                            if (item->ref() != m_hoverHub->ref().light()) {
-                                Application::instance()->selection().appendSelection(
-                                            static_cast<Hub*>(project()->lookup(item->ref())));
+                            for (SelectionItem *item : previous) {
+                                // himself is reselected at last
+                                if (item->ref() != m_hoverHub->ref().light()) {
+                                    Application::instance()->selection().appendSelection(
+                                                static_cast<Hub*>(project()->lookup(item->ref())));
+                                }
                             }
+
+                            Application::instance()->selection().appendSelection(m_hoverHub);
+                            Application::instance()->selection().endSelection();
+
+                            // an object is selected
+                            Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
                         }
-
-                        Application::instance()->selection().appendSelection(m_hoverHub);
-                        Application::instance()->selection().endSelection();
-
-                        // an object is selected
-                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
                     }
                 }
             }
@@ -394,6 +400,10 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 
         m_content->setCursor(cursor);
         m_lockedPos = event.globalPos();
+    } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
+               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_STRETCH) {
+        // initial relative
+        m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
     }
 
     return True;
@@ -419,6 +429,10 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
                 // clear selection
                 Application::instance()->selection().unselectAll();
             }
+        } else if (m_hubManipulator && m_hubManipulator->hasFocus()) {
+            // action using the manipulator
+            HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
+            hubManipulator->endTransform();
         }
     } else if (event.button(Mouse::RIGHT)) {
         if (m_actionMode == ACTION_CAMERA_TRANSLATION) {
@@ -519,6 +533,19 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             cameraNode->getTransform()->translate(Vector3(x, y, z));
         }
     } else {
+        // we have a current manipulator
+        if (m_hubManipulator && m_hubManipulator->hasFocus()) {
+            Float x = 0.f, y = 0.f, z = 0.f;
+
+            x = deltaX * 1.f; // * elapsed;
+            y = -deltaY * 1.f; // * elapsed;
+            z = deltaY * 1.f; // * elapsed;
+
+            // action using the manipulator
+            HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
+            hubManipulator->transform(Vector3(x, y, z), this);
+        }
+
         // only at once (and could add a small timer to avoid a lot of events)
         if (!m_scene->getPicking()->isPickingToProcess() && !m_scene->getPicking()->isProcessingPicking()) {
             // picking or manipulation of a transformer
@@ -535,6 +562,10 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
 
         cursor.setPos(pos);
         m_content->setCursor(cursor);
+    } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
+               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_STRETCH) {
+        // relative
+        m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
     }
 
     return True;
@@ -732,7 +763,7 @@ void MasterScene::pickingNoHit()
 
 void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 {
-    // m_hoverHub = nullptr;
+    m_hoverHub = nullptr;
 
     SceneObject *sceneObject = o3d::dynamicCast<SceneObject*>(pickable);
     if (sceneObject) {
@@ -744,7 +775,7 @@ void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 
 void MasterScene::elementPickingHit(o3d::UInt32 id, o3d::Vector3 pos)
 {
-    // m_hoverUIElement = nullptr;
+    m_hoverUIElement = nullptr;
 
     auto it = m_pickingToSceneUIElements.find(id);
     if (it != m_pickingToSceneUIElements.end()) {

@@ -152,6 +152,11 @@ public:
      */
     virtual Bool isSpacialNode() const;
 
+    /**
+     * @brief Is parent node is a spacial node.
+     */
+    Bool isParentSpacialNode() const;
+
 protected:
 
     Project *m_project;               //!< Owner project;
