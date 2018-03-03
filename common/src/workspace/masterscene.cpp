@@ -401,7 +401,7 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         m_content->setCursor(cursor);
         m_lockedPos = event.globalPos();
     } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
-               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_STRETCH) {
+               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_SKEW) {
         // initial relative
         m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
     }
@@ -563,7 +563,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         cursor.setPos(pos);
         m_content->setCursor(cursor);
     } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
-               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_STRETCH) {
+               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_SKEW) {
         // relative
         m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
     }

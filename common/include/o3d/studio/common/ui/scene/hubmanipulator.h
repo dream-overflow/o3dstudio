@@ -19,6 +19,8 @@
 
 namespace o3d {
 
+class Transform;
+
 namespace studio {
 namespace common {
 
@@ -87,13 +89,13 @@ protected:
 
     std::list<Hub*> m_targets;
     std::list<Vector3> m_orgV;
-    std::list<Quaternion> m_orgQ;
 
-    Matrix4 m_transform;
+    Transform *m_transform;
     Vector3 m_position;
-    Quaternion m_rotation;
+    Vector3 m_rotation;
+    Vector3 m_scale;
 
-    Float m_scale;
+    Float m_displayScale;
 
     UInt32 m_pickingMask;
 

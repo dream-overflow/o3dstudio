@@ -236,10 +236,10 @@ void SpacialNodeHub::syncWithScene(MasterScene *masterScene)
         o3d::Transform *nodeTransform = node->getTransform();
         if (nodeTransform) {
             o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
-            System::print(mainTransform->getPosition(), "pos"); fflush(0);
+            System::print(mainTransform->getScale(), "scale"); fflush(0);
             nodeTransform->setPosition(mainTransform->getPosition());
-       //     nodeTransform->setRotation(mainTransform->getRotation());
-       //     nodeTransform->setScale(mainTransform->getScale());
+            nodeTransform->setRotation(mainTransform->getRotation());
+            nodeTransform->setScale(mainTransform->getScale());
         }
 
         O3D_MESSAGE("SpacialNodeHub synced into scene");

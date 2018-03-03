@@ -55,7 +55,7 @@ public:
         ACTION_TRANSLATION,
         ACTION_ROTATION,
         ACTION_SCALE,
-        ACTION_STRETCH
+        ACTION_SKEW
     };
 
     enum SpeedModifier
