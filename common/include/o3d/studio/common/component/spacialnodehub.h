@@ -13,6 +13,7 @@
 #include "../workspace/hub.h"
 
 #include <o3d/core/vector3.h>
+#include <o3d/core/quaternion.h>
 
 #include <map>
 
@@ -95,6 +96,7 @@ public:
     // assume one transform for the moment
     void setPosition(UInt32 transformIndex, const o3d::Vector3f &pos);
     void setRotation(UInt32 transformIndex, const o3d::Vector3f &rot);
+    void setRotation(UInt32 transformIndex, const o3d::Quaternion &rot);
     void setScale(UInt32 transformIndex, const o3d::Vector3f &scale);
 
     UInt32 getNumTransforms() const;

@@ -236,7 +236,7 @@ void SpacialNodeHub::syncWithScene(MasterScene *masterScene)
         o3d::Transform *nodeTransform = node->getTransform();
         if (nodeTransform) {
             o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
-            System::print(mainTransform->getScale(), "scale"); fflush(0);
+
             nodeTransform->setPosition(mainTransform->getPosition());
             nodeTransform->setRotation(mainTransform->getRotation());
             nodeTransform->setScale(mainTransform->getScale());
@@ -261,6 +261,14 @@ void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f
     q.fromEuler(rot);
 
     mainTransform->setRotation(q);
+
+    setDirty();
+}
+
+void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Quaternion &rot)
+{
+    o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
+    mainTransform->setRotation(rot);
 
     setDirty();
 }

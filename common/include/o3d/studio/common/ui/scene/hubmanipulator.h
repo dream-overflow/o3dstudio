@@ -60,6 +60,7 @@ public:
     virtual void beginTransform(MasterScene *masterScene);
     virtual void transform(const Vector3f &v, MasterScene *masterScene);
     virtual void endTransform();
+    virtual void cancelTransform(MasterScene *masterScene);
     virtual Bool isTransform() const;
 
     virtual void createToScene(MasterScene *masterScene) override;
@@ -98,10 +99,12 @@ protected:
 
     std::list<Hub*> m_targets;
     std::list<Vector3> m_orgV;
+    std::list<Quaternion> m_orgQ;
 
-    Transform *m_transform;  //!< Current transformation of the helpers.
+    Transform *m_transform;  //!< Current helper transformation to apply.
+
     Vector3 m_position;      //!< Original position of the helper.
-    Vector3 m_rotation;      //!< Original rotation of the helper.
+    Quaternion m_rotation;   //!< Original rotation of the helper.
     Vector3 m_scale;         //!< Original scale of the helper.
 
     Float m_displayScale;

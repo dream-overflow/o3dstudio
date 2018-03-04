@@ -222,6 +222,11 @@ SceneUIElement *MasterScene::hoverSceneUIElement()
     return m_hoverUIElement;
 }
 
+const o3d::Transform& MasterScene::cameraTransform() const
+{
+    return *m_camera.get()->getNode()->getTransform();
+}
+
 void MasterScene::initialize(Bool debug)
 {
     if (m_content || m_scene || m_renderer) {
@@ -670,6 +675,11 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
             m_actionMode = ACTION_TRANSLATION;
         } else if (event.vKey() == o3d::VKey::KEY_G) {
             m_actionMode = ACTION_SKEW;
+        } else if (event.vKey() == o3d::VKey::KEY_ESCAPE) {
+            if (m_hubManipulator && m_hubManipulator->isTransform()) {
+                // cancel current transformation
+                m_hubManipulator->cancelTransform(this);
+            }
         }
     }
 

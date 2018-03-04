@@ -27,6 +27,7 @@ class ViewPort;
 class SceneDrawer;
 class Renderer;
 class Pickable;
+class Transform;
 
 namespace studio {
 namespace common {
@@ -117,6 +118,11 @@ public:
      * @brief Get current hover scene UI element.
      */
     SceneUIElement* hoverSceneUIElement();
+
+    /**
+     * @brief Get the active camera transform (@todo could use the CameraManipulator).
+     */
+    const Transform& cameraTransform() const;
 
     //
     // drawer

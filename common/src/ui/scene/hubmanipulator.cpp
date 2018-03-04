@@ -32,7 +32,8 @@ HubManipulator::HubManipulator(BaseObject *parent, Hub* target) :
     m_displayScale(1),
     m_pickingMask(0xfffffff0f),  // @todo picking mask range and mask generator
     m_axe(AXE_NONE),
-    m_transformMode(STATIC)
+    m_transformMode(STATIC),
+    m_transformAxis(TR_VIEW)
 {
     m_targets.push_back(target);
 }
@@ -47,7 +48,8 @@ HubManipulator::HubManipulator(
     m_displayScale(1),
     m_pickingMask(0xfffffff0f),  // @todo
     m_axe(AXE_NONE),
-    m_transformMode(STATIC)
+    m_transformMode(STATIC),
+    m_transformAxis(TR_VIEW)
 {
 
 }
@@ -109,6 +111,7 @@ void HubManipulator::leave()
 void HubManipulator::beginTransform(MasterScene *masterScene)
 {
     O3D_ASSERT(m_orgV.empty());
+    O3D_ASSERT(m_orgQ.empty());
 
     m_focus = True;
     m_delta.zero();
@@ -118,19 +121,15 @@ void HubManipulator::beginTransform(MasterScene *masterScene)
     if (masterScene->actionMode() == MasterScene::ACTION_ROTATION) {
         m_transformMode = ROTATE;
 
-        Vector3 v;
-
         for (Hub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 SpacialNodeHub *spacialNode = static_cast<SpacialNodeHub*>(hub);
-                spacialNode->transform(0).getRotation().toEuler(v);
-                m_orgV.push_back(v);
+                m_orgQ.push_back(spacialNode->transform(0).getRotation());
             } else if (hub->isParentSpacialNode()) {
                 SpacialNodeHub *spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-                spacialNode->transform(0).getRotation().toEuler(v);
-                m_orgV.push_back(v);
+                m_orgQ.push_back(spacialNode->transform(0).getRotation());
             } else {
-                m_orgV.push_back(Vector3());
+                m_orgQ.push_back(Quaternion());
             }
         }
     } else if (masterScene->actionMode() == MasterScene::ACTION_TRANSLATION) {
@@ -172,10 +171,16 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 {
     Float s = 1.f;
 
-    if (masterScene->motionType() == MasterScene::MOTION_STEP) {
-        s *= 10.f; // @todo step by N
+    if (masterScene->motionType() == MasterScene::MOTION_FAST) {
+        s *= 10.f;
     } else if (masterScene->motionType() == MasterScene::MOTION_PRECISE) {
         s *= 0.1f;
+    } else if (masterScene->motionType() == MasterScene::MOTION_STEP) {
+        // s *= 0.1f;  // @todo step by N
+    } else if (masterScene->motionType() == MasterScene::MOTION_GRID) {
+        // s *= 0.1f;  // @todo align to virtual grid
+    } else if (masterScene->motionType() == MasterScene::MOTION_MAGNET) {
+        // s *= 0.1f;  // @todo magnet to nearest location
     }
 
     // @todo determin the amount of x and y to be colinear or at 90° to the axis of the transform
@@ -191,7 +196,12 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             m_delta.y() += v.y() * s;
         }
 
-        auto it = m_orgV.begin();
+        Quaternion q;
+        q.fromEuler(m_delta);
+        q.normalize();
+        m_transform->setRotation(m_rotation * q);
+
+        auto it = m_orgQ.begin();
         SpacialNodeHub *spacialNode;
 
         for (Hub* hub : m_targets) {
@@ -204,7 +214,8 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             }
 
             if (spacialNode) {
-                spacialNode->setRotation(0, (*it) + m_delta);
+                // spacialNode->setRotation(0, (*it) + m_delta);
+                spacialNode->setRotation(0, (*it) * m_transform->getRotation());
 
                 SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
                 masterScene->addCommand(sceneCommand);
@@ -212,8 +223,6 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
             ++it;
         }
-
-        m_rotation = m_delta;
     } else if (m_transformMode == TRANSLATE) {
         if (m_axe == AXE_X) {
             m_delta.x() += v.x() * s;
@@ -226,6 +235,8 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             m_delta.y() += v.y() * s;
         }
 
+        m_transform->setPosition(m_position + m_delta);
+
         auto it = m_orgV.begin();
         SpacialNodeHub *spacialNode;
 
@@ -239,7 +250,32 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             }
 
             if (spacialNode) {
-                spacialNode->setPosition(0, (*it) + m_delta);
+                // spacialNode->setPosition(0, (*it) + m_delta);
+                // spacialNode->setPosition(0, (*it) + m_transform->getPosition() - m_position);
+                Vector3 v;
+
+                if (m_transformAxis == TR_VIEW) {
+                    // axis aligned to view
+                    v = m_transform->getPosition() - m_position;
+                    m_transform->getRotation().transform(v);
+                } else if (m_transformAxis == TR_GLOBAL) {
+                    // axis aligned to origin
+                    v = m_transform->getPosition() - m_position;
+                } else if (m_transformAxis == TR_LOCAL) {
+                    // axis aligned to object @todo
+                    v = m_transform->getPosition() - m_position;
+                    m_transform->getRotation().transform(v);
+                } else if (m_transformAxis == TR_MEDIAN) {
+                    // axis aligned to median @todo
+                    v = m_transform->getPosition() - m_position;
+                    m_transform->getRotation().transform(v);
+                } else if (m_transformAxis == TR_USER) {
+                    // axis aligned to user defined axe @todo
+                    v = m_transform->getPosition() - m_position;
+                    m_transform->getRotation().transform(v);
+                }
+
+                spacialNode->setPosition(0, (*it) + v);
 
                 SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
                 masterScene->addCommand(sceneCommand);
@@ -247,8 +283,6 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
             ++it;
         }
-
-        m_position = m_delta;
     } else if (m_transformMode == SCALE) {
         if (m_axe == AXE_X) {
             m_delta.x() += v.x() * s;
@@ -289,7 +323,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             ++it;
         }
 
-        m_scale = Vector3(1,1,1) + m_delta;
+        // m_transform->scale(m_delta);
     }  else if (m_transformMode == SKEW) {
         // @todo
     }
@@ -301,6 +335,101 @@ void HubManipulator::endTransform()
     m_transformMode = STATIC;
     m_delta.zero();
     m_orgV.clear();
+    m_orgQ.clear();
+}
+
+void HubManipulator::cancelTransform(MasterScene *masterScene)
+{
+    SpacialNodeHub *spacialNode;
+
+    // reset transforms of each target
+    if (m_transformMode == TRANSLATE) {
+        auto it = m_orgV.begin();
+        for (Hub* hub : m_targets) {
+            if (hub->isSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub);
+            } else if (hub->isParentSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+            } else {
+                spacialNode = nullptr;
+            }
+
+            if (spacialNode) {
+                SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                spacialNode->setPosition(0, *it);
+                masterScene->addCommand(sceneCommand);
+            }
+
+            ++it;
+        }
+    } else if (m_transformMode == ROTATE) {
+        auto it = m_orgQ.begin();
+        for (Hub* hub : m_targets) {
+            if (hub->isSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub);
+            } else if (hub->isParentSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+            } else {
+                spacialNode = nullptr;
+            }
+
+            if (spacialNode) {
+                SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                spacialNode->setRotation(0, *it);
+                masterScene->addCommand(sceneCommand);
+            }
+
+            ++it;
+        }
+    } else if (m_transformMode == SCALE) {
+        auto it = m_orgV.begin();
+        for (Hub* hub : m_targets) {
+            if (hub->isSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub);
+            } else if (hub->isParentSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+            } else {
+                spacialNode = nullptr;
+            }
+
+            if (spacialNode) {
+                SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                spacialNode->setScale(0, *it);
+                masterScene->addCommand(sceneCommand);
+            }
+
+            ++it;
+        }
+    } else if (m_transformMode == SKEW) {
+//        auto it = m_orgV.begin();
+//        for (Hub* hub : m_targets) {
+//            if (hub->isSpacialNode()) {
+//                spacialNode = static_cast<SpacialNodeHub*>(hub);
+//            } else if (hub->isParentSpacialNode()) {
+//                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+//            } else {
+//                spacialNode = nullptr;
+//            }
+//
+//            if (spacialNode) {
+//                SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+//                spacialNode->setSkew(0, *it);
+//                masterScene->addCommand(sceneCommand);
+//            }
+//
+//            ++it;
+//        }
+    }
+
+    m_transform->setPosition(m_position);
+    m_transform->setRotation(m_rotation);
+    m_transform->setScale(m_scale);
+
+    m_focus = False;
+    m_transformMode = STATIC;
+    m_delta.zero();
+    m_orgV.clear();
+    m_orgQ.clear();
 }
 
 o3d::Bool HubManipulator::isTransform() const
@@ -341,26 +470,12 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     context.enableDepthWrite();
     context.setDepthRange(0.0, 0.1);
 
-    // transform by current delta
-    MTransform local;
-    local.setPosition(m_transform->getPosition());
-    local.setRotation(m_transform->getRotation());
-    local.setScale(m_transform->getScale());
-
-    Quaternion q;
-    q.fromEuler(m_rotation);
-    q.normalize();
-
-    local.translate(m_position);
-    local.rotate(q);
-//    local.scale(m_scale);
-
     // computed visibility and 2d mapped position
     //Matrix4 mv;
 
     Vector3 v = Matrix::projectPoint(
                     scene->getActiveCamera()->getProjectionMatrix(),
-                    scene->getActiveCamera()->getModelviewMatrix() * local.getMatrix(),
+                    scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
                     vp,
                     Vector3());
 
@@ -380,8 +495,8 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     //        pj.buildOrtho(vp.x(), vp.x2(), vp.y(), vp.y2(), m_scale * -(factor*0.1f), m_scale * factor*0.1f);
     //        primitive->projection().set(pj);
 
-    Float s = m_displayScale * (scene->getActiveCamera()->getAbsoluteMatrix().getTranslation() - local.getPosition()).length() * 0.1;
-    primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix() * local.getMatrix());
+    Float s = m_displayScale * (scene->getActiveCamera()->getAbsoluteMatrix().getTranslation() - m_transform->getPosition()).length() * 0.1;
+    primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix());
     primitive->modelView().push();
 
     if (drawInfo.pass == DrawInfo::PICKING_PASS) {
@@ -555,50 +670,111 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
 
 void HubManipulator::updateTransform(MasterScene *masterScene)
 {
-    // synchro with hubs transformation
-    Vector3 pos;
-    Quaternion rot;
-    Vector3 scl;
-    UInt32 c = 0;
+    if (m_targets.empty()) {
+        m_transform->identity();
+        return;
+    }
 
-    SpacialNodeHub *spacialNode;
-    for (Hub* hub : m_targets) {
+    // synchro with hubs transformation
+    if (m_transformAxis == TR_GLOBAL) {
+        Vector3 pos;
+
+        Hub *hub = m_targets.back();
+        SpacialNodeHub *spacialNode;
         if (hub->isSpacialNode()) {
             spacialNode = static_cast<SpacialNodeHub*>(hub);
-            pos += spacialNode->transform(0).getPosition();
-            rot *= spacialNode->transform(0).getRotation();
-            rot.normalize();
-            scl += spacialNode->transform(0).getScale();
-
-            ++c;
+            pos = spacialNode->transform(0).getPosition();
         } else if (hub->isParentSpacialNode()) {
             spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-            pos += spacialNode->transform(0).getPosition();
-            rot *= spacialNode->transform(0).getRotation();
-            rot.normalize();
-            scl += spacialNode->transform(0).getScale();
-
-            ++c;
+            pos = spacialNode->transform(0).getPosition();
         }
-    }
 
-    if (c) {
-        Float inv = 1.f / c;
-
-        pos *= inv;
-        //rot *= inv;
-        scl *= inv;
-
+        // identity rotation
         m_transform->identity();
+        m_transform->setRotation(Quaternion());
         m_transform->setPosition(pos);
-        m_transform->setRotation(rot);
-        m_transform->setScale(scl);
+    } else if (m_transformAxis == TR_LOCAL) {
+        Vector3 pos;
+        Quaternion q;
+
+        Hub *hub = m_targets.back();
+        SpacialNodeHub *spacialNode;
+        if (hub->isSpacialNode()) {
+            spacialNode = static_cast<SpacialNodeHub*>(hub);
+            pos = spacialNode->transform(0).getPosition();
+            q = spacialNode->transform(0).getRotation();
+        } else if (hub->isParentSpacialNode()) {
+            spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+            pos = spacialNode->transform(0).getPosition();
+            q = spacialNode->transform(0).getRotation();
+        }
+
+        // identity rotation
+        m_transform->identity();
+        m_transform->setRotation(q);
+        m_transform->setPosition(pos);
+    } else if (m_transformAxis == TR_MEDIAN) {
+        Vector3 pos;
+        // Quaternion rot;
+        UInt32 c = 0;
+
+        // compute the median position
+        SpacialNodeHub *spacialNode;
+        for (Hub* hub : m_targets) {
+            if (hub->isSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub);
+                pos += spacialNode->transform(0).getPosition();
+                // rot *= spacialNode->transform(0).getRotation();
+                // rot.normalize();
+
+                ++c;
+            } else if (hub->isParentSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                pos += spacialNode->transform(0).getPosition();
+                // rot *= spacialNode->transform(0).getRotation();
+                // rot.normalize();
+
+                ++c;
+            }
+        }
+
+        if (c) {
+            Float inv = 1.f / c;
+
+            pos *= inv;
+            // rot *= inv;
+
+            m_transform->identity();
+            m_transform->setPosition(pos);
+            m_transform->setRotation(Quaternion());
+        }
+    } else if (m_transformAxis == TR_USER) {
+        // @todo from a user defined axis
+    } else if (m_transformAxis == TR_VIEW) {
+        Vector3 pos;
+
+        Hub *hub = m_targets.back();
+        SpacialNodeHub *spacialNode;
+        if (hub->isSpacialNode()) {
+            spacialNode = static_cast<SpacialNodeHub*>(hub);
+            pos = spacialNode->transform(0).getPosition();
+        } else if (hub->isParentSpacialNode()) {
+            spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+            pos = spacialNode->transform(0).getPosition();
+        }
+
+        Quaternion q = masterScene->cameraTransform().getRotation();
+
+        // identity rotation
+        m_transform->identity();
+        m_transform->setRotation(q);
+        m_transform->setPosition(pos);
     }
 
-    // reset relative transformation
-    m_position.zero();
-    m_rotation.zero();
-    m_scale.set(1,1,1);
+    // initial transformation for reset if cancel
+    m_position = m_transform->getPosition();
+    m_rotation = m_transform->getRotation();
+    m_scale = m_transform->getScale();
 }
 
 o3d::Color HubManipulator::axeColor(HubManipulator::Axe axe)
