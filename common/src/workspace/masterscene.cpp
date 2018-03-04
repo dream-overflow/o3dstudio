@@ -62,11 +62,12 @@ MasterScene::MasterScene(Entity *parent) :
     m_renderer(nullptr),
     m_scene(nullptr),
     m_actionMode(ACTION_NONE),
-    m_speedModifier(SPEED_NORMAL),
+    m_motionType(MOTION_FOLLOW),
     m_hoverHub(nullptr),
     m_camera(this),
     m_viewport(this),
     m_sceneDrawer(this),
+    m_cameraManipulator(nullptr),
     m_hubManipulator(nullptr),
     m_hoverUIElement(nullptr)
 {
@@ -235,6 +236,7 @@ void MasterScene::initialize(Bool debug)
 
     // no manipulation at initialization
     O3D_ASSERT(m_hubManipulator == nullptr);
+    O3D_ASSERT(m_cameraManipulator == nullptr);
 
     common::UiController &uiCtrl = common::Application::instance()->ui();
     uiCtrl.addContent(m_content);
@@ -307,6 +309,7 @@ void MasterScene::terminateDrawer()
     }
 
     // deleted by the previous iteration
+    m_cameraManipulator = nullptr;
     m_hubManipulator = nullptr;
     m_hoverUIElement = nullptr;
 
@@ -336,65 +339,70 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
     }
 
     if (event.button(Mouse::LEFT)) {
-        if (event.modifiers() & InputEvent::META_MODIFIER) {
-            m_actionMode = ACTION_CAMERA_ROTATION;
+        // action using the manipulator
+        if (m_hoverUIElement && m_hubManipulator == m_hoverUIElement) {
+            m_hubManipulator->beginTransform(this);
         } else {
-            // action using the manipulator
-            if (m_hoverUIElement && m_hubManipulator == m_hoverUIElement) {
-                HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
-                hubManipulator->beginTransform(this);
-            } else {
-                m_actionMode = ACTION_SELECTION;
+            m_actionMode = ACTION_SELECTION;
 
-                if (m_hoverHub) {
-                    if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-                        if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-                            // get previous selection and remove
-                            auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+            if (m_hoverHub) {
+                if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                        // get previous selection and remove
+                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
 
-                            Application::instance()->selection().beginSelection();
+                        Application::instance()->selection().beginSelection();
 
-                            for (SelectionItem *item : previous) {
-                                if (item->ref() != m_hoverHub->ref().light()) {
-                                    Application::instance()->selection().appendSelection(
-                                                static_cast<Hub*>(project()->lookup(item->ref())));
-                                }
+                        for (SelectionItem *item : previous) {
+                            if (item->ref() != m_hoverHub->ref().light()) {
+                                Application::instance()->selection().appendSelection(
+                                            static_cast<Hub*>(project()->lookup(item->ref())));
                             }
-
-                            Application::instance()->selection().appendSelection(m_hoverHub);
-                            Application::instance()->selection().endSelection();
-
-                            // an object is removed from selection
-                            Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Remove from selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
-                        } else {
-                            // get previous selection and append
-                            auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
-
-                            Application::instance()->selection().beginSelection();
-
-                            for (SelectionItem *item : previous) {
-                                // himself is reselected at last
-                                if (item->ref() != m_hoverHub->ref().light()) {
-                                    Application::instance()->selection().appendSelection(
-                                                static_cast<Hub*>(project()->lookup(item->ref())));
-                                }
-                            }
-
-                            Application::instance()->selection().appendSelection(m_hoverHub);
-                            Application::instance()->selection().endSelection();
-
-                            // an object is selected
-                            Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
                         }
+
+                        Application::instance()->selection().appendSelection(m_hoverHub);
+                        Application::instance()->selection().endSelection();
+
+                        // an object is removed from selection
+                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Remove from selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                    } else {
+                        // get previous selection and append
+                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+
+                        Application::instance()->selection().beginSelection();
+
+                        for (SelectionItem *item : previous) {
+                            // himself is reselected at last
+                            if (item->ref() != m_hoverHub->ref().light()) {
+                                Application::instance()->selection().appendSelection(
+                                            static_cast<Hub*>(project()->lookup(item->ref())));
+                            }
+                        }
+
+                        Application::instance()->selection().appendSelection(m_hoverHub);
+                        Application::instance()->selection().endSelection();
+
+                        // an object is selected
+                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
                     }
                 }
             }
         }
-    } else if (event.button(Mouse::RIGHT) && (event.modifiers() & InputEvent::META_MODIFIER)) {
-        m_actionMode = ACTION_CAMERA_TRANSLATION;
+    } else if (event.button(Mouse::MIDDLE)) {
+        if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+            m_actionMode = ACTION_CAMERA_TRANSLATION;
+            m_motionType = MOTION_FOLLOW;  // default normal speed, press again shift to slow
+        } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+            m_actionMode = ACTION_CAMERA_ZOOM;
+        } else {
+            m_actionMode = ACTION_CAMERA_ROTATION;
+        }
+    } else if (event.button(Mouse::RIGHT)) {
+
     }
 
     if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
+        // no cursor and infinite scrolling
         QCursor cursor = m_content->cursor();
         cursor.setShape(Qt::BlankCursor);
 
@@ -402,8 +410,9 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         m_lockedPos = event.globalPos();
     } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
                m_actionMode == ACTION_SCALE || m_actionMode == ACTION_SKEW) {
+
         // initial relative
-        m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
+        m_lockedPos = event.globalPos();
     }
 
     return True;
@@ -416,9 +425,7 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     }
 
     if (event.button(Mouse::LEFT)) {
-        if (m_actionMode == ACTION_CAMERA_ROTATION) {
-            m_actionMode = ACTION_NONE;
-        } else if (m_actionMode == ACTION_SELECTION) {       
+        if (m_actionMode == ACTION_SELECTION) {
             if (m_hoverHub) {
                 // initial selection
                 Application::instance()->selection().select(m_hoverHub);
@@ -434,17 +441,23 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
             HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
             hubManipulator->endTransform();
         }
-    } else if (event.button(Mouse::RIGHT)) {
-        if (m_actionMode == ACTION_CAMERA_TRANSLATION) {
+    } else if (event.button(Mouse::MIDDLE)) {
+        if (m_actionMode == ACTION_CAMERA_ROTATION ||
+            m_actionMode == ACTION_CAMERA_TRANSLATION ||
+            m_actionMode == ACTION_CAMERA_ZOOM) {
+            // stop camera action
             m_actionMode = ACTION_NONE;
         }
+    } else if (event.button(Mouse::RIGHT)) {
     }
 
     if (m_actionMode == ACTION_NONE && m_hubManipulator) {
+        // default to translation
         m_actionMode = ACTION_TRANSLATION;
     }
 
     if (m_actionMode != ACTION_CAMERA_ROTATION && m_actionMode != ACTION_CAMERA_TRANSLATION) {
+        // restore cursor
         QCursor cursor = m_content->cursor();
         cursor.setShape(Qt::ArrowCursor);
 
@@ -456,12 +469,20 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
 
 o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
 {
-    if (event.button(Mouse::LEFT)) {
-        // @todo double click on camera manipulator reset the rotation
-        m_camera.get()->getNode()->getTransform()->setRotation(Quaternion());
+    if (!m_scene) {
+        return False;
     }
 
-    return False;
+    if (event.button(Mouse::LEFT)) {
+
+    } else if (event.button(Mouse::MIDDLE)) {
+        // @todo double click on camera manipulator reset the rotation
+        m_camera.get()->getNode()->getTransform()->setRotation(Quaternion());
+    } else if (event.button(Mouse::RIGHT)) {
+
+    }
+
+    return True;
 }
 
 o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
@@ -485,18 +506,20 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
     if (m_actionMode == ACTION_CAMERA_ZOOM) {
         BaseNode *cameraNode = m_camera.get()->getNode();
         if (cameraNode) {
-            Float z = 0.f;
+            Float x = 0.f, y = 0.f, z = 0.f;
 
             z = deltaY * 100.f * elapsed;
 
-            // slow motion if shift is down
-            if (m_speedModifier == SPEED_SLOW) {
-                z *= 0.1;
-            } else if (m_speedModifier == SPEED_FAST) {
-                z *= 10;
+            // change axis if modifier
+            if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                x = z;
+                z = 0;
+            } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                y = z;
+                z = 0;
             }
 
-            cameraNode->getTransform()->translate(Vector3(0.f, 0.f, z));
+            cameraNode->getTransform()->translate(Vector3(x, y, z));
         }
     } else if (m_actionMode == ACTION_CAMERA_ROTATION) {
         BaseNode *cameraNode = m_camera.get()->getNode();
@@ -504,9 +527,9 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             Float speed = 1;
 
             // slow rotation if shift is down
-            if (m_speedModifier == SPEED_SLOW) {
+            if (m_motionType == MOTION_PRECISE) {
                 speed = 0.1;
-            } else if (m_speedModifier == SPEED_FAST) {
+            } else if (m_motionType == MOTION_FAST) {
                 speed = 10;
             }
 
@@ -518,14 +541,15 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         if (cameraNode) {
             Float x = 0.f, y = 0.f, z = 0.f;
 
-            x = deltaX * 100.f * elapsed;
-            y = -deltaY * 100.f * elapsed;
+            // @todo use of mouse smoother
+            x = -deltaX * 100.f * elapsed;
+            y = deltaY * 100.f * elapsed;
 
             // slow motion if shift is down
-            if (m_speedModifier == SPEED_SLOW) {
+            if (m_motionType == MOTION_PRECISE) {
                 x *= 0.1;
                 y *= 0.1;
-            } else if (m_speedModifier == SPEED_FAST) {
+            } else if (m_motionType == MOTION_FAST) {
                 x *= 10;
                 y *= 10;
             }
@@ -542,8 +566,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             z = deltaY * 1.f; // * elapsed;
 
             // action using the manipulator
-            HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
-            hubManipulator->transform(Vector3(x, y, z), this);
+            m_hubManipulator->transform(Vector3(x, y, z), this);
         }
 
         // only at once (and could add a small timer to avoid a lot of events)
@@ -578,24 +601,36 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
     }
 
     Float elapsed = m_scene->getFrameManager()->getFrameDuration();
-    // Int32 deltaX = event.angleDelta().x();  // too rarely supported
+
+    Int32 deltaX = event.angleDelta().x();   // ALT + or second wheel axis
     Int32 deltaY = event.angleDelta().y();
 
-    if (deltaY != 0) {
+    // camera zoom/rotate
+    if (deltaY != 0 || deltaX != 0) {
         BaseNode *cameraNode = m_camera.get()->getNode();
         if (cameraNode) {
-            Float z = 0.f;
+            Float delta = (deltaX + deltaY) * 100.f / 120.f * elapsed;
 
-            z = -deltaY * 100.f / 120.f * 10.f * elapsed;
-
-            // slow motion if shift is down
-            if (m_speedModifier == SPEED_SLOW) {
-                z *= 0.1;
-            } else if (m_speedModifier == SPEED_FAST) {
-                z *= 10;
+            // change type or axis if modifier
+            if (event.modifiers() & InputEvent::CTRL_MODIFIER && event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                // rotate on Z
+                cameraNode->getTransform()->rotate(Z, -delta * 0.1);
+            } else if (event.modifiers() & InputEvent::ALT_MODIFIER && event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                // rotate on X
+                cameraNode->getTransform()->rotate(X, -delta * 0.1);
+            } else if (event.modifiers() & InputEvent::ALT_MODIFIER && event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                // rotate on Y
+                cameraNode->getTransform()->rotate(Y, -delta * 0.1);
+            } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                // translate on X
+                cameraNode->getTransform()->translate(Vector3(delta * 10, 0, 0));
+            } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                // translate on Y
+                cameraNode->getTransform()->translate(Vector3(0, delta * 10, 0));
+            } else {
+                // translate on Z
+                cameraNode->getTransform()->translate(Vector3(0, 0, -delta * 10));
             }
-
-            cameraNode->getTransform()->translate(Vector3(0.f, 0.f, z));
 
             return True;
         }
@@ -606,44 +641,66 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
 
 o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
 {
-    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-        m_speedModifier = SPEED_FAST;
-    } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-        m_speedModifier = SPEED_SLOW;
-    } else {
-        m_speedModifier = SPEED_NORMAL;
+    if (!m_scene) {
+        return False;
     }
 
-    if (event.vKey() == o3d::VKey::KEY_SPACE) {
-        // toggle transformation mode
-        if (m_actionMode == ACTION_TRANSLATION) {
+    // motion modifier if action
+    if (event.modifiers() & InputEvent::SHIFT_MODIFIER && event.modifiers() & InputEvent::ALT_MODIFIER) {
+        m_motionType = MOTION_FAST;
+    } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+        m_motionType = MOTION_PRECISE;
+    } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+        m_motionType = MOTION_STEP;
+    } else if (event.modifiers() & InputEvent::META_MODIFIER) {
+        m_motionType = MOTION_MAGNET;
+    } else if (event.modifiers() & InputEvent::ALT_MODIFIER) {
+        m_motionType = MOTION_GRID;
+    } else {
+        m_motionType = MOTION_FOLLOW;
+    }
+
+    // switch action mode if no motifiers
+    if (event.modifiers() == 0) {
+        if (event.vKey() == o3d::VKey::KEY_R) {
             m_actionMode = ACTION_ROTATION;
-        } else if (m_actionMode == ACTION_ROTATION) {
+        } else if (event.vKey() == o3d::VKey::KEY_S) {
             m_actionMode = ACTION_SCALE;
-        } else if (m_actionMode == ACTION_SCALE) {
+        } else if (event.vKey() == o3d::VKey::KEY_T) {
             m_actionMode = ACTION_TRANSLATION;
+        } else if (event.vKey() == o3d::VKey::KEY_G) {
+            m_actionMode = ACTION_SKEW;
         }
     }
 
-    return False;
+    return True;
 }
 
 o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &event)
 {
-    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-        m_speedModifier = SPEED_FAST;
-    } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-        m_speedModifier = SPEED_SLOW;
-    } else {
-        m_speedModifier = SPEED_NORMAL;
+    if (!m_scene) {
+        return False;
     }
 
-    return False;
+    // motion modifier if action
+    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+        m_motionType = MOTION_PRECISE;
+    } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+        m_motionType = MOTION_STEP;
+    } else if (event.modifiers() & InputEvent::META_MODIFIER) {
+        m_motionType = MOTION_MAGNET;
+    } else if (event.modifiers() & InputEvent::ALT_MODIFIER) {
+        m_motionType = MOTION_GRID;
+    } else {
+        m_motionType = MOTION_FOLLOW;
+    }
+
+    return True;
 }
 
 o3d::Bool MasterScene::focusInEvent(const Event &/*event*/)
 {
-    m_speedModifier = SPEED_NORMAL;
+    m_motionType = MOTION_FOLLOW;
     m_actionMode = ACTION_NONE;
 
     return False;
@@ -651,7 +708,7 @@ o3d::Bool MasterScene::focusInEvent(const Event &/*event*/)
 
 o3d::Bool MasterScene::focusOutEvent(const Event &/*event*/)
 {
-    m_speedModifier = SPEED_NORMAL;
+    m_motionType = MOTION_FOLLOW;
     m_actionMode = ACTION_NONE;
 
     return False;
@@ -721,9 +778,9 @@ MasterScene::ActionMode MasterScene::actionMode() const
     return m_actionMode;
 }
 
-MasterScene::SpeedModifier MasterScene::speedModifier() const
+MasterScene::MotionType MasterScene::motionType() const
 {
-    return m_speedModifier;
+    return m_motionType;
 }
 
 void MasterScene::registerPickingId(o3d::UInt32 id, SceneUIElement *element)
@@ -907,7 +964,7 @@ void MasterScene::initializeDrawer()
         addSceneUIElement(infoHUD);
 
         // and a camera helper
-        CameraManipulator *cameraManipulator = new CameraManipulator(this, Point2f(0.9f, 0.1f), 1.f);
-        addSceneUIElement(cameraManipulator);
+        m_cameraManipulator = new CameraManipulator(this, Point2f(0.9f, 0.1f), 1.f);
+        addSceneUIElement(m_cameraManipulator);
     }
 }

@@ -87,21 +87,31 @@ protected:
         SKEW
     };
 
+    enum TransformAxis
+    {
+        TR_LOCAL = 0,   //!< Local axis of the selected object.
+        TR_VIEW,        //!< Related to the current view axis.
+        TR_GLOBAL,      //!< Absolute (origin).
+        TR_USER,        //!< An arbitrary axis defined by user.
+        TR_MEDIAN       //!< Computed median of the selection.
+    };
+
     std::list<Hub*> m_targets;
     std::list<Vector3> m_orgV;
 
-    Transform *m_transform;
-    Vector3 m_position;
-    Vector3 m_rotation;
-    Vector3 m_scale;
+    Transform *m_transform;  //!< Current transformation of the helpers.
+    Vector3 m_position;      //!< Original position of the helper.
+    Vector3 m_rotation;      //!< Original rotation of the helper.
+    Vector3 m_scale;         //!< Original scale of the helper.
 
     Float m_displayScale;
 
     UInt32 m_pickingMask;
 
-    Int32 m_axe;                    //!< Current axe or -1 if none
-    Vector3f m_delta;               //!< Current delta of the transform
-    TransformMode m_transformMode;  //! Current transform (when beginTransform...)
+    Int32 m_axe;                    //!< Current axe or -1 if none.
+    Vector3f m_delta;               //!< Current delta of the transform.
+    TransformMode m_transformMode;  //!< Current transform (when beginTransform...).
+    TransformAxis m_transformAxis;  //!< Current transform axis.
 
     void updateTransform(MasterScene *masterScene);
     Color axeColor(Axe axe);

@@ -34,6 +34,8 @@ namespace common {
 class O3DCanvasContent;
 class SceneCommand;
 class SceneUIElement;
+class CameraManipulator;
+class HubManipulator;
 
 class Event;
 class KeyEvent;
@@ -58,11 +60,14 @@ public:
         ACTION_SKEW
     };
 
-    enum SpeedModifier
+    enum MotionType
     {
-        SPEED_NORMAL = 0,
-        SPEED_SLOW,
-        SPEED_FAST
+        MOTION_FOLLOW = 0,  //!< follow the cursor
+        MOTION_PRECISE,     //!< scale 0.1
+        MOTION_FAST,        //!< scale 10
+        MOTION_STEP,        //!< follow an increment step
+        MOTION_GRID,        //!< follow a grid as magnet
+        MOTION_MAGNET       //!< follow a constraint of magnet with others objects
     };
 
     MasterScene(Entity *parent);
@@ -159,9 +164,9 @@ public:
     ActionMode actionMode() const;
 
     /**
-     * @brief Speed modifier related to the current action mode.
+     * @brief Motion type related to the current action mode.
      */
-    SpeedModifier speedModifier() const;
+    MotionType motionType() const;
 
     /**
      * @brief Map a picking id to a scene UI element.
@@ -191,9 +196,9 @@ private:
     o3d::Renderer *m_renderer;    //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
 
-    Point2i m_lockedPos;            //!< Infinite cursor
-    ActionMode m_actionMode;        //!< Current action mode
-    SpeedModifier m_speedModifier;  //!< Current action speed modifier
+    Point2i m_lockedPos;          //!< Infinite cursor
+    ActionMode m_actionMode;      //!< Current action mode
+    MotionType m_motionType;      //!< Current motion type
 
     UInt32 m_verticesCount[4];
     UInt32 m_trianglesCount[4];
@@ -219,8 +224,9 @@ private:
     //! Attached scene UI elements
     std::list<SceneUIElement*> m_sceneUIElements;
 
-    SceneUIElement *m_hubManipulator;    //!< Current hub selection manipulator (could be contextual)
-    SceneUIElement *m_hoverUIElement;    //!< Current hover ui element
+    CameraManipulator *m_cameraManipulator;  //!< Active camera manipulator.
+    HubManipulator *m_hubManipulator;        //!< Current hub selection manipulator.
+    SceneUIElement *m_hoverUIElement;        //!< Current hover ui element.
 
     //! Mapping of picking id to scene UI elements (can have multiple picking id to a same element)
     std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;

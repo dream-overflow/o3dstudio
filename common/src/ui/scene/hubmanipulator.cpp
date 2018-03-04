@@ -172,9 +172,9 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 {
     Float s = 1.f;
 
-    if (masterScene->speedModifier() == MasterScene::SPEED_FAST) {
-        s *= 10.f;
-    } else if (masterScene->speedModifier() == MasterScene::SPEED_SLOW) {
+    if (masterScene->motionType() == MasterScene::MOTION_STEP) {
+        s *= 10.f; // @todo step by N
+    } else if (masterScene->motionType() == MasterScene::MOTION_PRECISE) {
         s *= 0.1f;
     }
 
