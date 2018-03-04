@@ -683,6 +683,10 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
         }
     }
 
+    if (m_hubManipulator) {
+        m_hubManipulator->keyDownEvent(event, this);
+    }
+
     return True;
 }
 

@@ -74,6 +74,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     // setup modelview
     Matrix4 mv;
     mv.setRotation(scene->getActiveCamera()->getModelviewMatrix().getRotation());
+    //mv.setRotation(scene->getActiveCamera()->getAbsoluteMatrix().getRotation());
     // mv.setTranslation(0.45f*ratio, 0.4f, 0.f);
     mv.setTranslation(vp.x2() - m_scale * factor*0.1f, vp.y2() - m_scale * factor*0.1f, 0.f);
     primitive->modelView().set(mv);

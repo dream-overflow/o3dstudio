@@ -33,7 +33,9 @@ HubManipulator::HubManipulator(BaseObject *parent, Hub* target) :
     m_pickingMask(0xfffffff0f),  // @todo picking mask range and mask generator
     m_axe(AXE_NONE),
     m_transformMode(STATIC),
-    m_transformAxis(TR_VIEW)
+    m_pivotPoint(PIVOT_INDIVIDUAL),
+    m_transformOrientation(TR_LOCAL),
+    m_activeElt(nullptr)
 {
     m_targets.push_back(target);
 }
@@ -49,7 +51,9 @@ HubManipulator::HubManipulator(
     m_pickingMask(0xfffffff0f),  // @todo
     m_axe(AXE_NONE),
     m_transformMode(STATIC),
-    m_transformAxis(TR_VIEW)
+    m_pivotPoint(PIVOT_INDIVIDUAL),
+    m_transformOrientation(TR_LOCAL),
+    m_activeElt(nullptr)
 {
 
 }
@@ -108,13 +112,54 @@ void HubManipulator::leave()
     m_axe = AXE_NONE;
 }
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/messenger.h"
+
+void HubManipulator::keyDownEvent(const KeyEvent &event, MasterScene *masterScene)
+{
+    // not possible during transform
+    if (isTransform()) {
+        return;
+    }
+
+    // switch action mode if no motifiers
+    if (event.modifiers() == 0) {
+        if (event.vKey() == o3d::VKey::KEY_U) {
+            m_transformOrientation = TR_GLOBAL;
+            Application::instance()->messenger().info("Change to GLOBAL orientation");
+        } else if (event.vKey() == o3d::VKey::KEY_L) {
+            m_transformOrientation = TR_LOCAL;
+            Application::instance()->messenger().info("Change to LOCAL orientation");
+        } else if (event.vKey() == o3d::VKey::KEY_V) {
+            m_transformOrientation = TR_VIEW;
+            Application::instance()->messenger().info("Change to VIEW orientation");
+        } else if (event.vKey() == o3d::VKey::KEY_A) {
+            m_pivotPoint = PIVOT_ACTIVE_ELT;
+            Application::instance()->messenger().info("Change to ACTIVE ELEMENT pivot");
+        } else if (event.vKey() == o3d::VKey::KEY_I) {
+            m_pivotPoint = PIVOT_INDIVIDUAL;
+            Application::instance()->messenger().info("Change to INDIVIDUAL pivot");
+        } else if (event.vKey() == o3d::VKey::KEY_M) {
+            m_pivotPoint = PIVOT_MEDIAN;
+            Application::instance()->messenger().info("Change to MEDIAN pivot");
+        } else if (event.vKey() == o3d::VKey::KEY_P) {
+            m_pivotPoint = PIVOT_USER;
+            Application::instance()->messenger().info("Change to USER pivot");
+        }
+
+        // @todo pivot point change
+
+        updateTransform(masterScene);
+    }
+}
+
 void HubManipulator::beginTransform(MasterScene *masterScene)
 {
     O3D_ASSERT(m_orgV.empty());
     O3D_ASSERT(m_orgQ.empty());
 
     m_focus = True;
-    m_delta.zero();
+    m_relativeV.zero();
 
     updateTransform(masterScene);
 
@@ -183,26 +228,50 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         // s *= 0.1f;  // @todo magnet to nearest location
     }
 
+    if (!m_activeElt) {
+        return;
+    }
+
+    Vector3 pos;
+    Quaternion rot;
+
     // @todo determin the amount of x and y to be colinear or at 90° to the axis of the transform
     if (m_transformMode == ROTATE) {
         if (m_axe == AXE_X) {
-            m_delta.x() += v.x() * s;
+            m_relativeV.x() += v.x() * s;
         } else if (m_axe == AXE_Y) {
-            m_delta.y() += v.y() * s;
+            m_relativeV.y() += v.y() * s;
         } else if (m_axe == AXE_Z) {
-            m_delta.z() += v.z() * s;
+            m_relativeV.z() += v.z() * s;
         } else if (m_axe == AXE_MANY) {
-            m_delta.x() += v.x() * s;
-            m_delta.y() += v.y() * s;
+            m_relativeV.x() += v.x() * s;
+            m_relativeV.y() += v.y() * s;
         }
 
         Quaternion q;
-        q.fromEuler(m_delta);
+        q.fromEuler(m_relativeV);
         q.normalize();
-        m_transform->setRotation(m_rotation * q);
+        m_transform->setRotation(m_orgRot * q);
 
         auto it = m_orgQ.begin();
         SpacialNodeHub *spacialNode;
+        Quaternion pivotAxe;
+        Vector3 pivotPoint;
+
+        // @todo
+        if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
+            pivotAxe = m_activeElt->transform(0).getRotation();
+            pivotPoint = m_activeElt->transform(0).getPosition();
+            // @todo translate
+        } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
+        } else if (m_pivotPoint == PIVOT_MEDIAN) {
+            pivotAxe = m_activeElt->transform(0).getRotation();
+            Vector3 pivotPoint = m_transform->getPosition();
+            // @todo compute for each element the distance to the pivot point
+        } else if (m_pivotPoint == PIVOT_USER) {
+            // @todo
+            // pivot = masterScene->helperPoint().transform().getRotation();
+        }
 
         for (Hub* hub : m_targets) {
             if (hub->isSpacialNode()) {
@@ -214,8 +283,27 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             }
 
             if (spacialNode) {
-                // spacialNode->setRotation(0, (*it) + m_delta);
-                spacialNode->setRotation(0, (*it) * m_transform->getRotation());
+                Quaternion q;
+
+//                if (m_transformAxis == TR_VIEW) {
+//                    // axis aligned to view
+//                    q = m_transform->getRotation();
+//                } else if (m_transformAxis == TR_GLOBAL) {
+//                    // axis aligned to origin
+//                    q = m_transform->getRotation();
+//                } else if (m_transformAxis == TR_LOCAL) {
+//                    // axis aligned to object
+//                    q = m_transform->getRotation();
+//                } else if (m_transformAxis == TR_MEDIAN) {
+//                    // axis aligned to median @todo
+//                    q = m_transform->getRotation();
+//                } else if (m_transformAxis == TR_USER) {
+//                    // axis aligned to user defined axe @todo
+//                    q = m_transform->getRotation();
+//                }
+
+                q = m_transform->getRotation();
+                spacialNode->setRotation(0, (*it) * q);
 
                 SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
                 masterScene->addCommand(sceneCommand);
@@ -225,83 +313,178 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         }
     } else if (m_transformMode == TRANSLATE) {
         if (m_axe == AXE_X) {
-            m_delta.x() += v.x() * s;
+            m_relativeV.x() += v.x() * s;
         } else if (m_axe == AXE_Y) {
-            m_delta.y() += v.y() * s;
+            m_relativeV.y() += v.y() * s;
         } else if (m_axe == AXE_Z) {
-            m_delta.z() += v.z() * s;
+            m_relativeV.z() += v.z() * s;
         } else if (m_axe == AXE_MANY) {
-            m_delta.x() += v.x() * s;
-            m_delta.y() += v.y() * s;
+            m_relativeV.x() += v.x() * s;
+            m_relativeV.y() += v.y() * s;
         }
-
-        m_transform->setPosition(m_position + m_delta);
 
         auto it = m_orgV.begin();
         SpacialNodeHub *spacialNode;
+        Quaternion pivotAxe;
+        Vector3 pivotPoint;
 
-        for (Hub* hub : m_targets) {
-            if (hub->isSpacialNode()) {
-                spacialNode = static_cast<SpacialNodeHub*>(hub);
-            } else if (hub->isParentSpacialNode()) {
-                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-            } else {
-                spacialNode = nullptr;
-            }
+        if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
+            pivotAxe = m_activeElt->transform(0).getRotation();
+            pivotPoint = m_activeElt->transform(0).getPosition();
 
-            if (spacialNode) {
-                // spacialNode->setPosition(0, (*it) + m_delta);
-                // spacialNode->setPosition(0, (*it) + m_transform->getPosition() - m_position);
-                Vector3 v;
+            // pivot active + transform global
+            // @todo
 
-                if (m_transformAxis == TR_VIEW) {
-                    // axis aligned to view
-                    v = m_transform->getPosition() - m_position;
-                    m_transform->getRotation().transform(v);
-                } else if (m_transformAxis == TR_GLOBAL) {
-                    // axis aligned to origin
-                    v = m_transform->getPosition() - m_position;
-                } else if (m_transformAxis == TR_LOCAL) {
-                    // axis aligned to object @todo
-                    v = m_transform->getPosition() - m_position;
-                    m_transform->getRotation().transform(v);
-                } else if (m_transformAxis == TR_MEDIAN) {
-                    // axis aligned to median @todo
-                    v = m_transform->getPosition() - m_position;
-                    m_transform->getRotation().transform(v);
-                } else if (m_transformAxis == TR_USER) {
-                    // axis aligned to user defined axe @todo
-                    v = m_transform->getPosition() - m_position;
-                    m_transform->getRotation().transform(v);
+            // pivot active + transform local
+            // @todo
+
+            // pivot active + transform view
+            // @todo
+
+        } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
+            if (m_transformOrientation == TR_GLOBAL) {
+                // pivot individual + transform global
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        // axis is aligned to origin, relative translation
+                        pos = m_relativeV;
+                        spacialNode->transform(0).getRotation().transform(pos);
+                        spacialNode->setPosition(0, (*it) + pos);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
                 }
 
-                spacialNode->setPosition(0, (*it) + v);
+                // axis is aligned to origin, relative translation
+                pos = m_relativeV;
+                m_transform->getRotation().transform(pos);  // useless
+                m_transform->setPosition(m_orgPos + pos);
 
-                SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
-                masterScene->addCommand(sceneCommand);
+                // aligned to origin...
+                m_transform->setRotation(Quaternion());  // useless
+
+            } else if (m_transformOrientation == TR_LOCAL) {
+                // pivot individual + transform local
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        // axis is naturally aligned to object, relative translation
+                        pos = m_relativeV;
+                        spacialNode->setPosition(0, (*it) + pos);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
+                }
+
+                // helper transform, aligned to active element
+                pos = m_relativeV;
+                // m_activeElt->transform(0).getRotation().transform(v);
+                m_transform->setPosition(m_orgPos + pos);
+                m_transform->setRotation(m_activeElt->transform(0).getRotation());
+
+            } else if (m_transformOrientation == TR_VIEW) {
+                // pivot individual + transform view
+                pivotAxe = masterScene->cameraTransform().getRotation();
+
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        // axis is aligned to view, relative translation
+                        pos = m_relativeV;
+                        pivotAxe.transform(pos);
+
+                        // z is neg
+                        // pos.z() = -pos.z();
+
+                        spacialNode->setPosition(0, (*it) + pos);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
+                }
+
+                // axis is aligned to origin, relative translation
+                pos = m_relativeV;
+                pivotAxe.transform(pos);
+                m_transform->setPosition(m_orgPos + pos);
             }
+        } else if (m_pivotPoint == PIVOT_MEDIAN) {
+            pivotAxe = m_activeElt->transform(0).getRotation();
+            Vector3 pivotPoint = m_transform->getPosition();
+            // @todo compute for each element the distance to the pivot point (only for rotation)
 
-            ++it;
+            // pivot median + transform global
+            // @todo
+
+            // pivot median + transform local
+            // @todo
+
+            // pivot median + transform view
+            // @todo
+
+        } else if (m_pivotPoint == PIVOT_USER) {
+            // @todo
+            // pivot = masterScene->helperPoint().transform().getRotation();
+
+            // pivot user + transform global
+            // @todo
+
+            // pivot user + transform local
+            // @todo
+
+            // pivot user + transform view
+            // @todo
         }
     } else if (m_transformMode == SCALE) {
         if (m_axe == AXE_X) {
-            m_delta.x() += v.x() * s;
-            m_delta.y() = 1;
-            m_delta.z() = 1;
+            m_relativeV.x() += v.x() * s;
+            m_relativeV.y() = 1;
+            m_relativeV.z() = 1;
         } else if (m_axe == AXE_Y) {
-            m_delta.x() = 1;
-            m_delta.y() += v.y() * s;
-            m_delta.z() = 1;
+            m_relativeV.x() = 1;
+            m_relativeV.y() += v.y() * s;
+            m_relativeV.z() = 1;
         } else if (m_axe == AXE_Z) {
-            m_delta.x() = 1;
-            m_delta.y() = 1;
-            m_delta.z() += v.z() * s;
+            m_relativeV.x() = 1;
+            m_relativeV.y() = 1;
+            m_relativeV.z() += v.z() * s;
         } else if (m_axe == AXE_MANY) {
-            m_delta.x() += v.x() * s;
-            m_delta.y() += v.y() * s;
-            m_delta.z() = 1;
+            m_relativeV.x() += v.x() * s;
+            m_relativeV.y() += v.y() * s;
+            m_relativeV.z() = 1;
         }
 
+        // @todo
         auto it = m_orgV.begin();
         SpacialNodeHub *spacialNode;
 
@@ -315,7 +498,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             }
 
             if (spacialNode) {
-                spacialNode->setScale(0, (*it) + m_delta);
+                spacialNode->setScale(0, (*it) + m_relativeV);
                 SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
                 masterScene->addCommand(sceneCommand);
             }
@@ -333,7 +516,7 @@ void HubManipulator::endTransform()
 {
     m_focus = False;
     m_transformMode = STATIC;
-    m_delta.zero();
+    m_relativeV.zero();
     m_orgV.clear();
     m_orgQ.clear();
 }
@@ -421,13 +604,13 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
 //        }
     }
 
-    m_transform->setPosition(m_position);
-    m_transform->setRotation(m_rotation);
-    m_transform->setScale(m_scale);
+    m_transform->setPosition(m_orgPos);
+    m_transform->setRotation(m_orgRot);
+    m_transform->setScale(m_orgScale);
 
     m_focus = False;
     m_transformMode = STATIC;
-    m_delta.zero();
+    m_relativeV.zero();
     m_orgV.clear();
     m_orgQ.clear();
 }
@@ -675,47 +858,41 @@ void HubManipulator::updateTransform(MasterScene *masterScene)
         return;
     }
 
-    // synchro with hubs transformation
-    if (m_transformAxis == TR_GLOBAL) {
+    Vector3 pos;
+    Quaternion rot;
+
+    // active element of the selection (at now the last)
+    Hub *hub = m_targets.back();
+    if (hub->isSpacialNode()) {
+        m_activeElt = static_cast<SpacialNodeHub*>(hub);
+    } else if (hub->isParentSpacialNode()) {
+        m_activeElt = static_cast<SpacialNodeHub*>(hub->parent());
+    }
+
+    if (!m_activeElt) {
+        return;
+    }
+
+    if (m_transformOrientation == TR_GLOBAL) {
+        // aligned to origin
+        rot.identity();
+    } else if (m_transformOrientation == TR_LOCAL) {
+        // axis from active element
+        rot = m_activeElt->transform(0).getRotation();
+    } else if (m_transformOrientation == TR_VIEW) {
+        // aligned to camera
+        rot = masterScene->cameraTransform().getRotation();
+    }
+
+    if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
+        // position from active element
+        pos = m_activeElt->transform(0).getPosition();
+    } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
+        // position from active element
+        pos = m_activeElt->transform(0).getPosition();
+    } else if (m_pivotPoint == PIVOT_MEDIAN) {
+        // position computed to its median
         Vector3 pos;
-
-        Hub *hub = m_targets.back();
-        SpacialNodeHub *spacialNode;
-        if (hub->isSpacialNode()) {
-            spacialNode = static_cast<SpacialNodeHub*>(hub);
-            pos = spacialNode->transform(0).getPosition();
-        } else if (hub->isParentSpacialNode()) {
-            spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-            pos = spacialNode->transform(0).getPosition();
-        }
-
-        // identity rotation
-        m_transform->identity();
-        m_transform->setRotation(Quaternion());
-        m_transform->setPosition(pos);
-    } else if (m_transformAxis == TR_LOCAL) {
-        Vector3 pos;
-        Quaternion q;
-
-        Hub *hub = m_targets.back();
-        SpacialNodeHub *spacialNode;
-        if (hub->isSpacialNode()) {
-            spacialNode = static_cast<SpacialNodeHub*>(hub);
-            pos = spacialNode->transform(0).getPosition();
-            q = spacialNode->transform(0).getRotation();
-        } else if (hub->isParentSpacialNode()) {
-            spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-            pos = spacialNode->transform(0).getPosition();
-            q = spacialNode->transform(0).getRotation();
-        }
-
-        // identity rotation
-        m_transform->identity();
-        m_transform->setRotation(q);
-        m_transform->setPosition(pos);
-    } else if (m_transformAxis == TR_MEDIAN) {
-        Vector3 pos;
-        // Quaternion rot;
         UInt32 c = 0;
 
         // compute the median position
@@ -724,57 +901,30 @@ void HubManipulator::updateTransform(MasterScene *masterScene)
             if (hub->isSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub);
                 pos += spacialNode->transform(0).getPosition();
-                // rot *= spacialNode->transform(0).getRotation();
-                // rot.normalize();
-
                 ++c;
             } else if (hub->isParentSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
                 pos += spacialNode->transform(0).getPosition();
-                // rot *= spacialNode->transform(0).getRotation();
-                // rot.normalize();
-
                 ++c;
             }
         }
 
         if (c) {
-            Float inv = 1.f / c;
-
-            pos *= inv;
-            // rot *= inv;
-
-            m_transform->identity();
-            m_transform->setPosition(pos);
-            m_transform->setRotation(Quaternion());
+            pos *= 1.f / c;
         }
-    } else if (m_transformAxis == TR_USER) {
-        // @todo from a user defined axis
-    } else if (m_transformAxis == TR_VIEW) {
-        Vector3 pos;
-
-        Hub *hub = m_targets.back();
-        SpacialNodeHub *spacialNode;
-        if (hub->isSpacialNode()) {
-            spacialNode = static_cast<SpacialNodeHub*>(hub);
-            pos = spacialNode->transform(0).getPosition();
-        } else if (hub->isParentSpacialNode()) {
-            spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-            pos = spacialNode->transform(0).getPosition();
-        }
-
-        Quaternion q = masterScene->cameraTransform().getRotation();
-
-        // identity rotation
-        m_transform->identity();
-        m_transform->setRotation(q);
-        m_transform->setPosition(pos);
+    } else if (m_pivotPoint == PIVOT_USER) {
+        // @todo user defined from HelperPointManipulator
     }
 
+    // setup initial transformation
+    m_transform->identity();
+    m_transform->setRotation(rot);
+    m_transform->setPosition(pos);
+
     // initial transformation for reset if cancel
-    m_position = m_transform->getPosition();
-    m_rotation = m_transform->getRotation();
-    m_scale = m_transform->getScale();
+    m_orgPos = m_transform->getPosition();
+    m_orgRot = m_transform->getRotation();
+    m_orgScale = m_transform->getScale();
 }
 
 o3d::Color HubManipulator::axeColor(HubManipulator::Axe axe)

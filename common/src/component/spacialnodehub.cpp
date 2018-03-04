@@ -182,7 +182,7 @@ void SpacialNodeHub::createToScene(MasterScene *masterScene)
     node->addTransform(new MTransform);
 
     // determine where to put this node
-    if (parent() && parent()->typeRef() == typeRef()) {
+    if (isParentSpacialNode()) {
         // the parent hub is also a spacial node so take its node as parent
         SpacialNodeHub *parentHub = static_cast<SpacialNodeHub*>(parent());
 
