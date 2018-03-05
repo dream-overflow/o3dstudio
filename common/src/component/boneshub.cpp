@@ -212,6 +212,9 @@ void BonesHub::createToScene(MasterScene *masterScene)
 
     m_instances[masterScene] = bones;
 
+    // scene object id is as the base of the pickable color id
+    project()->addPickable((UInt32)bones->getId(), this);
+
     O3D_MESSAGE("BonesHub created into scene");
 }
 
@@ -221,6 +224,9 @@ void BonesHub::removeFromScene(MasterScene *masterScene)
     if (it != m_instances.end()) {
         o3d::Bones *bones = it->second;
         m_instances.erase(it);
+
+        // scene object id is as the base of the pickable color id
+        project()->removePickable((UInt32)bones->getId());
 
         bones->getParent()->deleteChild(bones);
 

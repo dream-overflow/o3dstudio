@@ -225,6 +225,9 @@ void MeshHub::createToScene(MasterScene *masterScene)
 
     m_instances[masterScene] = mesh;
 
+    // scene object id is as the base of the pickable color id
+    project()->addPickable((UInt32)mesh->getId(), this);
+
     O3D_MESSAGE("MeshHub created into scene");
 }
 
@@ -234,6 +237,10 @@ void MeshHub::removeFromScene(MasterScene *masterScene)
     if (it != m_instances.end()) {
         o3d::Mesh *mesh = it->second;
         m_instances.erase(it);
+
+        // scene object id is as the base of the pickable color id
+        project()->removePickable((UInt32)mesh->getId());
+
         mesh->getParent()->deleteChild(mesh);
 
         O3D_MESSAGE("MeshHub deleted from scene");

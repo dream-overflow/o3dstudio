@@ -83,6 +83,11 @@ o3d::Bool Entity::hasChanges() const
     return isDirty();
 }
 
+o3d::Bool Entity::isParentHub() const
+{
+    return m_parent && m_parent->ref().light().baseTypeOf(TypeRef::hub());
+}
+
 o3d::Bool Entity::serializeContent(OutStream &stream) const
 {
     stream << m_name

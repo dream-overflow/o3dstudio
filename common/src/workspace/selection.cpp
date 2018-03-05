@@ -72,6 +72,7 @@ void Selection::beginSelection()
         return;
     }
 
+    m_selecting = True;
     m_selectingSet.clear();
 }
 
@@ -132,6 +133,11 @@ void Selection::select(Entity *entity)
 
 void Selection::unselectAll()
 {
+    // nothing to do if current selection is already empty
+    if (m_currentSelection.empty()) {
+        return;
+    }
+
     for (SelectionItem *selectionItem : m_previousSelection) {
         delete selectionItem;
     }

@@ -13,8 +13,11 @@
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
 #include "o3d/studio/common/workspace/masterscenedrawer.h"
+#include "o3d/studio/common/workspace/roothub.h"
+#include "o3d/studio/common/workspace/selection.h"
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
+#include "o3d/studio/common/ui/scene/hubmanipulator.h"
 
 #include <o3d/engine/glextdefines.h>
 #include <o3d/engine/glextensionmanager.h>
@@ -26,9 +29,11 @@
 #include <o3d/engine/shadow/shadowvolumeforward.h>
 #include <o3d/engine/hierarchy/hierarchytree.h>
 #include <o3d/engine/utils/framemanager.h>
-#include <o3d/engine/object/ftransform.h>
+#include <o3d/engine/object/stransform.h>
 #include <o3d/engine/context.h>
 #include <o3d/engine/picking.h>
+
+#include <o3d/core/keyboard.h>
 
 #include <o3d/gui/gui.h>
 #include <o3d/gui/fontmanager.h>
@@ -37,6 +42,8 @@
 #include "o3d/studio/common/ui/scene/grid.h"
 #include "o3d/studio/common/ui/scene/infohud.h"
 #include "o3d/studio/common/ui/scene/cameramanipulator.h"
+
+#include "o3d/studio/common/messenger.h"
 
 #include "o3d/studio/common/ui/keyevent.h"
 //#include "o3d/studio/common/ui/mouseevent.h"
@@ -54,13 +61,20 @@ MasterScene::MasterScene(Entity *parent) :
     m_content(nullptr),
     m_renderer(nullptr),
     m_scene(nullptr),
-    m_rotateCam(False),
-    m_moveCam(False),
+    m_actionMode(ACTION_NONE),
+    m_motionType(MOTION_FOLLOW),
+    m_hoverHub(nullptr),
     m_camera(this),
     m_viewport(this),
-    m_sceneDrawer(this)
+    m_sceneDrawer(this),
+    m_cameraManipulator(nullptr),
+    m_hubManipulator(nullptr),
+    m_hoverUIElement(nullptr)
 {
     O3D_ASSERT(m_parent != nullptr);
+
+    // selection manager
+    common::Application::instance()->selection().selectionChanged.connect(this, &MasterScene::onSelectionChanged);
 }
 
 MasterScene::~MasterScene()
@@ -136,6 +150,16 @@ const O3DCanvasContent *MasterScene::content() const
     return m_content;
 }
 
+Hub *MasterScene::hoverHub()
+{
+    return m_hoverHub;
+}
+
+const Hub *MasterScene::hoverHub() const
+{
+    return m_hoverHub;
+}
+
 void MasterScene::addCommand(SceneCommand *command)
 {
     if (command) {
@@ -160,6 +184,8 @@ void MasterScene::addSceneUIElement(SceneUIElement *elt)
         O3D_ERROR(E_ValueRedefinition("Redefinition of a SceneUIElement"));
     }
 
+    elt->setup(this);
+
     m_sceneUIElements.push_back(elt);
 
     // add to the scene drawer to be displayed
@@ -170,13 +196,35 @@ void MasterScene::removeSceneUIElement(SceneUIElement *elt)
 {
     auto it = std::find(m_sceneUIElements.begin(), m_sceneUIElements.end(), elt);
     if (it != m_sceneUIElements.end()) {
+        elt->release(this);
+
         // remove from the scene drawer if initialized
         if (m_sceneDrawer.isValid()) {
             m_sceneDrawer.get()->removeSceneUIElement(*it);
         }
 
+        // null if hover element
+        if (m_hoverUIElement == elt) {
+            m_hoverUIElement = nullptr;
+        }
+
         m_sceneUIElements.erase(it);
     }
+}
+
+SceneUIElement *MasterScene::hubManipulator()
+{
+    return m_hubManipulator;
+}
+
+SceneUIElement *MasterScene::hoverSceneUIElement()
+{
+    return m_hoverUIElement;
+}
+
+const o3d::Transform& MasterScene::cameraTransform() const
+{
+    return *m_camera.get()->getNode()->getTransform();
 }
 
 void MasterScene::initialize(Bool debug)
@@ -190,6 +238,10 @@ void MasterScene::initialize(Bool debug)
     m_renderer = new common::QtRenderer(m_content);
     m_content->setDrawer(this);
     m_content->setRenderer(m_renderer);
+
+    // no manipulation at initialization
+    O3D_ASSERT(m_hubManipulator == nullptr);
+    O3D_ASSERT(m_cameraManipulator == nullptr);
 
     common::UiController &uiCtrl = common::Application::instance()->ui();
     uiCtrl.addContent(m_content);
@@ -261,6 +313,11 @@ void MasterScene::terminateDrawer()
         m_sceneUIElements.clear();
     }
 
+    // deleted by the previous iteration
+    m_cameraManipulator = nullptr;
+    m_hubManipulator = nullptr;
+    m_hoverUIElement = nullptr;
+
     // clear the scene
     if (m_scene) {
         // m_scene->getHierarchyTree()->getRootNode()->removeSon(*m_camera);
@@ -287,20 +344,83 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
     }
 
     if (event.button(Mouse::LEFT)) {
-        m_rotateCam = True;
+        // action using the manipulator
+        if (m_hoverUIElement && m_hubManipulator == m_hoverUIElement) {
+            m_hubManipulator->beginTransform(this);
+        } else {
+            m_actionMode = ACTION_SELECTION;
+
+            if (m_hoverHub) {
+                if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                        // get previous selection and remove
+                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+
+                        Application::instance()->selection().beginSelection();
+
+                        for (SelectionItem *item : previous) {
+                            if (item->ref() != m_hoverHub->ref().light()) {
+                                Application::instance()->selection().appendSelection(
+                                            static_cast<Hub*>(project()->lookup(item->ref())));
+                            }
+                        }
+
+                        Application::instance()->selection().appendSelection(m_hoverHub);
+                        Application::instance()->selection().endSelection();
+
+                        // an object is removed from selection
+                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Remove from selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                    } else {
+                        // get previous selection and append
+                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+
+                        Application::instance()->selection().beginSelection();
+
+                        for (SelectionItem *item : previous) {
+                            // himself is reselected at last
+                            if (item->ref() != m_hoverHub->ref().light()) {
+                                Application::instance()->selection().appendSelection(
+                                            static_cast<Hub*>(project()->lookup(item->ref())));
+                            }
+                        }
+
+                        Application::instance()->selection().appendSelection(m_hoverHub);
+                        Application::instance()->selection().endSelection();
+
+                        // an object is selected
+                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                    }
+                }
+            }
+        }
+    } else if (event.button(Mouse::MIDDLE)) {
+        if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+            m_actionMode = ACTION_CAMERA_TRANSLATION;
+            m_motionType = MOTION_FOLLOW;  // default normal speed, press again shift to slow
+        } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+            m_actionMode = ACTION_CAMERA_ZOOM;
+        } else {
+            m_actionMode = ACTION_CAMERA_ROTATION;
+        }
     } else if (event.button(Mouse::RIGHT)) {
-        m_moveCam = True;
+
     }
 
-    if (m_rotateCam || m_moveCam) {
+    if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
+        // no cursor and infinite scrolling
         QCursor cursor = m_content->cursor();
         cursor.setShape(Qt::BlankCursor);
 
         m_content->setCursor(cursor);
         m_lockedPos = event.globalPos();
+    } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
+               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_SKEW) {
+
+        // initial relative
+        m_lockedPos = event.globalPos();
     }
 
-    return m_rotateCam || m_moveCam;
+    return True;
 }
 
 o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
@@ -310,24 +430,64 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     }
 
     if (event.button(Mouse::LEFT)) {
-        m_rotateCam = False;
+        if (m_actionMode == ACTION_SELECTION) {
+            if (m_hoverHub) {
+                // initial selection
+                Application::instance()->selection().select(m_hoverHub);
+
+                // an object is selected
+                Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Initial selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+            } else {
+                // clear selection
+                Application::instance()->selection().unselectAll();
+            }
+        } else if (m_hubManipulator && m_hubManipulator->hasFocus()) {
+            // action using the manipulator
+            HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
+            hubManipulator->endTransform();
+        }
+    } else if (event.button(Mouse::MIDDLE)) {
+        if (m_actionMode == ACTION_CAMERA_ROTATION ||
+            m_actionMode == ACTION_CAMERA_TRANSLATION ||
+            m_actionMode == ACTION_CAMERA_ZOOM) {
+            // stop camera action
+            m_actionMode = ACTION_NONE;
+        }
     } else if (event.button(Mouse::RIGHT)) {
-        m_moveCam = False;
     }
 
-    if (!m_rotateCam && !m_moveCam) {
+    if (m_actionMode == ACTION_NONE && m_hubManipulator) {
+        // default to translation
+        m_actionMode = ACTION_TRANSLATION;
+    }
+
+    if (m_actionMode != ACTION_CAMERA_ROTATION && m_actionMode != ACTION_CAMERA_TRANSLATION) {
+        // restore cursor
         QCursor cursor = m_content->cursor();
         cursor.setShape(Qt::ArrowCursor);
 
         m_content->setCursor(cursor);
     }
 
-    return m_rotateCam || m_moveCam;
+    return True;
 }
 
-o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &/*event*/)
+o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
 {
-    return False;
+    if (!m_scene) {
+        return False;
+    }
+
+    if (event.button(Mouse::LEFT)) {
+
+    } else if (event.button(Mouse::MIDDLE)) {
+        // @todo double click on camera manipulator reset the rotation
+        m_camera.get()->getNode()->getTransform()->setRotation(Quaternion());
+    } else if (event.button(Mouse::RIGHT)) {
+
+    }
+
+    return True;
 }
 
 o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
@@ -348,43 +508,95 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         deltaY = 0;
     }
 
-    if (m_rotateCam && m_moveCam) {
-        BaseNode *cameraNode = m_camera.get()->getNode();
-        if (cameraNode) {
-            Float z = 0.f;
-
-            z = deltaY * 100.f * elapsed;
-
-            cameraNode->getTransform()->translate(Vector3(0.f, 0.f, z));
-        }
-    } else if (m_rotateCam) {
-        BaseNode *cameraNode = m_camera.get()->getNode();
-        if (cameraNode) {
-            cameraNode->getTransform()->rotate(Y, -deltaX * elapsed);
-            cameraNode->getTransform()->rotate(X, -deltaY * elapsed);
-        }
-    } else if (m_moveCam) {
+    if (m_actionMode == ACTION_CAMERA_ZOOM) {
         BaseNode *cameraNode = m_camera.get()->getNode();
         if (cameraNode) {
             Float x = 0.f, y = 0.f, z = 0.f;
 
-            x = deltaX * 100.f * elapsed;
-            y = -deltaY * 100.f * elapsed;
+            z = deltaY * 100.f * elapsed;
+
+            // change axis if modifier
+            if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                x = z;
+                z = 0;
+            } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                y = z;
+                z = 0;
+            }
 
             cameraNode->getTransform()->translate(Vector3(x, y, z));
         }
+    } else if (m_actionMode == ACTION_CAMERA_ROTATION) {
+        BaseNode *cameraNode = m_camera.get()->getNode();
+        if (cameraNode) {
+            Float speed = 1;
+
+            // slow rotation if shift is down
+            if (m_motionType == MOTION_PRECISE) {
+                speed = 0.1;
+            } else if (m_motionType == MOTION_FAST) {
+                speed = 10;
+            }
+
+            cameraNode->getTransform()->rotate(Y, -deltaX * elapsed * speed);
+            cameraNode->getTransform()->rotate(X, -deltaY * elapsed * speed);
+        }
+    } else if (m_actionMode == ACTION_CAMERA_TRANSLATION) {
+        BaseNode *cameraNode = m_camera.get()->getNode();
+        if (cameraNode) {
+            Float x = 0.f, y = 0.f, z = 0.f;
+
+            // @todo use of mouse smoother
+            x = -deltaX * 100.f * elapsed;
+            y = deltaY * 100.f * elapsed;
+
+            // slow motion if shift is down
+            if (m_motionType == MOTION_PRECISE) {
+                x *= 0.1;
+                y *= 0.1;
+            } else if (m_motionType == MOTION_FAST) {
+                x *= 10;
+                y *= 10;
+            }
+
+            cameraNode->getTransform()->translate(Vector3(x, y, z));
+        }
+    } else {
+        // we have a current manipulator
+        if (m_hubManipulator && m_hubManipulator->hasFocus()) {
+            Float x = 0.f, y = 0.f, z = 0.f;
+
+            x = deltaX * 1.f; // * elapsed;
+            y = -deltaY * 1.f; // * elapsed;
+            z = deltaY * 1.f; // * elapsed;
+
+            // action using the manipulator
+            m_hubManipulator->transform(Vector3(x, y, z), this);
+        }
+
+        // only at once (and could add a small timer to avoid a lot of events)
+        if (!m_scene->getPicking()->isPickingToProcess() && !m_scene->getPicking()->isProcessingPicking()) {
+            // picking or manipulation of a transformer
+            m_scene->getPicking()->postPickingEvent(
+                        (UInt32)event.localPos().x(),
+                        m_scene->getViewPortManager()->getReshapeHeight() - (UInt32)event.localPos().y());
+        }
     }
 
-    if (m_rotateCam || m_moveCam) {
-        // lock mouse position
+    if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
+        // lock mouse position, infinite cursor
         QCursor cursor = m_content->cursor();
         QPoint pos(m_lockedPos.x(), m_lockedPos.y());
 
         cursor.setPos(pos);
         m_content->setCursor(cursor);
+    } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
+               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_SKEW) {
+        // relative
+        m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
     }
 
-    return m_rotateCam || m_moveCam;
+    return True;
 }
 
 o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
@@ -394,17 +606,36 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
     }
 
     Float elapsed = m_scene->getFrameManager()->getFrameDuration();
-    // Int32 deltaX = event.angleDelta().x();  // too rarely supported
+
+    Int32 deltaX = event.angleDelta().x();   // ALT + or second wheel axis
     Int32 deltaY = event.angleDelta().y();
 
-    if (deltaY != 0) {
+    // camera zoom/rotate
+    if (deltaY != 0 || deltaX != 0) {
         BaseNode *cameraNode = m_camera.get()->getNode();
         if (cameraNode) {
-            Float z = 0.f;
+            Float delta = (deltaX + deltaY) * 100.f / 120.f * elapsed;
 
-            z = -deltaY * 100.f / 120.f * 10.f * elapsed;
-
-            cameraNode->getTransform()->translate(Vector3(0.f, 0.f, z));
+            // change type or axis if modifier
+            if (event.modifiers() & InputEvent::CTRL_MODIFIER && event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                // rotate on Z
+                cameraNode->getTransform()->rotate(Z, -delta * 0.1);
+            } else if (event.modifiers() & InputEvent::ALT_MODIFIER && event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                // rotate on X
+                cameraNode->getTransform()->rotate(X, -delta * 0.1);
+            } else if (event.modifiers() & InputEvent::ALT_MODIFIER && event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                // rotate on Y
+                cameraNode->getTransform()->rotate(Y, -delta * 0.1);
+            } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                // translate on X
+                cameraNode->getTransform()->translate(Vector3(delta * 10, 0, 0));
+            } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                // translate on Y
+                cameraNode->getTransform()->translate(Vector3(0, delta * 10, 0));
+            } else {
+                // translate on Z
+                cameraNode->getTransform()->translate(Vector3(0, 0, -delta * 10));
+            }
 
             return True;
         }
@@ -413,23 +644,83 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
     return False;
 }
 
-o3d::Bool MasterScene::keyPressEvent(const KeyEvent &/*event*/)
+o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
 {
-    return False;
+    if (!m_scene) {
+        return False;
+    }
+
+    // motion modifier if action
+    if (event.modifiers() & InputEvent::SHIFT_MODIFIER && event.modifiers() & InputEvent::ALT_MODIFIER) {
+        m_motionType = MOTION_FAST;
+    } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+        m_motionType = MOTION_PRECISE;
+    } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+        m_motionType = MOTION_STEP;
+    } else if (event.modifiers() & InputEvent::META_MODIFIER) {
+        m_motionType = MOTION_MAGNET;
+    } else if (event.modifiers() & InputEvent::ALT_MODIFIER) {
+        m_motionType = MOTION_GRID;
+    } else {
+        m_motionType = MOTION_FOLLOW;
+    }
+
+    // switch action mode if no motifiers
+    if (event.modifiers() == 0) {
+        if (event.vKey() == o3d::VKey::KEY_R) {
+            m_actionMode = ACTION_ROTATION;
+        } else if (event.vKey() == o3d::VKey::KEY_S) {
+            m_actionMode = ACTION_SCALE;
+        } else if (event.vKey() == o3d::VKey::KEY_T) {
+            m_actionMode = ACTION_TRANSLATION;
+        } else if (event.vKey() == o3d::VKey::KEY_G) {
+            m_actionMode = ACTION_SKEW;
+        } else if (event.vKey() == o3d::VKey::KEY_ESCAPE) {
+            if (m_hubManipulator && m_hubManipulator->isTransform()) {
+                // cancel current transformation
+                m_hubManipulator->cancelTransform(this);
+            }
+        }
+    }
+
+    return True;
 }
 
-o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &/*event*/)
+o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &event)
 {
-    return False;
+    if (!m_scene) {
+        return False;
+    }
+
+    // motion modifier if action
+    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+        m_motionType = MOTION_PRECISE;
+    } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+        m_motionType = MOTION_STEP;
+    } else if (event.modifiers() & InputEvent::META_MODIFIER) {
+        m_motionType = MOTION_MAGNET;
+    } else if (event.modifiers() & InputEvent::ALT_MODIFIER) {
+        m_motionType = MOTION_GRID;
+    } else {
+        m_motionType = MOTION_FOLLOW;
+    }
+
+    return True;
 }
 
 o3d::Bool MasterScene::focusInEvent(const Event &/*event*/)
 {
+    m_motionType = MOTION_FOLLOW;
+    m_actionMode = ACTION_NONE;
+
     return False;
 }
 
 o3d::Bool MasterScene::focusOutEvent(const Event &/*event*/)
 {
+    m_motionType = MOTION_FOLLOW;
+    m_actionMode = ACTION_NONE;
+
     return False;
 }
 
@@ -492,9 +783,124 @@ o3d::UInt32 MasterScene::numPoints(UInt32 pass) const
     return 0;
 }
 
+MasterScene::ActionMode MasterScene::actionMode() const
+{
+    return m_actionMode;
+}
+
+MasterScene::MotionType MasterScene::motionType() const
+{
+    return m_motionType;
+}
+
+void MasterScene::registerPickingId(o3d::UInt32 id, SceneUIElement *element)
+{
+    if (!element) {
+        return;
+    }
+
+    auto it = m_pickingToSceneUIElements.find(id);
+    if (it != m_pickingToSceneUIElements.end()) {
+        O3D_ERROR(E_InvalidOperation("Picking id already registered"));
+    }
+
+    m_pickingToSceneUIElements[id] = element;
+}
+
+void MasterScene::unregisterPickingId(o3d::UInt32 id)
+{
+    auto it = m_pickingToSceneUIElements.find(id);
+    if (it != m_pickingToSceneUIElements.end()) {
+        m_pickingToSceneUIElements.erase(it);
+    }
+}
+
+void MasterScene::pickingNoHit()
+{
+    if (m_hoverHub) {
+        // @todo a leave hub
+        m_hoverHub = nullptr;
+    }
+
+    if (m_hoverUIElement) {
+        m_hoverUIElement->leave();
+        m_hoverUIElement = nullptr;
+    }
+}
+
 void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 {
-    // @todo
+    m_hoverHub = nullptr;
+
+    SceneObject *sceneObject = o3d::dynamicCast<SceneObject*>(pickable);
+    if (sceneObject) {
+        // o3d object to o3s hub
+        m_hoverHub = project()->lookupPickable(pickable->getPickableId());
+        m_pickPos = pos;
+    }
+}
+
+void MasterScene::elementPickingHit(o3d::UInt32 id, o3d::Vector3 pos)
+{
+    m_hoverUIElement = nullptr;
+
+    auto it = m_pickingToSceneUIElements.find(id);
+    if (it != m_pickingToSceneUIElements.end()) {
+        it->second->hover(id, pos);
+        m_hoverUIElement = it->second;
+    }
+}
+
+void MasterScene::onSelectionChanged()
+{
+    const std::set<common::SelectionItem *> currentSelection =
+            common::Application::instance()->selection().filterCurrentByBaseType(common::TypeRef::hub());
+
+    common::Hub *hub = nullptr;
+
+    // delete a potentiel previous instance of manipulator
+    if (m_hubManipulator) {
+        removeSceneUIElement(m_hubManipulator);
+       // deletePtr(m_hubManipulator);
+       m_hubManipulator = nullptr; // @todo why double free corruption ?
+    }
+
+    std::list<Hub*> hubs;
+
+    Vector3 pos;
+    Quaternion rot;
+
+    for (common::SelectionItem *selectionItem : currentSelection) {
+        // @todo for current hub manipulator selection
+        if (selectionItem->ref().baseTypeOf(TypeRef::hub())) {
+            hub = static_cast<Hub*>(project()->lookup(selectionItem->ref()));
+            hubs.push_back(hub);
+
+            const Matrix4 &m = hub->absoluteMatrix(this);
+
+            pos += m.getTranslation();
+            rot += Quaternion(m.getRotation());
+        }
+    }
+
+    if (hubs.size()) {
+        // create the new according to the current builder (@todo not for now only the standard manipulator)
+        pos *= 1.f / hubs.size();
+        rot *= 1.f / hubs.size();
+
+        Matrix4 transform;
+        transform.setTranslation(pos);
+        transform.setRotation(rot.toMatrix3());
+
+        m_hubManipulator = new HubManipulator(this, hubs, transform);
+        addSceneUIElement(m_hubManipulator);
+
+        // default to translation when selection
+        m_actionMode = ACTION_TRANSLATION;
+    } else {
+        // or no action if no selection
+        m_actionMode = ACTION_NONE;
+    }
 }
 
 void MasterScene::processCommands()
@@ -531,10 +937,11 @@ void MasterScene::initializeDrawer()
         m_camera = new o3d::Camera(m_scene);
         m_camera.get()->setZnear(0.25f);
         m_camera.get()->setZfar(10000.f);
+        m_camera.get()->setFov(60.f/*45.f*/);
         m_camera.get()->disableVisibility();   // never visible
 
         Node *cameraNode = m_scene->getHierarchyTree()->addNode(m_camera.get());
-        cameraNode->addTransform(new FTransform());
+        cameraNode->addTransform(new STransform());
 
         // working drawer and viewport
         m_sceneDrawer = new MasterSceneDrawer(m_scene, this);
@@ -542,6 +949,13 @@ void MasterScene::initializeDrawer()
 
         // default all symbolics objects are drawn
         m_scene->drawAllSymbolicObject();
+
+        // enable picking by color and connect its signal
+        m_scene->getPicking()->setMode(Picking::COLOR);
+        m_scene->getPicking()->onHit.connect(this, &MasterScene::pickingHit, EvtHandler::CONNECTION_ASYNCH);
+        m_scene->getPicking()->onUnknownHit.connect(this, &MasterScene::elementPickingHit, EvtHandler::CONNECTION_ASYNCH);
+        m_scene->getPicking()->onNoHit.connect(this, &MasterScene::pickingNoHit, EvtHandler::CONNECTION_ASYNCH);
+        m_scene->getPicking()->setCamera(m_camera.get());
 
         // add an helper grid
         Int32 gridStep = (Int32)(200.f * m_camera.get()->getZnear());
@@ -560,11 +974,7 @@ void MasterScene::initializeDrawer()
         addSceneUIElement(infoHUD);
 
         // and a camera helper
-        CameraManipulator *cameraManipulator = new CameraManipulator(this, Point2f(0.9f, 0.1f), 1.f);
-        addSceneUIElement(cameraManipulator);
-
-        // picking slot
-        m_scene->getPicking()->setMode(Picking::COLOR);
-        m_scene->getPicking()->onHit.connect(this, &MasterScene::pickingHit);
+        m_cameraManipulator = new CameraManipulator(this, Point2f(0.9f, 0.1f), 1.f);
+        addSceneUIElement(m_cameraManipulator);
     }
 }

@@ -58,7 +58,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     }
 
     Scene *scene = masterScene->scene();
-    PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
+    PrimitiveAccess primitive = scene->getPrimitiveManager()->access(drawInfo);
 
     const Box2i &vp = scene->getContext()->getViewPort();
     const Float factor = 600.f;
@@ -80,14 +80,13 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
 
     // and project to ortho
     Matrix4 pj;
+    Matrix4 oldPj = scene->getContext()->projection().get();
     pj.buildOrtho(vp.x(), vp.x2(), vp.y(), vp.y2(), m_scale * -(factor*0.1f), m_scale * factor*0.1f);
     // pj.buildOrtho(-0.5f*ratio, 0.5f*ratio, -0.5f, 0.5f, -1.f, 1.f);
     primitive->projection().set(pj);
 
     // @todo adjust coef to keep a fixed screen size
-
-//    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_HINT_NICEST);
-    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);
+    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);  // AA_HINT_NICEST
 
     scene->getContext()->setCullingMode(CULLING_BACK_FACE);
     scene->getContext()->disableDoubleSide();
@@ -160,6 +159,15 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
 
     primitive->modelView().pop();
 
+    scene->getContext()->disableDepthTest();
+
+    // A simple axis to distinguis plus from minus direction
+    primitive->setColor(1, 1, 1);
+    primitive->setModelviewProjection();
+    primitive->drawXYZAxis(Vector3(m_scale*15, m_scale*15, m_scale*15));
+
     // restore
+    scene->getContext()->setDefaultDepthTest();
+    scene->getContext()->projection().set(oldPj);
     scene->getContext()->setAntiAliasing(aa);
 }

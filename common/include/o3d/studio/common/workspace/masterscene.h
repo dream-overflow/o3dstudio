@@ -10,6 +10,7 @@
 #define _O3DS_COMMON_MASTERSCENE_H
 
 #include <list>
+#include <unordered_map>
 
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/ui/canvas/o3ddrawer.h"
@@ -26,6 +27,7 @@ class ViewPort;
 class SceneDrawer;
 class Renderer;
 class Pickable;
+class Transform;
 
 namespace studio {
 namespace common {
@@ -33,6 +35,8 @@ namespace common {
 class O3DCanvasContent;
 class SceneCommand;
 class SceneUIElement;
+class CameraManipulator;
+class HubManipulator;
 
 class Event;
 class KeyEvent;
@@ -43,6 +47,29 @@ class MasterSceneDrawer;
 class O3S_API MasterScene : public BaseObject, public O3DDrawer
 {
 public:
+
+    enum ActionMode
+    {
+        ACTION_NONE = 0,
+        ACTION_CAMERA_ZOOM,
+        ACTION_CAMERA_TRANSLATION,
+        ACTION_CAMERA_ROTATION,
+        ACTION_SELECTION,
+        ACTION_TRANSLATION,
+        ACTION_ROTATION,
+        ACTION_SCALE,
+        ACTION_SKEW
+    };
+
+    enum MotionType
+    {
+        MOTION_FOLLOW = 0,  //!< follow the cursor
+        MOTION_PRECISE,     //!< scale 0.1
+        MOTION_FAST,        //!< scale 10
+        MOTION_STEP,        //!< follow an increment step
+        MOTION_GRID,        //!< follow a grid as magnet
+        MOTION_MAGNET       //!< follow a constraint of magnet with others objects
+    };
 
     MasterScene(Entity *parent);
     virtual ~MasterScene();
@@ -64,6 +91,9 @@ public:
     O3DCanvasContent *content();
     const O3DCanvasContent *content() const;
 
+    Hub *hoverHub();
+    const Hub *hoverHub() const;
+
     //
     // commands
     //
@@ -76,6 +106,23 @@ public:
 
     void addSceneUIElement(SceneUIElement *elt);
     void removeSceneUIElement(SceneUIElement *elt);
+
+    // @todo void setHubManipulatorComponent(Component *component);
+
+    /**
+     * @brief Get current hub manipulator.
+     */
+    SceneUIElement* hubManipulator();
+
+    /**
+     * @brief Get current hover scene UI element.
+     */
+    SceneUIElement* hoverSceneUIElement();
+
+    /**
+     * @brief Get the active camera transform (@todo could use the CameraManipulator).
+     */
+    const Transform& cameraTransform() const;
 
     //
     // drawer
@@ -113,10 +160,39 @@ public:
     UInt32 numLines(UInt32 pass) const;
     UInt32 numPoints(UInt32 pass) const;
 
+    //
+    // manipulation
+    //
+
+    /**
+     * @brief Current action mode.
+     */
+    ActionMode actionMode() const;
+
+    /**
+     * @brief Motion type related to the current action mode.
+     */
+    MotionType motionType() const;
+
+    /**
+     * @brief Map a picking id to a scene UI element.
+     * @param id Unique picking id.
+     * @param element Instance of the scene UI element.
+     */
+    void registerPickingId(UInt32 id, SceneUIElement *element);
+
+    /**
+     * @brief Unregister a picking id.
+     */
+    void unregisterPickingId(UInt32 id);
 
 public /*slots*/:
 
     void pickingHit(Pickable* pickable, Vector3 pos);
+    void elementPickingHit(UInt32 id, Vector3 pos);
+    void pickingNoHit();
+
+    void onSelectionChanged();
 
 private:
 
@@ -126,14 +202,17 @@ private:
     o3d::Renderer *m_renderer;    //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
 
-    Point2i m_lockedPos;
-    Bool m_rotateCam;
-    Bool m_moveCam;
+    Point2i m_lockedPos;          //!< Infinite cursor
+    ActionMode m_actionMode;      //!< Current action mode
+    MotionType m_motionType;      //!< Current motion type
 
     UInt32 m_verticesCount[4];
     UInt32 m_trianglesCount[4];
     UInt32 m_linesCount[4];
     UInt32 m_pointCount[4];
+
+    Hub *m_hoverHub;              //!< Current hub hovered by cursor
+    o3d::Point3f m_pickPos;       //!< Current picking position
 
     //! Main working camera, cannot be deleted
     o3d::SmartObject<o3d::Camera> m_camera;
@@ -150,6 +229,13 @@ private:
 
     //! Attached scene UI elements
     std::list<SceneUIElement*> m_sceneUIElements;
+
+    CameraManipulator *m_cameraManipulator;  //!< Active camera manipulator.
+    HubManipulator *m_hubManipulator;        //!< Current hub selection manipulator.
+    SceneUIElement *m_hoverUIElement;        //!< Current hover ui element.
+
+    //! Mapping of picking id to scene UI elements (can have multiple picking id to a same element)
+    std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;
 
     void processCommands();
 };

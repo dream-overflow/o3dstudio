@@ -17,6 +17,9 @@
 #include "o3d/studio/common/component/componentregistry.h"
 #include "o3d/studio/common/component/component.h"
 #include "o3d/studio/common/component/dummyhub.h"
+#include "o3d/studio/common/component/spacialnodehub.h"
+
+#include <o3d/core/matrix4.h>
 
 using namespace o3d::studio::common;
 
@@ -495,6 +498,35 @@ o3d::Int32 Hub::childIndexOf(Entity *entity) const
     }
 
     return -1;
+}
+
+const o3d::Matrix4 &Hub::absoluteMatrix(MasterScene *masterScene) const
+{
+    if (m_parent && m_parent->isParentHub()) {
+        Hub* parentHub = static_cast<Hub*>(m_parent);
+        if (parentHub->isSpacialNode()) {
+            return parentHub->absoluteMatrix(masterScene);
+        }
+    }
+
+    return o3d::Matrix4::getIdentity();
+}
+
+o3d::Bool Hub::isSpacialNode() const
+{
+    return False;
+}
+
+o3d::Bool Hub::isParentSpacialNode() const
+{
+    if (m_parent && m_parent->isParentHub()) {
+        Hub* parentHub = static_cast<Hub*>(m_parent);
+        if (parentHub->isSpacialNode()) {
+            return True;
+        }
+    }
+
+    return False;
 }
 
 o3d::Bool Hub::serializeContent(OutStream &stream) const

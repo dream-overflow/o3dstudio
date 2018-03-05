@@ -225,6 +225,9 @@ void SkinHub::createToScene(MasterScene *masterScene)
 
 //    m_instances[masterScene] = mesh;
 
+    // scene object id is as the base of the pickable color id
+//    project()->addPickable((UInt32)skin->getId(), this);
+
     O3D_MESSAGE("SkinHub created into scene");
 }
 
@@ -234,6 +237,10 @@ void SkinHub::removeFromScene(MasterScene *masterScene)
     if (it != m_instances.end()) {
         o3d::Skin *skin = it->second;
         m_instances.erase(it);
+
+        // scene object id is as the base of the pickable color id
+        project()->removePickable((UInt32)skin->getId());
+
         skin->getParent()->deleteChild(skin);
 
         O3D_MESSAGE("SkinHub deleted from scene");

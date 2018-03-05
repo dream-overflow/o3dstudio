@@ -51,7 +51,7 @@ public:
         TOUCH_BEGIN = 80,
         TOUCH_CANCEL = 81,
         TOUCH_END = 82,
-        TOUCH_UPDATe = 83
+        TOUCH_UPDATE = 83
     };
 
     Event(Type type) :

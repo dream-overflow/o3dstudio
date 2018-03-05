@@ -58,7 +58,7 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
     }
 
     Scene *scene = masterScene->scene();
-    PrimitiveAccess primitive = scene->getPrimitiveManager()->access();
+    PrimitiveAccess primitive = scene->getPrimitiveManager()->access(drawInfo);
 
     // setup modelview
     primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix());

@@ -510,6 +510,43 @@ std::list<const Fragment *> Project::fragments() const
     return results;
 }
 
+void Project::addPickable(UInt32 id, Hub *hub)
+{
+    if (!hub) {
+        return;
+    }
+
+    m_hubsByPickableId[id] = hub;
+}
+
+void Project::removePickable(UInt32 id)
+{
+    auto it = m_hubsByPickableId.find(id);
+    if (it != m_hubsByPickableId.end()) {
+        m_hubsByPickableId.erase(it);
+    }
+}
+
+Hub* Project::lookupPickable(o3d::UInt32 id)
+{
+    auto it = m_hubsByPickableId.find(id);
+    if (it != m_hubsByPickableId.end()) {
+        return it->second;
+    }
+
+    return nullptr;
+}
+
+const Hub* Project::lookupPickable(o3d::UInt32 id) const
+{
+    auto cit = m_hubsByPickableId.find(id);
+    if (cit != m_hubsByPickableId.cend()) {
+        return cit->second;
+    }
+
+    return nullptr;
+}
+
 void Project::addEntity(Entity *entity)
 {
     if (!entity) {

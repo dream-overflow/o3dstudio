@@ -75,6 +75,7 @@ void InfoHUD::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
 
     // and project to ortho
     Matrix4 pj;
+    Matrix4 oldPj = scene->getContext()->projection().get();
     pj.buildOrtho(vp.x(), vp.x2(), vp.y2(), vp.y(), -1.f, 1.f);
     scene->getContext()->projection().set(pj);
 
@@ -96,5 +97,6 @@ void InfoHUD::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
     m_font->writeAtRow(i++, 0, String("Points : {0}").arg(masterScene->numPoints(1)));
 
     // restore
+    scene->getContext()->projection().set(oldPj);
     scene->getContext()->setAntiAliasing(aa);
 }

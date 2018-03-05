@@ -71,11 +71,16 @@ QModelIndex ProjectModel::parent(const QModelIndex &child) const
     ProjectItem *childItem = static_cast<ProjectItem*>(child.internalPointer());
     ProjectItem *parentItem = childItem->parentItem();
 
-    if (parentItem == m_rootItem) {
+    if (parentItem == m_rootItem || !parentItem) {
         return QModelIndex();
     }
 
     return createIndex(parentItem->row(), 0, parentItem);
+}
+
+QModelIndex ProjectModel::modelIndex(ProjectItem *item) const
+{
+    return createIndex(item->row(), 0, item);
 }
 
 int ProjectModel::rowCount(const QModelIndex &parent) const

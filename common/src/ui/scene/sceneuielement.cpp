@@ -17,7 +17,8 @@ SceneUIElement::SceneUIElement(BaseObject *parent,
     BaseObject(parent),
     m_uiType(uiType),
     m_drawStep(drawStep),
-    m_directDraw(directDraw)
+    m_directDraw(directDraw),
+    m_focus(False)
 {
 
 }
@@ -25,6 +26,36 @@ SceneUIElement::SceneUIElement(BaseObject *parent,
 SceneUIElement::~SceneUIElement()
 {
 
+}
+
+void SceneUIElement::setup(MasterScene *)
+{
+    // nothing to do
+}
+
+void SceneUIElement::release(MasterScene *)
+{
+    // nothing to do
+}
+
+void SceneUIElement::setFocus(o3d::Bool focus)
+{
+    m_focus = focus;
+}
+
+o3d::Bool SceneUIElement::hasFocus() const
+{
+    return m_focus;
+}
+
+void SceneUIElement::hover(o3d::UInt32, const o3d::Point3f&)
+{
+    // nothing to do
+}
+
+void SceneUIElement::leave()
+{
+    // nothing to do
 }
 
 o3d::Bool SceneUIElement::isDirectDraw() const

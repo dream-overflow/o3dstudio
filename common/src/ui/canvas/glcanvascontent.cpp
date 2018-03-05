@@ -22,7 +22,8 @@ GLCanvasContent::GLCanvasContent(const LightRef &ref, QWidget *parent) :
 {
     setWindowTitle(tr("Display"));
     setWindowIcon(QIcon(":/icons/videogame_asset_black.svg"));
-    setFocusPolicy(Qt::NoFocus);
+    // setFocusPolicy(Qt::NoFocus);
+    setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(true);
     setAttribute(Qt::WA_AcceptTouchEvents, true);
 

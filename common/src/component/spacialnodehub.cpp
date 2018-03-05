@@ -178,6 +178,9 @@ void SpacialNodeHub::createToScene(MasterScene *masterScene)
     o3d::Node *node = new o3d::Node(masterScene->scene());
     node->setName(m_name);
 
+    // add the primary transform
+    node->addTransform(new MTransform);
+
     // determine where to put this node
     if (parent() && parent()->typeRef() == typeRef()) {
         // the parent hub is also a spacial node so take its node as parent
@@ -198,6 +201,9 @@ void SpacialNodeHub::createToScene(MasterScene *masterScene)
 
     m_instances[masterScene] = node;
 
+    // scene object id is as the base of the pickable color id
+    project()->addPickable((UInt32)node->getId(), this);
+
     O3D_MESSAGE("SpacialNodeHub created into scene");
 }
 
@@ -207,6 +213,9 @@ void SpacialNodeHub::removeFromScene(MasterScene *masterScene)
     if (it != m_instances.end()) {
         o3d::Node *node = it->second;
         m_instances.erase(it);
+
+        // scene object id is as the base of the pickable color id
+        project()->removePickable((UInt32)node->getId());
 
         node->getParent()->deleteChild(node);
 
@@ -230,6 +239,7 @@ void SpacialNodeHub::syncWithScene(MasterScene *masterScene)
 
             nodeTransform->setPosition(mainTransform->getPosition());
             nodeTransform->setRotation(mainTransform->getRotation());
+            nodeTransform->setScale(mainTransform->getScale());
         }
 
         O3D_MESSAGE("SpacialNodeHub synced into scene");
@@ -240,6 +250,8 @@ void SpacialNodeHub::setPosition(o3d::UInt32 transformIndex, const o3d::Vector3f
 {
     o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
     mainTransform->setPosition(pos);
+
+    setDirty();
 }
 
 void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f &rot)
@@ -249,17 +261,53 @@ void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f
     q.fromEuler(rot);
 
     mainTransform->setRotation(q);
+
+    setDirty();
+}
+
+void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Quaternion &rot)
+{
+    o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
+    mainTransform->setRotation(rot);
+
+    setDirty();
 }
 
 void SpacialNodeHub::setScale(o3d::UInt32 transformIndex, const o3d::Vector3f &scale)
 {
     o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
     mainTransform->setScale(scale);
+
+    setDirty();
 }
 
 o3d::UInt32 SpacialNodeHub::getNumTransforms() const
 {
     return (UInt32)m_transforms.size();
+}
+
+const o3d::Transform &SpacialNodeHub::transform(o3d::UInt32 transformIndex) const
+{
+    if (transformIndex < m_transforms.size()) {
+        return *m_transforms[transformIndex];
+    } else {
+        O3D_ERROR(E_IndexOutOfRange("Transform index"));
+    }
+}
+
+const o3d::Matrix4 &SpacialNodeHub::absoluteMatrix(MasterScene *masterScene) const
+{
+    auto it = m_instances.find(masterScene);
+    if (it != m_instances.end()) {
+        return it->second->getAbsoluteMatrix();
+    }
+
+    return Matrix4::getIdentity();
+}
+
+o3d::Bool SpacialNodeHub::isSpacialNode() const
+{
+    return True;
 }
 
 o3d::Bool SpacialNodeHub::addChildToScene(MasterScene *masterScene, o3d::SceneObject *sceneObject)
