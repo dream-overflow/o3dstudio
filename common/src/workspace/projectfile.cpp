@@ -61,6 +61,9 @@ const o3d::BaseDir &ProjectFile::path() const
 void ProjectFile::create()
 {
     save();
+
+    // now add root hub to project (other case is during loading)
+    m_project->rootHub()->create();
 }
 
 void ProjectFile::load()

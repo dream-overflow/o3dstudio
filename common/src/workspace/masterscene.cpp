@@ -876,6 +876,11 @@ void MasterScene::onSelectionChanged()
 
     for (common::SelectionItem *selectionItem : currentSelection) {
         // @todo for current hub manipulator selection
+        // only for related project
+        if (selectionItem->ref().projectId() != project()->ref().light().id()) {
+            continue;
+        }
+
         if (selectionItem->ref().baseTypeOf(TypeRef::hub())) {
             hub = static_cast<Hub*>(project()->lookup(selectionItem->ref()));
             hubs.push_back(hub);

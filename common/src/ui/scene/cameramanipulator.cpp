@@ -15,7 +15,9 @@
 #include <o3d/engine/primitive/primitivemanager.h>
 #include <o3d/engine/object/camera.h>
 #include <o3d/engine/scene/scene.h>
+#include <o3d/engine/hierarchy/node.h>
 #include <o3d/engine/drawinfo.h>
+#include <o3d/engine/object/stransform.h>
 
 #include "o3d/studio/common/workspace/masterscene.h"
 
@@ -73,8 +75,17 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
 
     // setup modelview
     Matrix4 mv;
-    mv.setRotation(scene->getActiveCamera()->getModelviewMatrix().getRotation());
-    //mv.setRotation(scene->getActiveCamera()->getAbsoluteMatrix().getRotation());
+
+    STransform *tr = static_cast<STransform*>(scene->getActiveCamera()->getNode()->getTransform());
+
+    Quaternion q1, q2;
+    q1.fromEuler(Vector3(-tr->getEuler().x(), -tr->getEuler().y(), 0));
+    q2.fromAxisAngle3(Vector3(0, 0, 1), -tr->getEuler().z());
+
+    q1 *= q2;
+
+    mv.setRotation(q1.toMatrix3().invert());
+
     // mv.setTranslation(0.45f*ratio, 0.4f, 0.f);
     mv.setTranslation(vp.x2() - m_scale * factor*0.1f, vp.y2() - m_scale * factor*0.1f, 0.f);
     primitive->modelView().set(mv);

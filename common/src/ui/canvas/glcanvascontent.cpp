@@ -47,6 +47,8 @@ GLCanvasContent::GLCanvasContent(const LightRef &ref, QWidget *parent) :
     format.setRenderableType(QSurfaceFormat::OpenGL);
     format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
     format.setProfile(QSurfaceFormat::CoreProfile);
+    // @todo debug mode
+    // format.setOption(QSurfaceFormat::DebugContext, True);
 
     // must be called before the widget or its parent window gets shown
     setFormat(format);
