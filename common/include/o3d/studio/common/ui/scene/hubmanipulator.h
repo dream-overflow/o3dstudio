@@ -49,7 +49,7 @@ public:
      * @param targets Targeted list of hubs objects.
      * @param hitPos Position where the hit (picking) occured
      */
-    HubManipulator(BaseObject *parent, std::list<Hub*> targets, const Matrix4 &transform);
+    HubManipulator(BaseObject *parent, const std::list<Hub *> targets);
 
     virtual ~HubManipulator();
 

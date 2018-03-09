@@ -40,10 +40,7 @@ HubManipulator::HubManipulator(BaseObject *parent, Hub* target) :
     m_targets.push_back(target);
 }
 
-HubManipulator::HubManipulator(
-        BaseObject *parent,
-        std::list<Hub *> targets,
-        const Matrix4 &transform) :
+HubManipulator::HubManipulator(BaseObject *parent, const std::list<Hub *> targets) :
     SceneUIElement(parent, SCENE_UI_3D, POST_DRAW, True),
     m_targets(targets),
     m_transform(new MTransform),
@@ -704,8 +701,6 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setPickableId(0xffffff02);   // z picking id
             primitive->draw(PrimitiveManager::SOLID_CYLINDER1, Vector3(s*0.1f,s*1.f,s*0.1f));
             primitive->modelView().pop();
-
-            // @todo
         } else if (masterScene->actionMode() == MasterScene::ACTION_TRANSLATION) {
             // translation axes as cylinder
             primitive->modelView().push();
@@ -744,8 +739,6 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setPickableId(0xffffff02);   // z picking id
             primitive->draw(PrimitiveManager::SOLID_CYLINDER1, Vector3(s*0.1f,s*0.8f,s*0.1f));
             primitive->modelView().pop();
-
-            // @todo
         }
     } else if (drawInfo.pass == DrawInfo::AMBIENT_PASS) {
         Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);  // AA_HINT_NICEST
@@ -837,6 +830,32 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->modelView().rotateX(o3d::toRadian(90.f));
             primitive->setColor(axeColor(AXE_Z));
             primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->modelView().pop();
+        } else if (masterScene->actionMode() == MasterScene::ACTION_CAMERA_ROTATION ||
+                   masterScene->actionMode() == MasterScene::ACTION_CAMERA_TRANSLATION||
+                   masterScene->actionMode() == MasterScene::ACTION_CAMERA_ZOOM) {
+            // translation axes during camera action to keep seeing but not acting
+            primitive->setModelviewProjection();
+            primitive->drawXYZAxis(Vector3(s, s, s));
+
+            primitive->modelView().push();
+            primitive->modelView().translate(Vector3(s*0.8f, 0, 0));
+            primitive->modelView().rotateZ(o3d::toRadian(-90.f));
+            primitive->setColor(axeColor(AXE_X));
+            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->modelView().pop();
+
+            primitive->modelView().push();
+            primitive->modelView().translate(Vector3(0,s*0.8f,0));
+            primitive->setColor(axeColor(AXE_Y));
+            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->modelView().pop();
+
+            primitive->modelView().push();
+            primitive->modelView().translate(Vector3(0,0,s*0.8f));
+            primitive->modelView().rotateX(o3d::toRadian(90.f));
+            primitive->setColor(axeColor(AXE_Z));
+            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
             primitive->modelView().pop();
         }
 

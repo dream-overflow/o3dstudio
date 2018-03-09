@@ -344,6 +344,11 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
     }
 
     if (event.button(Mouse::LEFT)) {
+        if (m_actionMode == ACTION_NONE && m_hubManipulator) {
+            // default to translation
+            m_actionMode = ACTION_TRANSLATION;
+        }
+
         // action using the manipulator
         if (m_hoverUIElement && m_hubManipulator == m_hoverUIElement) {
             m_hubManipulator->beginTransform(this);
@@ -683,7 +688,8 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
         }
     }
 
-    if (m_hubManipulator) {
+    if (m_hubManipulator && !m_hubManipulator->isTransform()) {
+        // don't change during a transform
         m_hubManipulator->keyDownEvent(event, this);
     }
 
@@ -871,11 +877,7 @@ void MasterScene::onSelectionChanged()
 
     std::list<Hub*> hubs;
 
-    Vector3 pos;
-    Quaternion rot;
-
     for (common::SelectionItem *selectionItem : currentSelection) {
-        // @todo for current hub manipulator selection
         // only for related project
         if (selectionItem->ref().projectId() != project()->ref().light().id()) {
             continue;
@@ -884,24 +886,12 @@ void MasterScene::onSelectionChanged()
         if (selectionItem->ref().baseTypeOf(TypeRef::hub())) {
             hub = static_cast<Hub*>(project()->lookup(selectionItem->ref()));
             hubs.push_back(hub);
-
-            const Matrix4 &m = hub->absoluteMatrix(this);
-
-            pos += m.getTranslation();
-            rot += Quaternion(m.getRotation());
         }
     }
 
     if (hubs.size()) {
         // create the new according to the current builder (@todo not for now only the standard manipulator)
-        pos *= 1.f / hubs.size();
-        rot *= 1.f / hubs.size();
-
-        Matrix4 transform;
-        transform.setTranslation(pos);
-        transform.setRotation(rot.toMatrix3());
-
-        m_hubManipulator = new HubManipulator(this, hubs, transform);
+        m_hubManipulator = new HubManipulator(this, hubs);
         addSceneUIElement(m_hubManipulator);
 
         // default to translation when selection
@@ -939,8 +929,8 @@ void MasterScene::initializeDrawer()
 
         m_scene = new o3d::Scene(nullptr, path.getFullPathName(), m_renderer);
 
-        m_scene->getContext()->setBackgroundColor(0.633f,0.792f,.914f,0.0f);
-        // m_scene->setGlobalAmbient();
+        m_scene->getContext()->setBackgroundColor(0.633f, 0.792f, 0.914f, 0.0f);
+        m_scene->setGlobalAmbient(Color(0.5f, 0.5f, 0.5f));
 
         // working camera
         m_camera = new o3d::Camera(m_scene);
@@ -975,7 +965,7 @@ void MasterScene::initializeDrawer()
         addSceneUIElement(grid);
 
         // add a HUD for common info about current scene
-        TrueTypeFont::initializeFreeType();  // @todo later done by using O3D GUI
+        TrueTypeFont::initializeFreeType();
 
         TrueTypeFont *font2d = new TrueTypeFont(m_scene);
         font2d->load("rc/fonts/arial.ttf", TrueTypeFont::CHARSET_LATIN1);
