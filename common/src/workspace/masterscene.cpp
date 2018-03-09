@@ -571,9 +571,9 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         if (m_hubManipulator && m_hubManipulator->hasFocus()) {
             Float x = 0.f, y = 0.f, z = 0.f;
 
-            x = deltaX * 1.f; // * elapsed;
-            y = -deltaY * 1.f; // * elapsed;
-            z = deltaY * 1.f; // * elapsed;
+            x = deltaX * 1.f;   // * elapsed;
+            y = -deltaY * 1.f;  // * elapsed;
+            z = deltaY * 1.f;   // * elapsed;
 
             // action using the manipulator
             m_hubManipulator->transform(Vector3(x, y, z), this);

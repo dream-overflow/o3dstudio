@@ -82,7 +82,7 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
     Color light(0.85f, 0.85f, 0.85f);
     // Color dark(0.6f, 0.6f, 0.6f);
     Color blue(0.15f, 0.15f, 0.7f);
-    Color red(0.15f, 0.7f, 0.15f);
+    Color red(0.7f, 0.15f, 0.15f);
 
     // on Y axis
     for (Int32 y = -m_halfSize.y() ; y < 0 ; y += m_step.y()) {

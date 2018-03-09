@@ -128,8 +128,8 @@ protected:
 
     UInt32 m_pickingMask;
 
-    Int32 m_axe;                    //!< Current axe or -1 if none.
-    Vector3f m_relativeV;               //!< Current delta of the transform.
+    Axe m_axe;                      //!< Current axe or -1 if none.
+    Vector3f m_relativeV;           //!< Current delta of the transform.
     TransformMode m_transformMode;  //!< Current transform (when beginTransform...).
     PivotPoint m_pivotPoint;        //!< Current defined pivot point.
     TransformOrientation m_transformOrientation;  //!< Current transform orientation mode.
@@ -137,6 +137,22 @@ protected:
     SpacialNodeHub *m_activeElt;
 
     void updateTransform(MasterScene *masterScene);
+    void refresh(MasterScene *masterScene);
+
+    Vector3f computeLinearVelocity(
+            MasterScene *masterScene,
+            const Vector3f &delta,
+            Axe axe,
+            const Vector3f &pivotPoint,
+            const Quaternion &pivotAxe);
+
+    Vector3f computeCircularVelocity(
+            MasterScene *masterScene,
+            const Vector3f &delta,
+            Axe axe,
+            const Vector3f &pivotPoint,
+            const Quaternion &pivotAxe);
+
     Color axeColor(Axe axe);
 };
 

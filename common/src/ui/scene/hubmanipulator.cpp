@@ -62,6 +62,7 @@ HubManipulator::~HubManipulator()
 
 void HubManipulator::setup(MasterScene *masterScene)
 {
+    // @todo is it necessary ?
     updateTransform(masterScene);
 
     // register the picking colors (@todo by range)
@@ -109,6 +110,74 @@ void HubManipulator::leave()
     m_axe = AXE_NONE;
 }
 
+void HubManipulator::refresh(MasterScene *masterScene)
+{
+    // outside of transform, refresh camera changes in view transform mode
+    if (isTransform()) {
+        return;
+    }
+
+    if (m_transformOrientation == TR_VIEW) {
+        Quaternion rot;
+
+        // aligned to camera
+        rot = masterScene->cameraTransform().getRotation();
+
+        // change initial rotation
+        m_transform->setRotation(rot);
+
+        // initial transformation for reset if cancel
+        m_orgRot = m_transform->getRotation();
+    }
+}
+
+o3d::Vector3f HubManipulator::computeLinearVelocity(
+        MasterScene *masterScene,
+        const o3d::Vector3f &delta,
+        Axe axe,
+        const Vector3f &pivotPoint,
+        const o3d::Quaternion &pivotAxe)
+{
+    Vector3 v;
+
+    Scene *scene = masterScene->scene();
+    const Box2i &vp = scene->getContext()->getViewPort();
+
+//    Matrix::projectPoint(
+//                scene->getActiveCamera()->getProjectionMatrix(),
+//                scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
+//                vp,
+//                delta);
+
+    if (axe == AXE_X) {
+
+    }
+
+    // @todo
+    v.x() = delta.x();
+    v.y() = delta.y();
+    v.z() = delta.z();
+
+    return v;
+}
+
+o3d::Vector3f HubManipulator::computeCircularVelocity(
+        MasterScene *masterScene,
+        const o3d::Vector3f &delta,
+        Axe axe,
+        const Vector3f &pivotPoint,
+        const o3d::Quaternion &pivotAxe)
+{
+    Vector3 v;
+
+    // @todo
+    v.x() = delta.x();
+    v.y() = delta.y();
+    v.z() = delta.z();
+
+    return v;
+}
+
 #include "o3d/studio/common/application.h"
 #include "o3d/studio/common/messenger.h"
 
@@ -145,7 +214,6 @@ void HubManipulator::keyDownEvent(const KeyEvent &event, MasterScene *masterScen
         }
 
         // @todo pivot point change
-
         updateTransform(masterScene);
     }
 }
@@ -309,16 +377,26 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             ++it;
         }
     } else if (m_transformMode == TRANSLATE) {
+        Vector3 delta;
+
         if (m_axe == AXE_X) {
-            m_relativeV.x() += v.x() * s;
+            delta.x() = v.x() * s;
         } else if (m_axe == AXE_Y) {
-            m_relativeV.y() += v.y() * s;
+            delta.y() += v.y() * s;
         } else if (m_axe == AXE_Z) {
-            m_relativeV.z() += v.z() * s;
+            delta.z() += v.z() * s;
         } else if (m_axe == AXE_MANY) {
-            m_relativeV.x() += v.x() * s;
-            m_relativeV.y() += v.y() * s;
+            // @todo determined by view
+            delta.x() += v.x() * s;
+            delta.y() += v.y() * s;
         }
+
+        m_relativeV += computeLinearVelocity(
+                           masterScene,
+                           delta,
+                           m_axe,
+                           m_transform->getPosition(),
+                           m_transform->getRotation());
 
         auto it = m_orgV.begin();
         SpacialNodeHub *spacialNode;
@@ -353,7 +431,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                     if (spacialNode) {
                         // axis is aligned to origin, relative translation
                         pos = m_relativeV;
-                        spacialNode->transform(0).getRotation().transform(pos);
+
                         spacialNode->setPosition(0, (*it) + pos);
 
                         SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
@@ -365,10 +443,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
                 // axis is aligned to origin, relative translation
                 pos = m_relativeV;
-                m_transform->getRotation().transform(pos);  // useless
                 m_transform->setPosition(m_orgPos + pos);
-
-                // aligned to origin...
                 m_transform->setRotation(Quaternion());  // useless
 
             } else if (m_transformOrientation == TR_LOCAL) {
@@ -385,6 +460,8 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                     if (spacialNode) {
                         // axis is naturally aligned to object, relative translation
                         pos = m_relativeV;
+
+                        spacialNode->transform(0).getRotation().transform(pos);
                         spacialNode->setPosition(0, (*it) + pos);
 
                         SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
@@ -396,7 +473,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
                 // helper transform, aligned to active element
                 pos = m_relativeV;
-                // m_activeElt->transform(0).getRotation().transform(v);
+                m_transform->getRotation().transform(pos);
                 m_transform->setPosition(m_orgPos + pos);
                 m_transform->setRotation(m_activeElt->transform(0).getRotation());
 
@@ -418,9 +495,6 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                         pos = m_relativeV;
                         pivotAxe.transform(pos);
 
-                        // z is neg
-                        // pos.z() = -pos.z();
-
                         spacialNode->setPosition(0, (*it) + pos);
 
                         SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
@@ -430,7 +504,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                     ++it;
                 }
 
-                // axis is aligned to origin, relative translation
+                // axis is aligned to view, relative translation
                 pos = m_relativeV;
                 pivotAxe.transform(pos);
                 m_transform->setPosition(m_orgPos + pos);
@@ -463,6 +537,9 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             // @todo
         }
     } else if (m_transformMode == SCALE) {
+        Vector3 delta;
+
+        // @todo how to with computeLinearVeolicity to keep original on others axis
         if (m_axe == AXE_X) {
             m_relativeV.x() += v.x() * s;
             m_relativeV.y() = 1;
@@ -480,6 +557,13 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             m_relativeV.y() += v.y() * s;
             m_relativeV.z() = 1;
         }
+
+        m_relativeV += computeLinearVelocity(
+                           masterScene,
+                           delta,
+                           m_axe,
+                           m_transform->getPosition(),
+                           m_transform->getRotation());
 
         // @todo
         auto it = m_orgV.begin();
@@ -639,6 +723,8 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     if (drawInfo.pass != DrawInfo::PICKING_PASS && drawInfo.pass != DrawInfo::AMBIENT_PASS) {
         return;
     }
+
+    refresh(masterScene);
 
     PrimitiveAccess primitive = scene->getPrimitiveManager()->access(drawInfo);
     Context &context = *scene->getContext();
