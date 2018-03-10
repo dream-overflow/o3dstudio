@@ -142,9 +142,7 @@ protected:
     Vector3f computeLinearVelocity(
             MasterScene *masterScene,
             const Vector3f &delta,
-            Axe axe,
-            const Vector3f &pivotPoint,
-            const Quaternion &pivotAxe);
+            Axe axe);
 
     Vector3f computeCircularVelocity(
             MasterScene *masterScene,

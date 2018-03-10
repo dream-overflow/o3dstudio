@@ -134,31 +134,56 @@ void HubManipulator::refresh(MasterScene *masterScene)
 o3d::Vector3f HubManipulator::computeLinearVelocity(
         MasterScene *masterScene,
         const o3d::Vector3f &delta,
-        Axe axe,
-        const Vector3f &pivotPoint,
-        const o3d::Quaternion &pivotAxe)
+        Axe axe)
 {
     Vector3 v;
 
     Scene *scene = masterScene->scene();
     const Box2i &vp = scene->getContext()->getViewPort();
 
-//    Matrix::projectPoint(
-//                scene->getActiveCamera()->getProjectionMatrix(),
-//                scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
-//                vp,
-//                delta);
+    // compute 2d pos of the helper
+    Vector3 helperPos1 = Matrix::projectPoint(
+                            scene->getActiveCamera()->getProjectionMatrix(),
+                            scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
+                            vp,
+                            Vector3());
+
+    Vector3 dir3d;
 
     if (axe == AXE_X) {
-
+        dir3d.x() = 1;
+    } else if (axe == AXE_Y) {
+        dir3d.y() = 1;
+    } else if (axe == AXE_Z) {
+        dir3d.z() = 1;
+    } else if (axe == AXE_MANY) {
+        // @todo
     }
 
-    // @todo
-    v.x() = delta.x();
-    v.y() = delta.y();
-    v.z() = delta.z();
+    // compute 2d pos of the helper
+    Vector3 helperPos2 = Matrix::projectPoint(
+                            scene->getActiveCamera()->getProjectionMatrix(),
+                            scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
+                            vp,
+                            dir3d);
 
-    return v;
+    Vector2f dir2d(helperPos2.x() - helperPos1.x(), helperPos2.y() - helperPos1.y());
+    dir2d.normalize();
+
+    Float velocity = dir2d * Vector2f(delta.x(), delta.y());
+
+    if (axe == AXE_X) {
+        v.x() = velocity;
+    } else if (axe == AXE_Y) {
+        v.y() = velocity;
+    } else if (axe == AXE_Z) {
+        v.z() = velocity;
+    } else if (axe == AXE_MANY) {
+        // @todo
+    }
+
+    // printf("%f\n", velocity); fflush(0);
+    return v * 0.1f;
 }
 
 o3d::Vector3f HubManipulator::computeCircularVelocity(
@@ -377,26 +402,8 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             ++it;
         }
     } else if (m_transformMode == TRANSLATE) {
-        Vector3 delta;
-
-        if (m_axe == AXE_X) {
-            delta.x() = v.x() * s;
-        } else if (m_axe == AXE_Y) {
-            delta.y() += v.y() * s;
-        } else if (m_axe == AXE_Z) {
-            delta.z() += v.z() * s;
-        } else if (m_axe == AXE_MANY) {
-            // @todo determined by view
-            delta.x() += v.x() * s;
-            delta.y() += v.y() * s;
-        }
-
-        m_relativeV += computeLinearVelocity(
-                           masterScene,
-                           delta,
-                           m_axe,
-                           m_transform->getPosition(),
-                           m_transform->getRotation());
+        // compute the relative change from origins in the direction of the axe and the input delta
+        m_relativeV += computeLinearVelocity(masterScene, v * s, m_axe);
 
         auto it = m_orgV.begin();
         SpacialNodeHub *spacialNode;
