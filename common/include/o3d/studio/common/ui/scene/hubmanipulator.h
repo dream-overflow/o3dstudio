@@ -62,7 +62,7 @@ public:
     //! May be removed, need a dedicated toolbar, but need shortcut too
     virtual void keyDownEvent(const KeyEvent &event, MasterScene *masterScene);
 
-    virtual void beginTransform(MasterScene *masterScene);
+    virtual void beginTransform(MasterScene *masterScene, const Vector3f &pos);
     virtual void transform(const Vector3f &v, MasterScene *masterScene);
     virtual void endTransform();
     virtual void cancelTransform(MasterScene *masterScene);
@@ -131,6 +131,7 @@ protected:
 
     Axe m_axe;                      //!< Current axe or -1 if none.
     Vector3f m_relativeV;           //!< Current delta of the transform.
+    Vector3f m_global;              //!< Current sum of the delta (not transformed).
     TransformMode m_transformMode;  //!< Current transform (when beginTransform...).
     PivotPoint m_pivotPoint;        //!< Current defined pivot point.
     TransformOrientation m_transformOrientation;  //!< Current transform orientation mode.

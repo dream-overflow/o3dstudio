@@ -351,7 +351,7 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 
         // action using the manipulator
         if (m_hoverUIElement && m_hubManipulator == m_hoverUIElement) {
-            m_hubManipulator->beginTransform(this);
+            m_hubManipulator->beginTransform(this, Vector3f(event.localPos().x(), event.localPos().y(), 0));
         } else {
             m_actionMode = ACTION_SELECTION;
 
