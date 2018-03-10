@@ -119,6 +119,7 @@ protected:
     std::list<Quaternion> m_orgQ;
 
     Transform *m_transform;  //!< Current helper transformation to apply.
+    Vector3 m_offset;        //!< Helper offset for some transform mode.
 
     Vector3 m_orgPos;      //!< Original position of the helper.
     Quaternion m_orgRot;   //!< Original rotation of the helper.
@@ -139,17 +140,8 @@ protected:
     void updateTransform(MasterScene *masterScene);
     void refresh(MasterScene *masterScene);
 
-    Vector3f computeLinearVelocity(
-            MasterScene *masterScene,
-            const Vector3f &delta,
-            Axe axe);
-
-    Vector3f computeCircularVelocity(
-            MasterScene *masterScene,
-            const Vector3f &delta,
-            Axe axe,
-            const Vector3f &pivotPoint,
-            const Quaternion &pivotAxe);
+    Vector3f computeLinearVelocity(MasterScene *masterScene, const Vector3f &delta, Axe axe);
+    Vector3f computeCircularVelocity(MasterScene *masterScene, const Vector3f &delta, Axe axe);
 
     Color axeColor(Axe axe);
 };

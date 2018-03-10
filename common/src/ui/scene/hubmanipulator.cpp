@@ -189,9 +189,7 @@ o3d::Vector3f HubManipulator::computeLinearVelocity(
 o3d::Vector3f HubManipulator::computeCircularVelocity(
         MasterScene *masterScene,
         const o3d::Vector3f &delta,
-        Axe axe,
-        const Vector3f &pivotPoint,
-        const o3d::Quaternion &pivotAxe)
+        Axe axe)
 {
     Vector3 v;
 
@@ -322,7 +320,6 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         return;
     }
 
-    Vector3 pos;
     Quaternion rot;
 
     // @todo determin the amount of x and y to be colinear or at 90° to the axis of the transform
@@ -409,6 +406,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         SpacialNodeHub *spacialNode;
         Quaternion pivotAxe;
         Vector3 pivotPoint;
+        Vector3 pos;
 
         if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
             pivotAxe = m_activeElt->transform(0).getRotation();
@@ -544,57 +542,149 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             // @todo
         }
     } else if (m_transformMode == SCALE) {
-        Vector3 delta;
+        // compute the relative change from origins in the direction of the axe and the input delta
+        Vector3 relativeV = computeLinearVelocity(masterScene, v * s, m_axe);
 
-        // @todo how to with computeLinearVeolicity to keep original on others axis
+        // no zero, need 1 for non concerned axes
         if (m_axe == AXE_X) {
-            m_relativeV.x() += v.x() * s;
+            m_relativeV.x() += relativeV.x();
             m_relativeV.y() = 1;
             m_relativeV.z() = 1;
         } else if (m_axe == AXE_Y) {
             m_relativeV.x() = 1;
-            m_relativeV.y() += v.y() * s;
+            m_relativeV.y() += relativeV.y();
             m_relativeV.z() = 1;
         } else if (m_axe == AXE_Z) {
             m_relativeV.x() = 1;
             m_relativeV.y() = 1;
-            m_relativeV.z() += v.z() * s;
+            m_relativeV.z() += relativeV.z();
         } else if (m_axe == AXE_MANY) {
-            m_relativeV.x() += v.x() * s;
-            m_relativeV.y() += v.y() * s;
-            m_relativeV.z() = 1;
+            // @todo
         }
 
-        m_relativeV += computeLinearVelocity(
-                           masterScene,
-                           delta,
-                           m_axe,
-                           m_transform->getPosition(),
-                           m_transform->getRotation());
+        Vector3 scale;
 
-        // @todo
         auto it = m_orgV.begin();
-        SpacialNodeHub *spacialNode;
+        SpacialNodeHub *spacialNode;       
 
-        for (Hub* hub : m_targets) {
-            if (hub->isSpacialNode()) {
-                spacialNode = static_cast<SpacialNodeHub*>(hub);
-            } else if (hub->isParentSpacialNode()) {
-                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-            } else {
-                spacialNode = nullptr;
+        if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
+            // pivotAxe = m_activeElt->transform(0).getRotation();
+            // pivotPoint = m_activeElt->transform(0).getPosition();
+
+            // pivot active + transform global
+            // @todo
+
+            // pivot active + transform local
+            // @todo
+
+            // pivot active + transform view
+            // @todo
+
+        } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
+            if (m_transformOrientation == TR_GLOBAL) {
+                // pivot individual + transform global
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        scale = m_relativeV;
+                        spacialNode->setScale(0, (*it) + scale);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
+                }
+
+                // to be consistent during translation
+                m_transform->setScale(m_orgScale + scale);
+
+            } else if (m_transformOrientation == TR_LOCAL) {
+                // pivot individual + transform local
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        scale = m_relativeV;
+                        spacialNode->setScale(0, (*it) + scale);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
+                }
+
+                // to be consistent during translation
+                m_transform->setScale(m_orgScale + scale);
+
+            } else if (m_transformOrientation == TR_VIEW) {
+                // pivot individual + transform view
+                // pivotAxe = masterScene->cameraTransform().getRotation();
+
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        scale = m_relativeV;
+                        spacialNode->setScale(0, (*it) + scale);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
+                }
+
+                // to be consistent during translation
+                m_transform->setScale(m_orgScale + scale);
             }
+        } else if (m_pivotPoint == PIVOT_MEDIAN) {
+            // pivotAxe = m_activeElt->transform(0).getRotation();
+            // Vector3 pivotPoint = m_transform->getPosition();
+            // @todo compute for each element the distance to the pivot point (only for rotation)
 
-            if (spacialNode) {
-                spacialNode->setScale(0, (*it) + m_relativeV);
-                SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
-                masterScene->addCommand(sceneCommand);
-            }
+            // pivot median + transform global
+            // @todo
 
-            ++it;
+            // pivot median + transform local
+            // @todo
+
+            // pivot median + transform view
+            // @todo
+
+        } else if (m_pivotPoint == PIVOT_USER) {
+            // @todo
+            // pivot = masterScene->helperPoint().transform().getRotation();
+
+            // pivot user + transform global
+            // @todo
+
+            // pivot user + transform local
+            // @todo
+
+            // pivot user + transform view
+            // @todo
         }
-
-        // m_transform->scale(m_delta);
     }  else if (m_transformMode == SKEW) {
         // @todo
     }
@@ -906,23 +996,23 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->drawXYZAxis(Vector3(s, s, s));
 
             primitive->modelView().push();
-            primitive->modelView().translate(Vector3(s*0.8f, 0, 0));
+            primitive->modelView().translate(Vector3(s*0.95f, 0, 0));
             primitive->modelView().rotateZ(o3d::toRadian(-90.f));
             primitive->setColor(axeColor(AXE_X));
-            primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.15f,s*0.15f,s*0.15f));
             primitive->modelView().pop();
 
             primitive->modelView().push();
-            primitive->modelView().translate(Vector3(0,s*0.8f,0));
+            primitive->modelView().translate(Vector3(0,s*0.95f,0));
             primitive->setColor(axeColor(AXE_Y));
-            primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.15f,s*0.15f,s*0.15f));
             primitive->modelView().pop();
 
             primitive->modelView().push();
-            primitive->modelView().translate(Vector3(0,0,s*0.8f));
+            primitive->modelView().translate(Vector3(0,0,s*0.95f));
             primitive->modelView().rotateX(o3d::toRadian(90.f));
             primitive->setColor(axeColor(AXE_Z));
-            primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.15f,s*0.15f,s*0.15f));
             primitive->modelView().pop();
         } else if (masterScene->actionMode() == MasterScene::ACTION_CAMERA_ROTATION ||
                    masterScene->actionMode() == MasterScene::ACTION_CAMERA_TRANSLATION||
@@ -1000,11 +1090,38 @@ void HubManipulator::updateTransform(MasterScene *masterScene)
         // position from active element
         pos = m_activeElt->transform(0).getPosition();
     } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
+        // position computed individualy by helper offset by median
+        m_offset.zero();
+        UInt32 c = 0;
+
+        // compute the median position
+        SpacialNodeHub *spacialNode;
+        for (Hub* hub : m_targets) {
+            if (hub->isSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub);
+                m_offset += spacialNode->transform(0).getPosition();
+                ++c;
+            } else if (hub->isParentSpacialNode()) {
+                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                m_offset += spacialNode->transform(0).getPosition();
+                ++c;
+            }
+        }
+
+        if (c) {
+            m_offset *= 1.f / c;
+        }
+
+        // position from origin of individual elements
+        pos.zero();
+
+        // @todo improve sep of helper and transform and objects
+
         // position from active element
         pos = m_activeElt->transform(0).getPosition();
+
     } else if (m_pivotPoint == PIVOT_MEDIAN) {
-        // position computed to its median
-        Vector3 pos;
+        // position computed to their median
         UInt32 c = 0;
 
         // compute the median position
