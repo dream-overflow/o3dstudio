@@ -213,6 +213,8 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
     Vector2f p1 = target - center;
     Float radius = p1.length();
 
+    // @todo keep radius for display an helper
+
     Vector2f p2(
                 m_previous.x() - vp.width() / 2 - vp.x(),
                 (vp.height() - m_previous.y()) - vp.height() / 2 - vp.y());
@@ -227,8 +229,6 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
     // http://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
     Float phi = o3d::simplifyRadian(atan2(p1.y(), p1.x()) - atan2(p2.y(), p2.x()));
     Float velocity = phi;
-
-    printf("%f %f\n", velocity, radius); fflush(0);
 
     if (axe == AXE_X) {
         v.x() = velocity;
@@ -384,6 +384,66 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
             pivotPoint = m_activeElt->transform(0).getPosition();
             // @todo translate
         } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
+            if (m_transformOrientation == TR_GLOBAL) {
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        q = m_transform->getRotation();
+                        spacialNode->setRotation(0, (*it) * q);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
+                }
+            } else if (m_transformOrientation == TR_LOCAL) {
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        spacialNode->setRotation(0, (*it) * q);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
+                }
+            } else if (m_transformOrientation == TR_VIEW) {
+                for (Hub* hub : m_targets) {
+                    if (hub->isSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub);
+                    } else if (hub->isParentSpacialNode()) {
+                        spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
+                    } else {
+                        spacialNode = nullptr;
+                    }
+
+                    if (spacialNode) {
+                        q = m_transform->getRotation();
+                        spacialNode->setRotation(0, (*it) * q);
+
+                        SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
+                        masterScene->addCommand(sceneCommand);
+                    }
+
+                    ++it;
+                }
+            }
         } else if (m_pivotPoint == PIVOT_MEDIAN) {
             pivotAxe = m_activeElt->transform(0).getRotation();
             Vector3 pivotPoint = m_transform->getPosition();
@@ -391,45 +451,6 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         } else if (m_pivotPoint == PIVOT_USER) {
             // @todo
             // pivot = masterScene->helperPoint().transform().getRotation();
-        }
-
-        for (Hub* hub : m_targets) {
-            if (hub->isSpacialNode()) {
-                spacialNode = static_cast<SpacialNodeHub*>(hub);
-            } else if (hub->isParentSpacialNode()) {
-                spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-            } else {
-                spacialNode = nullptr;
-            }
-
-            if (spacialNode) {
-                Quaternion q;
-
-//                if (m_transformAxis == TR_VIEW) {
-//                    // axis aligned to view
-//                    q = m_transform->getRotation();
-//                } else if (m_transformAxis == TR_GLOBAL) {
-//                    // axis aligned to origin
-//                    q = m_transform->getRotation();
-//                } else if (m_transformAxis == TR_LOCAL) {
-//                    // axis aligned to object
-//                    q = m_transform->getRotation();
-//                } else if (m_transformAxis == TR_MEDIAN) {
-//                    // axis aligned to median @todo
-//                    q = m_transform->getRotation();
-//                } else if (m_transformAxis == TR_USER) {
-//                    // axis aligned to user defined axe @todo
-//                    q = m_transform->getRotation();
-//                }
-
-                q = m_transform->getRotation();
-                spacialNode->setRotation(0, (*it) * q);
-
-                SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
-                masterScene->addCommand(sceneCommand);
-            }
-
-            ++it;
         }
     } else if (m_transformMode == TRANSLATE) {
         // compute the relative change from origins in the direction of the axe and the input delta
@@ -883,7 +904,9 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
         return;
     }
 
-    Float s = m_displayScale * (scene->getActiveCamera()->getAbsoluteMatrix().getTranslation() - m_transform->getPosition()).length() * 0.1;
+    Vector3 dist = m_transform->getMatrix().getTranslation() - scene->getActiveCamera()->getAbsoluteMatrix().getTranslation();
+    Float s = m_displayScale * dist.length() * 0.1;
+
     primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix());
     primitive->modelView().push();
 
@@ -892,6 +915,8 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
 
         // a picking pass for manipulation
         if (masterScene->actionMode() == MasterScene::ACTION_ROTATION) {
+            // @todo the axis the most colinear to the plane avix must be the external circle
+
             // translation axes as cylinder
             primitive->modelView().push();
             primitive->modelView().rotateZ(o3d::toRadian(-90.f));
@@ -956,10 +981,9 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
 
         primitive->setColor(1, 1, 1);
 
-        // @todo an highlighted bounding volume ??
+        // @todo an highlighted bounding volume...
 
-        // an highlighted version of the object
-        // @todo
+        // an highlighted version of the targets @todo but might need a particular status on targeted hubs
 
         if (masterScene->actionMode() == MasterScene::ACTION_ROTATION) {
             // rotation circles

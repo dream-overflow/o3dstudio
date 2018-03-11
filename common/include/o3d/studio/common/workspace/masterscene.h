@@ -244,6 +244,7 @@ private:
     std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;
 
     void processCommands();
+    void postPicking(const MouseEvent &event);
 };
 
 } // namespace common

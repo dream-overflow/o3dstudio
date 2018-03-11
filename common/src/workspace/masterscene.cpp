@@ -413,8 +413,13 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
             m_actionMode = ACTION_CAMERA_ROTATION;
         }
     } else if (event.button(Mouse::RIGHT)) {
-
+        if (m_hubManipulator && m_hubManipulator->isTransform()) {
+            // cancel current transformation
+            m_hubManipulator->cancelTransform(this);
+        }
     }
+
+    postPicking(event);
 
     if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
         // no cursor and infinite scrolling
@@ -478,6 +483,8 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
 
         m_content->setCursor(cursor);
     }
+
+    postPicking(event);
 
     return True;
 }
@@ -582,15 +589,9 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             // action using the manipulator
             m_hubManipulator->transform(Vector3(x, y, z), this);
         }
-
-        // only at once (and could add a small timer to avoid a lot of events)
-        if (!m_scene->getPicking()->isPickingToProcess() && !m_scene->getPicking()->isProcessingPicking()) {
-            // picking or manipulation of a transformer
-            m_scene->getPicking()->postPickingEvent(
-                        (UInt32)event.localPos().x(),
-                        m_scene->getViewPortManager()->getReshapeHeight() - (UInt32)event.localPos().y());
-        }
     }
+
+    postPicking(event);
 
     if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
         // lock mouse position, infinite cursor
@@ -650,6 +651,8 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
         }
     }
 
+    // postPicking(event); @todo need mouse position
+
     return False;
 }
 
@@ -697,6 +700,8 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
         m_hubManipulator->keyDownEvent(event, this);
     }
 
+    // postPicking(event); @todo need mouse position
+
     return True;
 }
 
@@ -718,6 +723,8 @@ o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &event)
     } else {
         m_motionType = MOTION_FOLLOW;
     }
+
+    // postPicking(event); @todo need mouse position
 
     return True;
 }
@@ -919,6 +926,17 @@ void MasterScene::processCommands()
         }
 
         delete command;
+    }
+}
+
+void MasterScene::postPicking(const MouseEvent &event)
+{
+    // only at once (and could add a small timer to avoid a lot of events)
+    if (!m_scene->getPicking()->isPickingToProcess() && !m_scene->getPicking()->isProcessingPicking()) {
+        // picking or manipulation of a transformer
+        m_scene->getPicking()->postPickingEvent(
+                    (UInt32)event.localPos().x(),
+                    m_scene->getViewPortManager()->getReshapeHeight() - (UInt32)event.localPos().y());
     }
 }
 

@@ -218,7 +218,8 @@ void MeshHub::createToScene(MasterScene *masterScene)
     }
 
     // if the parent hub is a spacial node add the mesh the it
-    if (parent() && parent()->typeRef() == Application::instance()->types().typeRef("o3s::common::hub::spacialhub")) {
+    // if (parent() && parent()->typeRef() == Application::instance()->types().typeRef("o3s::common::hub::spacialhub")) {
+    if (parent() && parent()->isParentHub() && static_cast<Hub*>(parent())->isSpacialNode()) {
         SpacialNodeHub *parentHub = static_cast<SpacialNodeHub*>(parent());
         parentHub->addChildToScene(masterScene, mesh);
     }
@@ -241,7 +242,8 @@ void MeshHub::removeFromScene(MasterScene *masterScene)
         // scene object id is as the base of the pickable color id
         project()->removePickable((UInt32)mesh->getId());
 
-        mesh->getParent()->deleteChild(mesh);
+        delete mesh;
+        //mesh->getParent()->deleteChild(mesh);
 
         O3D_MESSAGE("MeshHub deleted from scene");
     }

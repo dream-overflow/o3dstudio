@@ -10,6 +10,7 @@
 #include <o3d/engine/object/light.h>
 
 #include "o3d/studio/common/component/lighthub.h"
+#include "o3d/studio/common/component/spacialnodehub.h"
 #include "o3d/studio/common/workspace/project.h"
 #include "o3d/studio/common/workspace/masterscene.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
@@ -152,6 +153,12 @@ void LightHub::createToScene(MasterScene *masterScene)
         light->setLightType(o3d::Light::LIGHT_MAP);
     }
 
+    // if the parent hub is a spacial node add the light the it
+    if (parent() && parent()->isParentHub() && static_cast<Hub*>(parent())->isSpacialNode()) {
+        SpacialNodeHub *parentHub = static_cast<SpacialNodeHub*>(parent());
+        parentHub->addChildToScene(masterScene, light);
+    }
+
     m_instances[masterScene] = light;
 
     // scene object id is as the base of the pickable color id
@@ -171,6 +178,7 @@ void LightHub::removeFromScene(MasterScene *masterScene)
         project()->removePickable((UInt32)light->getId());
 
         delete light;
+        // light->getParent()->deleteChild(light);
 
         O3D_MESSAGE("LightHub deleted from scene");
     }
