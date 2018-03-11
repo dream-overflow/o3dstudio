@@ -18,6 +18,8 @@
 #include <o3d/engine/scene/scene.h>
 #include <o3d/engine/drawinfo.h>
 #include <o3d/engine/object/mtransform.h>
+#include <o3d/engine/viewport.h>
+#include <o3d/engine/hierarchy/node.h>
 
 #include "o3d/studio/common/workspace/masterscene.h"
 #include "o3d/studio/common/component/spacialnodehub.h"
@@ -120,7 +122,7 @@ void HubManipulator::refresh(MasterScene *masterScene)
         Quaternion rot;
 
         // aligned to camera
-        rot = masterScene->cameraTransform().getRotation();
+        rot = masterScene->camera()->getNode()->getTransform()->getRotation();
 
         // change initial rotation
         m_transform->setRotation(rot);
@@ -137,15 +139,14 @@ o3d::Vector3f HubManipulator::computeLinearVelocity(
 {
     Vector3 v;
 
-    Scene *scene = masterScene->scene();
-    const Box2i &vp = scene->getContext()->getViewPort();
+    const Box2i &vp = masterScene->viewPort();
 
     // compute 2d pos of the helper
     Vector3 helperPos1 = Matrix::projectPoint(
-                            scene->getActiveCamera()->getProjectionMatrix(),
-                            scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
-                            vp,
-                            Vector3());
+        masterScene->camera()->getProjectionMatrix(),
+        masterScene->camera()->getModelviewMatrix() * m_transform->getMatrix(),
+        vp,
+        Vector3());
 
     Vector3 dir3d;
 
@@ -161,15 +162,15 @@ o3d::Vector3f HubManipulator::computeLinearVelocity(
 
     // compute 2d pos of the helper plus a delta in the direction of the axes
     Vector3 helperPos2 = Matrix::projectPoint(
-                            scene->getActiveCamera()->getProjectionMatrix(),
-                            scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
-                            vp,
-                            dir3d);
+        masterScene->camera()->getProjectionMatrix(),
+        masterScene->camera()->getModelviewMatrix() * m_transform->getMatrix(),
+        vp,
+        dir3d);
 
     Vector2f dir2d(helperPos2.x() - helperPos1.x(), helperPos2.y() - helperPos1.y());
     dir2d.normalize();
 
-    Float velocity = dir2d * Vector2f(delta.x(), delta.y());
+    Float velocity = dir2d * Vector2f(delta.x(), -delta.y());
 
     if (axe == AXE_X) {
         v.x() = velocity;
@@ -191,70 +192,42 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
 {
     Vector3 v;
 
-    Scene *scene = masterScene->scene();
-    const Box2i &vp = scene->getContext()->getViewPort();
-    //Box2i vp(0,0,1,1);
+    const Box2i &vp = masterScene->viewPort();
 
-    // compute 2d pos of the previous pos
+    // compute 2d pos of the center of the rotation axis
     Vector3 helperPos1 = Matrix::projectPoint(
-                            scene->getActiveCamera()->getProjectionMatrix(),
-                            scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
-                            vp,
-                            Vector3());
+                             masterScene->camera()->getProjectionMatrix(),
+                             masterScene->camera()->getModelviewMatrix() * m_transform->getMatrix(),
+                             vp,
+                             Vector3());
 
-//    Vector3 pickerPos3d = Matrix::unprojectPoint(
-//                            scene->getActiveCamera()->getProjectionMatrix(),
-//                            scene->getActiveCamera()->getModelviewMatrix(),
-//                            vp,
-//                            helperPos1 + m_global);/*,
-//                            1,
-//                            scene->getActiveCamera()->getZnear(),
-//                            scene->getActiveCamera()->getZfar());*/
+    // and convert it in centered coordinates
+    Vector2f center(
+                helperPos1.x() - vp.width() / 2 + vp.x(),
+                helperPos1.y() - vp.height() / 2 + vp.y());
 
-//    pickerPos3d.z() = m_transform->getPosition().z();
+    Vector2f target(
+                (m_previous.x() + delta.x()) - vp.width() / 2 + vp.x(),
+                (vp.height() - (m_previous.y() + delta.y())) - vp.height() / 2 + vp.y());
 
-    Vector3 dir3d;
-    Vector2f diff = Vector2f(m_global.x()+delta.x(), vp.height()+delta.y()-m_global.y()) - Vector2f(helperPos1.x(), helperPos1.y());
-    Float radius = diff.length();
-/*
-    // @todo compute the arc
-    if (axe == AXE_X) {
-        dir3d.x() = 1;
-    } else if (axe == AXE_Y) {
-        dir3d.y() = 1;
-    } else if (axe == AXE_Z) {
-        dir3d.z() = 1;
-    } else if (axe == AXE_MANY) {
-        // @todo
-    }
+    Vector2f p1 = target - center;
+    Float radius = p1.length();
 
-    // compute 2d pos of the current pos
-    Vector3 helperPos2 = Matrix::projectPoint(
-                            scene->getActiveCamera()->getProjectionMatrix(),
-                            scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
-                            vp,
-                            dir3d * radius);
+    Vector2f p2(
+                m_previous.x() - vp.width() / 2 - vp.x(),
+                (vp.height() - m_previous.y()) - vp.height() / 2 - vp.y());
 
-    Vector2f dir2d(helperPos2.x() - helperPos1.x(), helperPos2.y() - helperPos1.y());
-    dir2d.normalize();
-*/
-    Vector3f nD = delta;
-    nD.normalize();
+    p2 -= center;
+    System::print(center, m_previous);
+    System::print(p1, p2);
 
-    Vector2f org(helperPos1.x() /*- vp.width() / 2*/, helperPos1.y()/* - vp.height() / 2*/);
-    Vector2f p2(m_global.x() + delta.x()/* - vp.width() / 2*/, vp.height() - (m_global.y() + delta.y()/* - vp.height() / 2*/));
-    p2 -= org;   // centered to the helper
-    System::print(p2, "p2"),
+    p1.normalize();
     p2.normalize();
 
-    Vector2f nG(m_global.x()/* - vp.width() / 2*/, vp.height() - (m_global.y()/* - vp.height() / 2*/));
-    nG -= org;   // centered to the helper
-    System::print(nG, "nG"),
-    nG.normalize();
+    // http://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
+    Float phi = o3d::simplifyRadian(atan2(p1.y(), p1.x()) - atan2(p2.y(), p2.x()));
+    Float velocity = phi;
 
-    // Float velocity = (nG * p2) * (2.0 / radius);
-    Float phi = o3d::simplifyRadian(atan2(p2.y(), p2.x()) - atan2(nG.y(), nG.x()));
-    Float velocity = phi; // * (100.0 / radius);
     printf("%f %f\n", velocity, radius); fflush(0);
 
     if (axe == AXE_X) {
@@ -317,7 +290,7 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
 
     m_focus = True;
     m_relativeV.zero();
-    m_global = pos;
+    m_initial = m_previous = pos;
 
     updateTransform(masterScene);
 
@@ -544,7 +517,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
             } else if (m_transformOrientation == TR_VIEW) {
                 // pivot individual + transform view
-                pivotAxe = masterScene->cameraTransform().getRotation();
+                pivotAxe = masterScene->camera()->getNode()->getTransform()->getRotation();
 
                 for (Hub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
@@ -750,7 +723,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
     }
 
     // update global input pos
-    m_global += v;
+    m_previous += v;
 }
 
 void HubManipulator::endTransform()
@@ -758,7 +731,7 @@ void HubManipulator::endTransform()
     m_focus = False;
     m_transformMode = STATIC;
     m_relativeV.zero();
-    m_global.zero();
+    m_previous.zero();
     m_orgV.clear();
     m_orgQ.clear();
 }
@@ -885,6 +858,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
         return;
     }
 
+    // during display uses current active viewport and camera
     refresh(masterScene);
 
     PrimitiveAccess primitive = scene->getPrimitiveManager()->access(drawInfo);
@@ -1134,7 +1108,7 @@ void HubManipulator::updateTransform(MasterScene *masterScene)
         rot = m_activeElt->transform(0).getRotation();
     } else if (m_transformOrientation == TR_VIEW) {
         // aligned to camera
-        rot = masterScene->cameraTransform().getRotation();
+        rot = masterScene->camera()->getNode()->getTransform()->getRotation();
     }
 
     if (m_pivotPoint == PIVOT_ACTIVE_ELT) {

@@ -222,9 +222,14 @@ SceneUIElement *MasterScene::hoverSceneUIElement()
     return m_hoverUIElement;
 }
 
-const o3d::Transform& MasterScene::cameraTransform() const
+const o3d::Camera* MasterScene::camera() const
 {
-    return *m_camera.get()->getNode()->getTransform();
+    return m_camera.get();
+}
+
+o3d::Box2i MasterScene::viewPort() const
+{
+    return o3d::Box2i(0, 0, m_content->size().width(), m_content->size().height());
 }
 
 void MasterScene::initialize(Bool debug)
@@ -572,8 +577,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             Float x = 0.f, y = 0.f, z = 0.f;
 
             x = deltaX * 1.f;   // * elapsed;
-            y = -deltaY * 1.f;  // * elapsed;
-            z = deltaY * 1.f;   // * elapsed;
+            y = deltaY * 1.f;  // * elapsed;
 
             // action using the manipulator
             m_hubManipulator->transform(Vector3(x, y, z), this);

@@ -120,9 +120,15 @@ public:
     SceneUIElement* hoverSceneUIElement();
 
     /**
-     * @brief Get the active camera transform (@todo could use the CameraManipulator).
+     * @brief Get the active camera of the master scene.
+     * @todo could use the CameraManipulator.
      */
-    const Transform& cameraTransform() const;
+    const Camera* camera() const;
+
+    /**
+     * @brief Related viewport area.
+     */
+    Box2i viewPort() const;
 
     //
     // drawer

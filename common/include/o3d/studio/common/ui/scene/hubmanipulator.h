@@ -131,7 +131,10 @@ protected:
 
     Axe m_axe;                      //!< Current axe or -1 if none.
     Vector3f m_relativeV;           //!< Current delta of the transform.
-    Vector3f m_global;              //!< Current sum of the delta (not transformed).
+
+    Vector3f m_initial;             //!< Initial input position.
+    Vector3f m_previous;              //!< Current sum of the delta (not transformed).
+
     TransformMode m_transformMode;  //!< Current transform (when beginTransform...).
     PivotPoint m_pivotPoint;        //!< Current defined pivot point.
     TransformOrientation m_transformOrientation;  //!< Current transform orientation mode.
