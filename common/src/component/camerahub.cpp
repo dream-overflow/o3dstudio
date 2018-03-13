@@ -186,7 +186,7 @@ void CameraHub::removeFromScene(MasterScene *masterScene)
         // scene object id is as the base of the pickable color id
         project()->removePickable((UInt32)camera->getId());
 
-        delete camera;
+        camera->getParent()->deleteChild(camera);
 
         O3D_MESSAGE("CameraHub deleted from scene");
     }

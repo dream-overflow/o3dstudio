@@ -242,8 +242,7 @@ void MeshHub::removeFromScene(MasterScene *masterScene)
         // scene object id is as the base of the pickable color id
         project()->removePickable((UInt32)mesh->getId());
 
-        delete mesh;
-        //mesh->getParent()->deleteChild(mesh);
+        mesh->getParent()->deleteChild(mesh);
 
         O3D_MESSAGE("MeshHub deleted from scene");
     }

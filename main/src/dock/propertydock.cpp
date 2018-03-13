@@ -96,8 +96,6 @@ void PropertyDock::onSelectionChanged()
         common::Hub *hub = nullptr;
 
         for (common::SelectionItem *selectionItem : previousSelection) {
-            // @todo sync data if necessary, remove widget
-
             project = workspace->project(selectionItem->ref());
 
             if (!project) {
@@ -109,8 +107,7 @@ void PropertyDock::onSelectionChanged()
                 continue;
             }
 
-            component = common::Application::instance()->components().componentByTarget(
-                            hub->ref().strong().typeName());
+            component = common::Application::instance()->components().componentByTarget(hub->ref().strong().typeName());
             if (!component) {
                 continue;
             }
@@ -150,13 +147,11 @@ void PropertyDock::onSelectionChanged()
                 continue;
             }
 
-            component = common::Application::instance()->components().componentByTarget(
-                            hub->ref().strong().typeName());
+            component = common::Application::instance()->components().componentByTarget(hub->ref().strong().typeName());
             if (!component) {
                 continue;
             }
 
-            // @todo what if multiple ? bulk or list ?
             panel = component->panel(common::Panel::PANEL_PROPERTY, hub);
             if (panel) {
                 QWidget *ui = panel->ui();

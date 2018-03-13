@@ -177,8 +177,7 @@ void LightHub::removeFromScene(MasterScene *masterScene)
         // scene object id is as the base of the pickable color id
         project()->removePickable((UInt32)light->getId());
 
-        delete light;
-        // light->getParent()->deleteChild(light);
+        light->getParent()->deleteChild(light);
 
         O3D_MESSAGE("LightHub deleted from scene");
     }
