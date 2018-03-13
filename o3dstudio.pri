@@ -66,10 +66,10 @@ QMAKE_CXXFLAGS_RELEASE += -O2 -DNDEBUG -ffunction-sections  # -fvisibility=hidde
 
 # @todo msvc
 *-clang++* {
-    QMAKE_CXXFLAGS_DEBUG += -O0 -D_DEBUG -glldb
+    QMAKE_CXXFLAGS_DEBUG += -O0 -D_DEBUG -g -glldb
 }
 *-g++* {
-    QMAKE_CXXFLAGS_DEBUG += -O0 -D_DEBUG -ggdb
+    QMAKE_CXXFLAGS_DEBUG += -O0 -D_DEBUG -g -ggdb
 }
 
 darwin:!minQtVersion(5, 7, 0) {
