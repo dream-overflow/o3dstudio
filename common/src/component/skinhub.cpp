@@ -89,15 +89,7 @@ void SkinHub::create()
 
 void SkinHub::destroy()
 {
-    // recursive destroy, because of the order, leaves before
-    Hub *hub;
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        hub = it->second;
-        hub->destroy();
-    }
-
-    // signal throught project->workspace
-    project()->workspace()->onProjectHubRemoved(ref().light());
+    Hub::destroy();
 
     for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
         // sync with master scenes

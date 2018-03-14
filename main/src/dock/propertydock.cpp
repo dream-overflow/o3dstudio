@@ -102,18 +102,7 @@ void PropertyDock::onSelectionChanged()
                 return;
             }
 
-            hub = static_cast<common::Hub*>(project->lookup(selectionItem->ref()));
-            if (!hub) {
-                continue;
-            }
-
-            component = common::Application::instance()->components().componentByTarget(hub->ref().strong().typeName());
-            if (!component) {
-                continue;
-            }
-
-            // @todo what if multiple ? bulk or list ?
-            auto it = m_panels.find(hub->ref().light());
+            auto it = m_panels.find(selectionItem->ref());
             if (it == m_panels.end()) {
                 continue;
             }
@@ -121,10 +110,15 @@ void PropertyDock::onSelectionChanged()
             panel = it->second;
             m_panels.erase(it);
 
-            // @todo sync data before delete or done by dtor...
+            // sync data if the hub exists
+            hub = static_cast<common::Hub*>(project->lookup(selectionItem->ref()));
+            if (hub) {
+                panel->commit();
+            }
+
             delete panel;
 
-            QString objName = toQString(hub->ref().light().longId());
+            QString objName = toQString(selectionItem->ref().longId());
 
             for (int i = 0; i < m_qtPropertyDock->widget()->layout()->count(); ++i) {
                 QWidget *ui = m_qtPropertyDock->widget()->layout()->itemAt(i)->widget();

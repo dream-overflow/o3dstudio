@@ -90,23 +90,24 @@ QWidget *Vector3Property::ui()
 
 void Vector3Property::setMinMax(o3d::Float min, o3d::Float max)
 {
-    if (m_v[0]) {
-        m_v[0]->setMinimum(min);
-        m_v[0]->setMaximum(max);
+    m_v[0]->setMinimum(min);
+    m_v[0]->setMaximum(max);
 
-        m_v[1]->setMinimum(min);
-        m_v[1]->setMaximum(max);
+    m_v[1]->setMinimum(min);
+    m_v[1]->setMaximum(max);
 
-        m_v[2]->setMinimum(min);
-        m_v[2]->setMaximum(max);
-    }
+    m_v[2]->setMinimum(min);
+    m_v[2]->setMaximum(max);
 }
 
 o3d::Vector3f Vector3Property::value() const
 {
-    if (m_v[0]) {
-        return Vector3f(m_v[0]->value(), m_v[1]->value(), m_v[2]->value());
-    } else {
-        return o3d::Vector3f(0, 0, 0);
-    }
+    return Vector3f(m_v[0]->value(), m_v[1]->value(), m_v[2]->value());
+}
+
+void Vector3Property::setValue(const o3d::Vector3f &v)
+{
+    m_v[0]->setValue(v.x());
+    m_v[1]->setValue(v.y());
+    m_v[2]->setValue(v.z());
 }

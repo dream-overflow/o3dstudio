@@ -67,6 +67,9 @@ void HubManipulator::setup(MasterScene *masterScene)
     // @todo is it necessary ?
     updateTransform(masterScene);
 
+    // don't want the object local axis
+    masterScene->scene()->setDrawObject(Scene::DRAW_LOCAL_AXIS, False);
+
     // register the picking colors
     masterScene->registerPickingId(0xffffff00, this);
     masterScene->registerPickingId(0xffffff01, this);
@@ -76,6 +79,9 @@ void HubManipulator::setup(MasterScene *masterScene)
 
 void HubManipulator::release(MasterScene *masterScene)
 {
+    // restore drawing of local axis
+    masterScene->scene()->setDrawObject(Scene::DRAW_LOCAL_AXIS, True);
+
     // register the picking colors
     masterScene->unregisterPickingId(0xffffff00);
     masterScene->unregisterPickingId(0xffffff01);
@@ -747,7 +753,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
     m_previous += v;
 }
 
-void HubManipulator::endTransform()
+void HubManipulator::endTransform(MasterScene *masterScene)
 {
     m_focus = False;
     m_transformMode = STATIC;

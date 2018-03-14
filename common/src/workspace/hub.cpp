@@ -43,9 +43,6 @@ Hub::~Hub()
     for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
         hub = it->second;
 
-        // remove the hub reference
-        project()->removeEntity(hub);
-
         // safely delete now
         delete hub;
     }
@@ -87,6 +84,9 @@ void Hub::destroy()
 
     // signal throught project->workspace
     project()->workspace()->onProjectHubRemoved(ref().light());
+
+    // and remove the hub reference from project
+    project()->removeEntity(this);
 }
 
 o3d::Bool Hub::load()
@@ -133,9 +133,6 @@ void Hub::addHub(Hub *hub, Int32 index)
     UInt64 hubId = hub->ref().light().id();
     m_hubs[hubId] = hub;
 
-    // called by create below
-    // project()->addEntity(hub);
-
     if (index >= 0) {
         Int32 n = 0;
         auto it = m_hubsOrder.begin();
@@ -155,11 +152,14 @@ void Hub::addHub(Hub *hub, Int32 index)
 
     hub->setProject(project());
 
-    // structure change (called by create)
-    // setDirty();
+    // structure change for this parent hub
+    setDirty();
 
-    // create the hub now
-    hub->create();
+    // create the hub now if not previously present into the project
+    // now done manually after
+    // if (!project()->lookup(hub->ref().light())) {
+        // hub->create();
+    //}
 }
 
 void Hub::removeHub(const LightRef &_ref)

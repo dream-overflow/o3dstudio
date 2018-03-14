@@ -111,22 +111,26 @@ public:
     //
 
     /**
-     * @brief Get a specific hub from a loaded project.
+     * @brief Get a specific hub from a loaded project using the lookup table.
+     * @note The hub can be outside of a parent hub.
      */
     Hub* hub(const LightRef &ref);
 
     /**
-     * @brief Get a specific hub from a loaded project (const version).
+     * @brief Get a specific hub from a loaded project using the lookup table (const version).
+     * @note The hub can be outside of a parent hub.
      */
     const Hub* hub(const LightRef &ref) const;
 
     /**
-     * @brief Find a specific hub, recursively from a loaded project.
+     * @brief Find a specific hub, recursively from the root hub of a loaded project.
+     * @note The hub have necessarely a parent one.
      */
     Hub* findHub(const LightRef &ref);
 
     /**
-     * @brief Find a specific hub, recursively from a loaded project (const version).
+     * @brief Find a specific hub, recursively from the root hub of a loaded project (const version).
+     * @note The hub have necessarely a parent one.
      */
     const Hub* findHub(const LightRef &ref) const;
 

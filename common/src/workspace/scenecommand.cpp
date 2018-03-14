@@ -67,5 +67,10 @@ void SceneHubCommand::process(MasterScene *masterScene)
 
            m_hub->syncWithScene(masterScene);
         }
+    } else {
+        // the hub can be removed but still not deleted, then we just interest in the DELETE command
+        if (m_cmdType == DELETE) {
+           m_hub->removeFromScene(masterScene);
+        }
     }
 }

@@ -64,7 +64,7 @@ public:
 
     virtual void beginTransform(MasterScene *masterScene, const Vector3f &pos);
     virtual void transform(const Vector3f &v, MasterScene *masterScene);
-    virtual void endTransform();
+    virtual void endTransform(MasterScene *masterScene);
     virtual void cancelTransform(MasterScene *masterScene);
     virtual Bool isTransform() const;
 

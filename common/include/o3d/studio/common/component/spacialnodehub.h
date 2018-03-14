@@ -169,6 +169,7 @@ private:
     // @todo multi transforms
     Vector3Property *m_position;
     Vector3Property *m_rotation;
+    Vector3Property *m_scale;
 };
 
 } // namespace common

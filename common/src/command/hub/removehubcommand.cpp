@@ -92,19 +92,23 @@ o3d::Bool RemoveHubCommand::undoCommand()
 
                 // restore content
                 DataInStream stream(m_data);
-                stream >> *hub;
                 hub->setRef(m_storedHubRef);
-
-                m_data.destroy();
 
                 parentHub->addHub(hub, m_nodePos);
 
-                // iterator over children
-                common::Hub *node = nullptr;
-                foreach (node, hub->hubs(true)) {
-                    // signal throught project->workspace
-                    project->workspace()->onProjectHubAdded(node->ref().light());
-                }
+                stream >> *hub;
+
+                m_data.destroy();
+
+                // hub was added after
+//                project->workspace()->onProjectHubAdded(hub->ref().light());
+
+//                // iterator over children
+//                common::Hub *node = nullptr;
+//                foreach (node, hub->hubs(true)) {
+//                    // signal throught project->workspace
+//                    project->workspace()->onProjectHubAdded(node->ref().light());
+//                }
 
                 return True;
             }

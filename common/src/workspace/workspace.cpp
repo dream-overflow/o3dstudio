@@ -266,7 +266,11 @@ Hub *Workspace::hub(const LightRef &ref)
         auto it = m_loadedProjects.find(ref.projectId());
         if (it != m_loadedProjects.end()) {
             Project *project = it->second;
-            return project->rootHub()->hub(ref.id());
+            Entity *entity = project->lookup(ref);
+            if (entity && entity->ref().light().baseTypeOf(TypeRef::hub())) {
+                return static_cast<Hub*>(entity);
+            }
+            // return project->rootHub()->findHub(ref.id());
         }
     }
 
@@ -278,8 +282,12 @@ const Hub *Workspace::hub(const LightRef &ref) const
     if (ref.baseTypeOf(TypeRef::hub())) {
         auto cit = m_loadedProjects.find(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
-            const Project *project = cit->second;
-            return project->rootHub()->hub(ref.id());
+            Project *project = cit->second;
+            Entity *entity = project->lookup(ref);
+            if (entity && entity->ref().light().baseTypeOf(TypeRef::hub())) {
+                return static_cast<Hub*>(entity);
+            }
+            // return project->rootHub()->findHub(ref.id());
         }
     }
 

@@ -68,6 +68,7 @@ o3d::Bool AddHubCommand::doCommand()
                 hub->setRef(ObjectRef::buildRef(project, hub->typeRef()));
 
                 parentHub->addHub(hub);
+                hub->create();
 
                 m_storedHubRef = hub->ref();
 
@@ -116,6 +117,8 @@ o3d::Bool AddHubCommand::redoCommand()
                 hub->setRef(m_storedHubRef);
 
                 parentHub->addHub(hub);
+                hub->create();
+
                 return True;
             }
         }

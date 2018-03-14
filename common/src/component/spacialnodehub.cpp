@@ -114,14 +114,7 @@ void SpacialNodeHub::create()
 
 void SpacialNodeHub::destroy()
 {
-    Hub *hub;
-    for (auto it = m_hubs.begin(); it != m_hubs.end(); ++it) {
-        hub = it->second;
-        hub->destroy();
-    }
-
-    // signal throught project->workspace
-    project()->workspace()->onProjectHubRemoved(ref().light());
+    Hub::destroy();
 
     for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
         // sync with master scenes
@@ -372,6 +365,12 @@ QWidget *SpacialNodePropertyPanel::ui()
     m_rotation = new Vector3Property(this, "rotation", fromQString(tr("Rotation")));
     pb.addPanelProperty(m_rotation);
 
+    m_scale = new Vector3Property(this, "scale", fromQString(tr("Scale")));
+    pb.addPanelProperty(m_scale);
+
+    // initial scale
+    m_scale->setValue(Vector3f(1,1,1));
+
     return pb.ui();
 }
 
@@ -385,10 +384,16 @@ void SpacialNodePropertyPanel::commit()
     if (m_hub) {
         m_hub->setPosition(0, m_position->value());
         m_hub->setRotation(0, m_rotation->value());
+        m_hub->setScale(0, m_scale->value());
     }
 }
 
 void SpacialNodePropertyPanel::update()
 {
-
+    if (m_hub) {
+        // @todo update display value from hub and need a change signal on hubs
+        // m_hub->setPosition(0, m_position->value());
+        // m_hub->setRotation(0, m_rotation->value());
+        // m_hub->setScale(0, m_scale->value());
+    }
 }

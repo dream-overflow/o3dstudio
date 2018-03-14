@@ -459,7 +459,7 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
         } else if (m_hubManipulator && m_hubManipulator->hasFocus()) {
             // action using the manipulator
             HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
-            hubManipulator->endTransform();
+            hubManipulator->endTransform(this);
         }
     } else if (event.button(Mouse::MIDDLE)) {
         if (m_actionMode == ACTION_CAMERA_ROTATION ||
