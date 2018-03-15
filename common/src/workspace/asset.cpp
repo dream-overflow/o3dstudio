@@ -68,6 +68,11 @@ void Asset::destroy()
 
 }
 
+void Asset::update()
+{
+
+}
+
 o3d::Bool Asset::deletable() const
 {
     return True;

@@ -34,7 +34,8 @@ public:
 
     void setMinMax(Float min, Float max);
 
-    o3d::Vector4 value() const;
+    o3d::Vector4f value() const;
+    void setValue(const o3d::Vector4f &v);
 
 public /*signals*/:
 

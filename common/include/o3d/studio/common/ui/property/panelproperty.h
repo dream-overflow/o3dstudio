@@ -11,6 +11,7 @@
 
 #include <QtWidgets/QWidget>
 #include "../panel.h"
+
 #include <o3d/core/evthandler.h>
 #include <o3d/core/evt.h>
 
@@ -33,6 +34,12 @@ public:
 
     //! Get the resulting widget.
     QWidget* ui();
+
+    //! Show related widget.
+    void show();
+
+    //! Hide the related widget.
+    void hide();
 
 protected:
 

@@ -74,6 +74,7 @@ public:
 
     virtual void create() override;
     virtual void destroy() override;
+    virtual void update() override;
 
     virtual Bool deletable() const override;
 
@@ -164,6 +165,7 @@ public:
 
 private:
 
+    LightRef m_ref;
     SpacialNodeHub *m_hub;
 
     // @todo multi transforms

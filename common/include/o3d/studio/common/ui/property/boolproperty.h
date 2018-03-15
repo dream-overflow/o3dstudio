@@ -32,6 +32,7 @@ public:
     QWidget* ui();
 
     o3d::Bool value() const;
+    void setValue(Bool checked);
 
 public /*signals*/:
 

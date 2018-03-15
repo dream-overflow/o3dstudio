@@ -12,6 +12,8 @@
 #include "component.h"
 #include "../workspace/hub.h"
 
+#include <o3d/image/color.h>
+
 #include <map>
 
 namespace o3d {
@@ -24,6 +26,10 @@ namespace common {
 class Entity;
 class Project;
 class Hub;
+class Vector3Property;
+class ColorProperty;
+class DropDownProperty;
+class FloatProperty;
 
 /**
  * @brief The LightComponent class
@@ -37,6 +43,7 @@ public:
 
     virtual void setup() override;
     virtual Hub* buildHub(const String &name, Project *project, Entity *parent) override;
+    virtual Panel* panel(Panel::PanelType panelType, Hub *hub) override;
 
 protected:
 };
@@ -64,6 +71,7 @@ public:
 
     virtual void create() override;
     virtual void destroy() override;
+    virtual void update() override;
 
     virtual Bool deletable() const override;
 
@@ -83,13 +91,73 @@ public:
     // Properties
     //
 
-    // @todo
+    void setLightType(LightType type);
+    void setAttenuation(const Vector3& quadratic);
+    void setAmbient(const Color& color);
+    void setDiffuse(const Color& color);
+    void setSpecular(const Color& color);
+    void setExponent(Float exp);
+    void setCutOff(Float angle);
+
+    LightType lightType() const;
+    const Vector3& attenuation() const;
+    const Color& ambient() const;
+    const Color& diffuse() const;
+    const Color& specular() const;
+    Float exponent() const;
+    Float cutOff() const;
 
 protected:
 
     LightType m_lightType;
+    Vector3 m_attenuation;
+    Color m_ambient;
+    Color m_diffuse;
+    Color m_specular;
+    Float m_exponent;
+    Float m_cutOff;
 
     std::map<MasterScene*, o3d::Light*> m_instances;
+};
+
+/**
+ * @brief The LightPropertyPanel
+ */
+class LightPropertyPanel : public Panel, public EvtHandler
+{
+    Q_DECLARE_TR_FUNCTIONS(LightPropertyPanel)
+
+public:
+
+    LightPropertyPanel(LightHub *hub);
+    virtual ~LightPropertyPanel();
+
+    virtual String elementName() const override;
+
+    virtual QWidget* ui() override;
+
+    virtual PanelType panelType() const override;
+
+    virtual void commit() override;
+    virtual void update() override;
+
+public /*slot*/:
+
+    void onLightTypeChanged(Int32 lightType);
+
+private:
+
+    LightRef m_ref;
+    LightHub *m_hub;
+
+    // @todo multi transforms
+    DropDownProperty *m_lightType;
+    Vector3Property *m_attenuation;
+    ColorProperty *m_ambient;
+    ColorProperty *m_diffuse;
+    ColorProperty *m_specular;
+    FloatProperty *m_exponent;
+    FloatProperty *m_cutOff;
 };
 
 } // namespace common

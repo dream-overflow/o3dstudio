@@ -46,6 +46,7 @@ public:
 
     virtual void create() override;
     virtual void destroy() override;
+    virtual void update() override;
 
     virtual Bool deletable() const override;
 

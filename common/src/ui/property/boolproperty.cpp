@@ -42,12 +42,18 @@ BoolProperty::BoolProperty(Panel *panel, const String &name, const o3d::String &
 
     // checkbox
     m_b = new QCheckBox();
+    m_b->blockSignals(true);
     m_b->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     m_b->setMinimumWidth(75);
+    m_b->blockSignals(false);
     pl->addWidget(m_b);
 
     l->addWidget(pw);
     m_widget = valueGroup;
+
+    m_widget->connect(m_b, &QCheckBox::stateChanged, [this] (int) {
+        onValueChanged(value());
+    });
 }
 
 BoolProperty::~BoolProperty()
@@ -68,5 +74,14 @@ o3d::Bool BoolProperty::value() const
         return m_b->isChecked();
     } else {
         return 0;
+    }
+}
+
+void BoolProperty::setValue(o3d::Bool checked)
+{
+    if (m_b) {
+        m_b->blockSignals(true);
+        m_b->setChecked(checked);
+        m_b->blockSignals(false);
     }
 }

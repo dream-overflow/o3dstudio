@@ -46,6 +46,7 @@ ColorProperty::ColorProperty(
 
     // r
     m_v[0] = new QDoubleSpinBox();
+    m_v[0]->blockSignals(true);
     m_v[0]->setRange(0, 1);
     m_v[0]->setDecimals(6);
     m_v[0]->setSingleStep(0.1);
@@ -53,10 +54,12 @@ ColorProperty::ColorProperty(
     m_v[0]->setValue(0);
     m_v[0]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     m_v[0]->setMinimumWidth(75);
+    m_v[0]->blockSignals(false);
     pl->addWidget(m_v[0]);
 
     // g
     m_v[1] = new QDoubleSpinBox();
+    m_v[1]->blockSignals(true);
     m_v[1]->setRange(0, 1);
     m_v[1]->setDecimals(6);
     m_v[1]->setSingleStep(0.1);
@@ -64,10 +67,12 @@ ColorProperty::ColorProperty(
     m_v[1]->setValue(0);
     m_v[1]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     m_v[1]->setMinimumWidth(75);
+    m_v[1]->blockSignals(false);
     pl->addWidget(m_v[1]);
 
     // b
     m_v[2] = new QDoubleSpinBox();
+    m_v[2]->blockSignals(true);
     m_v[2]->setRange(0, 1);
     m_v[2]->setDecimals(6);
     m_v[2]->setSingleStep(0.1);
@@ -75,21 +80,34 @@ ColorProperty::ColorProperty(
     m_v[2]->setValue(0);
     m_v[2]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     m_v[2]->setMinimumWidth(75);
+    m_v[2]->blockSignals(false);
     pl->addWidget(m_v[2]);
 
     // a
-    m_v[3] = new QDoubleSpinBox();
-    m_v[3]->setRange(0, 1);
-    m_v[3]->setDecimals(6);
-    m_v[3]->setSingleStep(0.1);
-    m_v[3]->setPrefix("a:");
-    m_v[3]->setValue(0);
-    m_v[3]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-    m_v[3]->setMinimumWidth(75);
-    pl->addWidget(m_v[3]);
+    if (m_format == COLOR_RGBA) {
+        m_v[3] = new QDoubleSpinBox();
+        m_v[3]->blockSignals(true);
+        m_v[3]->setRange(0, 1);
+        m_v[3]->setDecimals(6);
+        m_v[3]->setSingleStep(0.1);
+        m_v[3]->setPrefix("a:");
+        m_v[3]->setValue(0);
+        m_v[3]->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+        m_v[3]->setMinimumWidth(75);
+        m_v[3]->blockSignals(false);
+        pl->addWidget(m_v[3]);
+    } else {
+        m_v[3] = nullptr;
+    }
 
     l->addWidget(pw);
     m_widget = valueGroup;
+
+    for (int i = 0; i < (m_format == COLOR_RGB ? 3 : 4); ++i) {
+        m_widget->connect<void(QDoubleSpinBox::*)(double)>(m_v[i], &QDoubleSpinBox::valueChanged, [this] (double) {
+            onValueChanged(value());
+        });
+    }
 }
 
 ColorProperty::ColorFormat ColorProperty::colorFormat() const
@@ -111,9 +129,18 @@ QWidget *ColorProperty::ui()
 
 o3d::Color ColorProperty::value() const
 {
-    if (m_v[0]) {
+    if (m_format == COLOR_RGBA) {
         return Color(m_v[0]->value(), m_v[1]->value(), m_v[2]->value(), m_v[3]->value());
     } else {
-        return o3d::Color();
+        return Color(m_v[0]->value(), m_v[1]->value(), m_v[2]->value(), 1.0);
+    }
+}
+
+void ColorProperty::setValue(const o3d::Color &color)
+{
+    for (int i = 0; i < (m_format == COLOR_RGB ? 3 : 4); ++i) {
+        m_v[i]->blockSignals(true);
+        m_v[i]->setValue(color[i]);
+        m_v[i]->blockSignals(false);
     }
 }

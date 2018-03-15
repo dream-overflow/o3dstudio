@@ -89,6 +89,11 @@ void Hub::destroy()
     project()->removeEntity(this);
 }
 
+void Hub::update()
+{
+    // nothing to do
+}
+
 o3d::Bool Hub::load()
 {
     return True;

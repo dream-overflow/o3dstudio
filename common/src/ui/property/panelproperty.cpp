@@ -39,3 +39,17 @@ QWidget *PanelProperty::ui()
 {
     return m_widget;
 }
+
+void PanelProperty::show()
+{
+    if (m_widget) {
+        m_widget->show();
+    }
+}
+
+void PanelProperty::hide()
+{
+    if (m_widget) {
+        m_widget->hide();
+    }
+}

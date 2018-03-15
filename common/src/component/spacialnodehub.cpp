@@ -21,6 +21,9 @@
 #include "o3d/studio/common/workspace/masterscene.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/workspace/workspacemanager.h"
+
 using namespace o3d::studio::common;
 
 
@@ -119,6 +122,15 @@ void SpacialNodeHub::destroy()
     for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
         // sync with master scenes
         SceneCommand *sceneCommand = new SceneHubCommand(this, SceneHubCommand::DELETE);
+        it->first->addCommand(sceneCommand);
+    }
+}
+
+void SpacialNodeHub::update()
+{
+     for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
+        // sync with master scenes
+        SceneCommand *sceneCommand = new SceneHubCommand(this, SceneHubCommand::SYNC);
         it->first->addCommand(sceneCommand);
     }
 }
@@ -342,7 +354,12 @@ o3d::Bool SpacialNodeHub::removeChildFromScene(MasterScene *masterScene, o3d::Sc
 SpacialNodePropertyPanel::SpacialNodePropertyPanel(SpacialNodeHub *hub) :
     m_hub(hub)
 {
+    O3D_ASSERT(m_hub);
+    O3D_ASSERT(m_ref.isValid());
 
+    if (m_hub) {
+        m_ref = m_hub->ref().light();
+    }
 }
 
 SpacialNodePropertyPanel::~SpacialNodePropertyPanel()
@@ -381,19 +398,26 @@ Panel::PanelType SpacialNodePropertyPanel::panelType() const
 
 void SpacialNodePropertyPanel::commit()
 {
-    if (m_hub) {
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace->hub(m_ref) == m_hub) {
         m_hub->setPosition(0, m_position->value());
         m_hub->setRotation(0, m_rotation->value());
         m_hub->setScale(0, m_scale->value());
+
+        m_hub->update();
     }
 }
 
 void SpacialNodePropertyPanel::update()
 {
-    if (m_hub) {
-        // @todo update display value from hub and need a change signal on hubs
-        // m_hub->setPosition(0, m_position->value());
-        // m_hub->setRotation(0, m_rotation->value());
-        // m_hub->setScale(0, m_scale->value());
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace->hub(m_ref) == m_hub) {
+        Vector3 euler;
+        m_hub->transform(0).getRotation().toEuler(euler);
+        // @todo range clamp...
+
+        m_position->setValue(m_hub->transform(0).getPosition());
+        m_rotation->setValue(euler);
+        m_scale->setValue(m_hub->transform(0).getScale());
     }
 }

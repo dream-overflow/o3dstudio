@@ -164,7 +164,12 @@ void Project::create()
 
 void Project::destroy()
 {
+    // nothing to do
+}
 
+void Project::update()
+{
+    // nothing to do
 }
 
 o3d::Bool Project::deletable() const

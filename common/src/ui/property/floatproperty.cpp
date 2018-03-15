@@ -42,6 +42,7 @@ FloatProperty::FloatProperty(Panel *panel, const String &name, const o3d::String
 
     // x
     m_x = new QDoubleSpinBox();
+    m_x->blockSignals(true);
     m_x->setRange(-1000000000, 1000000000);
     m_x->setDecimals(6);
     m_x->setSingleStep(0.1);
@@ -49,10 +50,16 @@ FloatProperty::FloatProperty(Panel *panel, const String &name, const o3d::String
     m_x->setValue(0);
     m_x->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     m_x->setMinimumWidth(75);
+    m_x->setKeyboardTracking(false);
+    m_x->blockSignals(false);
     pl->addWidget(m_x);
 
     l->addWidget(pw);
     m_widget = valueGroup;
+
+    m_widget->connect<void(QDoubleSpinBox::*)(double)>(m_x, &QDoubleSpinBox::valueChanged, [this] (double) {
+        onValueChanged(value());
+    });
 }
 
 FloatProperty::~FloatProperty()
@@ -81,5 +88,14 @@ o3d::Float FloatProperty::value() const
         return m_x->value();
     } else {
         return 0;
+    }
+}
+
+void FloatProperty::setValue(o3d::Float v)
+{
+    if (m_x) {
+        m_x->blockSignals(true);
+        m_x->setValue(v);
+        m_x->blockSignals(false);
     }
 }

@@ -42,6 +42,7 @@ public:
     ColorFormat colorFormat() const;
 
     o3d::Color value() const;
+    void setValue(const o3d::Color &color);
 
 public /*signals*/:
 

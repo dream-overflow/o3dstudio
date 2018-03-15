@@ -34,6 +34,7 @@ public:
     void setMinMax(Float min, Float max);
 
     o3d::Float value() const;
+    void setValue(Float v);
 
 public /*signals*/:
 

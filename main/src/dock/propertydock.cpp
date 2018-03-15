@@ -153,7 +153,8 @@ void PropertyDock::onSelectionChanged()
 
                 m_qtPropertyDock->widget()->layout()->addWidget(ui);
                 m_panels[hub->ref().light()] = panel;
-                // @todo cleanup
+
+                panel->update();
             }
         }
     }

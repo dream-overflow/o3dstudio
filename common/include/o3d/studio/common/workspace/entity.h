@@ -70,6 +70,11 @@ public:
     virtual void destroy() = 0;
 
     /**
+     * @brief Update.
+     */
+    virtual void update() = 0;
+
+    /**
      * @brief Returns true if the entity can be safely deleted.
      */
     virtual Bool deletable() const = 0;

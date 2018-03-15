@@ -106,7 +106,8 @@ SOURCES += \
     src/ui/property/vector4property.cpp \
     src/ui/property/colorproperty.cpp \
     src/ui/property/boolproperty.cpp \
-    src/ui/scene/hubmanipulator.cpp
+    src/ui/scene/hubmanipulator.cpp \
+    src/ui/property/dropdownproperty.cpp
 
 
 HEADERS += \ 
@@ -207,7 +208,8 @@ HEADERS += \
     include/o3d/studio/common/ui/property/vector4property.h \
     include/o3d/studio/common/ui/property/colorproperty.h \
     include/o3d/studio/common/ui/property/boolproperty.h \
-    include/o3d/studio/common/ui/scene/hubmanipulator.h
+    include/o3d/studio/common/ui/scene/hubmanipulator.h \
+    include/o3d/studio/common/ui/property/dropdownproperty.h
 
 LIBS += -lobjective3d-dbg
 

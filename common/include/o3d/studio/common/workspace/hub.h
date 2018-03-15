@@ -47,8 +47,20 @@ public:
     virtual Project* project() override;
     virtual const Project* project() const override;
 
+    /**
+     * @brief Create the hub and manage scene creation command.
+     */
     virtual void create() override;
+
+    /**
+     * @brief Create the hub and manage scene creation command.
+     */
     virtual void destroy() override;
+
+    /**
+     * @brief Create the hub and manage scene creation command.
+     */
+    virtual void update() override;
 
     virtual Bool load() override;
     virtual Bool save() override;

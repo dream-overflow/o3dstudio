@@ -12,6 +12,9 @@
 #include <QtWidgets/QWidget>
 #include "../element.h"
 
+#include <o3d/core/evthandler.h>
+#include <o3d/core/evt.h>
+
 namespace o3d {
 namespace studio {
 namespace common {
