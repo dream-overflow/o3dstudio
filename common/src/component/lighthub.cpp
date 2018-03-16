@@ -335,7 +335,7 @@ LightPropertyPanel::LightPropertyPanel(LightHub *hub) :
     m_hub(hub)
 {
     O3D_ASSERT(m_hub);
-    O3D_ASSERT(m_ref.isValid());
+    O3D_ASSERT(m_hub->exists());
 
     if (m_hub) {
         m_ref = m_hub->ref().light();
