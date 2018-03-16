@@ -145,7 +145,7 @@ protected:
 /**
  * @brief The SpacialNodePropertyPanel
  */
-class SpacialNodePropertyPanel : public Panel
+class SpacialNodePropertyPanel : public Panel, public EvtHandler
 {
     Q_DECLARE_TR_FUNCTIONS(SpacialNodePropertyPanel)
 

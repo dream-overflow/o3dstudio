@@ -158,6 +158,14 @@ o3d::Bool LightHub::serializeContent(OutStream &stream) const
         return False;
     }
 
+    stream << m_lightType
+           << m_ambient
+           << m_diffuse
+           << m_specular
+           << m_exponent
+           << m_attenuation
+           << m_cutOff;
+
     return True;
 }
 
@@ -166,6 +174,14 @@ o3d::Bool LightHub::deserializeContent(InStream &stream)
     if (!Hub::deserializeContent(stream)) {
         return False;
     }
+
+    stream >> m_lightType
+           >> m_ambient
+           >> m_diffuse
+           >> m_specular
+           >> m_exponent
+           >> m_attenuation
+           >> m_cutOff;
 
     return True;
 }
@@ -387,6 +403,7 @@ QWidget *LightPropertyPanel::ui()
 
     // contextual if spot light
     m_cutOff = new FloatProperty(this, "cutoff", fromQString(tr("Cut-off")));
+    m_cutOff->setMinMax(0, 180);
     pb.addPanelProperty(m_cutOff);
 
     m_cutOff->onValueChanged.connect(this, [this] (Float) {

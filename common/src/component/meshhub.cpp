@@ -197,7 +197,7 @@ void MeshHub::createToScene(MasterScene *masterScene)
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setMaterial(Material::DEFERRED, new LambertMaterial(mesh));
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setAmbient(Color(1.0f, 1.0f, 1.0f, 1.f));
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setDiffuse(Color(1.0f, 1.0f, 1.0f, 1.f));
-    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setSpecular(Color(0.0f, 0.0f, 0.0f, 1.f));
+    mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setSpecular(Color(0.5f, 0.5f, 0.5f, 1.f));
     mesh->getMaterialProfile(0).getTechnique(0).getPass(0).setShine(1.f);
     mesh->initMaterialProfiles();
 

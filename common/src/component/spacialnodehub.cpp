@@ -379,11 +379,23 @@ QWidget *SpacialNodePropertyPanel::ui()
     m_position = new Vector3Property(this, "position", fromQString(tr("Position")));
     pb.addPanelProperty(m_position);
 
+    m_position->onValueChanged.connect(this, [this] (Vector3) {
+        commit();
+    });
+
     m_rotation = new Vector3Property(this, "rotation", fromQString(tr("Rotation")));
     pb.addPanelProperty(m_rotation);
 
+    m_rotation->onValueChanged.connect(this, [this] (Vector3) {
+        commit();
+    });
+
     m_scale = new Vector3Property(this, "scale", fromQString(tr("Scale")));
     pb.addPanelProperty(m_scale);
+
+    m_scale->onValueChanged.connect(this, [this] (Vector3) {
+        commit();
+    });
 
     // initial scale
     m_scale->setValue(Vector3f(1,1,1));
