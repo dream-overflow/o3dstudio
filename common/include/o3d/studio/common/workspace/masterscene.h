@@ -217,6 +217,8 @@ private:
     UInt32 m_linesCount[4];
     UInt32 m_pointCount[4];
 
+    o3d::Point3f m_pointerPos;    //!< Primary pointer position (generally the 2d mouse cursor)
+
     Hub *m_hoverHub;              //!< Current hub hovered by cursor
     o3d::Point3f m_pickPos;       //!< Current picking position
 
@@ -244,7 +246,7 @@ private:
     std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;
 
     void processCommands();
-    void postPicking(const MouseEvent &event);
+    void postPicking(const Vector3f &position);
 };
 
 } // namespace common

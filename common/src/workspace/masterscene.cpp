@@ -32,6 +32,8 @@
 #include <o3d/engine/object/stransform.h>
 #include <o3d/engine/context.h>
 #include <o3d/engine/picking.h>
+#include <o3d/engine/visibility/visibilitymanager.h>
+#include <o3d/engine/visibility/visibilitybasic.h>
 
 #include <o3d/core/keyboard.h>
 
@@ -254,12 +256,13 @@ void MasterScene::initialize(Bool debug)
 
 void MasterScene::paintDrawer()
 {
-    // process commands (FIFO)
-    processCommands();
-
     if (m_scene) {
         // CPU and GPU, need GL context
         m_scene->display();
+
+        // process commands (FIFO)
+        processCommands();
+
     }
 }
 
@@ -309,7 +312,7 @@ void MasterScene::terminateDrawer()
     if (!m_sceneUIElements.empty()) {
         for (SceneUIElement *elt : m_sceneUIElements) {
             // remove it from the scene drawer
-       //     m_sceneDrawer.get()->removeSceneUIElement(elt);
+            // m_sceneDrawer.get()->removeSceneUIElement(elt);
 
             delete elt;
         }
@@ -347,6 +350,9 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
     if (!m_scene) {
         return False;
     }
+
+    // keep pointer position
+    m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     if (event.button(Mouse::LEFT)) {
         if (m_actionMode == ACTION_NONE && m_hubManipulator) {
@@ -419,8 +425,6 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         }
     }
 
-    postPicking(event);
-
     if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
         // no cursor and infinite scrolling
         QCursor cursor = m_content->cursor();
@@ -435,6 +439,9 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         m_lockedPos = event.globalPos();
     }
 
+    // could be necessary
+    postPicking(m_pointerPos);
+
     return True;
 }
 
@@ -443,6 +450,9 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     if (!m_scene) {
         return False;
     }
+
+    // keep pointer position
+    m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     if (event.button(Mouse::LEFT)) {
         if (m_actionMode == ACTION_SELECTION) {
@@ -484,7 +494,8 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
         m_content->setCursor(cursor);
     }
 
-    postPicking(event);
+    // could be necessary
+    postPicking(m_pointerPos);
 
     return True;
 }
@@ -494,6 +505,9 @@ o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
     if (!m_scene) {
         return False;
     }
+
+    // keep pointer position
+    m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     if (event.button(Mouse::LEFT)) {
 
@@ -512,6 +526,9 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
     if (!m_scene) {
         return False;
     }
+
+    // keep pointer position
+    m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     Float elapsed = m_scene->getFrameManager()->getFrameDuration();
     Int32 deltaX = event.globalPos().x() - m_lockedPos.x();
@@ -591,8 +608,6 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         }
     }
 
-    postPicking(event);
-
     if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
         // lock mouse position, infinite cursor
         QCursor cursor = m_content->cursor();
@@ -605,6 +620,9 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         // relative
         m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
     }
+
+    // necessary at each move
+    postPicking(m_pointerPos);
 
     return True;
 }
@@ -651,7 +669,8 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
         }
     }
 
-    // postPicking(event); @todo need mouse position
+    // could be necessary
+    postPicking(m_pointerPos);
 
     return False;
 }
@@ -700,7 +719,8 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
         m_hubManipulator->keyDownEvent(event, this);
     }
 
-    // postPicking(event); @todo need mouse position
+    // could be necessary
+    postPicking(m_pointerPos);
 
     return True;
 }
@@ -724,7 +744,8 @@ o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &event)
         m_motionType = MOTION_FOLLOW;
     }
 
-    // postPicking(event); @todo need mouse position
+    // could be necessary
+    postPicking(m_pointerPos);
 
     return True;
 }
@@ -739,6 +760,8 @@ o3d::Bool MasterScene::focusInEvent(const Event &/*event*/)
 
 o3d::Bool MasterScene::focusOutEvent(const Event &/*event*/)
 {
+    // we don't want that focus out loose current displaying of a manipulator
+    // @todo so is this ok and for focus in ?
 //    m_motionType = MOTION_FOLLOW;
 //    m_actionMode = ACTION_NONE;
 
@@ -929,14 +952,14 @@ void MasterScene::processCommands()
     }
 }
 
-void MasterScene::postPicking(const MouseEvent &event)
+void MasterScene::postPicking(const Vector3f &position)
 {
     // only at once (and could add a small timer to avoid a lot of events)
     if (!m_scene->getPicking()->isPickingToProcess() && !m_scene->getPicking()->isProcessingPicking()) {
         // picking or manipulation of a transformer
         m_scene->getPicking()->postPickingEvent(
-                    (UInt32)event.localPos().x(),
-                    m_scene->getViewPortManager()->getReshapeHeight() - (UInt32)event.localPos().y());
+                    (UInt32)position.x(),
+                    m_scene->getViewPortManager()->getReshapeHeight() - (UInt32)position.y());
     }
 }
 
@@ -951,10 +974,23 @@ void MasterScene::initializeDrawer()
 
         m_scene = new o3d::Scene(nullptr, path.getFullPathName(), m_renderer);
 
+        // default all symbolics objects are drawn
+        m_scene->drawAllSymbolicObject();
+
+        // a typical blue background
         m_scene->getContext()->setBackgroundColor(0.633f, 0.792f, 0.914f, 0.0f);
         m_scene->setGlobalAmbient(Color(0.5f, 0.5f, 0.5f));
 
-        // working camera
+        // visibility manager (default to simple)
+        // @todo current quadtree is not adapted to edition have an octree or quadtree
+        // more specialized for edition
+        m_scene->getVisibilityManager()->setGlobal(VisibilityManager::DISTANCE, 8, 128);
+        m_scene->getVisibilityManager()->disableMaxDistance();
+
+        // don't display visibility manager debug data
+        m_scene->setDrawObject(Scene::DRAW_VISIBILITY, False);
+
+        // working camera @todo might be configurable per project
         m_camera = new o3d::Camera(m_scene);
         m_camera.get()->setZnear(0.25f);
         m_camera.get()->setZfar(10000.f);
@@ -968,9 +1004,6 @@ void MasterScene::initializeDrawer()
         m_sceneDrawer = new MasterSceneDrawer(m_scene, this);
         m_viewport = m_scene->getViewPortManager()->addScreenViewPort(m_camera.get(), m_sceneDrawer.get(), 0);
 
-        // default all symbolics objects are drawn
-        m_scene->drawAllSymbolicObject();
-
         // enable picking by color and connect its signal
         m_scene->getPicking()->setMode(Picking::COLOR);
         m_scene->getPicking()->onHit.connect(this, &MasterScene::pickingHit, EvtHandler::CONNECTION_ASYNCH);
@@ -978,7 +1011,7 @@ void MasterScene::initializeDrawer()
         m_scene->getPicking()->onNoHit.connect(this, &MasterScene::pickingNoHit, EvtHandler::CONNECTION_ASYNCH);
         m_scene->getPicking()->setCamera(m_camera.get());
 
-        // add an helper grid
+        // add an helper grid @todo configurable per project
         Int32 gridStep = (Int32)(200.f * m_camera.get()->getZnear());
         Float size = o3d::min(m_camera.get()->getZfar() * 0.8f, 1000.f);
         Int32 gridHW = (Int32)(size);
@@ -989,6 +1022,7 @@ void MasterScene::initializeDrawer()
         // add a HUD for common info about current scene
         TrueTypeFont::initializeFreeType();
 
+        // @todo position and visibility configurable globally and or override per project
         TrueTypeFont *font2d = new TrueTypeFont(m_scene);
         font2d->load("rc/fonts/arial.ttf", TrueTypeFont::CHARSET_LATIN1);
         InfoHUD *infoHUD = new InfoHUD(this, Point2f(0.02f, 0.02f), font2d);
