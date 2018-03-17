@@ -141,7 +141,7 @@ protected:
 
     SpacialNodeHub *m_activeElt;
 
-    void updateTransform(MasterScene *masterScene);
+    void updateTransform(MasterScene *masterScene, Bool keepOrg);
     void refresh(MasterScene *masterScene);
 
     Vector3f computeLinearVelocity(MasterScene *masterScene, const Vector3f &delta, Axe axe);

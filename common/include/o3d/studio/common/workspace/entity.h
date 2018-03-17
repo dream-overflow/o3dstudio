@@ -30,13 +30,17 @@ public:
 
     enum Changes
     {
-        PRESENTATION_CHANGED = 0,
-        DISPLAY_CHANGED = 1
+        PRESENTATION_CHANGED = 0,   //!< Presentation changed
+        DISPLAY_CHANGED = 1         //!< Display changed
     };
 
     enum Capacity
     {
-        STATE_CHANGED = 32,
+        STATE_CHANGED = 32,      //!< State (properties...) changed.
+        STATE_ACTIVITY,          //!< Entity is active (processing).
+        STATE_VISIBILITY,        //!< Entity is visible (if displayable).
+        STATE_ACTIVE_SELECTION,  //!< Active entity of the selection.
+        STATE_SELECTED           //!< Is selected entity
     };
 
     explicit Entity(const String &name, Entity *parent = nullptr);
@@ -113,6 +117,48 @@ public:
      * @brief Is the parent entity a hub.
      */
     virtual Bool isParentHub() const;
+
+    /**
+     * @brief Set (un)active entity of the selection.
+     * @note Compaitble with selected.
+     */
+    virtual void setActiveSelection(Bool activity);
+
+    /**
+     * @brief Is the active entity of the selection.
+     */
+    Bool isActiveSelection() const;
+
+    /**
+     * @brief Set selected entity.
+     * @note Compatible with active.
+     */
+    virtual void setSelected(Bool selected);
+
+    /**
+     * @brief Is entity part of the selection
+     */
+    Bool isSelected() const;
+
+    /**
+     * @brief Set activity of the entity (processing, update...)
+     */
+    virtual void setActivity(Bool activity);
+
+    /**
+     * @brief Is the entity active (processing, update...)
+     */
+    Bool isActive() const;
+
+    /**
+     * @brief Set visibility state of the entity (draw, picking...)
+     */
+    virtual void setVisibility(Bool visibility);
+
+    /**
+     * @brief Is the entity visibly (draw, picking...)
+     */
+    Bool isVisible() const;
 
     /**
      * @brief Serialize the entity content.

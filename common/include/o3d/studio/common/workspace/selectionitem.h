@@ -17,11 +17,15 @@ namespace common {
 
 class Entity;
 
+/**
+ * @brief The SelectionItem used by the selection manager.
+ * It manage the state selected of the entity.
+ */
 class O3S_API SelectionItem
 {
 public:
 
-    SelectionItem(const Entity *entity);
+    SelectionItem(Entity *entity);
     SelectionItem(const LightRef &ref);
     SelectionItem(const LightRef &ref, const LightRef &parentRef);
 

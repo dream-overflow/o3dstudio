@@ -88,11 +88,53 @@ o3d::Bool Entity::isParentHub() const
     return m_parent && m_parent->ref().light().baseTypeOf(TypeRef::hub());
 }
 
+void Entity::setActiveSelection(o3d::Bool activity)
+{
+    m_capacities.setBit(STATE_ACTIVE_SELECTION, activity);
+}
+
+o3d::Bool Entity::isActiveSelection() const
+{
+    return m_capacities.getBit(STATE_ACTIVE_SELECTION);
+}
+
+void Entity::setSelected(o3d::Bool selected)
+{
+    m_capacities.setBit(STATE_SELECTED, selected);
+}
+
+o3d::Bool Entity::isSelected() const
+{
+    return m_capacities.getBit(STATE_SELECTED);
+}
+
+void Entity::setActivity(o3d::Bool activity)
+{
+    m_capacities.setBit(STATE_ACTIVITY, activity);
+}
+
+o3d::Bool Entity::isActive() const
+{
+    return m_capacities.getBit(STATE_ACTIVITY);
+}
+
+void Entity::setVisibility(o3d::Bool visibility)
+{
+    m_capacities.setBit(STATE_VISIBILITY, visibility);
+}
+
+o3d::Bool Entity::isVisible() const
+{
+    return m_capacities.getBit(STATE_VISIBILITY);
+}
+
 o3d::Bool Entity::serializeContent(OutStream &stream) const
 {
     stream << m_name
            << m_parent->ref().uuid()
-           << m_parent->ref().strong().typeName();
+           << m_parent->ref().strong().typeName()
+           << m_capacities.getBit(STATE_ACTIVITY)
+           << m_capacities.getBit(STATE_VISIBILITY);
 
     return True;
 }
@@ -102,9 +144,16 @@ o3d::Bool Entity::deserializeContent(InStream &stream)
     Uuid uuid;
     String typeName;
 
+    Bool activity, visibility;
+
     stream >> m_name
            >> uuid
-           >> typeName;
+           >> typeName
+           >> activity
+           >> visibility;
+
+    m_capacities.setBit(STATE_ACTIVITY, activity);
+    m_capacities.setBit(STATE_VISIBILITY, visibility);
 
     return True;
 }

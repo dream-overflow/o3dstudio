@@ -64,8 +64,8 @@ HubManipulator::~HubManipulator()
 
 void HubManipulator::setup(MasterScene *masterScene)
 {
-    // @todo is it necessary ?
-    updateTransform(masterScene);
+    // compute initial helper
+    updateTransform(masterScene, True);
 
     // don't want the object local axis
     masterScene->scene()->setDrawObject(Scene::DRAW_LOCAL_AXIS, False);
@@ -232,6 +232,9 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
     p1.normalize();
     p2.normalize();
 
+    // @todo according to the direction of the active object
+    // minus the sign of the velocity if inverted to the natural 2d rotation
+
     // http://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
     Float phi = o3d::simplifyRadian(atan2(p1.y(), p1.x()) - atan2(p2.y(), p2.x()));
     Float velocity = phi;
@@ -285,7 +288,9 @@ void HubManipulator::keyDownEvent(const KeyEvent &event, MasterScene *masterScen
         }
 
         // @todo pivot point change
-        updateTransform(masterScene);
+
+        // helper position change
+        updateTransform(masterScene, True);
     }
 }
 
@@ -298,7 +303,7 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
     m_relativeV.zero();
     m_initial = m_previous = pos;
 
-    updateTransform(masterScene);
+    updateTransform(masterScene, True);
 
     if (masterScene->actionMode() == MasterScene::ACTION_ROTATION) {
         m_transformMode = ROTATE;
@@ -885,6 +890,9 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
         return;
     }
 
+    // @todo remove need a listener to know about a changes on targets
+    updateTransform(masterScene, False);
+
     // during display uses current active viewport and camera
     refresh(masterScene);
 
@@ -1108,7 +1116,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     context.setDefaultDepthRange();
 }
 
-void HubManipulator::updateTransform(MasterScene *masterScene)
+void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
 {
     if (m_targets.empty()) {
         m_transform->identity();
@@ -1205,10 +1213,12 @@ void HubManipulator::updateTransform(MasterScene *masterScene)
     m_transform->setRotation(rot);
     m_transform->setPosition(pos);
 
-    // initial transformation for reset if cancel
-    m_orgPos = m_transform->getPosition();
-    m_orgRot = m_transform->getRotation();
-    m_orgScale = m_transform->getScale();
+    if (keepOrg) {
+        // initial transformation for reset if cancel
+        m_orgPos = m_transform->getPosition();
+        m_orgRot = m_transform->getRotation();
+        m_orgScale = m_transform->getScale();
+    }
 }
 
 o3d::Color HubManipulator::axeColor(HubManipulator::Axe axe)

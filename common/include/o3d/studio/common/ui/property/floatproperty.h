@@ -32,9 +32,18 @@ public:
     QWidget* ui();
 
     void setMinMax(Float min, Float max);
+    void setPrecision(Int32 dec);
 
     o3d::Float value() const;
     void setValue(Float v);
+
+    /**
+     * @brief Setup a forbidden sub-range of value in exclusive (strict > and <).
+     * @note min must be lesser than max.
+     * @note If min is equal to max the range is empty, same as unset method.
+     */
+    void setForbiddenExclusiveRange(Float minExcl, Float maxExcl);
+    void unsetForbiddenExclusiveRange();
 
 public /*signals*/:
 
@@ -43,6 +52,9 @@ public /*signals*/:
 private:
 
     class QDoubleSpinBox *m_x;
+
+    Float m_minExl;
+    Float m_maxExl;
 };
 
 } // namespace common

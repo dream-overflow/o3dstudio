@@ -731,16 +731,16 @@ o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &event)
 
 o3d::Bool MasterScene::focusInEvent(const Event &/*event*/)
 {
-    m_motionType = MOTION_FOLLOW;
-    m_actionMode = ACTION_NONE;
+//    m_motionType = MOTION_FOLLOW;
+//    m_actionMode = ACTION_NONE;
 
     return False;
 }
 
 o3d::Bool MasterScene::focusOutEvent(const Event &/*event*/)
 {
-    m_motionType = MOTION_FOLLOW;
-    m_actionMode = ACTION_NONE;
+//    m_motionType = MOTION_FOLLOW;
+//    m_actionMode = ACTION_NONE;
 
     return False;
 }

@@ -22,7 +22,9 @@ using namespace o3d::studio::common;
 
 FloatProperty::FloatProperty(Panel *panel, const String &name, const o3d::String &label) :
     PanelProperty(panel, name, label),
-    m_x(nullptr)
+    m_x(nullptr),
+    m_minExl(0.f),
+    m_maxExl(0.f)
 {
     QVBoxLayout *l = new QVBoxLayout();
     l->setContentsMargins(0, 0, 0, 1);
@@ -58,6 +60,13 @@ FloatProperty::FloatProperty(Panel *panel, const String &name, const o3d::String
     m_widget = valueGroup;
 
     m_widget->connect<void(QDoubleSpinBox::*)(double)>(m_x, &QDoubleSpinBox::valueChanged, [this] (double) {
+        Float v = value();
+        if (v > m_minExl && v < m_maxExl) {
+            // adjust to nearest
+            v = o3d::abs(v - m_minExl) > o3d::abs(v - m_maxExl) ? m_maxExl : m_minExl;
+        }
+
+        m_x->setValue(v);
         onValueChanged(value());
     });
 }
@@ -82,6 +91,13 @@ void FloatProperty::setMinMax(o3d::Float min, o3d::Float max)
     }
 }
 
+void FloatProperty::setPrecision(o3d::Int32 dec)
+{
+    if (m_x) {
+        m_x->setDecimals(dec);
+    }
+}
+
 o3d::Float FloatProperty::value() const
 {
     if (m_x) {
@@ -93,9 +109,31 @@ o3d::Float FloatProperty::value() const
 
 void FloatProperty::setValue(o3d::Float v)
 {
+    if (m_minExl != m_maxExl) {
+        if (v > m_minExl && v < m_maxExl) {
+            // adjust to nearest
+            v = o3d::abs(v - m_minExl) > o3d::abs(v - m_maxExl) ? m_maxExl : m_minExl;
+        }
+    }
+
     if (m_x) {
         m_x->blockSignals(true);
         m_x->setValue(v);
         m_x->blockSignals(false);
     }
+}
+
+void FloatProperty::setForbiddenExclusiveRange(o3d::Float minExcl, o3d::Float maxExcl)
+{
+    if (minExcl > maxExcl) {
+        return;
+    }
+
+    m_minExl = minExcl;
+    m_maxExl = maxExcl;
+}
+
+void FloatProperty::unsetForbiddenExclusiveRange()
+{
+    m_minExl = m_maxExl = 0.f;
 }

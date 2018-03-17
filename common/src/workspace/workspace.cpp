@@ -260,6 +260,38 @@ o3d::Bool Workspace::load()
     return True;
 }
 
+Entity *Workspace::entity(const LightRef &ref)
+{
+    if (ref.baseTypeOf(TypeRef::project())) {
+        // a project cannot be a part of a project
+        return nullptr;
+    }
+
+    auto it = m_loadedProjects.find(ref.projectId());
+    if (it != m_loadedProjects.end()) {
+        Project *project = it->second;
+        return project->lookup(ref);
+    }
+
+    return nullptr;
+}
+
+const Entity *Workspace::entity(const LightRef &ref) const
+{
+    if (ref.baseTypeOf(TypeRef::project())) {
+        // a project cannot be a part of a project
+        return nullptr;
+    }
+
+    auto cit = m_loadedProjects.find(ref.projectId());
+    if (cit != m_loadedProjects.end()) {
+        const Project *project = cit->second;
+        return project->lookup(ref);
+    }
+
+    return nullptr;
+}
+
 Hub *Workspace::hub(const LightRef &ref)
 {
     if (ref.baseTypeOf(TypeRef::hub())) {
@@ -282,10 +314,10 @@ const Hub *Workspace::hub(const LightRef &ref) const
     if (ref.baseTypeOf(TypeRef::hub())) {
         auto cit = m_loadedProjects.find(ref.projectId());
         if (cit != m_loadedProjects.cend()) {
-            Project *project = cit->second;
-            Entity *entity = project->lookup(ref);
+            const Project *project = cit->second;
+            const Entity *entity = project->lookup(ref);
             if (entity && entity->ref().light().baseTypeOf(TypeRef::hub())) {
-                return static_cast<Hub*>(entity);
+                return static_cast<const Hub*>(entity);
             }
             // return project->rootHub()->findHub(ref.id());
         }

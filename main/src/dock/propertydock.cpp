@@ -96,12 +96,6 @@ void PropertyDock::onSelectionChanged()
         common::Hub *hub = nullptr;
 
         for (common::SelectionItem *selectionItem : previousSelection) {
-            project = workspace->project(selectionItem->ref());
-
-            if (!project) {
-                return;
-            }
-
             auto it = m_panels.find(selectionItem->ref());
             if (it == m_panels.end()) {
                 continue;
@@ -110,10 +104,13 @@ void PropertyDock::onSelectionChanged()
             panel = it->second;
             m_panels.erase(it);
 
-            // sync data if the hub exists
-            hub = static_cast<common::Hub*>(project->lookup(selectionItem->ref()));
-            if (hub) {
-                panel->commit();
+            // sync data if the hub and the project still exists
+            project = workspace->project(selectionItem->ref());
+            if (project) {
+                hub = static_cast<common::Hub*>(project->lookup(selectionItem->ref()));
+                if (hub) {
+                    panel->commit();
+                }
             }
 
             delete panel;
@@ -132,10 +129,12 @@ void PropertyDock::onSelectionChanged()
         for (common::SelectionItem *selectionItem : currentSelection) {
             project = workspace->project(selectionItem->ref());
 
+            // we don't want a panel for a select of an undefined project
             if (!project) {
                 return;
             }
 
+            // neither for an undefined hub
             hub = static_cast<common::Hub*>(project->lookup(selectionItem->ref()));
             if (!hub) {
                 continue;

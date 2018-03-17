@@ -17,6 +17,7 @@
 
 #include "o3d/studio/common/ui/panelbuilder.h"
 #include "o3d/studio/common/ui/property/vector3property.h"
+#include "o3d/studio/common/ui/property/quadraticproperty.h"
 #include "o3d/studio/common/ui/property/colorproperty.h"
 #include "o3d/studio/common/ui/property/floatproperty.h"
 #include "o3d/studio/common/ui/property/dropdownproperty.h"
@@ -386,8 +387,7 @@ QWidget *LightPropertyPanel::ui()
         commit();
     });
 
-    m_attenuation = new Vector3Property(this, "attenuation", fromQString(tr("Quadratic attenuation")));
-    m_attenuation->setMinMax(0, 1000000);
+    m_attenuation = new QuadraticProperty(this, "attenuation", fromQString(tr("Quadratic attenuation")));
     pb.addPanelProperty(m_attenuation);
 
     m_attenuation->onValueChanged.connect(this, [this] (Vector3) {
@@ -395,6 +395,7 @@ QWidget *LightPropertyPanel::ui()
     });
 
     m_exponent = new FloatProperty(this, "exponent", fromQString(tr("Exponent")));
+    m_exponent->setPrecision(2);
     pb.addPanelProperty(m_exponent);
 
     m_exponent->onValueChanged.connect(this, [this] (Float) {
@@ -404,9 +405,11 @@ QWidget *LightPropertyPanel::ui()
     // contextual if spot light
     m_cutOff = new FloatProperty(this, "cutoff", fromQString(tr("Cut-off")));
     m_cutOff->setMinMax(0, 180);
+    m_cutOff->setForbiddenExclusiveRange(90, 180);
+    m_cutOff->setPrecision(2);
     pb.addPanelProperty(m_cutOff);
 
-    m_cutOff->onValueChanged.connect(this, [this] (Float) {
+    m_cutOff->onValueChanged.connect(this, [this] (Float) {   
         commit();
     });
 

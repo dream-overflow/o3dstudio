@@ -12,6 +12,8 @@
 #include <o3d/engine/object/ftransform.h>
 #include <o3d/engine/object/dqtransform.h>
 
+#include <o3d/core/classfactory.h>
+
 #include "o3d/studio/common/ui/uiutils.h"
 #include "o3d/studio/common/ui/panelbuilder.h"
 #include "o3d/studio/common/ui/property/vector3property.h"
@@ -162,6 +164,15 @@ o3d::Bool SpacialNodeHub::serializeContent(OutStream &stream) const
         return False;
     }
 
+    // main transforms
+    stream << *static_cast<MTransform*>(m_transforms[0]);
+
+    // main + additionals transforms
+    stream << (UInt32)(m_transforms.size() - 1);
+    for (size_t i = 1; i < m_transforms.size(); ++i) {
+        ClassFactory::writeToFile(stream, *m_transforms[i]);
+    }
+
     return True;
 }
 
@@ -170,6 +181,20 @@ o3d::Bool SpacialNodeHub::deserializeContent(InStream &stream)
     if (!Hub::deserializeContent(stream)) {
         return False;
     }
+
+    // main transform
+    stream >> *static_cast<MTransform*>(m_transforms[0]);
+
+    // additionnals transforms
+    UInt32 numTrs;
+    stream >> numTrs;
+
+    Transform *transform;
+
+    for (UInt32 i = 0; i < numTrs; ++i) {
+        transform = static_cast<Transform*>(ClassFactory::readFromFile(stream, nullptr));
+        m_transforms.push_back(transform);
+     }
 
     return True;
 }

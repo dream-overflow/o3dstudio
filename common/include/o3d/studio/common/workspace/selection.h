@@ -22,6 +22,10 @@ namespace common {
 
 class Hub;
 
+/**
+ * @brief The Selection manager.
+ * @note Works on the active project of the current workspace.
+ */
 class O3S_API Selection : public BaseObject
 {
 public:

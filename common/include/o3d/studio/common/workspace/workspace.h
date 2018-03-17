@@ -111,6 +111,18 @@ public:
     //
 
     /**
+     * @brief Get a specific entity from a loaded project using the lookup table.
+     * @note A project cannot be a part of a project.
+     */
+    Entity* entity(const LightRef &ref);
+
+    /**
+     * @brief Get a specific entity from a loaded project using the lookup table (const version).
+     * @note A project cannot be a part of a project.
+     */
+    const Entity* entity(const LightRef &ref) const;
+
+    /**
      * @brief Get a specific hub from a loaded project using the lookup table.
      * @note The hub can be outside of a parent hub.
      */

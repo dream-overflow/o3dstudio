@@ -27,6 +27,7 @@ class Entity;
 class Project;
 class Hub;
 class Vector3Property;
+class QuadraticProperty;
 class ColorProperty;
 class DropDownProperty;
 class FloatProperty;
@@ -152,7 +153,7 @@ private:
 
     // @todo multi transforms
     DropDownProperty *m_lightType;
-    Vector3Property *m_attenuation;
+    QuadraticProperty *m_attenuation;
     ColorProperty *m_ambient;
     ColorProperty *m_diffuse;
     ColorProperty *m_specular;
