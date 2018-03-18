@@ -216,6 +216,6 @@ void CameraHub::syncWithScene(MasterScene *masterScene)
 
         // nothing to do
 
-        O3D_MESSAGE("CameraHub synced into scene");
+        // O3D_MESSAGE("CameraHub synced into scene");
     }
 }

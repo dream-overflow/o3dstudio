@@ -229,12 +229,22 @@ void SpacialNodeHub::createToScene(MasterScene *masterScene)
         masterScene->scene()->getHierarchyTree()->getRootNode()->addSonLast(node);
     }
 
+    // initial transform
+    o3d::Transform *nodeTransform = node->getTransform();
+    if (nodeTransform) {
+        o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
+
+        nodeTransform->setPosition(mainTransform->getPosition());
+        nodeTransform->setRotation(mainTransform->getRotation());
+        nodeTransform->setScale(mainTransform->getScale());
+    }
+
     m_instances[masterScene] = node;
 
     // scene object id is as the base of the pickable color id
     project()->addPickable((UInt32)node->getId(), this);
 
-    O3D_MESSAGE("SpacialNodeHub created into scene");
+    // O3D_MESSAGE("SpacialNodeHub created into scene");
 }
 
 void SpacialNodeHub::removeFromScene(MasterScene *masterScene)

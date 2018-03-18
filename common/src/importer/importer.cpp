@@ -61,6 +61,11 @@ const o3d::String &Importer::name() const
     return m_name;
 }
 
+const o3d::String &Importer::exts() const
+{
+    return m_exts;
+}
+
 const o3d::BitSet32 &Importer::capacities() const
 {
     return m_capacities;

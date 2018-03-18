@@ -274,7 +274,7 @@ void LightHub::syncWithScene(MasterScene *masterScene)
 
         // nothing to do
 
-        O3D_MESSAGE("LightHub synced into scene");
+        // O3D_MESSAGE("LightHub synced into scene");
     }
 }
 

@@ -8,6 +8,7 @@
 
 #include <QtCore/QAbstractItemModel>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QFileDialog>
 
 #include "newprojectdialog.h"
 
@@ -17,9 +18,6 @@
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/project.h"
-
-#include "o3d/studio/common/ui/uicontroller.h"
-#include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
 using namespace o3d::studio::main;
 

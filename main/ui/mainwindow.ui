@@ -35,7 +35,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -80,6 +80,8 @@
     <addaction name="actionSaveAll"/>
     <addaction name="separator"/>
     <addaction name="actionCloseProject"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
     <addaction name="separator"/>
@@ -988,6 +990,18 @@
   <action name="actionCompleXSelection">
    <property name="text">
     <string>Comple&amp;x selection</string>
+   </property>
+  </action>
+  <action name="actionImport">
+   <property name="icon">
+    <iconset resource="../../common/rc/common.qrc">
+     <normaloff>:/icons/archive_black.svg</normaloff>:/icons/archive_black.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Import...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+I</string>
    </property>
   </action>
  </widget>

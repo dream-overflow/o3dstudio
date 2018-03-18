@@ -157,6 +157,7 @@ private slots:
     void onFileWorkspaceManage();
 
     void onFileMenuPreferences();
+    void onFileMenuImport();
     void onFileMenuCloseProject();
     void onFileMenuQuit();
 
@@ -209,6 +210,7 @@ private:
 
     void openProject(const QString &location);
     void openResource(const QString &location);
+    void importFile(const QString &location);
 
     common::Messenger& messenger();
 

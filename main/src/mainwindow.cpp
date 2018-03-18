@@ -10,7 +10,6 @@
 #include "settings.h"
 
 #include "o3d/studio/common/command/commandmanager.h"
-#include "o3d/studio/common/command/dummycommand.h"
 
 #include <QtCore/QCoreApplication>
 #include <QtCore/QPluginLoader>
@@ -35,6 +34,7 @@
 #include "o3d/studio/common/settings.h"
 #include "o3d/studio/common/modulemanager.h"
 #include "o3d/studio/common/application.h"
+#include "o3d/studio/common/importer/importerregistry.h"
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/workspacemanager.h"
 #include "o3d/studio/common/workspace/workspace.h"
@@ -100,6 +100,10 @@ void QtMainWindow::setup()
     connect(ui.actionWorkspaceManage, SIGNAL(triggered(bool)), SLOT(onFileWorkspaceManage()));
 
     connect(ui.actionPreferences, SIGNAL(triggered(bool)), SLOT(onFileMenuPreferences()));
+
+    connect(ui.actionImport, SIGNAL(triggered(bool)), SLOT(onFileMenuImport()));
+    ui.actionImport->setEnabled(false);
+
     connect(ui.actionCloseProject, SIGNAL(triggered(bool)), SLOT(onFileMenuCloseProject()));
     ui.actionCloseProject->setEnabled(false);
 
@@ -159,8 +163,8 @@ void QtMainWindow::setup()
 
     messenger.info(fromQString(tr("Objective-3D Studio successfully started !")));
 
-    // for test execute a dummy command @todo remove me
-    common::Application::instance()->command().addCommand(new common::DummyCommand());
+    // for test only execute a dummy command
+    // common::Application::instance()->command().addCommand(new common::DummyCommand());
 }
 
 QtMainWindow::~QtMainWindow()
@@ -464,6 +468,31 @@ void QtMainWindow::onFileMenuPreferences()
     PreferencesDialog *dialog = new PreferencesDialog(this);
     dialog->setAttribute(Qt::WA_DeleteOnClose, true);
     dialog->show();
+}
+
+void QtMainWindow::onFileMenuImport()
+{
+    // list of file exts from importers
+    QString recognizedExts = toQString(common::Application::instance()->importers().supportedExts());
+
+    QString dir = settings().get("o3s::main::import::previousfolder").toString();
+    QString filename = QFileDialog::getOpenFileName(
+                this, tr("Import file"), dir, recognizedExts);
+
+    if (!filename.isEmpty()) {
+        QFileInfo lfile(filename);
+        QDir ldir(lfile.absoluteDir());
+
+        if (!ldir.exists()) {
+            return;
+        }
+
+        importFile(ldir.absolutePath());
+
+        if (ldir.cdUp()) {
+            settings().set("o3s::main::import::previousfolder", ldir.absolutePath());
+        }
+    }
 }
 
 void QtMainWindow::onFileMenuCloseProject()
@@ -805,6 +834,12 @@ void QtMainWindow::openProject(const QString &location)
 }
 
 void QtMainWindow::openResource(const QString &location)
+{
+    Q_UNUSED(location)
+    // @todo
+}
+
+void QtMainWindow::importFile(const QString &location)
 {
     Q_UNUSED(location)
     // @todo
@@ -1275,6 +1310,7 @@ void MainWindow::onChangeCurrentWorkspace(const String&)
 
         // no more opened projects
         m_qtMainWindow->ui.actionCloseProject->setEnabled(false);
+        m_qtMainWindow->ui.actionImport->setEnabled(false);
     }
 }
 
@@ -1358,6 +1394,7 @@ void MainWindow::onProjectAdded(common::LightRef ref)
 void MainWindow::onProjectActivated(o3d::studio::common::LightRef /*ref*/)
 {
     m_qtMainWindow->ui.actionCloseProject->setEnabled(true);
+    m_qtMainWindow->ui.actionImport->setEnabled(true);
 }
 
 void MainWindow::onProjectRemoved(o3d::studio::common::LightRef /*ref*/)
@@ -1366,6 +1403,7 @@ void MainWindow::onProjectRemoved(o3d::studio::common::LightRef /*ref*/)
     common::Project *project = workspace->activeProject();
     if (!project) {
         m_qtMainWindow->ui.actionCloseProject->setEnabled(false);
+        m_qtMainWindow->ui.actionImport->setEnabled(false);
     }
 }
 

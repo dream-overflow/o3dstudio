@@ -172,3 +172,20 @@ std::list<const Importer *> ImporterRegistry::importerList() const
 
     return results;
 }
+
+o3d::String ImporterRegistry::supportedExts() const
+{
+    String exts;
+
+    for (auto cit = m_importers.begin(); cit != m_importers.end(); ++cit) {
+        if (cit != m_importers.begin()) {
+            exts += ";;";
+        }
+
+        if (cit->second->exts().isValid()) {
+            exts += cit->second->exts();
+        }
+    }
+
+    return exts;
+}

@@ -56,6 +56,11 @@ public:
 
     std::list<const Importer*> importerList() const;
 
+    /**
+     * @brief Build the list of supported files extensions from registered importers.
+     */
+    String supportedExts() const;
+
 public /*signals*/:
 
     Signal<String> onImporterRegistered{this};

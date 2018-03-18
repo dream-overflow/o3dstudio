@@ -87,6 +87,11 @@ public:
     const String& name() const;
 
     /**
+     * @brief Supported files extensions separated by pipe |.
+     */
+    const String& exts() const;
+
+    /**
      * @brief Build the importer options related to this importer. Filled with initial values.
      * @return A valid importer options.
      */
@@ -131,6 +136,8 @@ protected:
 
     TypeRef m_typeRef;
     String m_name;
+
+    String m_exts;     //!< List of supported file extensions
 
     BitSet32 m_capacities;
 };

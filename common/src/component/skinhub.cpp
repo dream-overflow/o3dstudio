@@ -252,6 +252,6 @@ void SkinHub::syncWithScene(MasterScene *masterScene)
 
         // nothing to do
 
-        O3D_MESSAGE("SkinHub synced into scene");
+        // O3D_MESSAGE("SkinHub synced into scene");
     }
 }

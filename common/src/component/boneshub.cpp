@@ -203,6 +203,14 @@ void BonesHub::createToScene(MasterScene *masterScene)
         masterScene->scene()->getHierarchyTree()->getRootNode()->addSonLast(bones);
     }
 
+    o3d::Transform *nodeTransform = bones->getTransform();
+    if (nodeTransform) {
+        o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transform);
+
+        nodeTransform->setPosition(mainTransform->getPosition());
+        nodeTransform->setRotation(mainTransform->getRotation());
+    }
+
     m_instances[masterScene] = bones;
 
     // scene object id is as the base of the pickable color id
@@ -231,13 +239,13 @@ void BonesHub::syncWithScene(MasterScene *masterScene)
 {
     auto it = m_instances.find(masterScene);
     if (it != m_instances.end()) {
-        o3d::Node *node = it->second;
+        o3d::Bones *bones = it->second;
 
         // hub => o3d
-        node->setName(m_name);
+        bones->setName(m_name);
 
         // o3d => hub
-        o3d::Transform *nodeTransform = node->getTransform();
+        o3d::Transform *nodeTransform = bones->getTransform();
         if (nodeTransform) {
             o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transform);
 
@@ -245,7 +253,7 @@ void BonesHub::syncWithScene(MasterScene *masterScene)
             nodeTransform->setRotation(mainTransform->getRotation());
         }
 
-        O3D_MESSAGE("SpacialNodeHub synced into scene");
+        // O3D_MESSAGE("SpacialNodeHub synced into scene");
     }
 }
 

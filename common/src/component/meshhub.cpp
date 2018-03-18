@@ -249,11 +249,17 @@ void MeshHub::syncWithScene(MasterScene *masterScene)
         // hub => o3d
         mesh->setName(m_name);
 
+        // material changes
+        // @todo
+
+        // geometry changes
+        // @todo
+
         // o3d => hub
 
         // nothing to do
 
-        O3D_MESSAGE("MeshHub synced into scene");
+        // O3D_MESSAGE("MeshHub synced into scene");
     }
 }
 
