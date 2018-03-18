@@ -475,7 +475,7 @@ void QtMainWindow::onFileMenuImport()
     // list of file exts from importers
     QString recognizedExts = toQString(common::Application::instance()->importers().supportedExts());
 
-    QString dir = settings().get("o3s::main::import::previousfolder").toString();
+    QString dir = settings().get("o3s::main::import::previous-folder").toString();
     QString filename = QFileDialog::getOpenFileName(
                 this, tr("Import file"), dir, recognizedExts);
 
@@ -487,11 +487,9 @@ void QtMainWindow::onFileMenuImport()
             return;
         }
 
-        importFile(ldir.absolutePath());
+        importFile(filename);
 
-        if (ldir.cdUp()) {
-            settings().set("o3s::main::import::previousfolder", ldir.absolutePath());
-        }
+        settings().set("o3s::main::import::previous-folder", ldir.absolutePath());
     }
 }
 
@@ -839,10 +837,72 @@ void QtMainWindow::openResource(const QString &location)
     // @todo
 }
 
+#include "o3d/studio/common/workspace/hub.h"
+#include "o3d/studio/common/importer/importer.h"
+#include "o3d/studio/common/importer/importdefinition.h"
+
 void QtMainWindow::importFile(const QString &location)
 {
-    Q_UNUSED(location)
-    // @todo
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (!workspace) {
+        return;
+    }
+
+    common::Project *project = workspace->activeProject();
+    if (!project) {
+        return;
+    }
+
+    // @todo might use the ImportFileDialog with generals options,
+    // plus a sub-panel dynamic related to the importer module itself.
+
+    // from the selection manager take the first selected hub or project in way to
+    // import into this node. if project is selected import into the root hub, same if
+    // no selection at all.
+
+    // find the importer
+    o3d::File fileInfo(fromQString(location));
+    String fileExt = String("*.") + fileInfo.getFileExt();
+
+    const common::Importer *importer = nullptr;
+
+    for (const common::Importer *_importer : common::Application::instance()->instance()->importers().importerList()) {
+        if (_importer->exts().sub(fileExt, 0) != -1) {
+            importer = _importer;
+            break;
+        }
+    }
+
+    const std::set<common::SelectionItem *> currentSelection =
+            common::Application::instance()->selection().filterCurrentByBaseType(
+                common::TypeRef::hub());
+
+    o3d::studio::common::Hub *parentHub = project->rootHub();
+
+    if (!currentSelection.empty()) {
+        parentHub = static_cast<common::Hub*>(project->lookup((*currentSelection.begin())->ref()));
+//        if (!parentHub.acceptAnyHub()) { @todo
+//            parentHub = project->rootHub();
+//        }
+    }
+
+    if (parentHub) {
+        common::ImporterOption *options = new common::ImporterOption();
+
+        common::Importer *importer = common::Application::instance()->importers().importer("o3s::plugin::importer::fbxi");
+        common::ImportDefinition *def = nullptr;
+
+        try {
+            def = importer->import(
+                                fileInfo.getFullFileName(),
+                                options,
+                                parentHub);
+        } catch (E_BaseException &e) {
+            common::Application::instance()->messenger().critical(e.getMsg());
+        }
+
+        deletePtr(def);
+    }
 }
 
 o3d::studio::common::Messenger &QtMainWindow::messenger()

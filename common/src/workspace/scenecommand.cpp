@@ -14,6 +14,8 @@
 #include "o3d/studio/common/workspace/workspace.h"
 #include "o3d/studio/common/workspace/project.h"
 
+#include "o3d/studio/common/messenger.h"
+
 using namespace o3d::studio::common;
 
 
@@ -56,21 +58,37 @@ void SceneHubCommand::process(MasterScene *masterScene)
                 return;
             }
 
-           m_hub->createToScene(masterScene);
+            try {
+                m_hub->createToScene(masterScene);
+            } catch (E_BaseException &e) {
+                Application::instance()->messenger().critical(e.getMsg());
+            }
         } else if (m_cmdType == DELETE) {
-           m_hub->removeFromScene(masterScene);
+            try {
+                m_hub->removeFromScene(masterScene);
+            } catch (E_BaseException &e) {
+                Application::instance()->messenger().critical(e.getMsg());
+            }
         } else if (m_cmdType == SYNC) {
             if (!project->lookup(m_ref)) {
                 // normaly deleted from the project brefore this command
                 return;
             }
 
-           m_hub->syncWithScene(masterScene);
+            try {
+                m_hub->syncWithScene(masterScene);
+            } catch (E_BaseException &e) {
+                Application::instance()->messenger().critical(e.getMsg());
+            }
         }
     } else {
         // the hub can be removed but still not deleted, then we just interest in the DELETE command
         if (m_cmdType == DELETE) {
-           m_hub->removeFromScene(masterScene);
+            try {
+                m_hub->removeFromScene(masterScene);
+            } catch (E_BaseException &e) {
+                Application::instance()->messenger().critical(e.getMsg());
+            }
         }
     }
 }

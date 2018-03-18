@@ -282,7 +282,7 @@ void SpacialNodeHub::syncWithScene(MasterScene *masterScene)
             nodeTransform->setScale(mainTransform->getScale());
         }
 
-        O3D_MESSAGE("SpacialNodeHub synced into scene");
+        // O3D_MESSAGE("SpacialNodeHub synced into scene");
     }
 }
 

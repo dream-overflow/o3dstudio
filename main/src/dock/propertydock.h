@@ -48,8 +48,6 @@ private:
     std::map<common::LightRef, common::Panel*> m_panels;   //!< Current panels
 
     class QtPropertyDock *m_qtPropertyDock;
-
-    void setupUi();
 };
 
 class QtPropertyDock : public QDockWidget
@@ -61,15 +59,17 @@ public:
     QtPropertyDock(QWidget *parent = nullptr);
     virtual ~QtPropertyDock();
 
-signals:
+    class QLayout *container();
 
-protected:
+    void setupUi();
+
+signals:
 
 public slots:
 
 private:
 
-    void setupUi();
+    class QWidget *m_container;
 };
 
 } // namespace main

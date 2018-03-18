@@ -95,14 +95,14 @@ public:
      * @brief Build the importer options related to this importer. Filled with initial values.
      * @return A valid importer options.
      */
-    virtual ImporterOption* buildOptions() = 0;
+    virtual ImporterOption* buildOptions() const = 0;
 
     /**
      * @brief Introspect the content file. Does not proceed to importation of datas
      * @param filename File name of the content to introspect.
      * @return ImportDefinition object if success, null else.
      */
-    virtual ImportDefinition* introspect(const String &filename) = 0;
+    virtual ImportDefinition* introspect(const String &filename) const = 0;
 
     /**
      * @brief Import from a specified file name the content into a parent hub
@@ -114,7 +114,7 @@ public:
     virtual ImportDefinition* import(
             const String &filename,
             ImporterOption *options,
-            Hub *parent) = 0;
+            Hub *parent) const = 0;
 
     /**
      * @brief Array of capacities of the importer (not what is imported but what is importable).

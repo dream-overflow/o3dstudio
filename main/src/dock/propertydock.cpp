@@ -33,7 +33,8 @@ PropertyDock::PropertyDock(BaseObject *parent) :
     BaseObject(parent),
     common::Dock()
 {
-    setupUi();
+    m_qtPropertyDock = new QtPropertyDock();
+    m_qtPropertyDock->setupUi();
 
     // selection manager
     common::Application::instance()->selection().selectionChanged.connect(this, &PropertyDock::onSelectionChanged);
@@ -117,10 +118,10 @@ void PropertyDock::onSelectionChanged()
 
             QString objName = toQString(selectionItem->ref().longId());
 
-            for (int i = 0; i < m_qtPropertyDock->widget()->layout()->count(); ++i) {
-                QWidget *ui = m_qtPropertyDock->widget()->layout()->itemAt(i)->widget();
+            for (int i = 0; i < m_qtPropertyDock->container()->count(); ++i) {
+                QWidget *ui = m_qtPropertyDock->container()->itemAt(i)->widget();
                 if (ui->objectName() == objName) {
-                    m_qtPropertyDock->widget()->layout()->removeWidget(ui);
+                    m_qtPropertyDock->container()->removeWidget(ui);
                     ui->deleteLater();
                 }
             }
@@ -150,7 +151,7 @@ void PropertyDock::onSelectionChanged()
                 QWidget *ui = panel->ui();
                 ui->setObjectName(toQString(hub->ref().light().longId()));
 
-                m_qtPropertyDock->widget()->layout()->addWidget(ui);
+                m_qtPropertyDock->container()->addWidget(ui);
                 m_panels[hub->ref().light()] = panel;
 
                 panel->update();
@@ -165,7 +166,7 @@ void PropertyDock::onAttachPanel(o3d::String name, common::Panel *panel)
 
     // only interested by property panels
     if (panel->panelType() == common::Panel::PANEL_PROPERTY) {
-        m_qtPropertyDock->setWidget(panel->ui());
+        m_qtPropertyDock->container()->addWidget(panel->ui());
     }
 }
 
@@ -175,25 +176,14 @@ void PropertyDock::onDetachPanel(o3d::String name, common::Panel *panel)
 
     // only interested by property panels
     if (panel->panelType() == common::Panel::PANEL_PROPERTY) {
-        m_qtPropertyDock->setWidget(nullptr);
+        m_qtPropertyDock->container()->removeWidget(nullptr);
         panel->ui()->setParent(nullptr);
     }
 }
 
-void PropertyDock::setupUi()
-{
-    m_qtPropertyDock = new QtPropertyDock();
-
-    QWidget *widget = new QWidget();
-    widget->setLayout(new QVBoxLayout());
-    widget->layout()->setAlignment(Qt::AlignTop);
-    widget->layout()->setContentsMargins(0, 2, 0, 2);
-
-    m_qtPropertyDock->setWidget(widget);
-}
-
 QtPropertyDock::QtPropertyDock(QWidget *parent) :
-    QDockWidget(tr("Property"), parent)
+    QDockWidget(tr("Property"), parent),
+    m_container(nullptr)
 {
     setMinimumWidth(200);
     setMinimumHeight(200);
@@ -206,7 +196,26 @@ QtPropertyDock::~QtPropertyDock()
 
 }
 
+QLayout *QtPropertyDock::container()
+{
+    return m_container->layout();
+}
+
 void QtPropertyDock::setupUi()
 {
+    m_container = new QWidget();
+    m_container->setLayout(new QVBoxLayout());
+    m_container->layout()->setAlignment(Qt::AlignTop);
+    m_container->layout()->setContentsMargins(0, 2, 0, 2);
+
+    QScrollArea *scrollArea = new QScrollArea();
+    // scrollArea->setBackgroundRole(QPalette::Dark);
+    scrollArea->setWidget(m_container);
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setWidgetResizable(true);
+
+    setWidget(scrollArea);
+
     setWindowIcon(QIcon(":/icons/settings_input_component_black.svg"));
 }

@@ -59,25 +59,9 @@ DummyHub::~DummyHub()
 
 }
 
-#include "o3d/studio/common/application.h"
-#include "o3d/studio/common/workspace/workspacemanager.h"
-#include "o3d/studio/common/workspace/workspace.h"
-#include "o3d/studio/common/importer/importerregistry.h"
-#include "o3d/studio/common/importer/importer.h"
-#include "o3d/studio/common/importer/importdefinition.h"
-
 void DummyHub::create()
 {
     Hub::create();
-
-    // dev only test to import FBX @todo remove me after
-    Importer *fbxi = Application::instance()->importers().importer("o3s::plugin::importer::fbxi");
-    ImportDefinition *def = fbxi->import(
-                                "../../../../test/fbx/shaderBall/shaderBall.fbx",
-                                new ImporterOption(),
-                                this);
-
-    deletePtr(def);
 }
 
 o3d::Bool DummyHub::deletable() const
