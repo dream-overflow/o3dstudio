@@ -38,18 +38,8 @@ public:
     /**
      * @brief HubManipulator
      * @param parent Parent object
-     * @param target Targeted hub object.
-     * @param hitPos Position where the hit (picking) occured
      */
-    HubManipulator(BaseObject *parent, Hub* target);
-
-    /**
-     * @brief HubManipulator
-     * @param parent Parent object
-     * @param targets Targeted list of hubs objects.
-     * @param hitPos Position where the hit (picking) occured
-     */
-    HubManipulator(BaseObject *parent, const std::list<Hub *> targets);
+    HubManipulator(BaseObject *parent);
 
     virtual ~HubManipulator();
 
@@ -58,6 +48,12 @@ public:
 
     virtual void hover(UInt32 id, const Point3f &pos) override;
     virtual void leave() override;
+
+    virtual void setSelection(MasterScene *masterScene, const std::list<Hub *> targets);
+    virtual void setActiveHub(MasterScene *masterScene, Hub *hub);
+
+    virtual Bool hasSelection() const;
+    virtual Hub* activeHub();
 
     //! May be removed, need a dedicated toolbar, but need shortcut too
     virtual void keyDownEvent(const KeyEvent &event, MasterScene *masterScene);

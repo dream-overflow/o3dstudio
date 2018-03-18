@@ -355,7 +355,7 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
     m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     if (event.button(Mouse::LEFT)) {
-        if (m_actionMode == ACTION_NONE && m_hubManipulator) {
+        if (m_actionMode == ACTION_NONE && m_hubManipulator->hasSelection()) {
             // default to translation
             m_actionMode = ACTION_TRANSLATION;
         }
@@ -466,7 +466,7 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
                 // clear selection
                 Application::instance()->selection().unselectAll();
             }
-        } else if (m_hubManipulator && m_hubManipulator->hasFocus()) {
+        } else if (m_hubManipulator && m_hubManipulator->isTransform()) {
             // action using the manipulator
             HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
             hubManipulator->endTransform(this);
@@ -481,7 +481,7 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     } else if (event.button(Mouse::RIGHT)) {
     }
 
-    if (m_actionMode == ACTION_NONE && m_hubManipulator) {
+    if (m_actionMode == ACTION_NONE && m_hubManipulator->hasSelection()) {
         // default to translation
         m_actionMode = ACTION_TRANSLATION;
     }
@@ -597,7 +597,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         }
     } else {
         // we have a current manipulator
-        if (m_hubManipulator && m_hubManipulator->hasFocus()) {
+        if (m_hubManipulator && m_hubManipulator->isTransform()) {
             Float x = 0.f, y = 0.f, z = 0.f;
 
             x = deltaX * 1.f;   // * elapsed;
@@ -902,11 +902,9 @@ void MasterScene::onSelectionChanged()
 
     common::Hub *hub = nullptr;
 
-    // delete a potentiel previous instance of manipulator
+    // cleanup current selection
     if (m_hubManipulator) {
-        removeSceneUIElement(m_hubManipulator);
-       // deletePtr(m_hubManipulator);
-       m_hubManipulator = nullptr; // @todo why double free corruption ?
+        m_hubManipulator->setSelection(this, std::list<Hub*>());
     }
 
     std::list<Hub*> hubs;
@@ -925,8 +923,7 @@ void MasterScene::onSelectionChanged()
 
     if (hubs.size()) {
         // create the new according to the current builder (@todo not for now only the standard manipulator)
-        m_hubManipulator = new HubManipulator(this, hubs);
-        addSceneUIElement(m_hubManipulator);
+        m_hubManipulator->setSelection(this, hubs);
 
         // default to translation when selection
         m_actionMode = ACTION_TRANSLATION;
@@ -1028,8 +1025,12 @@ void MasterScene::initializeDrawer()
         InfoHUD *infoHUD = new InfoHUD(this, Point2f(0.02f, 0.02f), font2d);
         addSceneUIElement(infoHUD);
 
-        // and a camera helper
+        // a camera helper
         m_cameraManipulator = new CameraManipulator(this, Point2f(0.9f, 0.1f), 1.f);
         addSceneUIElement(m_cameraManipulator);
+
+        // and a default selection hub manipulator
+        m_hubManipulator = new HubManipulator(this);
+        addSceneUIElement(m_hubManipulator);
     }
 }

@@ -54,6 +54,7 @@
 #include "dock/mainconsole.h"
 #include "dock/workspacedock.h"
 #include "dock/propertydock.h"
+#include "dock/selectiondock.h"
 
 #include "content/browsercontent.h"
 
@@ -134,9 +135,21 @@ void QtMainWindow::setup()
     // @todo setActive view... plus context into the quicktoolbar
     connect(quickToolBar, SIGNAL(showHome()), SLOT(onViewHomePage()));
 
+    // dock
+    setDockNestingEnabled(true);
+    setDockOptions(
+                QMainWindow::AllowNestedDocks |
+                QMainWindow::AllowTabbedDocks |
+                QMainWindow::VerticalTabs |
+                QMainWindow::GroupedDragging);
+
     // workspace dock
     WorkspaceDock *workspaceDock = new WorkspaceDock();
     uiCtrl.addDock(workspaceDock);
+
+    // selection dock
+    SelectionDock *selectionDock = new SelectionDock();
+    uiCtrl.addDock(selectionDock);
 
     // property dock
     PropertyDock *propertyDock = new PropertyDock();
@@ -986,7 +999,7 @@ MainWindow::MainWindow(BaseObject *) :
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
     workspaceManager->onWorkspaceActivated.connect(this, &MainWindow::onChangeCurrentWorkspace);
 
-    onChangeCurrentWorkspace(workspaceManager->current()->name());
+    onChangeCurrentWorkspace(workspaceManager->current()->name());  
 
     // setup the main ui
     applySettings();

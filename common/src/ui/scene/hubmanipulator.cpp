@@ -28,26 +28,11 @@
 using namespace o3d::studio::common;
 
 
-HubManipulator::HubManipulator(BaseObject *parent, Hub* target) :
+HubManipulator::HubManipulator(BaseObject *parent) :
     SceneUIElement(parent, SCENE_UI_3D, POST_DRAW, True),
     m_transform(new MTransform),
     m_displayScale(1),
     m_pickingMask(0xfffffff0f),  // @todo picking mask range and mask generator
-    m_axe(AXE_NONE),
-    m_transformMode(STATIC),
-    m_pivotPoint(PIVOT_INDIVIDUAL),
-    m_transformOrientation(TR_LOCAL),
-    m_activeElt(nullptr)
-{
-    m_targets.push_back(target);
-}
-
-HubManipulator::HubManipulator(BaseObject *parent, const std::list<Hub *> targets) :
-    SceneUIElement(parent, SCENE_UI_3D, POST_DRAW, True),
-    m_targets(targets),
-    m_transform(new MTransform),
-    m_displayScale(1),
-    m_pickingMask(0xfffffff0f),  // @todo
     m_axe(AXE_NONE),
     m_transformMode(STATIC),
     m_pivotPoint(PIVOT_INDIVIDUAL),
@@ -115,6 +100,34 @@ void HubManipulator::leave()
     }
 
     m_axe = AXE_NONE;
+}
+
+void HubManipulator::setSelection(MasterScene *masterScene, const std::list<Hub *> targets)
+{
+    m_targets = targets;
+
+    // default take last hub as active element @todo
+//    if (targets.size() > 0) {
+//        m_activeElt = m_targets.back();
+//    }
+
+    updateTransform(masterScene, True);
+}
+
+void HubManipulator::setActiveHub(MasterScene *masterScene, Hub *hub)
+{
+//    m_activeElt = hub;
+    updateTransform(masterScene, True);
+}
+
+o3d::Bool HubManipulator::hasSelection() const
+{
+    return m_targets.size() > 0;
+}
+
+Hub *HubManipulator::activeHub()
+{
+    return m_activeElt;
 }
 
 void HubManipulator::refresh(MasterScene *masterScene)

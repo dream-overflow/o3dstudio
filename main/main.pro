@@ -45,7 +45,8 @@ SOURCES += \
     src/dock/propertydock.cpp \
     src/messenger.cpp \
     src/toolbar/hubcomponenttoolbar.cpp \
-    src/importfiledialog.cpp
+    src/importfiledialog.cpp \
+    src/dock/selectiondock.cpp
 
 
 HEADERS += \
@@ -66,7 +67,8 @@ HEADERS += \
     src/property/projectsection.h \
     src/dock/propertydock.h \
     src/toolbar/hubcomponenttoolbar.h \
-    src/importfiledialog.h
+    src/importfiledialog.h \
+    src/dock/selectiondock.h
 
 
 RESOURCES += \
