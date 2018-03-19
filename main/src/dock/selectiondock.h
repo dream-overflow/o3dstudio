@@ -7,9 +7,9 @@
  */
 
 #ifndef _O3DS_MAIN_SELECTIONDOCK_H
-#define _O3DS_MAIN_WORKSPACEDOCK_H
+#define _O3DS_MAIN_SELECTIONDOCK_H
 
-class QListView;
+class QListWidget;
 
 #include <QtWidgets/QDockWidget>
 
@@ -88,7 +88,7 @@ public:
 
     void setupUi();
 
-    QListView *m_listView;
+    QListWidget *m_listWidget;
     common::ProjectItem *m_lastSelected;
 };
 

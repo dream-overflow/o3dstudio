@@ -6,6 +6,8 @@
  * @details
  */
 
+#include <QtWidgets/QListWidget>
+
 #include "selectiondock.h"
 #include "../mainwindow.h"
 
@@ -19,11 +21,13 @@
 #include "o3d/studio/common/workspace/projectmodel.h"
 #include "o3d/studio/common/workspace/selection.h"
 #include "o3d/studio/common/workspace/selectionitem.h"
+#include "o3d/studio/common/component/componentregistry.h"
+#include "o3d/studio/common/component/component.h"
 
 #include "o3d/studio/common/ui/uicontroller.h"
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 
-#include <QtWidgets/QTreeView>
+#include "o3d/studio/common/ui/uiutils.h"
 
 using namespace o3d::studio::main;
 
@@ -108,28 +112,26 @@ o3d::Bool SelectionDock::isAutoFollow() const
 
 void SelectionDock::onSelectionChanged()
 {
-    const std::set<common::SelectionItem *> previousSelection = common::Application::instance()->selection().previousSelection();
-    const std::set<common::SelectionItem *> currentSelection = common::Application::instance()->selection().currentSelection();
-/*
-    common::ProjectModel* projectModel = static_cast<common::ProjectModel*>(m_qtSelectionDock->m_listView->model());
-    common::ProjectItem *projectItem = nullptr;
-
-    QModelIndex current;
-
-    common::SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, previousSelection) {
-        projectItem = projectModel->find(selectionItem->ref());
-
-        if (!projectItem) {
-            continue;
-        }
-
-        current = projectModel->modelIndex(projectItem);
-        m_qtSelectionDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Deselect);
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (!workspace) {
+        return;
     }
 
-    selectionItem = nullptr;
-    foreach (selectionItem, currentSelection) {
+    common::Project *project = workspace->activeProject();
+    if (!project) {
+        return;
+    }
+
+    const std::set<common::SelectionItem *> previousSelection = common::Application::instance()->selection().previousSelection();
+    const std::set<common::SelectionItem *> currentSelection = common::Application::instance()->selection().currentSelection();
+
+    m_qtSelectionDock->m_listWidget->clear();
+
+    common::SelectionItem *selectionItem = nullptr;
+    common::Component *component;
+    String icon;
+
+/*    foreach (selectionItem, previousSelection) {
         projectItem = projectModel->find(selectionItem->ref());
 
         if (!projectItem) {
@@ -137,20 +139,41 @@ void SelectionDock::onSelectionChanged()
         }
 
         current = projectModel->modelIndex(projectItem);
-        m_qtSelectionDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Select);
-
-        // auto expand on select
-        if (m_autoExpand) {
-            current = current.parent();
-            while (current.isValid()) {
-                if (!m_qtSelectionDock->m_treeView->isExpanded(current)) {
-                    m_qtSelectionDock->m_treeView->expand(current);
-                }
-
-                current = current.parent();
-            }
+        m_qtSelectionDock->m_listWidget->findItems()
+        m_qtSelectionDock->m_listWidget->removeItemWidget();
+    }
+*/
+    selectionItem = nullptr;
+    common::Hub *hub;
+    foreach (selectionItem, currentSelection) {
+        hub = workspace->hub(selectionItem->ref());
+        if (!hub || hub->project() != project) {
+            continue;
         }
-    }*/
+
+        component = common::Application::instance()->components().componentByTarget(hub->typeRef().name());
+        icon = component ? component->icon() : ":/icons/apps_black.svg";
+
+        QListWidgetItem *item = new QListWidgetItem();
+
+        item->setText(toQString(hub->name()));
+        item->setIcon(common::UiUtils::tintIcon(toQString(icon)));
+        item->setToolTip(toQString(hub->name()));
+
+        m_qtSelectionDock->m_listWidget->addItem(item);
+
+        // auto follow...
+        if (m_autoFollow) {
+//            current = current.parent();
+//            while (current.isValid()) {
+//                if (!m_qtSelectionDock->m_treeView->isExpanded(current)) {
+//                    m_qtSelectionDock->m_treeView->expand(current);
+//                }
+
+//                current = current.parent();
+//            }
+        }
+    }
 }
 
 void SelectionDock::onChangeCurrentWorkspace(const String &/*name*/)
@@ -193,7 +216,7 @@ QtSelectionDock::QtSelectionDock(QWidget *parent) :
 
 QtSelectionDock::~QtSelectionDock()
 {
-    delete m_listView;
+    delete m_listWidget;
 }
 /*
 void QtSelectionDock::onSelectionDetails(const QModelIndex &)
@@ -339,8 +362,8 @@ void QtSelectionDock::setupUi()
 {
     setWindowIcon(QIcon(":/icons/center_focus_weak_black.svg"));
 
-    m_listView = new QListView(this);
-    setWidget(m_listView);
+    m_listWidget = new QListWidget(this);
+    setWidget(m_listWidget);
 
     // m_treeView->setHeaderHidden(true);
     // setModel(new common::ProjectModel());
