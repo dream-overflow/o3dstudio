@@ -892,7 +892,7 @@ void QtMainWindow::importFile(const QString &location)
 
     o3d::studio::common::Hub *parentHub = project->rootHub();
 
-    if (!currentSelection.empty()) {
+    if (currentSelection.size() > 0) {
         parentHub = static_cast<common::Hub*>(project->lookup((*currentSelection.begin())->ref()));
 //        if (!parentHub.acceptAnyHub()) { @todo
 //            parentHub = project->rootHub();

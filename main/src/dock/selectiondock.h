@@ -40,10 +40,10 @@ public:
     virtual Qt::DockWidgetArea dockWidgetArea() const override;
 
     /**
-     * @brief Set the auto expand on select state.
+     * @brief Set the auto scroll to active element.
      */
-    void setAutoFollow(Bool s);
-    Bool isAutoFollow() const;
+    void setAutoScroll(Bool s);
+    Bool isAutoScroll() const;
 
 public /*slots*/:
 
@@ -57,7 +57,7 @@ private:
     class QtSelectionDock *m_qtSelectionDock;
     common::ProjectItem *m_lastSelected;
 
-    Bool m_autoFollow;
+    Bool m_autoScroll;
 
     void setupUi();
 };

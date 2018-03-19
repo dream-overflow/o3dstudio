@@ -55,10 +55,7 @@ public:
         ACTION_CAMERA_TRANSLATION,
         ACTION_CAMERA_ROTATION,
         ACTION_SELECTION,
-        ACTION_TRANSLATION,
-        ACTION_ROTATION,
-        ACTION_SCALE,
-        ACTION_SKEW
+        ACTION_TRANSFORM
     };
 
     enum MotionType
@@ -69,6 +66,14 @@ public:
         MOTION_STEP,        //!< follow an increment step
         MOTION_GRID,        //!< follow a grid as magnet
         MOTION_MAGNET       //!< follow a constraint of magnet with others objects
+    };
+
+    enum TransformMode
+    {
+        TR_TRANSLATION = 0,
+        TR_ROTATION,
+        TR_SCALE,
+        TR_SKEW
     };
 
     MasterScene(Entity *parent);
@@ -181,6 +186,11 @@ public:
     MotionType motionType() const;
 
     /**
+     * @brief Selected transform mode.
+     */
+    TransformMode transformMode() const;
+
+    /**
      * @brief Map a picking id to a scene UI element.
      * @param id Unique picking id.
      * @param element Instance of the scene UI element.
@@ -208,9 +218,11 @@ private:
     o3d::Renderer *m_renderer;    //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
 
-    Point2i m_lockedPos;          //!< Infinite cursor
-    ActionMode m_actionMode;      //!< Current action mode
-    MotionType m_motionType;      //!< Current motion type
+    Point2i m_lockedPos;            //!< Infinite cursor
+    ActionMode m_actionMode;        //!< Current action mode
+    ActionMode m_prevActionMode;    //!< Previous action mode
+    MotionType m_motionType;        //!< Current motion type
+    TransformMode m_transformMode;  //!< Selected transform mode
 
     UInt32 m_verticesCount[4];
     UInt32 m_trianglesCount[4];
@@ -244,6 +256,8 @@ private:
 
     //! Mapping of picking id to scene UI elements (can have multiple picking id to a same element)
     std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;
+
+    void setActionMode(ActionMode actionMode);
 
     void processCommands();
     void postPicking(const Vector3f &position);

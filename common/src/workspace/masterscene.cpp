@@ -64,7 +64,9 @@ MasterScene::MasterScene(Entity *parent) :
     m_renderer(nullptr),
     m_scene(nullptr),
     m_actionMode(ACTION_NONE),
+    m_prevActionMode(ACTION_NONE),
     m_motionType(MOTION_FOLLOW),
+    m_transformMode(TR_TRANSLATION),
     m_hoverHub(nullptr),
     m_camera(this),
     m_viewport(this),
@@ -355,21 +357,16 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
     m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     if (event.button(Mouse::LEFT)) {
-        if (m_actionMode == ACTION_NONE && m_hubManipulator->hasSelection()) {
-            // default to translation
-            m_actionMode = ACTION_TRANSLATION;
-        }
-
-        // action using the manipulator
-        if (m_hoverUIElement && m_hubManipulator == m_hoverUIElement) {
-            m_hubManipulator->beginTransform(this, Vector3f(event.localPos().x(), event.localPos().y(), 0));
-        } else {
-            m_actionMode = ACTION_SELECTION;
-
-            if (m_hoverHub) {
+        if (m_actionMode == ACTION_NONE) {
+            if (m_hoverUIElement && m_hubManipulator == m_hoverUIElement) {
+                // action using the manipulator
+                setActionMode(ACTION_TRANSFORM);
+                m_hubManipulator->beginTransform(this, Vector3f(event.localPos().x(), event.localPos().y(), 0));
+            } else if (m_hoverHub) {
+                // in a multiple selection
                 if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
                     if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-                        // get previous selection and remove
+                        // get current selection and remove from it
                         auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
 
                         Application::instance()->selection().beginSelection();
@@ -381,7 +378,6 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
                             }
                         }
 
-                        Application::instance()->selection().appendSelection(m_hoverHub);
                         Application::instance()->selection().endSelection();
 
                         // an object is removed from selection
@@ -411,17 +407,21 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         }
     } else if (event.button(Mouse::MIDDLE)) {
         if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-            m_actionMode = ACTION_CAMERA_TRANSLATION;
+            setActionMode(ACTION_CAMERA_TRANSLATION);
             m_motionType = MOTION_FOLLOW;  // default normal speed, press again shift to slow
         } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-            m_actionMode = ACTION_CAMERA_ZOOM;
+            setActionMode(ACTION_CAMERA_ZOOM);
         } else {
-            m_actionMode = ACTION_CAMERA_ROTATION;
+            setActionMode(ACTION_CAMERA_ROTATION);
         }
     } else if (event.button(Mouse::RIGHT)) {
-        if (m_hubManipulator && m_hubManipulator->isTransform()) {
+        if (m_actionMode == ACTION_TRANSFORM) {
             // cancel current transformation
-            m_hubManipulator->cancelTransform(this);
+            if (m_hubManipulator && m_hubManipulator->isTransform()) {
+                m_hubManipulator->cancelTransform(this);
+            }
+
+            setActionMode(ACTION_NONE);
         }
     }
 
@@ -432,9 +432,7 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 
         m_content->setCursor(cursor);
         m_lockedPos = event.globalPos();
-    } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
-               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_SKEW) {
-
+    } else if (m_actionMode == ACTION_TRANSFORM) {
         // initial relative
         m_lockedPos = event.globalPos();
     }
@@ -455,9 +453,14 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     if (event.button(Mouse::LEFT)) {
-        if (m_actionMode == ACTION_SELECTION) {
-            if (m_hoverHub) {
+        if (m_prevActionMode == ACTION_TRANSFORM) {
+            // nothing to do, prevent undefined behaviors
+        } else if (m_actionMode == ACTION_NONE) {
+            if (m_hubManipulator && m_hubManipulator->hasSelection()) {
+                // multiple selection is done at button press
+            } else if (m_hoverHub) {
                 // initial selection
+                // @todo multiple selection / vs single issue
                 Application::instance()->selection().select(m_hoverHub);
 
                 // an object is selected
@@ -466,24 +469,22 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
                 // clear selection
                 Application::instance()->selection().unselectAll();
             }
-        } else if (m_hubManipulator && m_hubManipulator->isTransform()) {
-            // action using the manipulator
-            HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
-            hubManipulator->endTransform(this);
+        } else if (m_actionMode == ACTION_TRANSFORM) {
+            if (m_hubManipulator && m_hubManipulator->isTransform()) {
+                // action using the manipulator
+                HubManipulator *hubManipulator = static_cast<HubManipulator*>(m_hubManipulator);
+                hubManipulator->endTransform(this);
+            }
+            setActionMode(ACTION_NONE);
         }
     } else if (event.button(Mouse::MIDDLE)) {
         if (m_actionMode == ACTION_CAMERA_ROTATION ||
             m_actionMode == ACTION_CAMERA_TRANSLATION ||
             m_actionMode == ACTION_CAMERA_ZOOM) {
             // stop camera action
-            m_actionMode = ACTION_NONE;
+            setActionMode(ACTION_NONE);
         }
     } else if (event.button(Mouse::RIGHT)) {
-    }
-
-    if (m_actionMode == ACTION_NONE && m_hubManipulator->hasSelection()) {
-        // default to translation
-        m_actionMode = ACTION_TRANSLATION;
     }
 
     if (m_actionMode != ACTION_CAMERA_ROTATION && m_actionMode != ACTION_CAMERA_TRANSLATION) {
@@ -615,8 +616,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
 
         cursor.setPos(pos);
         m_content->setCursor(cursor);
-    } else if (m_actionMode == ACTION_ROTATION || m_actionMode == ACTION_TRANSLATION ||
-               m_actionMode == ACTION_SCALE || m_actionMode == ACTION_SKEW) {
+    } else if (m_actionMode == ACTION_TRANSFORM) {
         // relative
         m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
     }
@@ -699,13 +699,13 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
     // switch action mode if no motifiers
     if (event.modifiers() == 0) {
         if (event.vKey() == o3d::VKey::KEY_R) {
-            m_actionMode = ACTION_ROTATION;
+            m_transformMode = TR_ROTATION;
         } else if (event.vKey() == o3d::VKey::KEY_S) {
-            m_actionMode = ACTION_SCALE;
+            m_transformMode = TR_SCALE;
         } else if (event.vKey() == o3d::VKey::KEY_T) {
-            m_actionMode = ACTION_TRANSLATION;
+            m_transformMode = TR_TRANSLATION;
         } else if (event.vKey() == o3d::VKey::KEY_G) {
-            m_actionMode = ACTION_SKEW;
+            m_transformMode = TR_SKEW;
         } else if (event.vKey() == o3d::VKey::KEY_ESCAPE) {
             if (m_hubManipulator && m_hubManipulator->isTransform()) {
                 // cancel current transformation
@@ -752,8 +752,8 @@ o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &event)
 
 o3d::Bool MasterScene::focusInEvent(const Event &/*event*/)
 {
-//    m_motionType = MOTION_FOLLOW;
-//    m_actionMode = ACTION_NONE;
+    m_motionType = MOTION_FOLLOW;
+    setActionMode(ACTION_NONE);
 
     return False;
 }
@@ -762,8 +762,8 @@ o3d::Bool MasterScene::focusOutEvent(const Event &/*event*/)
 {
     // we don't want that focus out loose current displaying of a manipulator
     // @todo so is this ok and for focus in ?
-//    m_motionType = MOTION_FOLLOW;
-//    m_actionMode = ACTION_NONE;
+    m_motionType = MOTION_FOLLOW;
+    setActionMode(ACTION_NONE);
 
     return False;
 }
@@ -837,6 +837,11 @@ MasterScene::MotionType MasterScene::motionType() const
     return m_motionType;
 }
 
+MasterScene::TransformMode MasterScene::transformMode() const
+{
+    return m_transformMode;
+}
+
 void MasterScene::registerPickingId(o3d::UInt32 id, SceneUIElement *element)
 {
     if (!element) {
@@ -882,6 +887,12 @@ void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
         m_hoverHub = project()->lookupPickable(pickable->getPickableId());
         m_pickPos = pos;
     }
+
+    if (m_hoverUIElement) {
+        // but no hover ui element
+        m_hoverUIElement->leave();
+        m_hoverUIElement = nullptr;
+    }
 }
 
 void MasterScene::elementPickingHit(o3d::UInt32 id, o3d::Vector3 pos)
@@ -892,6 +903,12 @@ void MasterScene::elementPickingHit(o3d::UInt32 id, o3d::Vector3 pos)
     if (it != m_pickingToSceneUIElements.end()) {
         it->second->hover(id, pos);
         m_hoverUIElement = it->second;
+    }
+
+    if (m_hoverHub) {
+        // but no hover hub
+        // @todo a leave hub
+        m_hoverHub = nullptr;
     }
 }
 
@@ -917,6 +934,12 @@ void MasterScene::onSelectionChanged()
 
         if (selectionItem->ref().baseTypeOf(TypeRef::hub())) {
             hub = static_cast<Hub*>(project()->lookup(selectionItem->ref()));
+
+            if (hub->parent() == hub->project()) {
+                // root hub cannot be manipulated
+                continue;
+            }
+
             hubs.push_back(hub);
         }
     }
@@ -924,13 +947,16 @@ void MasterScene::onSelectionChanged()
     if (hubs.size()) {
         // create the new according to the current builder (@todo not for now only the standard manipulator)
         m_hubManipulator->setSelection(this, hubs);
-
-        // default to translation when selection
-        m_actionMode = ACTION_TRANSLATION;
     } else {
         // or no action if no selection
-        m_actionMode = ACTION_NONE;
+        setActionMode(ACTION_NONE);
     }
+}
+
+void MasterScene::setActionMode(MasterScene::ActionMode actionMode)
+{
+    m_prevActionMode = m_actionMode;
+    m_actionMode = actionMode;
 }
 
 void MasterScene::processCommands()

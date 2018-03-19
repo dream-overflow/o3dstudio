@@ -125,7 +125,8 @@ protected:
 
     UInt32 m_pickingMask;
 
-    Axe m_axe;                      //!< Current axe or -1 if none.
+    Axe m_hoverAxe;                 //!< Hover axe or -1 if none.
+    Axe m_activeAxe;                //!< Active (transform) axe or -1 if none.
     Vector3f m_relativeV;           //!< Current delta of the transform.
 
     Vector3f m_initial;             //!< Initial input position.

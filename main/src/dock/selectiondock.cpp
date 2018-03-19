@@ -36,7 +36,7 @@ SelectionDock::SelectionDock(BaseObject *parent) :
     common::Dock(),
     m_qtSelectionDock(nullptr),
     m_lastSelected(nullptr),
-    m_autoFollow(True)
+    m_autoScroll(True)
 {
     setupUi();
 
@@ -76,14 +76,14 @@ Qt::DockWidgetArea SelectionDock::dockWidgetArea() const
     return Qt::LeftDockWidgetArea;
 }
 
-void SelectionDock::setAutoFollow(o3d::Bool s)
+void SelectionDock::setAutoScroll(o3d::Bool s)
 {
-    m_autoFollow = s;
+    m_autoScroll = s;
 }
 
-o3d::Bool SelectionDock::isAutoFollow() const
+o3d::Bool SelectionDock::isAutoScroll() const
 {
-    return m_autoFollow;
+    return m_autoScroll;
 }
 
 //void SelectionDock::onActivateProject(LightRef ref)
@@ -163,7 +163,7 @@ void SelectionDock::onSelectionChanged()
         m_qtSelectionDock->m_listWidget->addItem(item);
 
         // auto follow...
-        if (m_autoFollow) {
+        if (m_autoScroll) {
 //            current = current.parent();
 //            while (current.isValid()) {
 //                if (!m_qtSelectionDock->m_treeView->isExpanded(current)) {
@@ -363,6 +363,9 @@ void QtSelectionDock::setupUi()
     setWindowIcon(QIcon(":/icons/center_focus_weak_black.svg"));
 
     m_listWidget = new QListWidget(this);
+    m_listWidget->setAutoScroll(true);
+    m_listWidget->setIconSize(QSize(16, 16));
+
     setWidget(m_listWidget);
 
     // m_treeView->setHeaderHidden(true);

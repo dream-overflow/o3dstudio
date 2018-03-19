@@ -33,7 +33,8 @@ HubManipulator::HubManipulator(BaseObject *parent) :
     m_transform(new MTransform),
     m_displayScale(1),
     m_pickingMask(0xfffffff0f),  // @todo picking mask range and mask generator
-    m_axe(AXE_NONE),
+    m_hoverAxe(AXE_NONE),
+    m_activeAxe(AXE_NONE),
     m_transformMode(STATIC),
     m_pivotPoint(PIVOT_INDIVIDUAL),
     m_transformOrientation(TR_LOCAL),
@@ -49,12 +50,6 @@ HubManipulator::~HubManipulator()
 
 void HubManipulator::setup(MasterScene *masterScene)
 {
-    // compute initial helper
-    updateTransform(masterScene, True);
-
-    // don't want the object local axis
-    masterScene->scene()->setDrawObject(Scene::DRAW_LOCAL_AXIS, False);
-
     // register the picking colors
     masterScene->registerPickingId(0xffffff00, this);
     masterScene->registerPickingId(0xffffff01, this);
@@ -64,9 +59,6 @@ void HubManipulator::setup(MasterScene *masterScene)
 
 void HubManipulator::release(MasterScene *masterScene)
 {
-    // restore drawing of local axis
-    masterScene->scene()->setDrawObject(Scene::DRAW_LOCAL_AXIS, True);
-
     // register the picking colors
     masterScene->unregisterPickingId(0xffffff00);
     masterScene->unregisterPickingId(0xffffff01);
@@ -76,30 +68,22 @@ void HubManipulator::release(MasterScene *masterScene)
 
 void HubManipulator::hover(o3d::UInt32 id, const o3d::Point3f &pos)
 {
-    if (m_focus) {
-        return;
-    }
-
     if (id == 0xffffff00) {
-        m_axe = AXE_X;
+        m_hoverAxe = AXE_X;
     } else if (id == 0xffffff01) {
-        m_axe = AXE_Y;
+        m_hoverAxe = AXE_Y;
     } else if (id == 0xffffff02) {
-        m_axe = AXE_Z;
+        m_hoverAxe = AXE_Z;
     } else if (id == 0xffffff03) {
-        m_axe = AXE_MANY;
+        m_hoverAxe = AXE_MANY;
     } else {
-        m_axe = AXE_NONE;
+        m_hoverAxe = AXE_NONE;
     }
 }
 
 void HubManipulator::leave()
 {
-    if (m_focus) {
-        return;
-    }
-
-    m_axe = AXE_NONE;
+    m_hoverAxe = AXE_NONE;
 }
 
 void HubManipulator::setSelection(MasterScene *masterScene, const std::list<Hub *> targets)
@@ -312,13 +296,17 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
     O3D_ASSERT(m_orgV.empty());
     O3D_ASSERT(m_orgQ.empty());
 
+    // don't want the object local axis
+    masterScene->scene()->setDrawObject(Scene::DRAW_LOCAL_AXIS, False);
+
+    m_activeAxe = m_hoverAxe;
     m_focus = True;
     m_relativeV.zero();
     m_initial = m_previous = pos;
 
     updateTransform(masterScene, True);
 
-    if (masterScene->actionMode() == MasterScene::ACTION_ROTATION) {
+    if (masterScene->transformMode() == MasterScene::TR_ROTATION) {
         m_transformMode = ROTATE;
 
         for (Hub* hub : m_targets) {
@@ -332,7 +320,7 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgQ.push_back(Quaternion());
             }
         }
-    } else if (masterScene->actionMode() == MasterScene::ACTION_TRANSLATION) {
+    } else if (masterScene->transformMode() == MasterScene::TR_TRANSLATION) {
         m_transformMode = TRANSLATE;
 
         for (Hub* hub : m_targets) {
@@ -346,7 +334,7 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgV.push_back(Vector3());
             }
         }
-    } else if (masterScene->actionMode() == MasterScene::ACTION_SCALE) {
+    } else if (masterScene->transformMode() == MasterScene::TR_SCALE) {
         m_transformMode = SCALE;
 
         for (Hub* hub : m_targets) {
@@ -360,7 +348,7 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgV.push_back(Vector3(1, 1, 1));
             }
         }
-    }  else if (masterScene->actionMode() == MasterScene::ACTION_SKEW) {
+    }  else if (masterScene->transformMode() == MasterScene::TR_SKEW) {
        m_transformMode = SKEW;
     } else {
         m_transformMode = STATIC;
@@ -390,7 +378,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
     // @todo determin the amount of x and y to be colinear or at 90° to the axis of the transform
     if (m_transformMode == ROTATE) {
         // compute the relative change from origins in the direction of the arc of the axe and the input delta
-        m_relativeV += computeCircularVelocity(masterScene, v * s, m_axe);
+        m_relativeV += computeCircularVelocity(masterScene, v * s, m_activeAxe);
 
         Quaternion q;
         q.fromEuler(m_relativeV);
@@ -478,7 +466,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         }
     } else if (m_transformMode == TRANSLATE) {
         // compute the relative change from origins in the direction of the axe and the input delta
-        m_relativeV += computeLinearVelocity(masterScene, v * s, m_axe);
+        m_relativeV += computeLinearVelocity(masterScene, v * s, m_activeAxe);
 
         auto it = m_orgV.begin();
         SpacialNodeHub *spacialNode;
@@ -621,22 +609,22 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         }
     } else if (m_transformMode == SCALE) {
         // compute the relative change from origins in the direction of the axe and the input delta
-        Vector3 relativeV = computeLinearVelocity(masterScene, v * s, m_axe);
+        Vector3 relativeV = computeLinearVelocity(masterScene, v * s, m_activeAxe);
 
         // no zero, need 1 for non concerned axes
-        if (m_axe == AXE_X) {
+        if (m_activeAxe == AXE_X) {
             m_relativeV.x() += relativeV.x();
             m_relativeV.y() = 1;
             m_relativeV.z() = 1;
-        } else if (m_axe == AXE_Y) {
+        } else if (m_activeAxe == AXE_Y) {
             m_relativeV.x() = 1;
             m_relativeV.y() += relativeV.y();
             m_relativeV.z() = 1;
-        } else if (m_axe == AXE_Z) {
+        } else if (m_activeAxe == AXE_Z) {
             m_relativeV.x() = 1;
             m_relativeV.y() = 1;
             m_relativeV.z() += relativeV.z();
-        } else if (m_axe == AXE_MANY) {
+        } else if (m_activeAxe == AXE_MANY) {
             // @todo
         }
 
@@ -773,6 +761,10 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
 void HubManipulator::endTransform(MasterScene *masterScene)
 {
+    // restore drawing of local axis
+    masterScene->scene()->setDrawObject(Scene::DRAW_LOCAL_AXIS, True);
+
+    m_activeAxe = AXE_NONE;
     m_focus = False;
     m_transformMode = STATIC;
     m_relativeV.zero();
@@ -868,6 +860,7 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
     m_transform->setRotation(m_orgRot);
     m_transform->setScale(m_orgScale);
 
+    m_activeAxe = AXE_NONE;
     m_focus = False;
     m_transformMode = STATIC;
     m_relativeV.zero();
@@ -900,6 +893,11 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     Scene *scene = masterScene->scene();
 
     if (drawInfo.pass != DrawInfo::PICKING_PASS && drawInfo.pass != DrawInfo::AMBIENT_PASS) {
+        return;
+    }
+
+    if (m_targets.empty()) {
+        // no targets no display
         return;
     }
 
@@ -941,7 +939,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
         // assume picking project matrix is always current
 
         // a picking pass for manipulation
-        if (masterScene->actionMode() == MasterScene::ACTION_ROTATION) {
+        if (masterScene->transformMode() == MasterScene::TR_ROTATION) {
             // @todo the axis the most colinear to the plane avix must be the external circle
 
             // translation axes as cylinder
@@ -961,7 +959,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setPickableId(0xffffff02);   // z picking id
             primitive->draw(PrimitiveManager::SOLID_CYLINDER1, Vector3(s*0.1f,s*1.f,s*0.1f));
             primitive->modelView().pop();
-        } else if (masterScene->actionMode() == MasterScene::ACTION_TRANSLATION) {
+        } else if (masterScene->transformMode() == MasterScene::TR_TRANSLATION) {
             // translation axes as cylinder
             primitive->modelView().push();
             primitive->modelView().rotateZ(o3d::toRadian(-90.f));
@@ -981,7 +979,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->modelView().pop();
 
             // @todo a planar transformation helper
-        } else if (masterScene->actionMode() == MasterScene::ACTION_SCALE) {
+        } else if (masterScene->transformMode() == MasterScene::TR_SCALE) {
             // translation axes as cylinder
             primitive->modelView().push();
             primitive->modelView().rotateZ(o3d::toRadian(-90.f));
@@ -1012,7 +1010,31 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
 
         // an highlighted version of the targets @todo but might need a particular status on targeted hubs
 
-        if (masterScene->actionMode() == MasterScene::ACTION_ROTATION) {
+        if (masterScene->actionMode() == MasterScene::ACTION_TRANSFORM) {
+            // translation axes during camera action to keep seeing but not acting
+            primitive->setModelviewProjection();
+            primitive->drawXYZAxis(Vector3(s, s, s));
+
+            primitive->modelView().push();
+            primitive->modelView().translate(Vector3(s*0.8f, 0, 0));
+            primitive->modelView().rotateZ(o3d::toRadian(-90.f));
+            primitive->setColor(axeColor(AXE_X));
+            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->modelView().pop();
+
+            primitive->modelView().push();
+            primitive->modelView().translate(Vector3(0,s*0.8f,0));
+            primitive->setColor(axeColor(AXE_Y));
+            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->modelView().pop();
+
+            primitive->modelView().push();
+            primitive->modelView().translate(Vector3(0,0,s*0.8f));
+            primitive->modelView().rotateX(o3d::toRadian(90.f));
+            primitive->setColor(axeColor(AXE_Z));
+            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
+            primitive->modelView().pop();
+        } else if (masterScene->transformMode() == MasterScene::TR_ROTATION) {
             // rotation circles
             // @todo 0.5a circle in area of current angle
 
@@ -1039,7 +1061,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setColor(axeColor(AXE_Z));
             primitive->draw(PrimitiveManager::SOLID_SPHERE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
             primitive->modelView().pop();
-        } else if (masterScene->actionMode() == MasterScene::ACTION_TRANSLATION) {
+        } else if (masterScene->transformMode() == MasterScene::TR_TRANSLATION) {
             // translation axes
             primitive->setModelviewProjection();
             primitive->drawXYZAxis(Vector3(s, s, s));
@@ -1063,7 +1085,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setColor(axeColor(AXE_Z));
             primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
             primitive->modelView().pop();
-        } else if (masterScene->actionMode() == MasterScene::ACTION_SCALE) {
+        } else if (masterScene->transformMode() == MasterScene::TR_SCALE) {
             // scale axes with squares
             // @todo 0.5a square in direction and proportional to current scale
 
@@ -1089,32 +1111,6 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->modelView().rotateX(o3d::toRadian(90.f));
             primitive->setColor(axeColor(AXE_Z));
             primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.15f,s*0.15f,s*0.15f));
-            primitive->modelView().pop();
-        } else if (masterScene->actionMode() == MasterScene::ACTION_CAMERA_ROTATION ||
-                   masterScene->actionMode() == MasterScene::ACTION_CAMERA_TRANSLATION||
-                   masterScene->actionMode() == MasterScene::ACTION_CAMERA_ZOOM) {
-            // translation axes during camera action to keep seeing but not acting
-            primitive->setModelviewProjection();
-            primitive->drawXYZAxis(Vector3(s, s, s));
-
-            primitive->modelView().push();
-            primitive->modelView().translate(Vector3(s*0.8f, 0, 0));
-            primitive->modelView().rotateZ(o3d::toRadian(-90.f));
-            primitive->setColor(axeColor(AXE_X));
-            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
-            primitive->modelView().pop();
-
-            primitive->modelView().push();
-            primitive->modelView().translate(Vector3(0,s*0.8f,0));
-            primitive->setColor(axeColor(AXE_Y));
-            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
-            primitive->modelView().pop();
-
-            primitive->modelView().push();
-            primitive->modelView().translate(Vector3(0,0,s*0.8f));
-            primitive->modelView().rotateX(o3d::toRadian(90.f));
-            primitive->setColor(axeColor(AXE_Z));
-            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
             primitive->modelView().pop();
         }
 
@@ -1236,9 +1232,9 @@ void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
 
 o3d::Color HubManipulator::axeColor(HubManipulator::Axe axe)
 {
-    if (m_axe == AXE_MANY) {
+    if (m_activeAxe == AXE_MANY || m_hoverAxe == AXE_MANY) {
         // @todo depends...
-    } else if (m_axe == axe) {
+    } else if (m_activeAxe == axe || m_hoverAxe == axe) {
         if (axe == AXE_X) {
             return Color(1.f, 0.5f, 0.5f);
         }else if (axe == AXE_Y) {
