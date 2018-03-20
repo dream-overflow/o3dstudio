@@ -364,43 +364,42 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
                 m_hubManipulator->beginTransform(this, Vector3f(event.localPos().x(), event.localPos().y(), 0));
             } else if (m_hoverHub) {
                 // in a multiple selection
-                if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-                    if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-                        // get current selection and remove from it
-                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+                if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                    // get current selection and remove from it
+                    auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
 
-                        Application::instance()->selection().beginSelection();
+                    Application::instance()->selection().beginSelection();
 
-                        for (SelectionItem *item : previous) {
-                            if (item->ref() != m_hoverHub->ref().light()) {
-                                Application::instance()->selection().appendSelection(
-                                            static_cast<Hub*>(project()->lookup(item->ref())));
-                            }
+                    for (SelectionItem *item : previous) {
+                        if (item->ref() != m_hoverHub->ref().light()) {
+                            Application::instance()->selection().appendSelection(
+                                        static_cast<Hub*>(project()->lookup(item->ref())));
                         }
+                    }
 
-                        Application::instance()->selection().endSelection();
+                    if (!m_hoverHub->isSelected()) {
+                        // if not selected add it to last
+                        Application::instance()->selection().appendSelection(m_hoverHub);
 
                         // an object is removed from selection
                         Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Remove from selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
                     } else {
-                        // get previous selection and append
-                        auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
-
-                        Application::instance()->selection().beginSelection();
-
-                        for (SelectionItem *item : previous) {
-                            // himself is reselected at last
-                            if (item->ref() != m_hoverHub->ref().light()) {
-                                Application::instance()->selection().appendSelection(
-                                            static_cast<Hub*>(project()->lookup(item->ref())));
-                            }
-                        }
-
-                        Application::instance()->selection().appendSelection(m_hoverHub);
-                        Application::instance()->selection().endSelection();
-
                         // an object is selected
                         Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                    }
+
+                    Application::instance()->selection().endSelection();
+                } else {
+                    // single selection
+                    if (m_hoverHub->isSelected()) {
+                        // clear selection
+                        Application::instance()->selection().unselectAll();
+                    } else {
+                        // initial selection
+                        Application::instance()->selection().select(m_hoverHub);
+
+                        // an object is selected
+                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Initial selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
                     }
                 }
             }
@@ -456,19 +455,7 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
         if (m_prevActionMode == ACTION_TRANSFORM) {
             // nothing to do, prevent undefined behaviors
         } else if (m_actionMode == ACTION_NONE) {
-            if (m_hubManipulator && m_hubManipulator->hasSelection()) {
-                // multiple selection is done at button press
-            } else if (m_hoverHub) {
-                // initial selection
-                // @todo multiple selection / vs single issue
-                Application::instance()->selection().select(m_hoverHub);
-
-                // an object is selected
-                Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Initial selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
-            } else {
-                // clear selection
-                Application::instance()->selection().unselectAll();
-            }
+            // nothing to do for now
         } else if (m_actionMode == ACTION_TRANSFORM) {
             if (m_hubManipulator && m_hubManipulator->isTransform()) {
                 // action using the manipulator

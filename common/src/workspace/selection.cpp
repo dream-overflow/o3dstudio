@@ -33,6 +33,7 @@ Selection::~Selection()
     }
 
     for (SelectionItem *selectionItem : m_currentSelection) {
+        selectionItem->unselect();
         delete selectionItem;
     }
 }
@@ -55,6 +56,7 @@ void Selection::clear()
     m_previousSelection.clear();
 
     for (SelectionItem *selectionItem : m_currentSelection) {
+        selectionItem->unselect();
         delete selectionItem;
     }
 
@@ -102,10 +104,15 @@ void Selection::endSelection()
         delete selectionItem;
     }
 
+    for (SelectionItem *selectionItem : m_currentSelection) {
+        selectionItem->unselect();
+    }
+
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
     for (Entity *entity : m_selectingSet) {
+        entity->setSelected(True);
         m_currentSelection.insert(new SelectionItem(entity));
     }
 
@@ -121,10 +128,15 @@ void Selection::select(Entity *entity)
         delete selectionItem;
     }
 
+    for (SelectionItem *selectionItem : m_currentSelection) {
+        selectionItem->unselect();
+    }
+
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
     if (entity) {
+        entity->setSelected(True);
         m_currentSelection.insert(new SelectionItem(entity));
     }
 
@@ -140,6 +152,10 @@ void Selection::unselectAll()
 
     for (SelectionItem *selectionItem : m_previousSelection) {
         delete selectionItem;
+    }
+
+    for (SelectionItem *selectionItem : m_currentSelection) {
+        selectionItem->unselect();
     }
 
     m_previousSelection = m_currentSelection;
@@ -249,10 +265,12 @@ void Selection::onProjectHubRemoved(LightRef ref)
         return;
     }
 
-    const Entity *entity = project->lookup(ref);
+    Entity *entity = project->lookup(ref);
     if (!entity) {
         return;
     }
+
+    entity->setSelected(False);
 
     if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
         const Hub *removedHub = static_cast<const Hub*>(entity);
@@ -297,10 +315,12 @@ void Selection::onProjectFragmentRemoved(LightRef ref)
         return;
     }
 
-    const Entity *entity = project->lookup(ref);
+    Entity *entity = project->lookup(ref);
     if (!entity) {
         return;
     }
+
+    entity->setSelected(False);
 
     if (entity->ref().light().baseTypeOf(TypeRef::fragment())) {
         // erase selection from current selection
@@ -336,6 +356,10 @@ void Selection::onProjectRemoved(LightRef /*ref*/)
 
 void Selection::cleanupAll()
 {
+    for (SelectionItem *selectionItem : m_currentSelection) {
+        selectionItem->unselect();
+    }
+
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 }

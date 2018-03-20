@@ -19,7 +19,7 @@ class Entity;
 
 /**
  * @brief The SelectionItem used by the selection manager.
- * It manage the state selected of the entity.
+ * The state selected of the entity is not managed by selection item but by the selection manager.
  */
 class O3S_API SelectionItem
 {
@@ -33,6 +33,12 @@ public:
 
     inline const LightRef& ref() const { return m_ref; }
     inline const LightRef& parentRef() const { return m_parentRef; }
+
+    const Entity *entity() const;
+    Entity *entity();
+
+    void select();
+    void unselect();
 
 private:
 

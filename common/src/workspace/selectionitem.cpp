@@ -38,7 +38,7 @@ SelectionItem::SelectionItem(const LightRef &ref) :
 
     Entity *entity = workspace->entity(m_ref);
     if (entity) {
-        entity->setSelected(False);
+        m_parentRef = entity->parent()->ref().light();
     }
 }
 
@@ -50,16 +50,38 @@ SelectionItem::SelectionItem(const LightRef &ref, const LightRef &parentRef) :
 
     Entity *entity = workspace->entity(m_ref);
     if (entity) {
-        entity->setSelected(True);
+        m_parentRef = entity->parent()->ref().light();
     }
 }
 
 SelectionItem::~SelectionItem()
 {
-    common::Workspace *workspace = common::Application::instance()->workspaces().current();
+}
 
-    Entity *entity = workspace->entity(m_ref);
-    if (entity) {
-        entity->setSelected(False);
+const Entity *SelectionItem::entity() const
+{
+    const common::Workspace *workspace = common::Application::instance()->workspaces().current();
+    return  workspace->entity(m_ref);
+}
+
+Entity *SelectionItem::entity()
+{
+    common::Workspace *workspace = common::Application::instance()->workspaces().current();
+    return  workspace->entity(m_ref);
+}
+
+void SelectionItem::select()
+{
+    Entity *lentity = entity();
+    if (lentity) {
+        lentity->setSelected(True);
+    }
+}
+
+void SelectionItem::unselect()
+{
+    Entity *lentity = entity();
+    if (lentity) {
+        lentity->setSelected(False);
     }
 }
