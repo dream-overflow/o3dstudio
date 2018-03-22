@@ -198,8 +198,8 @@ void QtMainToolBar::setupButtons()
     addAsset->setEnabled(false);
     addAction(addAsset);
 
-    addSeparator();
+//    addSeparator();
 
-    addAction(QIcon::fromTheme("system-search"), tr("Search"));
-    addWidget(new QLineEdit());
+//    addAction(QIcon::fromTheme("system-search"), tr("Search"));
+//    addWidget(new QLineEdit());
 }
