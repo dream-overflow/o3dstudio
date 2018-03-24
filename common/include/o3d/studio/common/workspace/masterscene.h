@@ -209,6 +209,10 @@ public /*slots*/:
 
     void onSelectionChanged();
 
+    void changeTransformMode(Int32 mode);
+    void changeTransformOrientation(Int32 mode);
+    void changePivotMode(Int32 mode);
+
 private:
 
     Entity *m_parent;             //!< Parent entity (project, fragment)

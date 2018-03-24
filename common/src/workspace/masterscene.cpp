@@ -18,6 +18,7 @@
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 #include "o3d/studio/common/ui/scene/hubmanipulator.h"
+#include "o3d/studio/common/ui/toolbar/transformtoolbar.h"
 
 #include <o3d/engine/glextdefines.h>
 #include <o3d/engine/glextensionmanager.h>
@@ -940,6 +941,21 @@ void MasterScene::onSelectionChanged()
     }
 }
 
+void MasterScene::changeTransformMode(o3d::Int32 mode)
+{
+    m_transformMode = (TransformMode)mode;
+}
+
+void MasterScene::changeTransformOrientation(o3d::Int32 mode)
+{
+    m_hubManipulator->setTransformOrientation(HubManipulator::TransformOrientation(mode));
+}
+
+void MasterScene::changePivotMode(o3d::Int32 mode)
+{
+    m_hubManipulator->setPivotPoint(HubManipulator::PivotPoint(mode));
+}
+
 void MasterScene::setActionMode(MasterScene::ActionMode actionMode)
 {
     m_prevActionMode = m_actionMode;
@@ -1045,5 +1061,12 @@ void MasterScene::initializeDrawer()
         // and a default selection hub manipulator
         m_hubManipulator = new HubManipulator(this);
         addSceneUIElement(m_hubManipulator);
+
+        common::UiController &uiCtrl = common::Application::instance()->ui();
+        common::TransformToolBar *transformToolBar = static_cast<TransformToolBar*>(uiCtrl.toolBar("o3s::main::toolbar::transform"));
+
+        transformToolBar->onChangeTransformMode.connect(this, &MasterScene::changeTransformMode);
+        transformToolBar->onChangeOrientationMode.connect(this, &MasterScene::changeTransformOrientation);
+        transformToolBar->onChangePivotMode.connect(this, &MasterScene::changePivotMode);
     }
 }

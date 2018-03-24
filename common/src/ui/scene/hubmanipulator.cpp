@@ -249,9 +249,6 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
     return v;
 }
 
-#include "o3d/studio/common/application.h"
-#include "o3d/studio/common/messenger.h"
-
 void HubManipulator::keyDownEvent(const KeyEvent &event, MasterScene *masterScene)
 {
     // not possible during transform
@@ -263,25 +260,18 @@ void HubManipulator::keyDownEvent(const KeyEvent &event, MasterScene *masterScen
     if (event.modifiers() == 0) {
         if (event.vKey() == o3d::VKey::KEY_U) {
             m_transformOrientation = TR_GLOBAL;
-            Application::instance()->messenger().info("Change to GLOBAL orientation");
         } else if (event.vKey() == o3d::VKey::KEY_L) {
             m_transformOrientation = TR_LOCAL;
-            Application::instance()->messenger().info("Change to LOCAL orientation");
         } else if (event.vKey() == o3d::VKey::KEY_V) {
             m_transformOrientation = TR_VIEW;
-            Application::instance()->messenger().info("Change to VIEW orientation");
         } else if (event.vKey() == o3d::VKey::KEY_A) {
             m_pivotPoint = PIVOT_ACTIVE_ELT;
-            Application::instance()->messenger().info("Change to ACTIVE ELEMENT pivot");
         } else if (event.vKey() == o3d::VKey::KEY_I) {
             m_pivotPoint = PIVOT_INDIVIDUAL;
-            Application::instance()->messenger().info("Change to INDIVIDUAL pivot");
         } else if (event.vKey() == o3d::VKey::KEY_M) {
             m_pivotPoint = PIVOT_MEDIAN;
-            Application::instance()->messenger().info("Change to MEDIAN pivot");
         } else if (event.vKey() == o3d::VKey::KEY_P) {
             m_pivotPoint = PIVOT_USER;
-            Application::instance()->messenger().info("Change to USER pivot");
         }
 
         // @todo pivot point change
@@ -1123,6 +1113,16 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     context.setDefaultDepthWrite();
     context.setDefaultDepthTest();
     context.setDefaultDepthRange();
+}
+
+void HubManipulator::setPivotPoint(HubManipulator::PivotPoint mode)
+{
+    m_pivotPoint = mode;
+}
+
+void HubManipulator::setTransformOrientation(HubManipulator::TransformOrientation mode)
+{
+    m_transformOrientation = mode;
 }
 
 void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)

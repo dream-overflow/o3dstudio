@@ -50,7 +50,6 @@
 
 #include "maintoolbar.h"
 #include "quicktoolbar.h"
-#include "toolbar/transformtoolbar.h"
 
 #include "dock/mainconsole.h"
 #include "dock/workspacedock.h"
@@ -132,10 +131,6 @@ void QtMainWindow::setup()
     // quick toolbar
     QuickToolBar *quickToolBar = new QuickToolBar();
     uiCtrl.addToolBar(quickToolBar);
-
-    // transform toolbar
-    TransformToolBar *transformToolBar = new TransformToolBar();
-    uiCtrl.addToolBar(transformToolBar);
 
     // @todo setActive view... plus context into the quicktoolbar
     connect(quickToolBar, SIGNAL(showHome()), SLOT(onViewHomePage()));

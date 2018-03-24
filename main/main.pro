@@ -46,8 +46,7 @@ SOURCES += \
     src/messenger.cpp \
     src/toolbar/hubcomponenttoolbar.cpp \
     src/importfiledialog.cpp \
-    src/dock/selectiondock.cpp \
-    src/toolbar/transformtoolbar.cpp
+    src/dock/selectiondock.cpp
 
 
 HEADERS += \
@@ -69,8 +68,7 @@ HEADERS += \
     src/dock/propertydock.h \
     src/toolbar/hubcomponenttoolbar.h \
     src/importfiledialog.h \
-    src/dock/selectiondock.h \
-    src/toolbar/transformtoolbar.h
+    src/dock/selectiondock.h
 
 
 RESOURCES += \

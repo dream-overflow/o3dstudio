@@ -66,6 +66,7 @@ Application::Application() :
     m_importerRegistry->initialize();
     m_builderRegistry->initialize();
     m_selection->initialize();
+    m_ui->initialize();
 }
 
 Application::~Application()
@@ -308,6 +309,13 @@ o3d::Bool Application::stop()
     ModuleManager::destroy();
 
     m_started = False;
+    return True;
+}
+
+o3d::Bool Application::setupUi()
+{
+    m_ui->setupUi();
+
     return True;
 }
 

@@ -60,6 +60,7 @@ public:
 
     Bool start();
     Bool stop();
+    Bool setupUi();
 
     //
     // Controllers

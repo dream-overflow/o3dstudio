@@ -27,6 +27,9 @@ public:
     UiController();
     virtual ~UiController();
 
+    virtual void initialize();
+    virtual void setupUi();
+
     /**
      * @brief A content is added as central widget, in a stacked area but only one
      * is active at time.

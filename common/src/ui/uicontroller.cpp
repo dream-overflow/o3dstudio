@@ -62,6 +62,20 @@ UiController::~UiController()
     }
 }
 
+void UiController::initialize()
+{
+
+}
+
+#include "o3d/studio/common/ui/toolbar/transformtoolbar.h"
+
+void UiController::setupUi()
+{
+    // transform toolbar
+    TransformToolBar *transformToolBar = new TransformToolBar();
+    addToolBar(transformToolBar);
+}
+
 o3d::Bool UiController::addContent(Content *content)
 {
     if (content == nullptr) {

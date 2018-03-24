@@ -176,6 +176,8 @@ int main(int argc, char *argv[])
 //                o3d::False,
 //                o3d::True);
 
+    o3d::studio::common::Application::instance()->setupUi();
+
     // start timer once main windows is ready to receive events
     new o3d::Timer(50, o3d::Timer::TIMER_TIMEOUT, new o3d::CallbackFunction(mainTimer));
     // new o3d::TimerThread(16, o3d::Timer::TIMER_TIMEOUT, new o3d::CallbackFunction(threadedTimer));

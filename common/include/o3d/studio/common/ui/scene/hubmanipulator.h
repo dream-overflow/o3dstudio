@@ -36,6 +36,27 @@ class O3S_API HubManipulator : public SceneUIElement
 public:
 
     /**
+     * @brief Pivot point is defined :
+     */
+    enum PivotPoint
+    {
+        PIVOT_ACTIVE_ELT = 0,   //!< on the active element of the selection.
+        PIVOT_INDIVIDUAL,       //!< relative for each element.
+        PIVOT_MEDIAN,           //!< relative to the computed median point.
+        PIVOT_USER              //!< relative to used defined point.
+    };
+
+    /**
+     * @brief Transform orientation is base on :
+     */
+    enum TransformOrientation
+    {
+        TR_LOCAL = 0,   //!< Local axis of the selected object.
+        TR_GLOBAL,      //!< Absolute (origin).
+        TR_VIEW         //!< Related to the current view axis.
+    };
+
+    /**
      * @brief HubManipulator
      * @param parent Parent object
      */
@@ -69,6 +90,9 @@ public:
     virtual void syncWithScene(MasterScene *masterScene) override;
     virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene) override;
 
+    void setPivotPoint(PivotPoint mode);
+    void setTransformOrientation(TransformOrientation mode);
+
 protected:
 
     enum Axe
@@ -87,27 +111,6 @@ protected:
         ROTATE,
         SCALE,
         SKEW
-    };
-
-    /**
-     * @brief Pivot point is...
-     */
-    enum PivotPoint
-    {
-        PIVOT_ACTIVE_ELT = 0,   //!< on the active element of the selection.
-        PIVOT_INDIVIDUAL,       //!< relative for each element.
-        PIVOT_MEDIAN,           //!< relative to the computed median point.
-        PIVOT_USER             //!< relative to used defined point.
-    };
-
-    /**
-     * @brief Transform orientation is...
-     */
-    enum TransformOrientation
-    {
-        TR_LOCAL = 0,   //!< Local axis of the selected object.
-        TR_GLOBAL,      //!< Absolute (origin).
-        TR_VIEW         //!< Related to the current view axis.
     };
 
     std::list<Hub*> m_targets;
