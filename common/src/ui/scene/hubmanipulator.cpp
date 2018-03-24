@@ -35,10 +35,11 @@ HubManipulator::HubManipulator(BaseObject *parent) :
     m_pickingMask(0xfffffff0f),  // @todo picking mask range and mask generator
     m_hoverAxe(AXE_NONE),
     m_activeAxe(AXE_NONE),
-    m_transformMode(TRANSLATE),
     m_transforming(False),
+    m_transformMode(TRANSLATE),
     m_pivotPoint(PIVOT_INDIVIDUAL),
     m_transformOrientation(TR_LOCAL),
+    m_actionRadius(0),
     m_activeElt(nullptr)
 {
 
@@ -91,10 +92,10 @@ void HubManipulator::setSelection(MasterScene *masterScene, const std::list<Hub 
 {
     m_targets = targets;
 
-    // default take last hub as active element @todo
-//    if (targets.size() > 0) {
-//        m_activeElt = m_targets.back();
-//    }
+    // default take first hub as active element @todo
+    if (targets.size() > 0) {
+        // m_activeElt = static_cast<SpacialNodeHub*>(m_targets.front());
+    }
 
     updateTransform(masterScene, True);
 }
@@ -215,17 +216,15 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
                 (vp.height() - (m_previous.y() + delta.y())) - vp.height() / 2 + vp.y());
 
     Vector2f p1 = target - center;
-    Float radius = p1.length();
 
-    // @todo keep radius for display an helper
+    m_actionPos = Vector3f(target.x() + vp.width() / 2, target.y() + vp.height() / 2, 0);
+    m_actionRadius = p1.length();
 
     Vector2f p2(
                 m_previous.x() - vp.width() / 2 - vp.x(),
                 (vp.height() - m_previous.y()) - vp.height() / 2 - vp.y());
 
     p2 -= center;
-    System::print(center, m_previous);
-    System::print(p1, p2);
 
     p1.normalize();
     p2.normalize();
@@ -236,6 +235,8 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
     // http://www.euclideanspace.com/maths/algebra/vectors/angleBetween/
     Float phi = o3d::simplifyRadian(atan2(p1.y(), p1.x()) - atan2(p2.y(), p2.x()));
     Float velocity = phi;
+
+    m_actionPhi = o3d::simplifyRadian(atan2(p1.y(), p1.x()) - atan2(1, 0));
 
     if (axe == AXE_X) {
         v.x() = velocity;
@@ -1063,6 +1064,59 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->modelView().pop();
         } else if (m_transformMode == SKEW) {
             // @todo
+        }
+
+        // display helper radius
+        if (m_actionRadius != 0.0 && m_transforming) {
+            if (m_transformMode == ROTATE || m_transformMode == SCALE || m_transformMode == SKEW) {
+                m_actionPos.set(m_previous.x(),
+                                vp.height() - m_previous.y(),
+                                0);
+
+                // ortho projection
+                Matrix4 pj;
+                pj.buildOrtho(vp.x(), vp.x2(), vp.y(), vp.y2(), -1, 1);
+                primitive->projection().set(pj);
+
+                // identiy modelview
+                primitive->modelView().identity();
+
+                Vector3f p1(v.x(), v.y(), 0);
+                Vector3f p2(m_actionPos.x(), m_actionPos.y(), 0);
+                Vector3f p3(m_actionPos.x() - 5, m_actionPos.y() - 5, 0);
+                Vector3f p4(m_actionPos.x() + 5, m_actionPos.y() - 5, 0);
+
+                // angle from origin, draw an arrow
+                Matrix3 rot;
+                rot.rotateZ(m_actionPhi);
+
+                p3 = rot * Vector3f(-5, -5, 0) + p2;
+                p4 = rot * Vector3f(5, -5, 0) + p2;
+
+//                Float sin = sinf(-m_actionPhi);
+//                Float cos = cosf(-m_actionPhi);
+
+//                p3.x() = -5 * cos + -5 * sin + p2.x();
+//                p3.y() = -5 * cos - -5 * sin + p2.y();
+
+//                p4.x() = 5 * cos + -5 * sin + p2.x();
+//                p4.y() = -5 * cos - 5 * sin + p2.y();
+
+                primitive->setColor(Color(0, 0, 0, 1));
+
+                primitive->modelView().push();
+                primitive->beginDraw(P_LINES);
+                primitive->addVertex(p1, Color(0, 0, 0, 1));
+                primitive->addVertex(p2, Color(0, 0, 0, 1));
+
+                primitive->addVertex(p2, Color(0, 0, 0, 1));
+                primitive->addVertex(p3, Color(0, 0, 0, 1));
+
+                primitive->addVertex(p2, Color(0, 0, 0, 1));
+                primitive->addVertex(p4, Color(0, 0, 0, 1));
+                primitive->endDraw();
+                primitive->modelView().pop();
+            }
         }
 
         context.setAntiAliasing(aa);

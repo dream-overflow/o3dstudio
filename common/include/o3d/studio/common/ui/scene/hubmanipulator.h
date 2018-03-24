@@ -160,6 +160,10 @@ protected:
     PivotPoint m_pivotPoint;        //!< Current defined pivot point.
     TransformOrientation m_transformOrientation;  //!< Current transform orientation mode.
 
+    Vector3f m_actionPos;           //!< Current 2D position
+    Float m_actionRadius;           //!< Radius of action
+    Float m_actionPhi;              //!< Angle of the action from initial
+
     SpacialNodeHub *m_activeElt;
 
     void updateTransform(MasterScene *masterScene, Bool keepOrg);

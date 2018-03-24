@@ -427,15 +427,21 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         }
     }
 
+    Bool hideCursor = False;
+
     if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
-        // no cursor and infinite scrolling
+        hideCursor = True;
+    } else if (m_actionMode == ACTION_TRANSFORM) {
+        hideCursor = True;
+    }
+
+    if (hideCursor) {
+        // no cursor (and infinite scrolling)
         QCursor cursor = m_content->cursor();
         cursor.setShape(Qt::BlankCursor);
 
-        m_content->setCursor(cursor);
-        m_lockedPos = event.globalPos();
-    } else if (m_actionMode == ACTION_TRANSFORM) {
         // initial relative
+        m_content->setCursor(cursor);
         m_lockedPos = event.globalPos();
     }
 
@@ -477,7 +483,16 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
     } else if (event.button(Mouse::RIGHT)) {
     }
 
-    if (m_actionMode != ACTION_CAMERA_ROTATION && m_actionMode != ACTION_CAMERA_TRANSLATION) {
+    Bool showCursor = False;
+
+    if (m_actionMode != ACTION_CAMERA_ROTATION &&
+        m_actionMode != ACTION_CAMERA_TRANSLATION &&
+        m_actionMode != ACTION_TRANSFORM) {
+
+        showCursor = True;
+    }
+
+    if (showCursor) {
         // restore cursor
         QCursor cursor = m_content->cursor();
         cursor.setShape(Qt::ArrowCursor);
@@ -607,8 +622,15 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         cursor.setPos(pos);
         m_content->setCursor(cursor);
     } else if (m_actionMode == ACTION_TRANSFORM) {
-        // relative
-        m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
+        // lock mouse position, infinite cursor
+        QCursor cursor = m_content->cursor();
+        QPoint pos(m_lockedPos.x(), m_lockedPos.y());
+
+        cursor.setPos(pos);
+        m_content->setCursor(cursor);
+
+        // comment for infinite mouse
+        // m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
     }
 
     // necessary at each move
