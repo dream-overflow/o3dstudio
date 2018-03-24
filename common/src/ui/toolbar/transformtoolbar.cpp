@@ -144,6 +144,7 @@ void QtTransformToolBar::setupUi()
     translate->setProperty("tranformMode", QVariant(0));
     translate->setEnabled(false);
     translate->setCheckable(true);
+    translate->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_T));
     addAction(translate);
 
     QAction *rotate = new QAction(common::UiUtils::tintIcon("://icons/3d_rotation_black.svg"), tr("Rotation"), actionGroup);
@@ -151,6 +152,7 @@ void QtTransformToolBar::setupUi()
     rotate->setProperty("tranformMode", QVariant(1));
     rotate->setEnabled(false);
     rotate->setCheckable(true);
+    rotate->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_R));
     addAction(rotate);
 
     QAction *scale = new QAction(common::UiUtils::tintIcon("://icons/transform_black.svg"), tr("Scale factor"), actionGroup);
@@ -158,6 +160,7 @@ void QtTransformToolBar::setupUi()
     scale->setProperty("tranformMode", QVariant(2));
     scale->setEnabled(false);
     scale->setCheckable(true);
+    scale->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_S));
     addAction(scale);
 
     QAction *skew = new QAction(common::UiUtils::tintIcon("://icons/details_black.svg"), tr("Skew"), actionGroup);
@@ -165,6 +168,7 @@ void QtTransformToolBar::setupUi()
     skew->setProperty("tranformMode", QVariant(3));
     skew->setEnabled(false);
     skew->setCheckable(true);
+    skew->setShortcut(QKeySequence(Qt::SHIFT + Qt::Key_K));
     addAction(skew);
 
     m_orientationMode = new QComboBox();

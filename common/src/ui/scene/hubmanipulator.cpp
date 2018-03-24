@@ -35,7 +35,8 @@ HubManipulator::HubManipulator(BaseObject *parent) :
     m_pickingMask(0xfffffff0f),  // @todo picking mask range and mask generator
     m_hoverAxe(AXE_NONE),
     m_activeAxe(AXE_NONE),
-    m_transformMode(STATIC),
+    m_transformMode(TRANSLATE),
+    m_transforming(False),
     m_pivotPoint(PIVOT_INDIVIDUAL),
     m_transformOrientation(TR_LOCAL),
     m_activeElt(nullptr)
@@ -255,30 +256,6 @@ void HubManipulator::keyDownEvent(const KeyEvent &event, MasterScene *masterScen
     if (isTransform()) {
         return;
     }
-
-    // switch action mode if no motifiers
-    if (event.modifiers() == 0) {
-        if (event.vKey() == o3d::VKey::KEY_U) {
-            m_transformOrientation = TR_GLOBAL;
-        } else if (event.vKey() == o3d::VKey::KEY_L) {
-            m_transformOrientation = TR_LOCAL;
-        } else if (event.vKey() == o3d::VKey::KEY_V) {
-            m_transformOrientation = TR_VIEW;
-        } else if (event.vKey() == o3d::VKey::KEY_A) {
-            m_pivotPoint = PIVOT_ACTIVE_ELT;
-        } else if (event.vKey() == o3d::VKey::KEY_I) {
-            m_pivotPoint = PIVOT_INDIVIDUAL;
-        } else if (event.vKey() == o3d::VKey::KEY_M) {
-            m_pivotPoint = PIVOT_MEDIAN;
-        } else if (event.vKey() == o3d::VKey::KEY_P) {
-            m_pivotPoint = PIVOT_USER;
-        }
-
-        // @todo pivot point change
-
-        // helper position change
-        updateTransform(masterScene, True);
-    }
 }
 
 void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &pos)
@@ -293,10 +270,14 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
     m_focus = True;
     m_relativeV.zero();
     m_initial = m_previous = pos;
+    m_transforming = True;
 
     updateTransform(masterScene, True);
 
-    if (masterScene->transformMode() == MasterScene::TR_ROTATION) {
+    // m_pivotPoint = masterScene->transformPivotMode();
+    // m_transformOrientation = masterScene->transformOrientationMode();
+
+    if (masterScene->transformMode() == ROTATE) {
         m_transformMode = ROTATE;
 
         for (Hub* hub : m_targets) {
@@ -310,7 +291,7 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgQ.push_back(Quaternion());
             }
         }
-    } else if (masterScene->transformMode() == MasterScene::TR_TRANSLATION) {
+    } else if (masterScene->transformMode() == TRANSLATE) {
         m_transformMode = TRANSLATE;
 
         for (Hub* hub : m_targets) {
@@ -324,7 +305,7 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgV.push_back(Vector3());
             }
         }
-    } else if (masterScene->transformMode() == MasterScene::TR_SCALE) {
+    } else if (masterScene->transformMode() == SCALE) {
         m_transformMode = SCALE;
 
         for (Hub* hub : m_targets) {
@@ -338,10 +319,8 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgV.push_back(Vector3(1, 1, 1));
             }
         }
-    }  else if (masterScene->transformMode() == MasterScene::TR_SKEW) {
+    }  else if (masterScene->transformMode() == SKEW) {
        m_transformMode = SKEW;
-    } else {
-        m_transformMode = STATIC;
     }
 }
 
@@ -754,9 +733,10 @@ void HubManipulator::endTransform(MasterScene *masterScene)
     // restore drawing of local axis
     masterScene->scene()->setDrawObject(Scene::DRAW_LOCAL_AXIS, True);
 
+    m_transformMode = (TransformMode)masterScene->transformMode();
     m_activeAxe = AXE_NONE;
     m_focus = False;
-    m_transformMode = STATIC;
+    m_transforming = False;
     m_relativeV.zero();
     m_previous.zero();
     m_orgV.clear();
@@ -850,9 +830,10 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
     m_transform->setRotation(m_orgRot);
     m_transform->setScale(m_orgScale);
 
+    m_transformMode = (TransformMode)masterScene->transformMode();
     m_activeAxe = AXE_NONE;
     m_focus = False;
-    m_transformMode = STATIC;
+    m_transforming = False;
     m_relativeV.zero();
     m_orgV.clear();
     m_orgQ.clear();
@@ -860,7 +841,7 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
 
 o3d::Bool HubManipulator::isTransform() const
 {
-    return m_transformMode != STATIC;
+    return m_transforming;
 }
 
 void HubManipulator::createToScene(MasterScene *)
@@ -929,7 +910,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
         // assume picking project matrix is always current
 
         // a picking pass for manipulation
-        if (masterScene->transformMode() == MasterScene::TR_ROTATION) {
+        if (m_transformMode == ROTATE) {
             // @todo the axis the most colinear to the plane avix must be the external circle
 
             // translation axes as cylinder
@@ -949,7 +930,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setPickableId(0xffffff02);   // z picking id
             primitive->draw(PrimitiveManager::SOLID_CYLINDER1, Vector3(s*0.1f,s*1.f,s*0.1f));
             primitive->modelView().pop();
-        } else if (masterScene->transformMode() == MasterScene::TR_TRANSLATION) {
+        } else if (m_transformMode == TRANSLATE) {
             // translation axes as cylinder
             primitive->modelView().push();
             primitive->modelView().rotateZ(o3d::toRadian(-90.f));
@@ -969,7 +950,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->modelView().pop();
 
             // @todo a planar transformation helper
-        } else if (masterScene->transformMode() == MasterScene::TR_SCALE) {
+        } else if (m_transformMode == SCALE) {
             // translation axes as cylinder
             primitive->modelView().push();
             primitive->modelView().rotateZ(o3d::toRadian(-90.f));
@@ -987,6 +968,8 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setPickableId(0xffffff02);   // z picking id
             primitive->draw(PrimitiveManager::SOLID_CYLINDER1, Vector3(s*0.1f,s*0.8f,s*0.1f));
             primitive->modelView().pop();
+        } else if (m_transformMode == SKEW) {
+
         }
     } else if (drawInfo.pass == DrawInfo::AMBIENT_PASS) {
         Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);  // AA_HINT_NICEST
@@ -1000,31 +983,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
 
         // an highlighted version of the targets @todo but might need a particular status on targeted hubs
 
-        if (masterScene->actionMode() == MasterScene::ACTION_TRANSFORM) {
-            // translation axes during camera action to keep seeing but not acting
-            primitive->setModelviewProjection();
-            primitive->drawXYZAxis(Vector3(s, s, s));
-
-            primitive->modelView().push();
-            primitive->modelView().translate(Vector3(s*0.8f, 0, 0));
-            primitive->modelView().rotateZ(o3d::toRadian(-90.f));
-            primitive->setColor(axeColor(AXE_X));
-            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
-            primitive->modelView().pop();
-
-            primitive->modelView().push();
-            primitive->modelView().translate(Vector3(0,s*0.8f,0));
-            primitive->setColor(axeColor(AXE_Y));
-            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
-            primitive->modelView().pop();
-
-            primitive->modelView().push();
-            primitive->modelView().translate(Vector3(0,0,s*0.8f));
-            primitive->modelView().rotateX(o3d::toRadian(90.f));
-            primitive->setColor(axeColor(AXE_Z));
-            primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
-            primitive->modelView().pop();
-        } else if (masterScene->transformMode() == MasterScene::TR_ROTATION) {
+        if (m_transformMode == ROTATE) {
             // rotation circles
             // @todo 0.5a circle in area of current angle
 
@@ -1051,7 +1010,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setColor(axeColor(AXE_Z));
             primitive->draw(PrimitiveManager::SOLID_SPHERE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
             primitive->modelView().pop();
-        } else if (masterScene->transformMode() == MasterScene::TR_TRANSLATION) {
+        } else if (m_transformMode == TRANSLATE) {
             // translation axes
             primitive->setModelviewProjection();
             primitive->drawXYZAxis(Vector3(s, s, s));
@@ -1075,7 +1034,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setColor(axeColor(AXE_Z));
             primitive->draw(PrimitiveManager::SOLID_CONE1, Vector3(s*0.1f,s*0.2f,s*0.1f));
             primitive->modelView().pop();
-        } else if (masterScene->transformMode() == MasterScene::TR_SCALE) {
+        } else if (m_transformMode == SCALE) {
             // scale axes with squares
             // @todo 0.5a square in direction and proportional to current scale
 
@@ -1102,6 +1061,8 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
             primitive->setColor(axeColor(AXE_Z));
             primitive->draw(PrimitiveManager::SOLID_CUBE1, Vector3(s*0.15f,s*0.15f,s*0.15f));
             primitive->modelView().pop();
+        } else if (m_transformMode == SKEW) {
+            // @todo
         }
 
         context.setAntiAliasing(aa);
@@ -1117,12 +1078,23 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
 
 void HubManipulator::setPivotPoint(HubManipulator::PivotPoint mode)
 {
-    m_pivotPoint = mode;
+    if (!isTransform()) {
+        m_pivotPoint = mode;
+    }
 }
 
 void HubManipulator::setTransformOrientation(HubManipulator::TransformOrientation mode)
 {
-    m_transformOrientation = mode;
+    if (!isTransform()) {
+        m_transformOrientation = mode;
+    }
+}
+
+void HubManipulator::setTransforMode(HubManipulator::TransformMode mode)
+{
+    if (!isTransform()) {
+        m_transformMode = mode;
+    }
 }
 
 void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)

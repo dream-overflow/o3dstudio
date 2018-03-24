@@ -57,6 +57,17 @@ public:
     };
 
     /**
+     * @brief Used transformation mode.
+     */
+    enum TransformMode
+    {
+        TRANSLATE,
+        ROTATE,
+        SCALE,
+        SKEW
+    };
+
+    /**
      * @brief HubManipulator
      * @param parent Parent object
      */
@@ -90,8 +101,26 @@ public:
     virtual void syncWithScene(MasterScene *masterScene) override;
     virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene) override;
 
+    /**
+     * @brief setPivotPoint
+     * @param mode
+     * @note Not possible during a transformation.
+     */
     void setPivotPoint(PivotPoint mode);
+
+    /**
+     * @brief setTransformOrientation
+     * @param mode
+     * @note Not possible during a transformation.
+     */
     void setTransformOrientation(TransformOrientation mode);
+
+    /**
+     * @brief setTransforMode
+     * @param mode
+     * @note Not possible during a transformation.
+     */
+    void setTransforMode(TransformMode mode);
 
 protected:
 
@@ -102,15 +131,6 @@ protected:
         AXE_Y = 1,
         AXE_Z = 2,
         AXE_MANY = 4
-    };
-
-    enum TransformMode
-    {
-        STATIC = 0,
-        TRANSLATE,
-        ROTATE,
-        SCALE,
-        SKEW
     };
 
     std::list<Hub*> m_targets;
@@ -133,8 +153,9 @@ protected:
     Vector3f m_relativeV;           //!< Current delta of the transform.
 
     Vector3f m_initial;             //!< Initial input position.
-    Vector3f m_previous;              //!< Current sum of the delta (not transformed).
+    Vector3f m_previous;            //!< Current sum of the delta (not transformed).
 
+    Bool m_transforming;
     TransformMode m_transformMode;  //!< Current transform (when beginTransform...).
     PivotPoint m_pivotPoint;        //!< Current defined pivot point.
     TransformOrientation m_transformOrientation;  //!< Current transform orientation mode.

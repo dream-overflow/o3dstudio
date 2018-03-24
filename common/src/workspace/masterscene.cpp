@@ -67,7 +67,9 @@ MasterScene::MasterScene(Entity *parent) :
     m_actionMode(ACTION_NONE),
     m_prevActionMode(ACTION_NONE),
     m_motionType(MOTION_FOLLOW),
-    m_transformMode(TR_TRANSLATION),
+    m_transformMode(0),
+    m_pivotMode(0),
+    m_orientationMode(0),
     m_hoverHub(nullptr),
     m_camera(this),
     m_viewport(this),
@@ -686,15 +688,7 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
 
     // switch action mode if no motifiers
     if (event.modifiers() == 0) {
-        if (event.vKey() == o3d::VKey::KEY_R) {
-            m_transformMode = TR_ROTATION;
-        } else if (event.vKey() == o3d::VKey::KEY_S) {
-            m_transformMode = TR_SCALE;
-        } else if (event.vKey() == o3d::VKey::KEY_T) {
-            m_transformMode = TR_TRANSLATION;
-        } else if (event.vKey() == o3d::VKey::KEY_G) {
-            m_transformMode = TR_SKEW;
-        } else if (event.vKey() == o3d::VKey::KEY_ESCAPE) {
+        if (event.vKey() == o3d::VKey::KEY_ESCAPE) {
             if (m_hubManipulator && m_hubManipulator->isTransform()) {
                 // cancel current transformation
                 m_hubManipulator->cancelTransform(this);
@@ -825,7 +819,7 @@ MasterScene::MotionType MasterScene::motionType() const
     return m_motionType;
 }
 
-MasterScene::TransformMode MasterScene::transformMode() const
+o3d::Int32 MasterScene::transformMode() const
 {
     return m_transformMode;
 }
@@ -943,17 +937,29 @@ void MasterScene::onSelectionChanged()
 
 void MasterScene::changeTransformMode(o3d::Int32 mode)
 {
-    m_transformMode = (TransformMode)mode;
+    m_transformMode = mode;
+
+    if (m_hubManipulator) {
+        m_hubManipulator->setTransforMode((HubManipulator::TransformMode)mode);
+    }
 }
 
 void MasterScene::changeTransformOrientation(o3d::Int32 mode)
 {
-    m_hubManipulator->setTransformOrientation(HubManipulator::TransformOrientation(mode));
+    m_orientationMode = mode;
+
+    if (m_hubManipulator) {
+        m_hubManipulator->setTransformOrientation(HubManipulator::TransformOrientation(mode));
+    }
 }
 
 void MasterScene::changePivotMode(o3d::Int32 mode)
 {
-    m_hubManipulator->setPivotPoint(HubManipulator::PivotPoint(mode));
+    m_pivotMode = mode;
+
+    if (m_hubManipulator) {
+        m_hubManipulator->setPivotPoint(HubManipulator::PivotPoint(mode));
+    }
 }
 
 void MasterScene::setActionMode(MasterScene::ActionMode actionMode)

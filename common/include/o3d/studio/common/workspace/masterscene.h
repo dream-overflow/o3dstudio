@@ -67,14 +67,6 @@ public:
         MOTION_MAGNET       //!< follow a constraint of magnet with others objects
     };
 
-    enum TransformMode
-    {
-        TR_TRANSLATION = 0,
-        TR_ROTATION,
-        TR_SCALE,
-        TR_SKEW
-    };
-
     MasterScene(Entity *parent);
     virtual ~MasterScene();
 
@@ -187,7 +179,7 @@ public:
     /**
      * @brief Selected transform mode.
      */
-    TransformMode transformMode() const;
+    Int32 transformMode() const;
 
     /**
      * @brief Map a picking id to a scene UI element.
@@ -221,11 +213,14 @@ private:
     o3d::Renderer *m_renderer;    //!< Attached renderer
     o3d::Scene *m_scene;          //!< Related o3d scene
 
-    Point2i m_lockedPos;            //!< Infinite cursor
-    ActionMode m_actionMode;        //!< Current action mode
-    ActionMode m_prevActionMode;    //!< Previous action mode
-    MotionType m_motionType;        //!< Current motion type
-    TransformMode m_transformMode;  //!< Selected transform mode
+    Point2i m_lockedPos;          //!< Infinite cursor
+    ActionMode m_actionMode;      //!< Current action mode
+    ActionMode m_prevActionMode;  //!< Previous action mode
+    MotionType m_motionType;      //!< Current motion type
+
+    Int32 m_transformMode;        //!< Selected transform mode
+    Int32 m_pivotMode;            //!< Selected pivot mode
+    Int32 m_orientationMode;      //!< Selected orientation mode
 
     UInt32 m_verticesCount[4];
     UInt32 m_trianglesCount[4];
