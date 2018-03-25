@@ -22,7 +22,7 @@ using namespace o3d::studio::common;
 
 
 RootHub::RootHub(const String &name, Project *parent) :
-    Hub(name, parent)
+    StructuralHub(name, parent)
 {
     m_typeRef = TypeRef::hub();
     m_ref = ObjectRef(TypeRef::hub());
@@ -53,6 +53,11 @@ void RootHub::createToScene(MasterScene *)
 void RootHub::syncWithScene(MasterScene *)
 {
     // does nothing
+}
+
+const o3d::Transform *RootHub::transform(o3d::UInt32 transformIndex) const
+{
+    return nullptr;
 }
 
 void RootHub::removeFromScene(MasterScene *)

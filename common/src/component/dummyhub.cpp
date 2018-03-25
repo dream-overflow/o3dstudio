@@ -49,7 +49,7 @@ Hub *DummyHubComponent::buildHub(const String &name, Project *project, Entity *p
 }
 
 DummyHub::DummyHub(const String &name, Entity *parent) :
-    Hub(name, parent)
+    StructuralHub(name, parent)
 {
 
 }
@@ -115,4 +115,9 @@ void DummyHub::removeFromScene(MasterScene */*masterScene*/)
 void DummyHub::syncWithScene(MasterScene */*masterScene*/)
 {
     // nothing to do with the scene
+}
+
+const o3d::Transform *DummyHub::transform(o3d::UInt32 transformIndex) const
+{
+    return nullptr;
 }

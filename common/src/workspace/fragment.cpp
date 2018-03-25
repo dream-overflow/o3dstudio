@@ -29,6 +29,11 @@ Fragment::~Fragment()
     delete m_masterScene;
 }
 
+Entity::Role Fragment::role() const
+{
+    return ROLE_FRAGMENT;
+}
+
 void Fragment::setProject(Project *project)
 {
     m_parent = project;

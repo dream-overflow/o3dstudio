@@ -10,7 +10,7 @@
 #define _O3DS_COMMON_DUMMYHUB_H
 
 #include "component.h"
-#include "../workspace/hub.h"
+#include "../workspace/structuralhub.h"
 
 namespace o3d {
 namespace studio {
@@ -36,9 +36,10 @@ protected:
 };
 
 /**
- * @brief The DummyHub class
+ * @brief The DummyHub class is a specialized structural hub without specific transform.
+ * @see See SpacialNodeHub for a transform.
  */
-class O3S_API DummyHub : public Hub
+class O3S_API DummyHub : public StructuralHub
 {
 public:
 
@@ -59,6 +60,8 @@ public:
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;
     virtual void syncWithScene(MasterScene *masterScene) override;
+
+    virtual const Transform* transform(UInt32 transformIndex) const override;
 
 protected:
 };

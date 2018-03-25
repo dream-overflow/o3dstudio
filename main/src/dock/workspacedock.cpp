@@ -314,6 +314,8 @@ void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QMode
         common::Workspace* workspace = common::Application::instance()->workspaces().current();
         common::Project *project = workspace->project(projectItem->ref());
 
+        common::Selection &selection = common::Application::instance()->selection();
+
         if (!project) {
             return;
         }
@@ -325,15 +327,78 @@ void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QMode
         if (projectItem->ref().baseTypeOf(common::TypeRef::hub())) {
             common::Hub *hub = project->rootHub()->findHub(projectItem->ref().id());
             if (hub) {
-                common::Application::instance()->selection().select(hub);
+                // hub select but according to accepted role :
+                selection.select(hub);
+
+                // @todo for now auto defines accepted role by hub
+                if (hub->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
+                    selection.setAcceptedRole(common::Selection::ACCEPT_STRUCTURAL_HUB);
+                } else {
+                    selection.setAcceptedRole(common::Selection::ACCEPT_HUB);
+                    // selection.setAcceptedRole(common::Selection::ACCEPT_PROPERTY_HUB);
+                }
+
+                if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
+                    selection.select(hub->project());
+                } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
+                    common::Hub *currentHub = hub;
+
+                    // select the first found structure parent hub
+                    while (currentHub->role() != common::Entity::ROLE_STRUCTURAL_HUB) {
+                        if (currentHub->isParentHub()) {
+                            currentHub = static_cast<common::Hub*>(currentHub->parent());
+                        }
+                    }
+
+                    if (currentHub->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
+                        selection.select(currentHub);
+                    }
+                } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
+                    // no specificity
+                    selection.select(hub);
+                } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
+                    // @todo property hub ?
+                    selection.select(hub);
+                } else {
+                    selection.select(hub->project());
+                }
             }
         } else if (projectItem->ref().baseTypeOf(common::TypeRef::fragment())) {
             common::Fragment *fragment = project->fragment(projectItem->ref());
             if (fragment) {
-                common::Application::instance()->selection().select(fragment);
+                // fragment select but according to accepted role :
+                // @todo
+                selection.select(fragment);
+
+                if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
+                    selection.select(fragment->project());
+                } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
+                    selection.select(fragment->project()->rootHub());
+                } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
+                    selection.select(fragment->project()->rootHub());
+                } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
+                    selection.select(project->rootHub());
+                } else if (selection.acceptedRole() == common::Selection::ACCEPT_FRAGMENT) {
+                    selection.select(fragment);
+                } else {
+                    selection.select(fragment->project());
+                }
             }
         } else if (projectItem->ref().baseTypeOf(common::TypeRef::project())) {
-            common::Application::instance()->selection().select(project);
+            // project select but according to accepted role :
+            if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
+                selection.select(project);
+            } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
+                selection.select(project->rootHub());
+            } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
+                selection.select(project->rootHub());
+            } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
+                selection.select(project->rootHub());
+            } else {
+                selection.select(project);
+            }
+        } else if (projectItem->ref().baseTypeOf(common::TypeRef::resource())) {
+            // @todo when resources will be implemented
         }
     }
 }

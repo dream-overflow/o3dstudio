@@ -32,6 +32,8 @@ public:
     Fragment(const String &name, Entity *parent = nullptr);
     virtual ~Fragment();
 
+    virtual Role role() const override;
+
     void setProject(Project *project);
 
     virtual Project* project() override;

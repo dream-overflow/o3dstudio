@@ -10,7 +10,7 @@
 #define _O3DS_COMMON_SPACIALNODEHUB_H
 
 #include "component.h"
-#include "../workspace/hub.h"
+#include "../workspace/structuralhub.h"
 
 #include <o3d/core/vector3.h>
 #include <o3d/core/quaternion.h>
@@ -51,9 +51,10 @@ protected:
 };
 
 /**
- * @brief The SpacialNodeHub class
+ * @brief The SpacialNodeHub class is a specialized structural node with a transform.
+ * @see DummyHub for structural node without transform.
  */
-class O3S_API SpacialNodeHub : public Hub
+class O3S_API SpacialNodeHub : public StructuralHub
 {
 public:
 
@@ -105,7 +106,7 @@ public:
 //    UInt32 insertTransform(TransformType type, UInt32 at);
 //    void removeTransform(UInt32 at);
 
-    const Transform& transform(UInt32 transformIndex) const;
+    virtual const Transform* transform(UInt32 transformIndex) const override;
 
     virtual const o3d::Matrix4& absoluteMatrix(MasterScene *masterScene) const override;
 

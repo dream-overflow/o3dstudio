@@ -15,6 +15,7 @@
 #include "o3d/studio/common/workspace/masterscenedrawer.h"
 #include "o3d/studio/common/workspace/roothub.h"
 #include "o3d/studio/common/workspace/selection.h"
+#include "o3d/studio/common/workspace/structuralhub.h"
 
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 #include "o3d/studio/common/ui/scene/hubmanipulator.h"
@@ -366,43 +367,43 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
                 setActionMode(ACTION_TRANSFORM);
                 m_hubManipulator->beginTransform(this, Vector3f(event.localPos().x(), event.localPos().y(), 0));
             } else if (m_hoverHub) {
+                Selection &selection = Application::instance()->selection();
+
+                Entity *entity = nullptr, *hover = nullptr;
+                hover = findSelectable(m_hoverHub);
+
+                // @todo for now auto defines accepted role to structural from view
+                selection.setAcceptedRole(common::Selection::ACCEPT_STRUCTURAL_HUB);
+
                 // in a multiple selection
-                if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                if (event.modifiers() & InputEvent::SHIFT_MODIFIER && hover) {
                     // get current selection and remove from it
-                    auto previous = Application::instance()->selection().filterCurrentByBaseType(TypeRef::hub());
+                    auto previous = selection.filterCurrentByBaseType(TypeRef::hub());
 
                     Application::instance()->selection().beginSelection();
 
                     for (SelectionItem *item : previous) {
-                        if (item->ref() != m_hoverHub->ref().light()) {
-                            Application::instance()->selection().appendSelection(
-                                        static_cast<Hub*>(project()->lookup(item->ref())));
+                        entity = item->entity();
+
+                        if ((item->ref() != hover->ref().light()) && (entity = findSelectable(entity))) {
+                            selection.appendSelection(entity);
                         }
                     }
 
-                    if (!m_hoverHub->isSelected()) {
+                    if (!hover->isSelected() && (entity = findSelectable(m_hoverHub))) {
                         // if not selected add it to last
-                        Application::instance()->selection().appendSelection(m_hoverHub);
-
-                        // an object is removed from selection
-                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Remove from selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
-                    } else {
-                        // an object is selected
-                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Multiple selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                        selection.appendSelection(entity);
                     }
 
                     Application::instance()->selection().endSelection();
-                } else {
+                } else if (hover) {
                     // single selection
-                    if (m_hoverHub->isSelected()) {
+                    if (hover->isSelected()) {
                         // clear selection
-                        Application::instance()->selection().unselectAll();
+                        selection.unselectAll();
                     } else {
                         // initial selection
-                        Application::instance()->selection().select(m_hoverHub);
-
-                        // an object is selected
-                        Application::instance()->messenger().message(Messenger::DEBUG_MSG, String("Initial selection on {0} at {1}").arg(m_hoverHub->name()).arg(m_pickPos));
+                        selection.select(hover);
                     }
                 }
             }
@@ -925,10 +926,16 @@ void MasterScene::onSelectionChanged()
 
     // cleanup current selection
     if (m_hubManipulator) {
-        m_hubManipulator->setSelection(this, std::list<Hub*>());
+        m_hubManipulator->setSelection(this, std::list<StructuralHub*>());
     }
 
-    std::list<Hub*> hubs;
+    std::list<StructuralHub*> hubs;
+
+    if (Application::instance()->selection().acceptedRole() == Selection::ACCEPT_STRUCTURAL_HUB) {
+
+    } else if (Application::instance()->selection().acceptedRole() == Selection::ACCEPT_PROPERTY_HUB) {
+
+    }
 
     for (common::SelectionItem *selectionItem : currentSelection) {
         // only for related project
@@ -939,16 +946,21 @@ void MasterScene::onSelectionChanged()
         if (selectionItem->ref().baseTypeOf(TypeRef::hub())) {
             hub = static_cast<Hub*>(project()->lookup(selectionItem->ref()));
 
+            if (hub->role() != Entity::ROLE_STRUCTURAL_HUB) {
+                // accept only structure hubs
+                continue;
+            }
+
             if (hub->parent() == hub->project()) {
                 // root hub cannot be manipulated
                 continue;
             }
 
-            hubs.push_back(hub);
+            hubs.push_back(static_cast<StructuralHub*>(hub));
         }
     }
 
-    if (hubs.size()) {
+    if (hubs.size() && m_hubManipulator) {
         // create the new according to the current builder (@todo not for now only the standard manipulator)
         m_hubManipulator->setSelection(this, hubs);
     } else {
@@ -1015,6 +1027,38 @@ void MasterScene::postPicking(const Vector3f &position)
                     (UInt32)position.x(),
                     m_scene->getViewPortManager()->getReshapeHeight() - (UInt32)position.y());
     }
+}
+
+Entity* MasterScene::findSelectable(Entity *entity) const
+{
+    if (entity && entity->ref().light().baseTypeOf(TypeRef::hub())) {
+        Hub *hub = static_cast<Hub*>(entity);
+
+        if (Application::instance()->selection().acceptedRole() == Selection::ACCEPT_STRUCTURAL_HUB) {
+            if (hub->role() != Entity::ROLE_STRUCTURAL_HUB) {
+                // @todo select parent if structural hub
+
+                while (hub->isParentHub()) {
+                    hub = static_cast<Hub*>(hub->parent());
+                    if (hub->role() == Entity::ROLE_STRUCTURAL_HUB) {
+                        return hub;
+                    }
+                }
+
+                return nullptr;
+            }
+        } else if (Application::instance()->selection().acceptedRole() == Selection::ACCEPT_PROPERTY_HUB) {
+            if (hub->role() != Entity::ROLE_HUB) {
+                // @todo select first child hub
+
+                return nullptr;
+            }
+        }
+
+        return hub;
+    }
+
+    return nullptr;
 }
 
 void MasterScene::initializeDrawer()

@@ -24,7 +24,7 @@ class Transform;
 namespace studio {
 namespace common {
 
-class Hub;
+class StructuralHub;
 class SpacialNodeHub;
 class KeyEvent;
 
@@ -81,11 +81,11 @@ public:
     virtual void hover(UInt32 id, const Point3f &pos) override;
     virtual void leave() override;
 
-    virtual void setSelection(MasterScene *masterScene, const std::list<Hub *> targets);
-    virtual void setActiveHub(MasterScene *masterScene, Hub *hub);
+    virtual void setSelection(MasterScene *masterScene, const std::list<StructuralHub *> targets);
+    virtual void setActiveHub(MasterScene *masterScene, StructuralHub *hub);
 
     virtual Bool hasSelection() const;
-    virtual Hub* activeHub();
+    virtual StructuralHub* activeHub();
 
     //! May be removed, need a dedicated toolbar, but need shortcut too
     virtual void keyDownEvent(const KeyEvent &event, MasterScene *masterScene);
@@ -133,7 +133,7 @@ protected:
         AXE_MANY = 4
     };
 
-    std::list<Hub*> m_targets;
+    std::list<StructuralHub*> m_targets;
     std::list<Vector3> m_orgV;
     std::list<Quaternion> m_orgQ;
 
@@ -164,7 +164,7 @@ protected:
     Float m_actionRadius;           //!< Radius of action
     Float m_actionPhi;              //!< Angle of the action from initial
 
-    SpacialNodeHub *m_activeElt;
+    StructuralHub *m_activeElt;
 
     void updateTransform(MasterScene *masterScene, Bool keepOrg);
     void refresh(MasterScene *masterScene);

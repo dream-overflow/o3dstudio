@@ -20,7 +20,9 @@ using namespace o3d::studio::common;
 
 Selection::Selection(BaseObject *parent) :
     BaseObject(parent),
-    m_selecting(False)
+    m_selecting(False),
+    // m_acceptRole(ACCEPT_ANY)
+    m_acceptRole(ACCEPT_STRUCTURAL_HUB)  // @todo
 {
 
 }
@@ -35,6 +37,10 @@ Selection::~Selection()
     for (SelectionItem *selectionItem : m_currentSelection) {
         selectionItem->unselect();
         delete selectionItem;
+    }
+
+    if (m_activeEntity.isValid()) {
+        // @todo do we unset an active flag ?
     }
 }
 
@@ -62,8 +68,23 @@ void Selection::clear()
 
     m_currentSelection.clear();
 
+    if (m_activeEntity.isValid()) {
+        // @todo do we unset an active flag ?
+        m_activeEntity = LightRef();
+    }
+
     m_selectingSet.clear();
     m_selecting = False;
+}
+
+void Selection::setAcceptedRole(Selection::AcceptRole accept)
+{
+    m_acceptRole = accept;
+}
+
+Selection::AcceptRole Selection::acceptedRole() const
+{
+    return m_acceptRole;
 }
 
 void Selection::beginSelection()
@@ -80,6 +101,11 @@ void Selection::beginSelection()
 
 void Selection::appendSelection(Entity *entity)
 {
+    // is entity role currently accepted else reject mean ignore the selection attempt
+    if (!checkEntityAcceptance(entity)) {
+        return;
+    }
+
     if (!entity || !m_selecting) {
         return;
     }
@@ -116,6 +142,17 @@ void Selection::endSelection()
         m_currentSelection.insert(new SelectionItem(entity));
     }
 
+    if (m_activeEntity.isValid()) {
+        // do we unset an active flag ?
+    }
+
+    if (m_selectingSet.begin() != m_selectingSet.end()) {
+        // active entity is the first
+        m_activeEntity = (*m_selectingSet.begin())->ref().light();
+    } else {
+        m_activeEntity = LightRef();
+    }
+
     m_selectingSet.clear();
     m_selecting = False;
 
@@ -124,6 +161,11 @@ void Selection::endSelection()
 
 void Selection::select(Entity *entity)
 {
+    // is entity role currently accepted else reject mean ignore the selection attempt
+    if (!checkEntityAcceptance(entity)) {
+        return;
+    }
+
     for (SelectionItem *selectionItem : m_previousSelection) {
         delete selectionItem;
     }
@@ -135,9 +177,18 @@ void Selection::select(Entity *entity)
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
+    if (m_activeEntity.isValid()) {
+        // do we unset an active flag ?
+    }
+
     if (entity) {
         entity->setSelected(True);
         m_currentSelection.insert(new SelectionItem(entity));
+
+        // active entity is the unique
+        m_activeEntity = entity->ref().light();
+    } else {
+        m_activeEntity = LightRef();
     }
 
     selectionChanged();
@@ -161,7 +212,39 @@ void Selection::unselectAll()
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
 
+    if (m_activeEntity.isValid()) {
+        // do we unset an active flag ?
+    }
+
+    m_activeEntity = LightRef();
+
     selectionChanged();
+}
+
+void Selection::setActiveEntity(Entity *entity)
+{
+    if (entity) {
+        m_activeEntity = entity->ref().light();
+    } else {
+        m_activeEntity = LightRef();
+    }
+}
+
+const LightRef &Selection::activeEntityRef() const
+{
+    return m_activeEntity;
+}
+
+Entity *Selection::activeEntity()
+{
+    common::Workspace *workspace = common::Application::instance()->workspaces().current();
+    return workspace->entity(m_activeEntity);
+}
+
+const Entity *Selection::activeEntity() const
+{
+    const common::Workspace *workspace = common::Application::instance()->workspaces().current();
+    return workspace->entity(m_activeEntity);
 }
 
 const std::set<SelectionItem *> Selection::previousSelection() const
@@ -272,6 +355,11 @@ void Selection::onProjectHubRemoved(LightRef ref)
 
     entity->setSelected(False);
 
+    if (m_activeEntity == ref) {
+        // do we unset an active flag ?
+        m_activeEntity = LightRef();
+    }
+
     if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
         const Hub *removedHub = static_cast<const Hub*>(entity);
         std::list<const Hub*> hubs = removedHub->hubs(True);
@@ -322,6 +410,11 @@ void Selection::onProjectFragmentRemoved(LightRef ref)
 
     entity->setSelected(False);
 
+    if (m_activeEntity == ref) {
+        // do we unset an active flag ?
+        m_activeEntity = LightRef();
+    }
+
     if (entity->ref().light().baseTypeOf(TypeRef::fragment())) {
         // erase selection from current selection
         for (auto it1 = m_currentSelection.begin(); it1 != m_currentSelection.end(); ++it1) {
@@ -338,7 +431,7 @@ void Selection::onProjectFragmentRemoved(LightRef ref)
     }
 }
 
-void Selection::onProjectRemoved(LightRef /*ref*/)
+void Selection::onProjectRemoved(LightRef ref)
 {
     Bool lemit = False;
 
@@ -348,6 +441,11 @@ void Selection::onProjectRemoved(LightRef /*ref*/)
 
     // cleanup all
     cleanupAll();
+
+    if (m_activeEntity == ref) {
+        // do we unset an active flag ?
+        m_activeEntity = LightRef();
+    }
 
     if (lemit) {
         selectionChanged();
@@ -362,4 +460,25 @@ void Selection::cleanupAll()
 
     m_previousSelection = m_currentSelection;
     m_currentSelection.clear();
+
+    if (m_activeEntity.isValid()) {
+        // do we unset an active flag ?
+    }
+
+    m_activeEntity = LightRef();
+}
+
+o3d::Bool Selection::checkEntityAcceptance(Entity *entity)
+{
+    // is entity role currently accepted else reject mean ignore the selection attempt
+    if (entity) {
+        if (m_acceptRole == ACCEPT_STRUCTURAL_HUB) {
+            if (entity->role() != Entity::ROLE_STRUCTURAL_HUB) {
+                return False;
+            }
+        }
+        // @todo
+    }
+
+    return True;
 }

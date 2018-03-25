@@ -37,6 +37,11 @@ Resource::~Resource()
 
 }
 
+Entity::Role Resource::role() const
+{
+    return ROLE_RESOURCE;
+}
+
 void Resource::setProject(Project *project)
 {
     m_project = project;

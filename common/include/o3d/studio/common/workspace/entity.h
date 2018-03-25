@@ -43,6 +43,17 @@ public:
         STATE_SELECTED           //!< Is selected entity
     };
 
+    enum Role
+    {
+        ROLE_UNDEFINED = 0,
+        ROLE_PROJECT,
+        ROLE_FRAGMENT,
+        ROLE_ASSET,
+        ROLE_RESOURCE,
+        ROLE_HUB,
+        ROLE_STRUCTURAL_HUB
+    };
+
     explicit Entity(const String &name, Entity *parent = nullptr);
     virtual ~Entity();
 
@@ -66,6 +77,14 @@ public:
     void setTypeRef(const TypeRef &typeRef);
     const TypeRef& typeRef() const;
 
+    /**
+     * @brief Role of the entity.
+     */
+    virtual Role role() const = 0;
+
+    /**
+     * @brief Create step, related to destroy.
+     */
     virtual void create() = 0;
 
     /**
@@ -74,7 +93,7 @@ public:
     virtual void destroy() = 0;
 
     /**
-     * @brief Update.
+     * @brief Update content.
      */
     virtual void update() = 0;
 

@@ -9,7 +9,7 @@
 #ifndef _O3DS_COMMON_ROOTHUB_H
 #define _O3DS_COMMON_ROOTHUB_H
 
-#include "hub.h"
+#include "structuralhub.h"
 
 namespace o3d {
 namespace studio {
@@ -18,7 +18,7 @@ namespace common {
 /**
  * @brief The root hub final class
  */
-class O3S_API RootHub : public Hub
+class O3S_API RootHub : public StructuralHub
 {
     Q_DECLARE_TR_FUNCTIONS(RootHub)
 
@@ -53,6 +53,8 @@ public:
      * @brief syncWithScene Does nothing, virtual root.
      */
     virtual void syncWithScene(MasterScene *masterScene) override;
+
+    virtual const Transform* transform(UInt32 transformIndex) const override;
 };
 
 } // namespace common

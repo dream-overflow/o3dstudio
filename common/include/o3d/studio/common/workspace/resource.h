@@ -38,6 +38,8 @@ public:
     explicit Resource(const String &name, Entity *parent = nullptr);
     virtual ~Resource();
 
+    virtual Role role() const override;
+
     void setProject(Project *project);
 
     virtual Project* project() override;

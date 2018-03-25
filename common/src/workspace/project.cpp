@@ -82,6 +82,11 @@ Project::~Project()
     delete m_info;
 }
 
+Entity::Role Project::role() const
+{
+    return ROLE_PROJECT;
+}
+
 Project *Project::project()
 {
     return this;

@@ -7,7 +7,7 @@
  */
 
 #include "o3d/studio/common/ui/scene/hubmanipulator.h"
-#include "o3d/studio/common/workspace/hub.h"
+#include "o3d/studio/common/workspace/structuralhub.h"
 
 #include <o3d/engine/context.h>
 #include <o3d/engine/matrix.h>
@@ -88,21 +88,21 @@ void HubManipulator::leave()
     m_hoverAxe = AXE_NONE;
 }
 
-void HubManipulator::setSelection(MasterScene *masterScene, const std::list<Hub *> targets)
+void HubManipulator::setSelection(MasterScene *masterScene, const std::list<StructuralHub *> targets)
 {
     m_targets = targets;
 
-    // default take first hub as active element @todo
+    // default take first hub as active element
     if (targets.size() > 0) {
-        // m_activeElt = static_cast<SpacialNodeHub*>(m_targets.front());
+        m_activeElt = m_targets.front();
     }
 
     updateTransform(masterScene, True);
 }
 
-void HubManipulator::setActiveHub(MasterScene *masterScene, Hub *hub)
+void HubManipulator::setActiveHub(MasterScene *masterScene, StructuralHub *hub)
 {
-//    m_activeElt = hub;
+    m_activeElt = hub;
     updateTransform(masterScene, True);
 }
 
@@ -111,7 +111,7 @@ o3d::Bool HubManipulator::hasSelection() const
     return m_targets.size() > 0;
 }
 
-Hub *HubManipulator::activeHub()
+StructuralHub *HubManipulator::activeHub()
 {
     return m_activeElt;
 }
@@ -284,10 +284,10 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
         for (Hub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 SpacialNodeHub *spacialNode = static_cast<SpacialNodeHub*>(hub);
-                m_orgQ.push_back(spacialNode->transform(0).getRotation());
+                m_orgQ.push_back(spacialNode->transform(0)->getRotation());
             } else if (hub->isParentSpacialNode()) {
                 SpacialNodeHub *spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-                m_orgQ.push_back(spacialNode->transform(0).getRotation());
+                m_orgQ.push_back(spacialNode->transform(0)->getRotation());
             } else {
                 m_orgQ.push_back(Quaternion());
             }
@@ -298,10 +298,10 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
         for (Hub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 SpacialNodeHub *spacialNode = static_cast<SpacialNodeHub*>(hub);
-                m_orgV.push_back(spacialNode->transform(0).getPosition());
+                m_orgV.push_back(spacialNode->transform(0)->getPosition());
             } else if (hub->isParentSpacialNode()) {
                 SpacialNodeHub *spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-                m_orgV.push_back(spacialNode->transform(0).getPosition());
+                m_orgV.push_back(spacialNode->transform(0)->getPosition());
             } else {
                 m_orgV.push_back(Vector3());
             }
@@ -312,10 +312,10 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
         for (Hub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 SpacialNodeHub *spacialNode = static_cast<SpacialNodeHub*>(hub);
-                m_orgV.push_back(spacialNode->transform(0).getScale());
+                m_orgV.push_back(spacialNode->transform(0)->getScale());
             } else if (hub->isParentSpacialNode()) {
                 SpacialNodeHub *spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-                m_orgV.push_back(spacialNode->transform(0).getScale());
+                m_orgV.push_back(spacialNode->transform(0)->getScale());
             } else {
                 m_orgV.push_back(Vector3(1, 1, 1));
             }
@@ -362,12 +362,12 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
         // @todo
         if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
-            pivotAxe = m_activeElt->transform(0).getRotation();
-            pivotPoint = m_activeElt->transform(0).getPosition();
+            pivotAxe = m_activeElt->transform(0)->getRotation();
+            pivotPoint = m_activeElt->transform(0)->getPosition();
             // @todo translate
         } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
             if (m_transformOrientation == TR_GLOBAL) {
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -387,7 +387,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                     ++it;
                 }
             } else if (m_transformOrientation == TR_LOCAL) {
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -406,7 +406,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                     ++it;
                 }
             } else if (m_transformOrientation == TR_VIEW) {
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -427,7 +427,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                 }
             }
         } else if (m_pivotPoint == PIVOT_MEDIAN) {
-            pivotAxe = m_activeElt->transform(0).getRotation();
+            pivotAxe = m_activeElt->transform(0)->getRotation();
             Vector3 pivotPoint = m_transform->getPosition();
             // @todo compute for each element the distance to the pivot point
         } else if (m_pivotPoint == PIVOT_USER) {
@@ -445,8 +445,8 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         Vector3 pos;
 
         if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
-            pivotAxe = m_activeElt->transform(0).getRotation();
-            pivotPoint = m_activeElt->transform(0).getPosition();
+            pivotAxe = m_activeElt->transform(0)->getRotation();
+            pivotPoint = m_activeElt->transform(0)->getPosition();
 
             // pivot active + transform global
             // @todo
@@ -460,7 +460,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
             if (m_transformOrientation == TR_GLOBAL) {
                 // pivot individual + transform global
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -489,7 +489,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
             } else if (m_transformOrientation == TR_LOCAL) {
                 // pivot individual + transform local
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -502,7 +502,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                         // axis is naturally aligned to object, relative translation
                         pos = m_relativeV;
 
-                        spacialNode->transform(0).getRotation().transform(pos);
+                        spacialNode->transform(0)->getRotation().transform(pos);
                         spacialNode->setPosition(0, (*it) + pos);
 
                         SceneHubCommand *sceneCommand = new SceneHubCommand(spacialNode, SceneHubCommand::SYNC);
@@ -516,13 +516,13 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                 pos = m_relativeV;
                 m_transform->getRotation().transform(pos);
                 m_transform->setPosition(m_orgPos + pos);
-                m_transform->setRotation(m_activeElt->transform(0).getRotation());
+                m_transform->setRotation(m_activeElt->transform(0)->getRotation());
 
             } else if (m_transformOrientation == TR_VIEW) {
                 // pivot individual + transform view
                 pivotAxe = masterScene->camera()->getNode()->getTransform()->getRotation();
 
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -551,7 +551,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                 m_transform->setPosition(m_orgPos + pos);
             }
         } else if (m_pivotPoint == PIVOT_MEDIAN) {
-            pivotAxe = m_activeElt->transform(0).getRotation();
+            pivotAxe = m_activeElt->transform(0)->getRotation();
             Vector3 pivotPoint = m_transform->getPosition();
             // @todo compute for each element the distance to the pivot point (only for rotation)
 
@@ -604,8 +604,8 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         SpacialNodeHub *spacialNode;       
 
         if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
-            // pivotAxe = m_activeElt->transform(0).getRotation();
-            // pivotPoint = m_activeElt->transform(0).getPosition();
+            // pivotAxe = m_activeElt->transform(0)->getRotation();
+            // pivotPoint = m_activeElt->transform(0)->getPosition();
 
             // pivot active + transform global
             // @todo
@@ -619,7 +619,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
         } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
             if (m_transformOrientation == TR_GLOBAL) {
                 // pivot individual + transform global
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -644,7 +644,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
 
             } else if (m_transformOrientation == TR_LOCAL) {
                 // pivot individual + transform local
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -671,7 +671,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                 // pivot individual + transform view
                 // pivotAxe = masterScene->cameraTransform().getRotation();
 
-                for (Hub* hub : m_targets) {
+                for (StructuralHub* hub : m_targets) {
                     if (hub->isSpacialNode()) {
                         spacialNode = static_cast<SpacialNodeHub*>(hub);
                     } else if (hub->isParentSpacialNode()) {
@@ -695,7 +695,7 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
                 m_transform->setScale(m_orgScale + scale);
             }
         } else if (m_pivotPoint == PIVOT_MEDIAN) {
-            // pivotAxe = m_activeElt->transform(0).getRotation();
+            // pivotAxe = m_activeElt->transform(0)->getRotation();
             // Vector3 pivotPoint = m_transform->getPosition();
             // @todo compute for each element the distance to the pivot point (only for rotation)
 
@@ -751,7 +751,7 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
     // reset transforms of each target
     if (m_transformMode == TRANSLATE) {
         auto it = m_orgV.begin();
-        for (Hub* hub : m_targets) {
+        for (StructuralHub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub);
             } else if (hub->isParentSpacialNode()) {
@@ -770,7 +770,7 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
         }
     } else if (m_transformMode == ROTATE) {
         auto it = m_orgQ.begin();
-        for (Hub* hub : m_targets) {
+        for (StructuralHub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub);
             } else if (hub->isParentSpacialNode()) {
@@ -789,7 +789,7 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
         }
     } else if (m_transformMode == SCALE) {
         auto it = m_orgV.begin();
-        for (Hub* hub : m_targets) {
+        for (StructuralHub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub);
             } else if (hub->isParentSpacialNode()) {
@@ -808,7 +808,7 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
         }
     } else if (m_transformMode == SKEW) {
 //        auto it = m_orgV.begin();
-//        for (Hub* hub : m_targets) {
+//        for (StructuralHub* hub : m_targets) {
 //            if (hub->isSpacialNode()) {
 //                spacialNode = static_cast<SpacialNodeHub*>(hub);
 //            } else if (hub->isParentSpacialNode()) {
@@ -1162,7 +1162,7 @@ void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
     Quaternion rot;
 
     // active element of the selection (at now the last)
-    Hub *hub = m_targets.back();
+    StructuralHub *hub = m_targets.back();
     if (hub->isSpacialNode()) {
         m_activeElt = static_cast<SpacialNodeHub*>(hub);
     } else if (hub->isParentSpacialNode()) {
@@ -1178,7 +1178,7 @@ void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
         rot.identity();
     } else if (m_transformOrientation == TR_LOCAL) {
         // axis from active element
-        rot = m_activeElt->transform(0).getRotation();
+        rot = m_activeElt->transform(0)->getRotation();
     } else if (m_transformOrientation == TR_VIEW) {
         // aligned to camera
         rot = masterScene->camera()->getNode()->getTransform()->getRotation();
@@ -1186,7 +1186,7 @@ void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
 
     if (m_pivotPoint == PIVOT_ACTIVE_ELT) {
         // position from active element
-        pos = m_activeElt->transform(0).getPosition();
+        pos = m_activeElt->transform(0)->getPosition();
     } else if (m_pivotPoint == PIVOT_INDIVIDUAL) {
         // position computed individualy by helper offset by median
         m_offset.zero();
@@ -1194,14 +1194,14 @@ void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
 
         // compute the median position
         SpacialNodeHub *spacialNode;
-        for (Hub* hub : m_targets) {
+        for (StructuralHub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub);
-                m_offset += spacialNode->transform(0).getPosition();
+                m_offset += spacialNode->transform(0)->getPosition();
                 ++c;
             } else if (hub->isParentSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-                m_offset += spacialNode->transform(0).getPosition();
+                m_offset += spacialNode->transform(0)->getPosition();
                 ++c;
             }
         }
@@ -1216,7 +1216,7 @@ void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
         // @todo improve sep of helper and transform and objects
 
         // position from active element
-        pos = m_activeElt->transform(0).getPosition();
+        pos = m_activeElt->transform(0)->getPosition();
 
     } else if (m_pivotPoint == PIVOT_MEDIAN) {
         // position computed to their median
@@ -1224,14 +1224,14 @@ void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
 
         // compute the median position
         SpacialNodeHub *spacialNode;
-        for (Hub* hub : m_targets) {
+        for (StructuralHub* hub : m_targets) {
             if (hub->isSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub);
-                pos += spacialNode->transform(0).getPosition();
+                pos += spacialNode->transform(0)->getPosition();
                 ++c;
             } else if (hub->isParentSpacialNode()) {
                 spacialNode = static_cast<SpacialNodeHub*>(hub->parent());
-                pos += spacialNode->transform(0).getPosition();
+                pos += spacialNode->transform(0)->getPosition();
                 ++c;
             }
         }

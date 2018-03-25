@@ -47,6 +47,8 @@ public:
     Project(const String &name, Workspace *workspace = nullptr);
     virtual ~Project();
 
+    virtual Role role() const override;
+
     virtual Project* project() override;
     virtual const Project* project() const override;
 

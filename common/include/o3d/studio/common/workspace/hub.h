@@ -42,6 +42,8 @@ public:
     explicit Hub(const String &name, Entity *parent = nullptr);
     virtual ~Hub();
 
+    virtual Role role() const override;
+
     void setProject(Project *project);
 
     virtual Project* project() override;

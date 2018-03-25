@@ -90,7 +90,7 @@ Panel *SpacialNodeComponent::panel(Panel::PanelType panelType, Hub *hub)
 }
 
 SpacialNodeHub::SpacialNodeHub(const String &name, Entity *parent) :
-    Hub(name, parent),
+    StructuralHub(name, parent),
     m_nodePolicy(POLICY_DEFAULT),
     m_instances()
 {
@@ -326,10 +326,10 @@ o3d::UInt32 SpacialNodeHub::getNumTransforms() const
     return (UInt32)m_transforms.size();
 }
 
-const o3d::Transform &SpacialNodeHub::transform(o3d::UInt32 transformIndex) const
+const o3d::Transform *SpacialNodeHub::transform(o3d::UInt32 transformIndex) const
 {
     if (transformIndex < m_transforms.size()) {
-        return *m_transforms[transformIndex];
+        return m_transforms[transformIndex];
     } else {
         O3D_ERROR(E_IndexOutOfRange("Transform index"));
     }
@@ -460,11 +460,11 @@ void SpacialNodePropertyPanel::update()
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (workspace->hub(m_ref) == m_hub) {
         Vector3 euler;
-        m_hub->transform(0).getRotation().toEuler(euler);
+        m_hub->transform(0)->getRotation().toEuler(euler);
         // @todo range clamp...
 
-        m_position->setValue(m_hub->transform(0).getPosition());
+        m_position->setValue(m_hub->transform(0)->getPosition());
         m_rotation->setValue(euler);
-        m_scale->setValue(m_hub->transform(0).getScale());
+        m_scale->setValue(m_hub->transform(0)->getScale());
     }
 }

@@ -37,6 +37,11 @@ Asset::~Asset()
     }
 }
 
+Entity::Role Asset::role() const
+{
+    return ROLE_ASSET;
+}
+
 void Asset::setProject(Project *project)
 {
     m_parent = project;

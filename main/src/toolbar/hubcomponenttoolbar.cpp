@@ -139,9 +139,10 @@ void QtHubComponentToolBar::onCreateHub()
             return;
         }
 
-        const std::set<common::SelectionItem*> hubs = selection.filterCurrentByBaseType(common::TypeRef::hub());
-        if (hubs.size() > 1) {
-            return;
+        common::Entity *activeEntity = selection.activeEntity();
+        if (!activeEntity) {
+            // always usese root hub of active project as default
+            activeEntity = project->rootHub();
         }
 
         const common::Component *component = common::Application::instance()->components().component(name);
@@ -149,17 +150,11 @@ void QtHubComponentToolBar::onCreateHub()
             return;
         }
 
-        // @todo could disable unusable buttons
+        // @todo could disable unusable buttons according to what the parent accept
 
         // add as sub-hub
-        if (hubs.size() == 1) {
-            auto it = hubs.begin();
-            common::AddHubCommand *cmd = new common::AddHubCommand((*it)->ref(), component->typeRef(), String());
-            common::Application::instance()->command().addCommand(cmd);
-        }/* else {
-            common::AddHubCommand *cmd = new common::AddHubCommand(project->rootHub()->ref().light(), component->typeRef(), String());
-            common::Application::instance()->command().addCommand(cmd);
-        }*/
+        common::AddHubCommand *cmd = new common::AddHubCommand(activeEntity->ref().light(), component->typeRef(), String());
+        common::Application::instance()->command().addCommand(cmd);
     }
 
     deleteLater();

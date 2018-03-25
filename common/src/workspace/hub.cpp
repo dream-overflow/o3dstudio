@@ -48,6 +48,11 @@ Hub::~Hub()
     }
 }
 
+Entity::Role Hub::role() const
+{
+    return ROLE_HUB;
+}
+
 void Hub::setProject(Project *project)
 {
     m_project = project;

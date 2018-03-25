@@ -259,6 +259,7 @@ private:
 
     void processCommands();
     void postPicking(const Vector3f &position);
+    Entity *findSelectable(Entity *entity) const;
 };
 
 } // namespace common

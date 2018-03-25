@@ -30,6 +30,17 @@ class O3S_API Selection : public BaseObject
 {
 public:
 
+    enum AcceptRole
+    {
+        ACCEPT_ANY = 0,         //!< Any kind of entity.
+        ACCEPT_PROJECT,         //!< Project only.
+        ACCEPT_FRAGMENT,        //!< Fragment only.
+        ACCEPT_HUB,             //!< Any kind of hub.
+        ACCEPT_PROPERTY_HUB,    //!< Hub having properties to manage.
+        ACCEPT_STRUCTURAL_HUB,  //!< Dummy hub, spacial hub...
+        ACCEPT_RESOURCE         //!< Resource only.
+    };
+
     Selection(BaseObject *parent = nullptr);
     virtual ~Selection();
 
@@ -42,6 +53,16 @@ public:
      * @brief Clear any selection.
      */
     void clear();
+
+    /**
+     * @brief Set accepted role/type.
+     */
+    void setAcceptedRole(AcceptRole accept);
+
+    /**
+     * @brief Current accepted role/type.
+     */
+    AcceptRole acceptedRole() const;
 
     /**
      * @brief begin a multiple selection that will be validated and thrown at endSelection call.
@@ -66,6 +87,17 @@ public:
      */
     void unselectAll();
 
+    /**
+     * @brief Set the current working/active entity.
+     * Used to defined entity to works in some contexts.
+     * @note By default the during a selection the active entity is defined to the first of the selection.
+     */
+    void setActiveEntity(Entity *entity);
+
+    const LightRef& activeEntityRef() const;
+    Entity* activeEntity();
+    const Entity* activeEntity() const;
+
     const std::set<SelectionItem*> previousSelection() const;
     const std::set<SelectionItem*> currentSelection() const;
 
@@ -89,6 +121,7 @@ public /*slots*/:
 private:
 
     Bool m_selecting;
+    AcceptRole m_acceptRole;
 
     //! Current set of selected items
     std::set<SelectionItem*> m_currentSelection;
@@ -98,7 +131,11 @@ private:
     //! Current set of selected items
     std::set<Entity*> m_selectingSet;
 
+    //! Current active entity
+    LightRef m_activeEntity;
+
     void cleanupAll();
+    Bool checkEntityAcceptance(Entity *entity);
 };
 
 } // namespace common

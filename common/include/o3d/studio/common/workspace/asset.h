@@ -51,6 +51,8 @@ public:
     Asset(const String &name, Entity *parent = nullptr);
     virtual ~Asset();
 
+    virtual Role role() const override;
+
     void setProject(Project *project);
 
     virtual Project* project() override;
