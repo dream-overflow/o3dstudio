@@ -74,6 +74,10 @@ void MainConsole::onMessage(UInt32 msgType, String message)
 {
     QIcon icon = QIcon::fromTheme("dialog-question");
 
+    if (msgType >= common::Messenger::STATUS_MSG) {
+        return;
+    }
+
     switch (msgType) {
         case QtDebugMsg:
             icon = QIcon::fromTheme("edit-delete");

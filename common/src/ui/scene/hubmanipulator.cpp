@@ -25,6 +25,9 @@
 #include "o3d/studio/common/component/spacialnodehub.h"
 #include "o3d/studio/common/workspace/scenecommand.h"
 
+#include "o3d/studio/common/application.h"
+#include "o3d/studio/common/messenger.h"
+
 using namespace o3d::studio::common;
 
 
@@ -32,7 +35,6 @@ HubManipulator::HubManipulator(BaseObject *parent) :
     SceneUIElement(parent, SCENE_UI_3D, POST_DRAW, True),
     m_transform(new MTransform),
     m_displayScale(1),
-    m_pickingMask(0xfffffff0f),  // @todo picking mask range and mask generator
     m_hoverAxe(AXE_NONE),
     m_activeAxe(AXE_NONE),
     m_transforming(False),
@@ -187,6 +189,9 @@ o3d::Vector3f HubManipulator::computeLinearVelocity(
         // @todo
     }
 
+    Application::instance()->messenger().status(
+                String("Translation delta={0}").arg(m_relativeV + v));
+
     return v * 0.1f;
 }
 
@@ -248,6 +253,14 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
         // @todo
     }
 
+    Vector3f rot(m_relativeV + v);
+    for (UInt32 i = 0; i < 3; ++i) {
+        rot[i] = o3d::toDegree(o3d::simplifyRadian(rot[i]));
+    }
+
+    Application::instance()->messenger().status(
+                String("Manipulator radius={0}, Rotation delta={1}").arg(m_actionRadius).arg(rot));
+
     return v;
 }
 
@@ -292,6 +305,10 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgQ.push_back(Quaternion());
             }
         }
+
+        // init some variables
+        computeCircularVelocity(masterScene, Vector3f(), AXE_NONE);
+
     } else if (masterScene->transformMode() == TRANSLATE) {
         m_transformMode = TRANSLATE;
 
@@ -306,6 +323,10 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgV.push_back(Vector3());
             }
         }
+
+        // init some variables
+        computeLinearVelocity(masterScene, Vector3f(), AXE_NONE);
+
     } else if (masterScene->transformMode() == SCALE) {
         m_transformMode = SCALE;
 
@@ -320,8 +341,15 @@ void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &po
                 m_orgV.push_back(Vector3(1, 1, 1));
             }
         }
+
+        // init some variables
+        computeLinearVelocity(masterScene, Vector3f(), AXE_NONE);
+
     }  else if (masterScene->transformMode() == SKEW) {
        m_transformMode = SKEW;
+
+       // init some variables
+       computeLinearVelocity(masterScene, Vector3f(), AXE_NONE);
     }
 }
 
@@ -349,6 +377,10 @@ void HubManipulator::transform(const o3d::Vector3f &v, MasterScene *masterScene)
     if (m_transformMode == ROTATE) {
         // compute the relative change from origins in the direction of the arc of the axe and the input delta
         m_relativeV += computeCircularVelocity(masterScene, v * s, m_activeAxe);
+
+        for (UInt32 i = 0; i < 3; ++i) {
+            m_relativeV[i] = o3d::simplifyRadian(m_relativeV[i]);
+        }
 
         Quaternion q;
         q.fromEuler(m_relativeV);

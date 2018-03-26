@@ -40,7 +40,8 @@ public:
         WARNING_MSG,
         CRITICAL_MSG,
         FATAL_MSG,
-        INFO_MSG
+        INFO_MSG,
+        STATUS_MSG      //!< Higher level than info, only for status bar in most cases
     };
 
     Messenger(BaseObject *parent = nullptr);
@@ -49,6 +50,7 @@ public:
     void message(UInt32 msgType, const String &message);
 
     void debug(const String &message);
+    void status(const String &message);
     void info(const String &message);
     void warning(const String &message);
     void fatal(const String &message);

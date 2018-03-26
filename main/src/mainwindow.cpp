@@ -1083,7 +1083,7 @@ o3d::Bool MainWindow::commitSettings()
 
 void MainWindow::onMessage(o3d::UInt32 msgType, String message)
 {
-    if (msgType == common::Messenger::INFO_MSG) {
+    if (msgType == common::Messenger::INFO_MSG || msgType == common::Messenger::STATUS_MSG) {
         m_qtMainWindow->statusBar()->showMessage(toQString(message));
     }
 }

@@ -49,6 +49,11 @@ void Messenger::debug(const String &message)
     this->message(DEBUG_MSG, message);
 }
 
+void Messenger::status(const o3d::String &message)
+{
+    this->message(STATUS_MSG, message);
+}
+
 void Messenger::info(const String &message)
 {
     this->message(INFO_MSG, message);

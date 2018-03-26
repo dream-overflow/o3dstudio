@@ -146,8 +146,6 @@ protected:
 
     Float m_displayScale;
 
-    UInt32 m_pickingMask;
-
     Axe m_hoverAxe;                 //!< Hover axe or -1 if none.
     Axe m_activeAxe;                //!< Active (transform) axe or -1 if none.
     Vector3f m_relativeV;           //!< Current delta of the transform.
