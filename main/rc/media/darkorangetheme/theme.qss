@@ -413,7 +413,7 @@ QScrollBar::add-line:vertical
     subcontrol-origin: margin;
 }
 
-QScrollBar::sub-line:vertical:hover,QScrollBar::sub-line:vertical:on
+QScrollBar::sub-line:vertical:hover, QScrollBar::sub-line:vertical:on
 {
 
     border-image: url(:/darktheme/images/media/darktheme/images/up_arrow.png);
@@ -422,7 +422,6 @@ QScrollBar::sub-line:vertical:hover,QScrollBar::sub-line:vertical:on
     subcontrol-position: top;
     subcontrol-origin: margin;
 }
-
 
 QScrollBar::add-line:vertical:hover, QScrollBar::add-line:vertical:on
 {
@@ -663,4 +662,34 @@ QCheckBox::indicator:disabled, QRadioButton::indicator:disabled, QTreeView::indi
 /* not outline on selected node */
 QTreeView {
     outline: 0;
+    selection-background-color: #444;
 }
+
+QTreeView::item:selected
+{
+    color: #b1b1b1;
+    background-color: #444;
+}
+
+/*
+QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(:/darktheme/images/media/darktheme/images/vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(:/darktheme/images/media/darktheme/images/branch-more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(:/darktheme/images/media/darktheme/images/branch-end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed, QTreeView::branch:closed:has-children:has-siblings {
+    border-image: none;
+    image: url(:/darktheme/images/media/darktheme/images/branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings, QTreeView::branch:open:has-children:has-siblings  {
+    border-image: none;
+    image: url(:/darktheme/images/media/darktheme/images/branch-open.png);
+}*/

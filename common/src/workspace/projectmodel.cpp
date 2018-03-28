@@ -485,6 +485,18 @@ void ProjectModel::updatePresentation(const LightRef &ref)
     }
 }
 
+void ProjectModel::updatePresentation(QModelIndex itemIndex)
+{
+    if (!itemIndex.isValid()) {
+        return;
+    }
+
+    ProjectItem *item = static_cast<ProjectItem*>(itemIndex.internalPointer());
+
+    item->updatePresentation();
+    emit dataChanged(itemIndex, itemIndex);
+}
+
 static QString makeParentPath(const QStringList &path, int minus) {
     QString parentPath = "";
     for (int i = 0; i < path.length() - minus; ++i) {

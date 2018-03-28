@@ -16,6 +16,8 @@
 #include "o3d/studio/common/workspace/fragment.h"
 //#include "o3d/studio/common/workspace/asset.h"
 
+#include "o3d/studio/common/ui/uiutils.h"
+
 #include <QtCore/qobjectdefs.h>
 
 using namespace o3d::studio::common;
@@ -367,6 +369,15 @@ Fragment *ProjectItem::fragment()
     }
 
     return nullptr;
+}
+
+void ProjectItem::setSelected(o3d::Bool selected)
+{
+    if (selected) {
+        m_icon = common::UiUtils::tintIcon(m_icon, -1, nullptr, common::UiUtils::TINT_HIGHLIGHT);
+    } else {
+        m_icon = common::UiUtils::tintIcon(m_icon, -1, nullptr, common::UiUtils::TINT_NORMAL);
+    }
 }
 
 //const Asset *ProjectItem::asset() const

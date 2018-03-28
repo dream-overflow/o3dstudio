@@ -63,6 +63,10 @@ public:
 
     void updatePresentation();
 
+    //
+    // Entity
+    //
+
     Bool isProject() const;
     Bool isHub() const;
     Bool isFragment() const;
@@ -81,6 +85,15 @@ public:
 
 //    const Asset* asset() const;
 //    Asset* asset();
+
+    //
+    // Properties
+    //
+
+    /**
+     * @brief Set selected state and look'n'fell for the item.
+     */
+    void setSelected(Bool selected);
 
 private:
 

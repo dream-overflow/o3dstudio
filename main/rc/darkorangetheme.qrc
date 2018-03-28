@@ -3,6 +3,11 @@
         <file alias="checkbox.png">media/darkorangetheme/images/checkbox.png</file>
         <file alias="down_arrow.png">media/darkorangetheme/images/down_arrow.png</file>
         <file>media/darkorangetheme/images/handle.png</file>
+        <file>media/darkorangetheme/images/branch-closed.png</file>
+        <file>media/darkorangetheme/images/branch-end.png</file>
+        <file>media/darkorangetheme/images/branch-more.png</file>
+        <file>media/darkorangetheme/images/branch-open.png</file>
+        <file>media/darkorangetheme/images/vline.png</file>
     </qresource>
     <qresource prefix="/style">
         <file alias="darkorangetheme.qss">media/darkorangetheme/theme.qss</file>

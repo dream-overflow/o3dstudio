@@ -16,23 +16,48 @@
 
 using namespace o3d::studio::common;
 
-QIcon UiUtils::tintIcon(const QString &filename, QWidget *widget)
+static QIcon _tintIcon(QImage &image, QColor &color, UiUtils::TintMode mode)
 {
-    if (widget == nullptr) {
-        widget = QApplication::activeWindow();
-    }
+    if (mode == UiUtils::TINT_NORMAL) {
+        // Loop all the pixels
+        for(int y = 0; y < image.height(); y++) {
+            for(int x= 0; x < image.width(); x++) {
+                // Read the alpha value each pixel, keeping the RGB values of your color
+                color.setAlpha(image.pixelColor(x, y).alpha());
 
-    QColor color = QApplication::palette(widget).color(QPalette::Highlight);
-    QImage image = QImage(filename);
+                // Apply the pixel color
+                image.setPixelColor(x, y, color);
+            }
+        }
+    } else if (mode == UiUtils::TINT_HIGHLIGHT) {
+        color.setRedF(o3d::min(1.0, color.redF() * 1.4));
+        color.setGreenF(o3d::min(1.0, color.greenF() * 1.4));
+        color.setBlueF(o3d::min(1.0, color.blueF() * 1.4));
 
-    // Loop all the pixels
-    for(int y = 0; y < image.height(); y++) {
-        for(int x= 0; x < image.width(); x++) {
-            // Read the alpha value each pixel, keeping the RGB values of your color
-            color.setAlpha(image.pixelColor(x, y).alpha());
+        // Loop all the pixels
+        for(int y = 0; y < image.height(); y++) {
+            for(int x= 0; x < image.width(); x++) {
+                // Read the alpha value each pixel, keeping the RGB values of your color
+                color.setAlpha(image.pixelColor(x, y).alpha());
 
-            // Apply the pixel color
-            image.setPixelColor(x, y, color);
+                // Apply the pixel color
+                image.setPixelColor(x, y, color);
+            }
+        }
+    } else if (mode == UiUtils::TINT_DARK) {
+        color.setRedF(color.redF() / 1.4);
+        color.setGreenF(color.greenF() / 1.4);
+        color.setBlueF(color.blueF() / 1.4);
+
+        // Loop all the pixels
+        for(int y = 0; y < image.height(); y++) {
+            for(int x= 0; x < image.width(); x++) {
+                // Read the alpha value each pixel, keeping the RGB values of your color
+                color.setAlpha(image.pixelColor(x, y).alpha());
+
+                // Apply the pixel color
+                image.setPixelColor(x, y, color);
+            }
         }
     }
 
@@ -41,7 +66,19 @@ QIcon UiUtils::tintIcon(const QString &filename, QWidget *widget)
     return QIcon(pixmap);
 }
 
-QIcon UiUtils::tintIcon(QIcon icon, int size, QWidget *widget)
+QIcon UiUtils::tintIcon(const QString &filename, QWidget *widget, TintMode mode)
+{
+    if (widget == nullptr) {
+        widget = QApplication::activeWindow();
+    }
+
+    QColor color = QApplication::palette(widget).color(QPalette::Highlight);
+    QImage image = QImage(filename);
+
+    return _tintIcon(image, color, mode);
+}
+
+QIcon UiUtils::tintIcon(QIcon icon, int size, QWidget *widget, TintMode mode)
 {
     if (widget == nullptr) {
         widget = QApplication::activeWindow();
@@ -54,20 +91,7 @@ QIcon UiUtils::tintIcon(QIcon icon, int size, QWidget *widget)
     QColor color = QApplication::palette(widget).color(QPalette::Highlight);
     QImage image = icon.pixmap(QSize(size, size)).toImage();
 
-    // Loop all the pixels
-    for(int y = 0; y < image.height(); y++) {
-        for(int x= 0; x < image.width(); x++) {
-            // Read the alpha value each pixel, keeping the RGB values of your color
-            color.setAlpha(image.pixelColor(x, y).alpha());
-
-            // Apply the pixel color
-            image.setPixelColor(x, y, color);
-        }
-    }
-
-    // Get the coloured pixmap
-    QPixmap pixmap = QPixmap::fromImage(image);
-    return QIcon(pixmap);
+    return _tintIcon(image, color, mode);
 }
 
 void UiUtils::tintMenu(QList<QAction*> actions, QWidget *widget)

@@ -208,7 +208,10 @@ void WorkspaceDock::onSelectManagerChange()
         }
 
         current = projectModel->modelIndex(projectItem);
-        m_qtWorkspaceDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Deselect);
+        // m_qtWorkspaceDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Deselect);
+        projectItem->setSelected(False);
+
+        projectModel->updatePresentation(current);
     }
 
     selectionItem = nullptr;
@@ -220,7 +223,10 @@ void WorkspaceDock::onSelectManagerChange()
         }
 
         current = projectModel->modelIndex(projectItem);
-        m_qtWorkspaceDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Select);
+        // m_qtWorkspaceDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Select);
+        projectItem->setSelected(True);
+
+        projectModel->updatePresentation(current);
 
         // auto expand on select
         if (m_autoExpand) {
@@ -492,5 +498,6 @@ void QtWorkspaceDock::setupUi()
     setWidget(m_treeView);
 
     m_treeView->setHeaderHidden(true);
+    m_treeView->setSelectionMode(QTreeView::MultiSelection);
     setModel(new common::ProjectModel());
 }

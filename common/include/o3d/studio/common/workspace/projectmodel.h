@@ -65,6 +65,7 @@ public:
 //    void removeAsset(const common::LightRef &ref);
 
     void updatePresentation(const LightRef &ref);
+    void updatePresentation(QModelIndex itemIndex);
 
 private:
 

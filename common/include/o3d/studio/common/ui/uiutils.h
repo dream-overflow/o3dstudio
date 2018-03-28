@@ -22,9 +22,18 @@ class O3S_API UiUtils
 {
 public:
 
-    // static QIcon tintIcon(const String &icon, QWidget *widget = nullptr);
-    static QIcon tintIcon(const QString &icon, QWidget *widget = nullptr);
-    static QIcon tintIcon(QIcon icon, int size = -1, QWidget *widget = nullptr);
+    enum TintMode
+    {
+        TINT_NORMAL = 0,
+        TINT_HIGHLIGHT,
+        TINT_DARK,
+        TINT_WHITE,
+        TINT_NEGATIVE
+    };
+
+    // static QIcon tintIcon(const String &icon, QWidget *widget = nullptr, TintMode mode = TINT_NORMAL);
+    static QIcon tintIcon(const QString &icon, QWidget *widget = nullptr, TintMode mode = TINT_NORMAL);
+    static QIcon tintIcon(QIcon icon, int size = -1, QWidget *widget = nullptr, TintMode mode = TINT_NORMAL);
     static void tintMenu(QList<QAction*> actions, QWidget *widget = nullptr);
 };
 
