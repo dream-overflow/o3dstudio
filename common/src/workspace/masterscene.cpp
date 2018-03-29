@@ -366,57 +366,22 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
                 // action using the manipulator
                 setActionMode(ACTION_TRANSFORM);
                 m_hubManipulator->beginTransform(this, Vector3f(event.localPos().x(), event.localPos().y(), 0));
-            } else if (m_hoverHub) {
-                Selection &selection = Application::instance()->selection();
+            } else {
+                // camera or world transform
+                if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                    setActionMode(ACTION_CAMERA_TRANSLATION);
 
-                Entity *entity = nullptr, *hover = nullptr;
-                hover = findSelectable(m_hoverHub);
-
-                // @todo for now auto defines accepted role to structural from view
-                selection.setAcceptedRole(common::Selection::ACCEPT_STRUCTURAL_HUB);
-
-                // in a multiple selection
-                if (event.modifiers() & InputEvent::SHIFT_MODIFIER && hover) {
-                    // get current selection and remove from it
-                    auto previous = selection.filterCurrentByBaseType(TypeRef::hub());
-
-                    Application::instance()->selection().beginSelection();
-
-                    for (SelectionItem *item : previous) {
-                        entity = item->entity();
-
-                        if ((item->ref() != hover->ref().light()) && (entity = findSelectable(entity))) {
-                            selection.appendSelection(entity);
-                        }
-                    }
-
-                    if (!hover->isSelected() && (entity = findSelectable(m_hoverHub))) {
-                        // if not selected add it to last
-                        selection.appendSelection(entity);
-                    }
-
-                    Application::instance()->selection().endSelection();
-                } else if (hover) {
-                    // single selection
-                    if (hover->isSelected()) {
-                        // clear selection
-                        selection.unselectAll();
-                    } else {
-                        // initial selection
-                        selection.select(hover);
-                    }
+                    // default normal speed, press again shift to slow
+                    m_motionType = MOTION_FOLLOW;
+                } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                    setActionMode(ACTION_CAMERA_ZOOM);
+                } else {
+                    setActionMode(ACTION_CAMERA_ROTATION);
                 }
             }
         }
     } else if (event.button(Mouse::MIDDLE)) {
-        if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-            setActionMode(ACTION_CAMERA_TRANSLATION);
-            m_motionType = MOTION_FOLLOW;  // default normal speed, press again shift to slow
-        } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-            setActionMode(ACTION_CAMERA_ZOOM);
-        } else {
-            setActionMode(ACTION_CAMERA_ROTATION);
-        }
+        // nothing for now
     } else if (event.button(Mouse::RIGHT)) {
         if (m_actionMode == ACTION_TRANSFORM) {
             // cancel current transformation
@@ -425,12 +390,55 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
             }
 
             setActionMode(ACTION_NONE);
+        } else if (m_hoverHub) {
+            // selection on right button
+            Selection &selection = Application::instance()->selection();
+
+            Entity *entity = nullptr, *hover = nullptr;
+            hover = findSelectable(m_hoverHub);
+
+            // @todo for now auto defines accepted role to structural from view
+            selection.setAcceptedRole(common::Selection::ACCEPT_STRUCTURAL_HUB);
+
+            // in a multiple selection
+            if (event.modifiers() & InputEvent::SHIFT_MODIFIER && hover) {
+                // get current selection and remove from it
+                auto previous = selection.filterCurrentByBaseType(TypeRef::hub());
+
+                Application::instance()->selection().beginSelection();
+
+                for (SelectionItem *item : previous) {
+                    entity = item->entity();
+
+                    if ((item->ref() != hover->ref().light()) && (entity = findSelectable(entity))) {
+                        selection.appendSelection(entity);
+                    }
+                }
+
+                if (!hover->isSelected() && (entity = findSelectable(m_hoverHub))) {
+                    // if not selected add it to last
+                    selection.appendSelection(entity);
+                }
+
+                Application::instance()->selection().endSelection();
+            } else if (hover) {
+                // single selection
+                if (hover->isSelected()) {
+                    // clear selection
+                    selection.unselectAll();
+                } else {
+                    // initial selection
+                    selection.select(hover);
+                }
+            }
         }
     }
 
     Bool hideCursor = False;
 
-    if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
+    if (m_actionMode == ACTION_CAMERA_ROTATION ||
+            m_actionMode == ACTION_CAMERA_TRANSLATION ||
+            m_actionMode == ACTION_CAMERA_ZOOM) {
         hideCursor = True;
     } else if (m_actionMode == ACTION_TRANSFORM) {
         hideCursor = True;
@@ -473,21 +481,23 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
                 hubManipulator->endTransform(this);
             }
             setActionMode(ACTION_NONE);
-        }
-    } else if (event.button(Mouse::MIDDLE)) {
-        if (m_actionMode == ACTION_CAMERA_ROTATION ||
-            m_actionMode == ACTION_CAMERA_TRANSLATION ||
-            m_actionMode == ACTION_CAMERA_ZOOM) {
+        } else if (m_actionMode == ACTION_CAMERA_ROTATION ||
+                   m_actionMode == ACTION_CAMERA_TRANSLATION ||
+                   m_actionMode == ACTION_CAMERA_ZOOM) {
             // stop camera action
             setActionMode(ACTION_NONE);
         }
+    } else if (event.button(Mouse::MIDDLE)) {
+        // nothing for now
     } else if (event.button(Mouse::RIGHT)) {
+        // nothing for now
     }
 
     Bool showCursor = False;
 
     if (m_actionMode != ACTION_CAMERA_ROTATION &&
         m_actionMode != ACTION_CAMERA_TRANSLATION &&
+        m_actionMode != ACTION_CAMERA_ZOOM &&
         m_actionMode != ACTION_TRANSFORM) {
 
         showCursor = True;
@@ -517,12 +527,12 @@ o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
     m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     if (event.button(Mouse::LEFT)) {
-
-    } else if (event.button(Mouse::MIDDLE)) {
-        // @todo double click on camera manipulator reset the rotation
+        // double click on camera manipulator reset the rotation
         m_camera.get()->getNode()->getTransform()->setRotation(Quaternion());
+    } else if (event.button(Mouse::MIDDLE)) {
+        // nothing for now
     } else if (event.button(Mouse::RIGHT)) {
-
+        // nothing for now
     }
 
     return True;
@@ -537,7 +547,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
     // keep pointer position
     m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
-    Float elapsed = m_scene->getFrameManager()->getFrameDuration();
+    Float elapsed = 0.01;//m_scene->getFrameManager()->getFrameDuration();
     Int32 deltaX = event.globalPos().x() - m_lockedPos.x();
     Int32 deltaY = event.globalPos().y() - m_lockedPos.y();
 
@@ -549,13 +559,32 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         deltaY = 0;
     }
 
+    // @todo use of the mouse smoother
+
     if (m_actionMode == ACTION_CAMERA_ZOOM) {
         BaseNode *cameraNode = m_camera.get()->getNode();
         if (cameraNode) {
             Float x = 0.f, y = 0.f, z = 0.f;
 
+            x = deltaX * 100.f * elapsed;
             z = deltaY * 100.f * elapsed;
 
+            if (o3d::abs(x) > o3d::abs(z)) {
+                z = 0;
+            } else {
+                x = 0;
+            }
+
+            // slow motion if shift is down
+            if (m_motionType == MOTION_PRECISE) {
+                x *= 0.1;
+                z *= 0.1;
+            } else if (m_motionType == MOTION_FAST) {
+                x *= 10;
+                z *= 10;
+            }
+
+            /*
             // change axis if modifier
             if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
                 x = z;
@@ -563,7 +592,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
                 y = z;
                 z = 0;
-            }
+            }*/
 
             cameraNode->getTransform()->translate(Vector3(x, y, z));
         }
@@ -587,7 +616,6 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         if (cameraNode) {
             Float x = 0.f, y = 0.f, z = 0.f;
 
-            // @todo use of mouse smoother
             x = -deltaX * 100.f * elapsed;
             y = deltaY * 100.f * elapsed;
 
@@ -607,7 +635,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         if (m_hubManipulator && m_hubManipulator->isTransform()) {
             Float x = 0.f, y = 0.f, z = 0.f;
 
-            x = deltaX * 1.f;   // * elapsed;
+            x = deltaX * 1.f;  // * elapsed;
             y = deltaY * 1.f;  // * elapsed;
 
             // action using the manipulator
@@ -615,7 +643,9 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
         }
     }
 
-    if (m_actionMode == ACTION_CAMERA_ROTATION || m_actionMode == ACTION_CAMERA_TRANSLATION) {
+    if (m_actionMode == ACTION_CAMERA_ROTATION ||
+            m_actionMode == ACTION_CAMERA_TRANSLATION ||
+            m_actionMode == ACTION_CAMERA_ZOOM) {
         // lock mouse position, infinite cursor
         QCursor cursor = m_content->cursor();
         QPoint pos(m_lockedPos.x(), m_lockedPos.y());
