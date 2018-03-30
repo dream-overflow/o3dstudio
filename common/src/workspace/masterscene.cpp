@@ -405,7 +405,7 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
                 // get current selection and remove from it
                 auto previous = selection.filterCurrentByBaseType(TypeRef::hub());
 
-                Application::instance()->selection().beginSelection();
+                selection.beginSelection();
 
                 for (SelectionItem *item : previous) {
                     entity = item->entity();
@@ -420,7 +420,7 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
                     selection.appendSelection(entity);
                 }
 
-                Application::instance()->selection().endSelection();
+                selection.endSelection();
             } else if (hover) {
                 // single selection
                 if (hover->isSelected()) {

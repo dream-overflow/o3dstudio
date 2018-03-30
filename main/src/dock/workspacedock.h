@@ -86,7 +86,9 @@ public:
     virtual ~QtWorkspaceDock();
 
     virtual void focusInEvent(QFocusEvent *event) override;
+    virtual void focusOutEvent(QFocusEvent *event) override;
     virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void keyReleaseEvent(QKeyEvent *event) override;
 
     void setModel(QAbstractItemModel *model);
 
@@ -96,12 +98,14 @@ public slots:
     void onSelectionDetails(const QModelIndex &);
     void onSelectItem(const QModelIndex &index);
 
-public:
+private:
 
     void setupUi();
 
     QTreeView *m_treeView;
     common::ProjectItem *m_lastSelected;
+
+    common::Entity* findSelectable(common::Entity *entity) const;
 };
 
 } // namespace main

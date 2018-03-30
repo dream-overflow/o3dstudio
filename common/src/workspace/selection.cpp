@@ -221,6 +221,12 @@ void Selection::unselectAll()
     selectionChanged();
 }
 
+o3d::Bool Selection::canSelect(const Entity *entity) const
+{
+    // is entity role currently accepted else reject mean ignore the selection attempt
+    return checkEntityAcceptance(entity);
+}
+
 void Selection::setActiveEntity(Entity *entity)
 {
     if (entity) {
@@ -468,17 +474,52 @@ void Selection::cleanupAll()
     m_activeEntity = LightRef();
 }
 
-o3d::Bool Selection::checkEntityAcceptance(Entity *entity)
+o3d::Bool Selection::checkEntityAcceptance(const Entity *entity) const
 {
     // is entity role currently accepted else reject mean ignore the selection attempt
     if (entity) {
+        if (m_acceptRole == ACCEPT_ANY) {
+            return True;
+        }
+
         if (m_acceptRole == ACCEPT_STRUCTURAL_HUB) {
-            if (entity->role() != Entity::ROLE_STRUCTURAL_HUB) {
-                return False;
+            if (entity->role() == Entity::ROLE_STRUCTURAL_HUB) {
+                return True;
             }
         }
-        // @todo
+
+        if (m_acceptRole == ACCEPT_HUB) {
+            if (entity->role() == Entity::ROLE_STRUCTURAL_HUB) {
+                return True;
+            } else if (entity->role() == Entity::ROLE_HUB) {
+                return True;
+            }
+        }
+
+        if (m_acceptRole == ACCEPT_PROPERTY_HUB) {
+            if (entity->role() == Entity::ROLE_HUB) {
+                return True;
+            }
+        }
+
+        if (m_acceptRole == ACCEPT_PROJECT) {
+            if (entity->role() == Entity::ROLE_PROJECT) {
+                return True;
+            }
+        }
+
+        if (m_acceptRole == ACCEPT_FRAGMENT) {
+            if (entity->role() == Entity::ROLE_FRAGMENT) {
+                return True;
+            }
+        }
+
+          if (m_acceptRole == ACCEPT_RESOURCE) {
+            if (entity->role() == Entity::ROLE_RESOURCE) {
+                return True;
+            }
+        }
     }
 
-    return True;
+    return False;
 }

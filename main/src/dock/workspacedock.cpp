@@ -277,14 +277,13 @@ QtWorkspaceDock::QtWorkspaceDock(QWidget *parent) :
 
     // details
     connect(m_treeView, SIGNAL(doubleClicked(const QModelIndex &)), SLOT(onSelectionDetails(const QModelIndex &)));
-    connect(m_treeView, SIGNAL(clicked(const QModelIndex &)), SLOT(onSelectItem(const QModelIndex &)));
+    connect(m_treeView, SIGNAL(pressed(const QModelIndex &)), SLOT(onSelectItem(const QModelIndex &)));
 }
 
 QtWorkspaceDock::~QtWorkspaceDock()
 {
     delete m_treeView;
 }
-
 
 void QtWorkspaceDock::onSelectionDetails(const QModelIndex &)
 {
@@ -301,15 +300,24 @@ void QtWorkspaceDock::onSelectionDetails(const QModelIndex &)
 
 void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelIndex &previous)
 {
+/*    if (!(QApplication::mouseButtons() & Qt::RightButton) && !(QApplication::mouseButtons() & Qt::MiddleButton)) {
+        return;
+    }
+
     if (previous.isValid()) {
-        // @todo for multiple selection
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(previous.internalPointer());
         m_lastSelected = nullptr;
-
-        // projectItem->unselect();
     }
 
     if (current.isValid()) {
+        Bool multiple = False;
+
+        if (m_shiftModifier) {
+            multiple = True;
+        }
+
+        common::Entity *selected = nullptr;
+
         // @todo for multiple selection
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
         m_lastSelected = projectItem;
@@ -334,8 +342,6 @@ void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QMode
             common::Hub *hub = project->rootHub()->findHub(projectItem->ref().id());
             if (hub) {
                 // hub select but according to accepted role :
-                selection.select(hub);
-
                 // @todo for now auto defines accepted role by hub
                 if (hub->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
                     selection.setAcceptedRole(common::Selection::ACCEPT_STRUCTURAL_HUB);
@@ -345,7 +351,7 @@ void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QMode
                 }
 
                 if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
-                    selection.select(hub->project());
+                    selected = hub->project();
                 } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
                     common::Hub *currentHub = hub;
 
@@ -357,16 +363,16 @@ void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QMode
                     }
 
                     if (currentHub->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
-                        selection.select(currentHub);
+                        selected == currentHub;
                     }
                 } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
                     // no specificity
-                    selection.select(hub);
+                    selected = hub;
                 } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
                     // @todo property hub ?
-                    selection.select(hub);
+                    selected = hub;
                 } else {
-                    selection.select(hub->project());
+                    selected = hub->project();
                 }
             }
         } else if (projectItem->ref().baseTypeOf(common::TypeRef::fragment())) {
@@ -374,86 +380,211 @@ void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QMode
             if (fragment) {
                 // fragment select but according to accepted role :
                 // @todo
-                selection.select(fragment);
-
                 if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
-                    selection.select(fragment->project());
+                    selected = fragment->project();
                 } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
-                    selection.select(fragment->project()->rootHub());
+                    selected = fragment->project()->rootHub();
                 } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
-                    selection.select(fragment->project()->rootHub());
+                    selected = fragment->project()->rootHub();
                 } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
-                    selection.select(project->rootHub());
+                    selected = project->rootHub();
                 } else if (selection.acceptedRole() == common::Selection::ACCEPT_FRAGMENT) {
-                    selection.select(fragment);
+                    selected = fragment;
                 } else {
-                    selection.select(fragment->project());
+                    selected = fragment->project();
                 }
             }
         } else if (projectItem->ref().baseTypeOf(common::TypeRef::project())) {
             // project select but according to accepted role :
             if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
-                selection.select(project);
+                selected = project;
             } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
-                selection.select(project->rootHub());
+                selected = project->rootHub();
             } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
-                selection.select(project->rootHub());
+                selected = project->rootHub();
             } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
-                selection.select(project->rootHub());
+                selected = project->rootHub();
             } else {
-                selection.select(project);
+                selected = project;
             }
         } else if (projectItem->ref().baseTypeOf(common::TypeRef::resource())) {
             // @todo when resources will be implemented
         }
-    }
-}
 
-void QtWorkspaceDock::onSelectItem(const QModelIndex &/*index*/)
-{
-    // @todo should be unset when selection change
-    // onSelectionChanged(index, index);
-    return;
-/*
-    // on click second time, to reselect
-    // @todo should only arrives after a lost of focus or a change of selection...
-    if (index.isValid()) {
-        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(index.internalPointer());
-        if (m_lastSelected != nullptr && m_lastSelected == projectItem) {
-            common::Project *project = projectItem->project();
-            common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().type());
+        if (selected) {
+            if (multiple) {
+                common::Entity* entity;
 
-            if (!project) {
-                return;
-            }
+                auto previous = selection.filterCurrentByBaseType(common::TypeRef::hub());
 
-            // first set as active projet if not current
-            common::Workspace* workspace = common::Application::instance()->workspaces().current();
-            if (workspace->activeProject() != project) {
-                workspace->setActiveProject(project->ref().light());
-            }
+                selection.beginSelection();
 
-            if (baseType == common::TypeRef::hub()) {
-                common::Hub *hub = project->rootHub()->findHub(projectItem->ref().id());
-                if (hub) {
-                    common::Application::instance()->selection().select(hub);
+                for (common::SelectionItem *item : previous) {
+                    entity = item->entity();
+
+                    if ((item->ref() != selected->ref().light()) && (entity = findSelectable(entity))) {
+                        selection.appendSelection(entity);
+                    }
                 }
-            } else if (baseType == common::TypeRef::fragment()) {
-                common::Fragment *fragment = project->fragment(projectItem->ref());
-                if (fragment) {
-                    common::Application::instance()->selection().select(fragment);
+
+                if (!selected->isSelected() && (entity = findSelectable(selected))) {
+                    // if not selected add it to last
+                    selection.appendSelection(entity);
                 }
-            } else if (baseType == common::TypeRef::project()) {
-                common::Application::instance()->selection().select(project);
+
+                selection.endSelection();
+            } else {
+                if (!selected->isSelected()) {
+                    selection.select(selected);
+                } else {
+                    selection.unselectAll();
+                }
             }
         }
     }*/
 }
 
+o3d::studio::common::Entity* QtWorkspaceDock::findSelectable(common::Entity *entity) const
+{
+    if (!entity) {
+        return nullptr;
+    }
+
+    if (common::Application::instance()->selection().acceptedRole() == common::Selection::ACCEPT_ANY) {
+        return entity;
+    }
+
+    if (entity->ref().light().baseTypeOf(common::TypeRef::project())) {
+        if (common::Application::instance()->selection().acceptedRole() == common::Selection::ACCEPT_PROJECT) {
+            return entity;
+        }
+    } else if (entity && entity->ref().light().baseTypeOf(common::TypeRef::fragment())) {
+        if (common::Application::instance()->selection().acceptedRole() == common::Selection::ACCEPT_FRAGMENT) {
+            return entity;
+        }
+    } else if (entity && entity->ref().light().baseTypeOf(common::TypeRef::resource())) {
+        if (common::Application::instance()->selection().acceptedRole() == common::Selection::ACCEPT_RESOURCE) {
+            return entity;
+        }
+    } else if (entity && entity->ref().light().baseTypeOf(common::TypeRef::hub())) {
+        if (common::Application::instance()->selection().acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
+            if (entity->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
+                return entity;
+            }
+        } else if (common::Application::instance()->selection().acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
+            if (entity->role() == common::Entity::ROLE_HUB) {
+                return entity;
+            }
+        } else if (common::Application::instance()->selection().acceptedRole() == common::Selection::ACCEPT_HUB) {
+            if (entity->role() == common::Entity::ROLE_HUB) {
+                return entity;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
+void QtWorkspaceDock::onSelectItem(const QModelIndex &current)
+{
+    if (!(QApplication::mouseButtons() & Qt::RightButton) && !(QApplication::mouseButtons() & Qt::MiddleButton)) {
+        return;
+    }
+
+    if (current.isValid()) {
+        Bool multiple = False;
+
+        if (QApplication::keyboardModifiers() & Qt::ShiftModifier) {
+            multiple = True;
+        }
+
+        common::Entity *selected = nullptr;
+
+        // @todo for multiple selection
+        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
+        m_lastSelected = projectItem;
+
+        common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().typeId());
+
+        // first set as active projet if not current
+        common::Workspace* workspace = common::Application::instance()->workspaces().current();
+        common::Project *project = workspace->project(projectItem->ref());
+
+        common::Selection &selection = common::Application::instance()->selection();
+
+        if (!project) {
+            return;
+        }
+
+        if (workspace->activeProject() != project) {
+            workspace->setActiveProject(project->ref().light());
+        }
+
+        common::Entity *currentEntity = project->lookup(projectItem->ref());
+
+        if (currentEntity && (selection.currentSelection().empty() || !multiple)) {
+            // set new current accept role on initial selection
+            if (currentEntity->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
+                selection.setAcceptedRole(common::Selection::ACCEPT_STRUCTURAL_HUB);
+            } else if (currentEntity->role() == common::Entity::ROLE_HUB) {
+                selection.setAcceptedRole(common::Selection::ACCEPT_HUB);
+            } else if (currentEntity->role() == common::Entity::ROLE_PROJECT) {
+                selection.setAcceptedRole(common::Selection::ACCEPT_PROJECT);
+            } else if (currentEntity->role() == common::Entity::ROLE_FRAGMENT) {
+                selection.setAcceptedRole(common::Selection::ACCEPT_FRAGMENT);
+            } else if (currentEntity->role() == common::Entity::ROLE_RESOURCE) {
+                selection.setAcceptedRole(common::Selection::ACCEPT_RESOURCE);
+            }
+        }
+
+        if (selection.canSelect(currentEntity)) {
+            if (multiple) {
+                // toggle select in multiple
+                common::Entity* entity;
+
+                auto previous = selection.currentSelection();
+
+                selection.beginSelection();
+
+                for (common::SelectionItem *item : previous) {
+                    entity = item->entity();
+
+                    if ((item->ref() != currentEntity->ref().light())) {
+                        selection.appendSelection(entity);
+                    }
+                }
+
+                if (!currentEntity->isSelected()) {
+                    // if not selected add it to last
+                    selection.appendSelection(currentEntity);
+                }
+
+                selection.endSelection();
+            } else {
+                if (!currentEntity->isSelected()) {
+                    selection.select(currentEntity);
+                } else {
+                    selection.unselectAll();
+                }
+            }
+        } else {
+            if (!multiple) {
+                selection.select(currentEntity);
+            }
+        }
+    }
+
+    // onSelectionChanged(index, index);
+}
 
 void QtWorkspaceDock::focusInEvent(QFocusEvent *event)
 {
     QDockWidget::focusInEvent(event);
+}
+
+void QtWorkspaceDock::focusOutEvent(QFocusEvent *event)
+{
+    QDockWidget::focusOutEvent(event);
 }
 
 void QtWorkspaceDock::keyPressEvent(QKeyEvent *event)
@@ -476,6 +607,11 @@ void QtWorkspaceDock::keyPressEvent(QKeyEvent *event)
     }
 
     return QDockWidget::keyPressEvent(event);
+}
+
+void QtWorkspaceDock::keyReleaseEvent(QKeyEvent *event)
+{
+    return QDockWidget::keyReleaseEvent(event);
 }
 
 void QtWorkspaceDock::setModel(QAbstractItemModel *model)

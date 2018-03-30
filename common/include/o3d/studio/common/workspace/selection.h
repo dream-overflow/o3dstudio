@@ -88,6 +88,11 @@ public:
     void unselectAll();
 
     /**
+     * @brief According to entity role and current selection profile test if the entity can be selected.
+     */
+    Bool canSelect(const Entity *entity) const;
+
+    /**
      * @brief Set the current working/active entity.
      * Used to defined entity to works in some contexts.
      * @note By default the during a selection the active entity is defined to the first of the selection.
@@ -135,7 +140,7 @@ private:
     LightRef m_activeEntity;
 
     void cleanupAll();
-    Bool checkEntityAcceptance(Entity *entity);
+    Bool checkEntityAcceptance(const Entity *entity) const;
 };
 
 } // namespace common
