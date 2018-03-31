@@ -175,11 +175,9 @@ void PluginModel::setupModelData(const QList<PluginSection *> &data, PluginItem 
     Q_UNUSED(parent)
 
     PluginItem *rootItem = m_rootItem;
-
-    PluginSection *section = nullptr;
     PluginItem *itemParent = nullptr;
 
-    foreach (section, data) {
+    for (PluginSection *section : data) {
         QStringList path = section->name().split("::");
         QString leaf = path.last();
 

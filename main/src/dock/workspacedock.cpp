@@ -199,8 +199,7 @@ void WorkspaceDock::onSelectManagerChange()
 
     QModelIndex current;
 
-    common::SelectionItem *selectionItem = nullptr;
-    foreach (selectionItem, previousSelection) {
+    for (common::SelectionItem *selectionItem : previousSelection) {
         projectItem = projectModel->find(selectionItem->ref());
 
         if (!projectItem) {
@@ -208,14 +207,12 @@ void WorkspaceDock::onSelectManagerChange()
         }
 
         current = projectModel->modelIndex(projectItem);
-        // m_qtWorkspaceDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Deselect);
         projectItem->setSelected(False);
 
         projectModel->updatePresentation(current);
     }
 
-    selectionItem = nullptr;
-    foreach (selectionItem, currentSelection) {
+    for (common::SelectionItem *selectionItem : currentSelection) {
         projectItem = projectModel->find(selectionItem->ref());
 
         if (!projectItem) {
@@ -223,7 +220,6 @@ void WorkspaceDock::onSelectManagerChange()
         }
 
         current = projectModel->modelIndex(projectItem);
-        // m_qtWorkspaceDock->m_treeView->selectionModel()->select(current, QItemSelectionModel::Select);
         projectItem->setSelected(True);
 
         projectModel->updatePresentation(current);
@@ -277,7 +273,7 @@ QtWorkspaceDock::QtWorkspaceDock(QWidget *parent) :
 
     // details
     connect(m_treeView, SIGNAL(doubleClicked(const QModelIndex &)), SLOT(onSelectionDetails(const QModelIndex &)));
-    connect(m_treeView, SIGNAL(pressed(const QModelIndex &)), SLOT(onSelectItem(const QModelIndex &)));
+    connect(m_treeView, SIGNAL(pressed(const QModelIndex &)), SLOT(onPressItem(const QModelIndex &)));
 }
 
 QtWorkspaceDock::~QtWorkspaceDock()
@@ -485,26 +481,31 @@ o3d::studio::common::Entity* QtWorkspaceDock::findSelectable(common::Entity *ent
     return nullptr;
 }
 
-void QtWorkspaceDock::onSelectItem(const QModelIndex &current)
+void QtWorkspaceDock::onPressItem(const QModelIndex &current)
 {
-    if (!(QApplication::mouseButtons() & Qt::RightButton) && !(QApplication::mouseButtons() & Qt::MiddleButton)) {
-        return;
-    }
-
     if (current.isValid()) {
         Bool multiple = False;
+
+        if (QApplication::mouseButtons() & Qt::RightButton) {
+            if (!m_treeView->selectionModel()->isSelected(current)) {
+                // single of view-selection
+                m_treeView->selectionModel()->select(current, QItemSelectionModel::Clear | QItemSelectionModel::Select);
+            }
+        }
+
+        if (!(QApplication::mouseButtons() & Qt::MiddleButton)) {
+            // select with middle-click or maybee @todo when left click the icone
+            return;
+        }
 
         if (QApplication::keyboardModifiers() & Qt::ShiftModifier) {
             multiple = True;
         }
 
-        common::Entity *selected = nullptr;
-
-        // @todo for multiple selection
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
         m_lastSelected = projectItem;
 
-        common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().typeId());
+        // common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().typeId());
 
         // first set as active projet if not current
         common::Workspace* workspace = common::Application::instance()->workspaces().current();
@@ -614,6 +615,18 @@ void QtWorkspaceDock::keyReleaseEvent(QKeyEvent *event)
     return QDockWidget::keyReleaseEvent(event);
 }
 
+bool QtWorkspaceDock::eventFilter(QObject *target, QEvent *event)
+{
+    if (target == m_treeView && event->type() == QEvent::MouseButtonPress) {
+        QContextMenuEvent *m = static_cast<QContextMenuEvent*>(event);
+        if (event->type() == QEvent::ContextMenu) {
+            // @todo create context menu
+            return true;
+        }
+    }
+    return false;
+}
+
 void QtWorkspaceDock::setModel(QAbstractItemModel *model)
 {
     QAbstractItemModel *oldModel = m_treeView->model();
@@ -636,4 +649,85 @@ void QtWorkspaceDock::setupUi()
     m_treeView->setHeaderHidden(true);
     m_treeView->setSelectionMode(QTreeView::MultiSelection);
     setModel(new common::ProjectModel());
+
+    // install a custom context menu
+    m_treeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    m_treeView->installEventFilter(this);
+
+    connect(m_treeView, &QTreeView::customContextMenuRequested, this, &QtWorkspaceDock::onShowContextMenu);
+}
+
+void QtWorkspaceDock::onShowContextMenu(const QPoint& pos)
+{
+    QPoint globalPos = m_treeView->mapToGlobal(pos);
+    QMenu contextMenu;
+
+    QModelIndex index = m_treeView->indexAt(pos);
+    if (!index.isValid()) {
+        return;
+    }
+
+    QModelIndex current = m_treeView->currentIndex();
+    // @todo select model selection
+
+    QModelIndexList indexes = m_treeView->selectionModel()->selectedIndexes();
+
+    if (indexes.empty()) {
+        return;
+    }
+
+    Bool single = False;
+    if (indexes.size() == 1) {
+        single = True;
+
+        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
+        common::Project *project = projectItem->project();
+        if (project) {
+            // @todo
+        }
+    }
+
+    QAction *selectAction = new QAction(tr("Select"));
+    selectAction->setProperty("actionName", "select");
+    contextMenu.addAction(selectAction);
+
+    QAction *unselectAction = new QAction(tr("Unselect"));
+    unselectAction->setProperty("actionName", "unselect");
+    contextMenu.addAction(unselectAction);
+
+    contextMenu.addSeparator();
+
+    if (single && (index.flags() & Qt::ItemIsEditable)) {
+        QAction *renameAction = new QAction(tr("Rename"));
+        renameAction->setProperty("actionName", "rename");
+        contextMenu.addAction(renameAction);
+        contextMenu.addSeparator();
+    }
+
+    QAction *deleteAction = new QAction(tr("Delete"));
+    deleteAction->setProperty("actionName", "delete");
+    contextMenu.addAction(deleteAction);
+
+    contextMenu.addSeparator();
+
+    QAction *cancelAction = new QAction(tr("Cancel"));
+    cancelAction->setProperty("actionName", "cancel");
+    contextMenu.addAction(cancelAction);
+
+    QAction* selectedItem = contextMenu.exec(globalPos);
+    if (selectedItem) {
+        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(index.internalPointer());
+
+        if (selectedItem->property("actionName") == "rename") {
+            m_treeView->setEditTriggers(QAbstractItemView::EditKeyPressed | QAbstractItemView::DoubleClicked);
+            m_treeView->edit(index);
+
+        } else if (selectedItem->property("actionName") == "select") {
+
+        } else if (selectedItem->property("actionName") == "unselect") {
+
+        } else if (selectedItem->property("actionName") == "delete") {
+
+        }
+    }
 }

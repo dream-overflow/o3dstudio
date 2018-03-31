@@ -195,71 +195,6 @@ const o3d::String& QtMainWindow::theme() const
     return m_currentTheme;
 }
 
-/*void MainWindow::loadPlugin()
-    o3d::studio::common::GuiPluginInterface * lpInterface = nullptr;
-
-    // Loading of static plugins
-    foreach (QObject *lpPlugin, QPluginLoader::staticInstances())
-    {
-        lpInterface = qobject_cast<o3scommon::GuiPluginInterface *>(lpPlugin);
-
-        if (lpInterface != nullptr)
-            m_modules.push_back(lpInterface);
-    }
-
-    // Loading of dynamic plugins
-    const QStringList lModulePathList = ModulePreferences::GetModulePathList();
-
-    foreach (QString lPath, lModulePathList)
-    {
-        QDir lPluginsDir(lPath);
-
-        foreach (QString lFileName, lPluginsDir.entryList(QStringList(O3S_MODULE_EXT), QDir::Files))
-        {
-            QPluginLoader lLoader(lPluginsDir.absoluteFilePath(lFileName));
-
-            lpInterface = qobject_cast<o3scommon::GuiPluginInterface *>(lLoader.instance());
-
-            if (lpInterface != nullptr)
-                m_modules.push_back(lpInterface);
-        }
-    }
-
-    // We append now each plugin into the menu "Start"
-    QList<QAction*> lActionToAdd;
-
-    foreach(o3scommon::GuiPluginInterface * lpInterface, m_modules)
-    {
-        if (lpInterface != nullptr)
-        {
-            if (!lpInterface->GetMenuItemName().isEmpty())
-            {
-                QAction * lpAction = new QAction(menuStart);
-                lpAction->setProperty("ModuleName", QVariant(lpInterface->GetModuleName()));
-                lpAction->setText(lpInterface->GetMenuItemName());
-                lpAction->setToolTip(lpInterface->GetMenuItemTooltip());
-                lpAction->setIcon(lpInterface->GetMenuItemIcon());
-
-                connect(lpAction, SIGNAL(triggered(bool)), SLOT(OnStartMenuModuleActivated()));
-
-                lActionToAdd.push_back(lpAction);
-            }
-        }
-    }
-
-    menuStart->insertActions(menuStart->actions().front(), lActionToAdd);
-
-    // We load the default module
-    QString lStartModule = ModulePreferences::GetAutoStartModuleName();
-
-    if (!lStartModule.isEmpty()) {
-        startModule(lStartModule);
-    } else {
-        startModule("Default");
-    }
-}
-*/
-
 o3d::Bool QtMainWindow::setThemeColor(const String &theme)
 {
     if (theme == m_currentTheme) {
@@ -738,8 +673,7 @@ void QtMainWindow::initRecentProjectsMenu()
     common::Settings &settings = common::Application::instance()->settings();
     QStringList recentsProject = settings.get("o3s::main::project::recents", QVariant(QStringList())).toStringList();
 
-    QAction *action;
-    foreach (action, ui.menuRecentsProjects->actions()) {
+    for (QAction *action : ui.menuRecentsProjects->actions()) {
         if (action->property("location").isValid()) {
             ui.menuRecentsProjects->removeAction(action);
         }
@@ -747,9 +681,8 @@ void QtMainWindow::initRecentProjectsMenu()
 
     QAction *separator = ui.menuRecentsProjects->actions().at(0);
 
-    QString project;
     int i = 0;
-    foreach (project, recentsProject) {
+    for (QString project : recentsProject) {
         if (project.isEmpty()) {
             continue;
         }
@@ -768,8 +701,7 @@ void QtMainWindow::initRecentResourcesMenu()
     common::Settings &settings = common::Application::instance()->settings();
     QStringList recentsResource = settings.get("o3s::main::resource::recents", QVariant(QStringList())).toStringList();
 
-    QAction *action;
-    foreach (action, ui.menuRecentsResources->actions()) {
+    for (QAction *action : ui.menuRecentsResources->actions()) {
         if (action->property("location").isValid()) {
             ui.menuRecentsResources->removeAction(action);
         }
@@ -778,8 +710,7 @@ void QtMainWindow::initRecentResourcesMenu()
     QAction *separator = ui.menuRecentsResources->actions().at(0);
 
     int i = 0;
-    QString resource;
-    foreach (resource, recentsResource) {
+    for (QString resource : recentsResource) {
         if (resource.isEmpty()) {
             continue;
         }
@@ -1180,8 +1111,7 @@ o3d::Bool MainWindow::removeDock(const String &name)
 {
     // erase menu entry
     QList<QAction*> actions = m_qtMainWindow->ui.menuDockViews->actions();
-    QAction *action = nullptr;
-    foreach (action, actions) {
+    for (QAction *action : actions) {
         if (action->property("name").toString() == toQString(name)) {
             m_qtMainWindow->ui.menuDockViews->removeAction(action);
             return True;
@@ -1230,8 +1160,7 @@ o3d::Bool MainWindow::removeToolBarWidget(const String &name)
 {
     // erase menu entry
     QList<QAction*> actions = m_qtMainWindow->ui.menuToolBarViews->actions();
-    QAction *action = nullptr;
-    foreach (action, actions) {
+    for (QAction *action : actions) {
         if (action->property("name").toString() == toQString(name)) {
             m_qtMainWindow->ui.menuToolBarViews->removeAction(action);
             return True;

@@ -111,14 +111,12 @@ public:
     //
 
     /**
-     * @brief Get a specific entity from a loaded project using the lookup table.
-     * @note A project cannot be a part of a project.
+     * @brief Get a specific entity from a loaded project or a project itself using the lookup table.
      */
     Entity* entity(const LightRef &ref);
 
     /**
-     * @brief Get a specific entity from a loaded project using the lookup table (const version).
-     * @note A project cannot be a part of a project.
+     * @brief Get a specific entity from a loaded project or a project itself using the lookup table (const version).
      */
     const Entity* entity(const LightRef &ref) const;
 

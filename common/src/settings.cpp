@@ -35,8 +35,8 @@ void Settings::loadGroup(const String &group)
     QSettings lSettings(SETTINGS_FILE, QSettings::IniFormat, QCoreApplication::instance());
     lSettings.beginGroup(toQString(group));
 
-    QString key, s;
-    foreach (key, lSettings.childKeys()) {
+    QString s;
+    for (QString key : lSettings.childKeys()) {
         s = key;
         s = prefix + s.replace(re, "::\\1\\2").toLower();
         m_settings[fromQString(s)] = lSettings.value(key);

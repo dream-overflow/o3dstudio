@@ -100,16 +100,6 @@ o3d::Bool RemoveHubCommand::undoCommand()
 
                 m_data.destroy();
 
-                // hub was added after
-//                project->workspace()->onProjectHubAdded(hub->ref().light());
-
-//                // iterator over children
-//                common::Hub *node = nullptr;
-//                foreach (node, hub->hubs(true)) {
-//                    // signal throught project->workspace
-//                    project->workspace()->onProjectHubAdded(node->ref().light());
-//                }
-
                 return True;
             }
         }

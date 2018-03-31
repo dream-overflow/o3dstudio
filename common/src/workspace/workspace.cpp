@@ -264,6 +264,12 @@ Entity *Workspace::entity(const LightRef &ref)
 {
     if (ref.baseTypeOf(TypeRef::project())) {
         // a project cannot be a part of a project
+
+        auto it = m_loadedProjects.find(ref.id());
+        if (it != m_loadedProjects.end()) {
+            return it->second;
+        }
+
         return nullptr;
     }
 
@@ -280,6 +286,12 @@ const Entity *Workspace::entity(const LightRef &ref) const
 {
     if (ref.baseTypeOf(TypeRef::project())) {
         // a project cannot be a part of a project
+
+        auto cit = m_loadedProjects.find(ref.id());
+        if (cit != m_loadedProjects.cend()) {
+            return cit->second;
+        }
+
         return nullptr;
     }
 
@@ -419,8 +431,7 @@ void Workspace::onSelectionChanged()
     Bool changeProject = False;
 
     if (!previousSelection.empty()) {
-        SelectionItem *selectionItem = nullptr;
-        foreach (selectionItem, previousSelection) {
+        for (common::SelectionItem *selectionItem : previousSelection) {
             if (selectionItem->ref() == m_activeProject->ref().light()) {
                 m_activeProject = nullptr;
                 changeProject = True;
@@ -430,8 +441,7 @@ void Workspace::onSelectionChanged()
     }
 
     if (!currentSelection.empty()) {
-        SelectionItem *selectionItem = nullptr;
-        foreach (selectionItem, previousSelection) {
+        for (common::SelectionItem *selectionItem : currentSelection) {
             Project *lproject = project(selectionItem->ref());
             if (lproject) {
                 m_activeProject = lproject;

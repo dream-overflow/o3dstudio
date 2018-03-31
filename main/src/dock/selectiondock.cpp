@@ -127,11 +127,10 @@ void SelectionDock::onSelectionChanged()
 
     m_qtSelectionDock->m_listWidget->clear();
 
-    common::SelectionItem *selectionItem = nullptr;
     common::Component *component;
     String icon;
 
-/*    foreach (selectionItem, previousSelection) {
+/*    for (common::SelectionItem *selectionItem : previousSelection) {
         projectItem = projectModel->find(selectionItem->ref());
 
         if (!projectItem) {
@@ -143,9 +142,8 @@ void SelectionDock::onSelectionChanged()
         m_qtSelectionDock->m_listWidget->removeItemWidget();
     }
 */
-    selectionItem = nullptr;
     common::Hub *hub;
-    foreach (selectionItem, currentSelection) {
+    for (common::SelectionItem *selectionItem : currentSelection) {
         hub = workspace->hub(selectionItem->ref());
         if (!hub || hub->project() != project) {
             continue;

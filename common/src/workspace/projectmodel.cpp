@@ -180,15 +180,19 @@ o3d::Bool ProjectModel::setData(const QModelIndex &index, const QVariant &value,
 
 Qt::ItemFlags ProjectModel::flags(const QModelIndex &index) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return 0;
+    }
 
     // project cannot be renamed like this
     ProjectItem *item = static_cast<ProjectItem*>(index.internalPointer());
     if (item->isProject()) {
         return QAbstractItemModel::flags(index);
+    } else if (item->entity() == item->entity()->project()->rootHub()) {
+        return QAbstractItemModel::flags(index);
     } else {
-        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+        // return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable | Qt::ItemIsDragEnabled;
     }
 }
 
@@ -522,11 +526,9 @@ ProjectItem* createItem(const QString &section, const QString &name, const QStri
 void ProjectModel::setupModelData(const QList<PluginSection *> &data, ProjectItem *parent)
 {
     PluginItem *rootItem = m_rootItem;
-
-    PluginSection *section = nullptr;
     PluginItem *itemParent = nullptr;
 
-    foreach (section, data) {
+    for (PluginSection *section : data) {
         QStringList path = section->name().split("::");
         QString leaf = path.last();
 

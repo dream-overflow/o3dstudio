@@ -182,8 +182,7 @@ ProjectItem *ProjectItem::find(const String &path)
     ProjectItem *result = nullptr;
 
     if (lpath.length() < dpath.length()) {
-        ProjectItem *child = nullptr;
-        foreach (child, m_childItems) {
+        for (ProjectItem *child : m_childItems) {
             result = child->find(path);
 
             if (result != nullptr) {
@@ -202,8 +201,7 @@ ProjectItem *ProjectItem::find(const LightRef &ref)
     }
 
     ProjectItem *result = nullptr;
-    ProjectItem *child = nullptr;
-    foreach (child, m_childItems) {
+    for (ProjectItem *child : m_childItems) {
         result = child->find(ref);
 
         if (result != nullptr) {

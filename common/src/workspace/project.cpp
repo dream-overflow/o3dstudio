@@ -277,6 +277,10 @@ void Project::setupMasterScene()
 
 Entity *Project::lookup(const LightRef &ref)
 {
+    if (ref == this->ref().light()) {
+        return this;
+    }
+
     if (ref.projectId() == m_ref.light().id()) {
         auto it = m_entitiesById.find(ref.id());
         if (it != m_entitiesById.end()) {
@@ -289,6 +293,10 @@ Entity *Project::lookup(const LightRef &ref)
 
 const Entity *Project::lookup(const LightRef &ref) const
 {
+    if (ref == this->ref().light()) {
+        return this;
+    }
+
     if (ref.projectId() == m_ref.light().id()) {
         auto cit = m_entitiesById.find(ref.id());
         if (cit != m_entitiesById.cend()) {
@@ -301,6 +309,10 @@ const Entity *Project::lookup(const LightRef &ref) const
 
 Entity *Project::lookup(const Uuid &uuid)
 {
+    if (uuid == this->ref().uuid()) {
+        return this;
+    }
+
     auto it = m_entitiesByUuid.find(uuid);
     if (it != m_entitiesByUuid.end()) {
         return it->second;
@@ -311,6 +323,10 @@ Entity *Project::lookup(const Uuid &uuid)
 
 const Entity *Project::lookup(const Uuid &uuid) const
 {
+    if (uuid == this->ref().uuid()) {
+        return this;
+    }
+
     auto cit = m_entitiesByUuid.find(uuid);
     if (cit != m_entitiesByUuid.cend()) {
         return cit->second;

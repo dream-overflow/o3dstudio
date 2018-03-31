@@ -32,8 +32,7 @@ PropertyModel::~PropertyModel()
         delete m_rootItem;
     }
 
-    PropertySection *section;
-    foreach (section, m_sections) {
+    for (PropertySection *section : m_sections) {
         delete section;
     }
 }
@@ -157,11 +156,9 @@ void PropertyModel::setupModelData(const std::list<PropertySection *> &data, Pro
     Q_UNUSED(parent)
 
     PropertyItem *rootItem = m_rootItem;
-
-    PropertySection *propertySection = nullptr;
     PropertyItem *itemParent = nullptr;
 
-    foreach (propertySection, data) {
+    for (PropertySection *propertySection : data) {
         QStringList path = toQString(propertySection->name()).split("::");
         QString leaf = path.last();
 

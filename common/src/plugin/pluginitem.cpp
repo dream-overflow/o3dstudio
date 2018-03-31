@@ -94,8 +94,7 @@ PluginItem *PluginItem::find(const QString &path)
     PluginItem *result = nullptr;
 
     if (lpath.length() < dpath.length()) {
-        PluginItem *child = nullptr;
-        foreach (child, m_childItems) {
+        for (PluginItem *child : m_childItems) {
             result = child->find(path);
 
             if (result != nullptr) {

@@ -90,13 +90,16 @@ public:
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;
 
+    virtual bool eventFilter(QObject *target, QEvent *event) override;
+
     void setModel(QAbstractItemModel *model);
 
 public slots:
 
     void onSelectionChanged(const QModelIndex &current, const QModelIndex &previous);
     void onSelectionDetails(const QModelIndex &);
-    void onSelectItem(const QModelIndex &index);
+    void onPressItem(const QModelIndex &index);
+    void onShowContextMenu(const QPoint& pos);
 
 private:
 

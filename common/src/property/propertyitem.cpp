@@ -109,8 +109,7 @@ PropertyItem *PropertyItem::find(const String &path)
     PropertyItem *result = nullptr;
 
     if (lpath.length() < dpath.length()) {
-        PropertyItem *child = nullptr;
-        foreach (child, m_childItems) {
+        for (PropertyItem *child : m_childItems) {
             result = child->find(path);
 
             if (result != nullptr) {

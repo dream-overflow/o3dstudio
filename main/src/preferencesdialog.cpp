@@ -218,8 +218,7 @@ void PreferencesDialog::setupCategories()
         loadedProjectList.sort(caseInsensitiveLessThan);
         // std::sort(loadedProjectList.begin(), loadedProjectList.end(), caseInsensitiveLessThan);
 
-        common::Project *project = nullptr;
-        foreach (project, loadedProjectList) {
+        for (common::Project *project : loadedProjectList) {
             // specialized project section node
             sections.push_back(new ProjectSection(project->ref().light()));
             // @todo project sub-sections
