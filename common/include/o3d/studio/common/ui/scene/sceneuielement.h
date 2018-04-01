@@ -26,6 +26,7 @@ class MasterScene;
 
 /**
  * @brief Common scene UI element base class
+ * @todo input event and move some from master scene to elements
  */
 class O3S_API SceneUIElement : public BaseObject
 {

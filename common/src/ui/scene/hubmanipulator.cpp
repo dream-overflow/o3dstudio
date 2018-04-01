@@ -914,6 +914,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     PrimitiveAccess primitive = scene->getPrimitiveManager()->access(drawInfo);
     Context &context = *scene->getContext();
 
+    // @todo not correct in picking mode need masterScene.viewPort() but not for below compute
     const Box2i &vp = context.getViewPort();
 
     // biaised depth

@@ -10,6 +10,7 @@
 
 #include <o3d/engine/context.h>
 #include <o3d/engine/matrix.h>
+#include <o3d/engine/picking.h>
 #include <o3d/engine/scene/scene.h>
 #include <o3d/engine/context.h>
 #include <o3d/engine/primitive/primitivemanager.h>
@@ -37,6 +38,30 @@ CameraManipulator::~CameraManipulator()
 
 }
 
+void CameraManipulator::setup(MasterScene *masterScene)
+{
+    // register the picking colors
+    masterScene->registerPickingId(0xffffff04, this);
+}
+
+void CameraManipulator::release(MasterScene *masterScene)
+{
+    // register the picking colors
+    masterScene->unregisterPickingId(0xffffff04);
+}
+
+void CameraManipulator::hover(o3d::UInt32 id, const o3d::Point3f &pos)
+{
+    if (id == 0xffffff04) {
+
+    }
+}
+
+void CameraManipulator::leave()
+{
+
+}
+
 void CameraManipulator::createToScene(MasterScene *)
 {
 
@@ -54,15 +79,15 @@ void CameraManipulator::syncWithScene(MasterScene *)
 
 void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
 {
-    // @todo a picking pass for manipulation
-    if (drawInfo.pass != DrawInfo::AMBIENT_PASS) {
+    if (drawInfo.pass != DrawInfo::AMBIENT_PASS && drawInfo.pass != DrawInfo::PICKING_PASS) {
         return;
     }
 
     Scene *scene = masterScene->scene();
     PrimitiveAccess primitive = scene->getPrimitiveManager()->access(drawInfo);
 
-    const Box2i &vp = scene->getContext()->getViewPort();
+    // const Box2i &vp = scene->getContext()->getViewPort();
+    const Box2i &vp = masterScene->viewPort();
     const Float factor = 600.f;
 
     // Get ratio from active scene camera (could do it from primary viewport)
@@ -86,7 +111,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
 
     mv.setRotation(q1.toMatrix3().invert());
 
-    // mv.setTranslation(0.45f*ratio, 0.4f, 0.f);
+    // mv.setTranslation(480 * m_scale, 290 * m_scale, -600 * m_scale); // approx in perspective mode
     mv.setTranslation(vp.x2() - m_scale * factor*0.1f, vp.y2() - m_scale * factor*0.1f, 0.f);
     primitive->modelView().set(mv);
 
@@ -94,11 +119,22 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     Matrix4 pj;
     Matrix4 oldPj = scene->getContext()->projection().get();
     pj.buildOrtho(vp.x(), vp.x2(), vp.y(), vp.y2(), m_scale * -(factor*0.1f), m_scale * factor*0.1f);
-    // pj.buildOrtho(-0.5f*ratio, 0.5f*ratio, -0.5f, 0.5f, -1.f, 1.f);
-    primitive->projection().set(pj);
 
-    // @todo adjust coef to keep a fixed screen size
-    Context::AntiAliasingMethod aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);  // AA_HINT_NICEST
+    Context::AntiAliasingMethod aa;
+
+    if (drawInfo.pass == DrawInfo::PICKING_PASS) {
+        Vector2f pos = scene->getPicking()->getWindowPos();
+        Vector2f size = scene->getPicking()->getWindowSize();
+
+        // create size pixel picking region near cursor location
+        Matrix4 regionMatrix = ProjectionMatrix::pickMatrix(pos, size, vp);
+        primitive->projection().set(regionMatrix);
+        primitive->projection().mult(pj);
+    } else {
+        aa = scene->getContext()->setAntiAliasing(Context::AA_MULTI_SAMPLE);  // AA_HINT_NICEST
+
+        primitive->projection().set(pj);
+    }
 
     scene->getContext()->setCullingMode(CULLING_BACK_FACE);
     scene->getContext()->disableDoubleSide();
@@ -111,6 +147,10 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
 
     // 5% of the scale
     Vector3 vscale(xs*0.05f, ys*0.05f, zs*0.05f);
+
+    if (drawInfo.pass == DrawInfo::PICKING_PASS) {
+        primitive->setPickableId(0xffffff04);
+    }
 
     // global cube
     primitive->draw(PrimitiveManager::SOLID_CUBE1, vscale);
@@ -181,5 +221,8 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     // restore
     scene->getContext()->setDefaultDepthTest();
     scene->getContext()->projection().set(oldPj);
-    scene->getContext()->setAntiAliasing(aa);
+
+    if (drawInfo.pass == DrawInfo::AMBIENT_PASS) {
+        scene->getContext()->setAntiAliasing(aa);
+    }
 }

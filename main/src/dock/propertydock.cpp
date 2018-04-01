@@ -168,8 +168,6 @@ void PropertyDock::onSelectionChanged()
 
 void PropertyDock::onAttachPanel(o3d::String name, common::Panel *panel)
 {
-    // @todo sync previous one
-
     // only interested by property panels
     if (panel->panelType() == common::Panel::PANEL_PROPERTY) {
         m_qtPropertyDock->container()->addWidget(panel->ui());
@@ -178,11 +176,13 @@ void PropertyDock::onAttachPanel(o3d::String name, common::Panel *panel)
 
 void PropertyDock::onDetachPanel(o3d::String name, common::Panel *panel)
 {
-    // @todo sync it before
-
     // only interested by property panels
     if (panel->panelType() == common::Panel::PANEL_PROPERTY) {
         m_qtPropertyDock->container()->removeWidget(nullptr);
+
+        // only if auto commit ?
+        // panel->commit();
+
         panel->ui()->setParent(nullptr);
     }
 }

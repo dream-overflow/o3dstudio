@@ -34,10 +34,16 @@ public:
     CameraManipulator(BaseObject *parent, const Point2f &pos, const Float scale = 1.f);
     virtual ~CameraManipulator();
 
-    virtual void createToScene(MasterScene *masterScene);
-    virtual void removeFromScene(MasterScene *masterScene);
-    virtual void syncWithScene(MasterScene *masterScene);
-    virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene);
+    virtual void setup(MasterScene *masterScene) override;
+    virtual void release(MasterScene *masterScene) override;
+
+    virtual void hover(UInt32 id, const Point3f &pos) override;
+    virtual void leave() override;
+
+    virtual void createToScene(MasterScene *masterScene) override;
+    virtual void removeFromScene(MasterScene *masterScene) override;
+    virtual void syncWithScene(MasterScene *masterScene) override;
+    virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene) override;
 
 protected:
 

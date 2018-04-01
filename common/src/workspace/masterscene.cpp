@@ -528,7 +528,9 @@ o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
 
     if (event.button(Mouse::LEFT)) {
         // double click on camera manipulator reset the rotation
-        m_camera.get()->getNode()->getTransform()->setRotation(Quaternion());
+        if (m_hoverUIElement == m_cameraManipulator) {
+            m_camera.get()->getNode()->getTransform()->setRotation(Quaternion());
+        }
     } else if (event.button(Mouse::MIDDLE)) {
         // nothing for now
     } else if (event.button(Mouse::RIGHT)) {
