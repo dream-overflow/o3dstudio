@@ -7,6 +7,9 @@
  */
 
 #include "o3d/studio/common/workspace/entity.h"
+#include "o3d/studio/common/workspace/project.h"
+
+#include "o3d/studio/common/workspace/workspace.h"
 
 #include <o3d/core/file.h>
 
@@ -110,7 +113,16 @@ o3d::Bool Entity::isSelected() const
 
 void Entity::setActivity(o3d::Bool activity)
 {
-    m_capacities.setBit(STATE_ACTIVITY, activity);
+    if (m_capacities.getBit(STATE_ACTIVITY) != activity) {
+        m_capacities.setBit(STATE_ACTIVITY, activity);
+
+        BitSet64 changes;
+        changes.setBit(STATE_CHANGED, True);
+        changes.setBit(STATE_ACTIVITY, True);
+
+        // emit event onto workspace
+        project()->workspace()->onProjectEntityChanged(ref().light(), changes);
+    }
 }
 
 o3d::Bool Entity::isActive() const
@@ -118,14 +130,55 @@ o3d::Bool Entity::isActive() const
     return m_capacities.getBit(STATE_ACTIVITY);
 }
 
+void Entity::setSelectable(o3d::Bool selectable)
+{
+    if (m_capacities.getBit(STATE_SELECTABLE) != selectable) {
+        m_capacities.setBit(STATE_SELECTABLE, selectable);
+
+        BitSet64 changes;
+        changes.setBit(STATE_CHANGED, True);
+        changes.setBit(STATE_SELECTABLE, True);
+
+        // emit event onto workspace
+        project()->workspace()->onProjectEntityChanged(ref().light(), changes);
+    }
+}
+
+o3d::Bool Entity::isSelectable() const
+{
+    return m_capacities.getBit(STATE_SELECTABLE);
+}
+
 void Entity::setVisibility(o3d::Bool visibility)
 {
-    m_capacities.setBit(STATE_VISIBILITY, visibility);
+    if (m_capacities.getBit(STATE_VISIBILITY) != visibility) {
+        m_capacities.setBit(STATE_VISIBILITY, visibility);
+
+        BitSet64 changes;
+        changes.setBit(STATE_CHANGED, True);
+        changes.setBit(STATE_VISIBILITY, True);
+
+        // emit event onto workspace
+        project()->workspace()->onProjectEntityChanged(ref().light(), changes);
+    }
 }
 
 o3d::Bool Entity::isVisible() const
 {
     return m_capacities.getBit(STATE_VISIBILITY);
+}
+
+void Entity::modelChanged()
+{
+    setDirty();
+
+    m_capacities.setBit(MODEL_CHANGED, True);
+
+    BitSet64 changes;
+    changes.setBit(STATE_CHANGED, True);
+    changes.setBit(MODEL_CHANGED, True);
+
+    project()->workspace()->onProjectEntityChanged(ref().light(), changes);
 }
 
 o3d::Bool Entity::serializeContent(OutStream &stream) const

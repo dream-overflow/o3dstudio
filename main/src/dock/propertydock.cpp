@@ -42,6 +42,12 @@ PropertyDock::PropertyDock(BaseObject *parent) :
     // ui ctrl
     common::Application::instance()->ui().attachPanel.connect(this, &PropertyDock::onAttachPanel);
     common::Application::instance()->ui().detachPanel.connect(this, &PropertyDock::onDetachPanel);
+
+    // initial setup of current workspace
+    common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
+    workspaceManager->onWorkspaceActivated.connect(this, &PropertyDock::onChangeCurrentWorkspace);
+
+    onChangeCurrentWorkspace(workspaceManager->current()->name());
 }
 
 PropertyDock::~PropertyDock()
@@ -178,6 +184,46 @@ void PropertyDock::onDetachPanel(o3d::String name, common::Panel *panel)
     if (panel->panelType() == common::Panel::PANEL_PROPERTY) {
         m_qtPropertyDock->container()->removeWidget(nullptr);
         panel->ui()->setParent(nullptr);
+    }
+}
+
+void PropertyDock::onChangeCurrentWorkspace(const String &/*name*/)
+{
+    common::Workspace* workspace = common::Application::instance()->workspaces().current();
+    if (workspace) {
+        // workspace project
+//        workspace->onProjectAdded.connect(this, &WorkspaceDock::onAddProject);
+//        workspace->onProjectRemoved.connect(this, &WorkspaceDock::onRemoveProject);
+//        workspace->onProjectActivated.connect(this, &WorkspaceDock::onActivateProject);
+
+//        // project entities
+//        workspace->onProjectHubAdded.connect(this, &WorkspaceDock::onProjectHubAdded, CONNECTION_ASYNCH);
+//        workspace->onProjectHubRemoved.connect(this, &WorkspaceDock::onProjectHubRemoved, CONNECTION_ASYNCH);
+
+//        workspace->onProjectFragmentAdded.connect(this, &WorkspaceDock::onProjectFragmentAdded, CONNECTION_ASYNCH);
+//        workspace->onProjectFragmentRemoved.connect(this, &WorkspaceDock::onProjectFragmentRemoved, CONNECTION_ASYNCH);
+
+        workspace->onProjectEntityChanged.connect(this, &PropertyDock::onProjectEntityChanged, CONNECTION_ASYNCH);
+    }
+}
+
+void PropertyDock::onProjectEntityChanged(common::LightRef ref, o3d::BitSet64 changeFlags)
+{
+    if (changeFlags.getBit(common::Entity::MODEL_CHANGED)) {
+        common::Workspace* workspace = common::Application::instance()->workspaces().current();
+        common::Panel *panel = nullptr;
+
+        // find the panel and update it
+        auto it = m_panels.find(ref);
+        if (it == m_panels.end()) {
+            return;
+        }
+
+        panel = it->second;
+
+        if (panel) {
+            panel->update();
+        }
     }
 }
 

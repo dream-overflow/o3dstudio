@@ -30,8 +30,9 @@ public:
 
     enum Changes
     {
-        PRESENTATION_CHANGED = 0,   //!< Presentation changed
-        DISPLAY_CHANGED = 1         //!< Display changed
+        PRESENTATION_CHANGED = 0,   //!< Presentation changed.
+        DISPLAY_CHANGED,            //!< Display changed.
+        MODEL_CHANGED               //!< Model changed.
     };
 
     enum Capacity
@@ -40,7 +41,8 @@ public:
         STATE_ACTIVITY,          //!< Entity is active (processing).
         STATE_VISIBILITY,        //!< Entity is visible (if displayable).
         STATE_ACTIVE_SELECTION,  //!< Active entity of the selection.
-        STATE_SELECTED           //!< Is selected entity
+        STATE_SELECTED,          //!< Is selected entity.
+        STATE_SELECTABLE         //!< IS entity seletable into the graphic view.
     };
 
     enum Role
@@ -165,6 +167,17 @@ public:
     virtual void setActivity(Bool activity);
 
     /**
+     * @brief Set entity selectable into the graphics views.
+     */
+    void setSelectable(Bool selectable);
+
+    /**
+     * @brief Is entity electable into the graphics views.
+     * @return
+     */
+    Bool isSelectable() const;
+
+    /**
      * @brief Is the entity active (processing, update...)
      */
     Bool isActive() const;
@@ -178,6 +191,12 @@ public:
      * @brief Is the entity visibly (draw, picking...)
      */
     Bool isVisible() const;
+
+    /**
+     * @brief Model changed enable the state flag, and the model flag plus emit a signal from
+     * the related workspace.
+     */
+    void modelChanged();
 
     /**
      * @brief Serialize the entity content.

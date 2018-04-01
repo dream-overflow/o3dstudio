@@ -18,6 +18,7 @@ class QTreeView;
 #include "o3d/studio/common/objectref.h"
 
 #include <o3d/core/baseobject.h>
+#include <o3d/core/templatebitset.h>
 
 #include <map>
 
@@ -42,6 +43,9 @@ public /*slots*/:
 
     void onAttachPanel(String name, common::Panel* panel);
     void onDetachPanel(String name, common::Panel* panel);
+
+    void onChangeCurrentWorkspace(const String &name);
+    void onProjectEntityChanged(common::LightRef ref, BitSet64 changeFlags);
 
 private:
 

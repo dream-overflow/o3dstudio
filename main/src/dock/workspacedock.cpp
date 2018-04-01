@@ -44,7 +44,7 @@ WorkspaceDock::WorkspaceDock(BaseObject *parent) :
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
     workspaceManager->onWorkspaceActivated.connect(this, &WorkspaceDock::onChangeCurrentWorkspace);
 
-     // selection manager
+    // selection manager
     common::Application::instance()->selection().selectionChanged.connect(this, &WorkspaceDock::onSelectManagerChange);
 
     onChangeCurrentWorkspace(workspaceManager->current()->name());

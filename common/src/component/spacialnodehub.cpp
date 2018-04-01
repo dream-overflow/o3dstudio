@@ -291,7 +291,7 @@ void SpacialNodeHub::setPosition(o3d::UInt32 transformIndex, const o3d::Vector3f
     o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
     mainTransform->setPosition(pos);
 
-    setDirty();
+    modelChanged();
 }
 
 void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f &rot)
@@ -302,7 +302,7 @@ void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Vector3f
 
     mainTransform->setRotation(q);
 
-    setDirty();
+    modelChanged();
 }
 
 void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Quaternion &rot)
@@ -310,7 +310,7 @@ void SpacialNodeHub::setRotation(o3d::UInt32 transformIndex, const o3d::Quaterni
     o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
     mainTransform->setRotation(rot);
 
-    setDirty();
+    modelChanged();
 }
 
 void SpacialNodeHub::setScale(o3d::UInt32 transformIndex, const o3d::Vector3f &scale)
@@ -318,7 +318,7 @@ void SpacialNodeHub::setScale(o3d::UInt32 transformIndex, const o3d::Vector3f &s
     o3d::MTransform *mainTransform = static_cast<o3d::MTransform*>(m_transforms.front());
     mainTransform->setScale(scale);
 
-    setDirty();
+    modelChanged();
 }
 
 o3d::UInt32 SpacialNodeHub::getNumTransforms() const
