@@ -264,12 +264,14 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
     return v;
 }
 
-void HubManipulator::keyDownEvent(const KeyEvent &event, MasterScene *masterScene)
+o3d::Bool HubManipulator::keyPressEvent(const KeyEvent &event, MasterScene *masterScene)
 {
     // not possible during transform
     if (isTransform()) {
-        return;
+        return True;
     }
+
+    return False;
 }
 
 void HubManipulator::beginTransform(MasterScene *masterScene, const Vector3f &pos)
@@ -1291,9 +1293,14 @@ void HubManipulator::updateTransform(MasterScene *masterScene, Bool keepOrg)
 
 o3d::Color HubManipulator::axeColor(HubManipulator::Axe axe)
 {
-    if (m_activeAxe == AXE_MANY || m_hoverAxe == AXE_MANY) {
+    Axe usedAxe = m_hoverAxe;
+    if (isTransform()) {
+        usedAxe = m_activeAxe;
+    }
+
+    if (usedAxe == AXE_MANY) {
         // @todo depends...
-    } else if (m_activeAxe == axe || m_hoverAxe == axe) {
+    } else if (usedAxe == axe) {
         if (axe == AXE_X) {
             return Color(1.f, 0.5f, 0.5f);
         }else if (axe == AXE_Y) {
@@ -1305,7 +1312,7 @@ o3d::Color HubManipulator::axeColor(HubManipulator::Axe axe)
         if (axe == AXE_X) {
             return Color(1.f, 0.f, 0.f);
         } else if (axe == AXE_Y) {
-            return Color(0.f, 1.f, 0.f);
+            return Color(0.f, 0.6f, 0.f);
         } else if (axe == AXE_Z) {
            return Color(0.f, 0.f, 1.f);
         }

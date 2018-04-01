@@ -116,10 +116,16 @@ public:
     SceneUIElement* hoverSceneUIElement();
 
     /**
-     * @brief Get the active camera of the master scene.
+     * @brief Get the active camera of the master scene (read-only).
      * @todo could use the CameraManipulator.
      */
     const Camera* camera() const;
+
+    /**
+     * @brief Get the active camera of the master scene.
+     * @todo could use the CameraManipulator.
+     */
+    Camera* camera();
 
     /**
      * @brief Related viewport area.

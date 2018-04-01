@@ -88,7 +88,7 @@ public:
     virtual StructuralHub* activeHub();
 
     //! May be removed, need a dedicated toolbar, but need shortcut too
-    virtual void keyDownEvent(const KeyEvent &event, MasterScene *masterScene);
+    virtual Bool keyPressEvent(const KeyEvent &event, MasterScene *masterScene) override;
 
     virtual void beginTransform(MasterScene *masterScene, const Vector3f &pos);
     virtual void transform(const Vector3f &v, MasterScene *masterScene);

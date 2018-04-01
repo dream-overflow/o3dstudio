@@ -67,3 +67,38 @@ SceneUIElement::DrawStep SceneUIElement::drawStep() const
 {
     return m_drawStep;
 }
+
+o3d::Bool SceneUIElement::mousePressEvent(const MouseEvent &, MasterScene *)
+{
+    return False;
+}
+
+o3d::Bool SceneUIElement::mouseReleaseEvent(const MouseEvent &, MasterScene *)
+{
+    return False;
+}
+
+o3d::Bool SceneUIElement::mouseDoubleClickEvent(const MouseEvent &, MasterScene *)
+{
+    return False;
+}
+
+o3d::Bool SceneUIElement::mouseMoveEvent(const MouseEvent &, MasterScene *)
+{
+    return False;
+}
+
+o3d::Bool SceneUIElement::wheelEvent(const WheelEvent &, MasterScene *)
+{
+    return False;
+}
+
+o3d::Bool SceneUIElement::keyPressEvent(const KeyEvent &, MasterScene *)
+{
+    return False;
+}
+
+o3d::Bool SceneUIElement::keyReleaseEvent(const KeyEvent &, MasterScene *)
+{
+    return False;
+}

@@ -25,6 +25,18 @@ class O3S_API CameraManipulator : public SceneUIElement
 {
 public:
 
+    enum Part
+    {
+        PART_NONE = 0,
+        PART_CUBE = 0xffffff04,
+        PART_X_PLUS,
+        PART_X_MINUS,
+        PART_Y_PLUS,
+        PART_Y_MINUS,
+        PART_Z_PLUS,
+        PART_Z_MINUS
+    };
+
     /**
      * @brief CameraManipulator
      * @param parent Parent object
@@ -45,10 +57,16 @@ public:
     virtual void syncWithScene(MasterScene *masterScene) override;
     virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene) override;
 
+    virtual Bool mouseReleaseEvent(const MouseEvent &event, MasterScene *masterScene) override;
+    virtual Bool mouseDoubleClickEvent(const MouseEvent &event, MasterScene *masterScene) override;
+
 protected:
 
     Point2f m_pos;
     Float m_scale;
+
+    Part m_hoverPart;
+    Part m_activePart;
 };
 
 } // namespace common

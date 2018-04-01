@@ -23,6 +23,9 @@ namespace studio {
 namespace common {
 
 class MasterScene;
+class MouseEvent;
+class WheelEvent;
+class KeyEvent;
 
 /**
  * @brief Common scene UI element base class
@@ -127,6 +130,19 @@ public:
      * @brief Or uses of a direct rendering. Called during scene drawer paint.
      */
     virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene) = 0;
+
+    //
+    // Inputs
+    //
+
+    virtual Bool mousePressEvent(const MouseEvent &event, MasterScene *masterScene);
+    virtual Bool mouseReleaseEvent(const MouseEvent &event, MasterScene *masterScene);
+    virtual Bool mouseDoubleClickEvent(const MouseEvent &event, MasterScene *masterScene);
+    virtual Bool mouseMoveEvent(const MouseEvent &event, MasterScene *masterScene);
+    virtual Bool wheelEvent(const WheelEvent &event, MasterScene *masterScene);
+
+    virtual Bool keyPressEvent(const KeyEvent &event, MasterScene *masterScene);
+    virtual Bool keyReleaseEvent(const KeyEvent &event, MasterScene *masterScene);
 
 protected:
 

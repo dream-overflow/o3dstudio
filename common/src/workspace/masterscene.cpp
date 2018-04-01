@@ -235,6 +235,11 @@ const o3d::Camera* MasterScene::camera() const
     return m_camera.get();
 }
 
+o3d::Camera *MasterScene::camera()
+{
+    return m_camera.get();
+}
+
 o3d::Box2i MasterScene::viewPort() const
 {
     return o3d::Box2i(0, 0, m_content->size().width(), m_content->size().height());
@@ -527,14 +532,16 @@ o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
     m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
     if (event.button(Mouse::LEFT)) {
-        // double click on camera manipulator reset the rotation
-        if (m_hoverUIElement == m_cameraManipulator) {
-            m_camera.get()->getNode()->getTransform()->setRotation(Quaternion());
-        }
+        // nothing for now
     } else if (event.button(Mouse::MIDDLE)) {
         // nothing for now
     } else if (event.button(Mouse::RIGHT)) {
         // nothing for now
+    }
+
+    if (m_hoverUIElement) {
+        // follow to hover ui element
+        m_hoverUIElement->mouseDoubleClickEvent(event, this);
     }
 
     return True;
@@ -753,7 +760,7 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
 
     if (m_hubManipulator && !m_hubManipulator->isTransform()) {
         // don't change during a transform
-        m_hubManipulator->keyDownEvent(event, this);
+        m_hubManipulator->keyPressEvent(event, this);
     }
 
     // could be necessary
