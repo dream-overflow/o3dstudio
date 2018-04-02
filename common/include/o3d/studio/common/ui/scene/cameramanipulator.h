@@ -45,6 +45,18 @@ public:
         ACTION_ZOOM
     };
 
+    enum CameraMode
+    {
+        PERSPECTIVE = 0,
+        ORTHO,
+        LEFT_ORTHO,
+        RIGHT_ORTHO,
+        TOP_ORTHO,
+        BOTTOM_ORTHO,
+        FRONT_ORTHO,
+        BACK_ORTHO
+    };
+
     /**
      * @brief CameraManipulator
      * @param parent Parent object
@@ -83,6 +95,9 @@ protected:
     Part m_activePart;
 
     Action m_action;
+    CameraMode m_mode;
+
+    void setOrtho(MasterScene *masterScene);
 };
 
 } // namespace common
