@@ -45,6 +45,17 @@ public:
         ACTION_ZOOM
     };
 
+    enum CameraView
+    {
+        VIEW_ANY = 0,
+        VIEW_LEFT,
+        VIEW_RIGHT,
+        VIEW_TOP,
+        VIEW_BOTTOM,
+        VIEW_FRONT,
+        VIEW_BACK
+    };
+
     enum CameraMode
     {
         PERSPECTIVE = 0,
@@ -86,6 +97,9 @@ public:
 
     virtual Bool mouseDoubleClickEvent(const MouseEvent &event, MasterScene *masterScene) override;
 
+    CameraMode cameraMode() const;
+    CameraView cameraView() const;
+
 protected:
 
     Point2f m_pos;
@@ -95,7 +109,9 @@ protected:
     Part m_activePart;
 
     Action m_action;
-    CameraMode m_mode;
+
+    CameraMode m_cameraMode;
+    CameraView m_cameraView;
 
     void setOrtho(MasterScene *masterScene);
 };
