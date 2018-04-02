@@ -315,7 +315,7 @@ const std::set<SelectionItem *> Selection::filterCurrentByBaseType(const TypeRef
     return filtered;
 }
 
-void Selection::onChangeCurrentWorkspace(const o3d::String &name)
+void Selection::onChangeCurrentWorkspace(const o3d::String &/*name*/)
 {
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
     common::Workspace *workspace = workspaceManager->current();
@@ -326,18 +326,19 @@ void Selection::onChangeCurrentWorkspace(const o3d::String &name)
         workspace->onProjectFragmentRemoved.connect(this, &Selection::onProjectFragmentRemoved);
     }
 
-    Bool lemit = False;
+    // might probably not emit because its a non sens
+//    Bool lemit = False;
 
-    if (!m_currentSelection.empty()) {
-        lemit = True;
-    }
+//    if (!m_currentSelection.empty()) {
+//        lemit = True;
+//    }
 
     // cleanup all
     cleanupAll();
 
-    if (lemit) {
-        selectionChanged();
-    }
+//    if (lemit) {
+//        selectionChanged();
+//    }
 }
 
 void Selection::onProjectHubRemoved(LightRef ref)

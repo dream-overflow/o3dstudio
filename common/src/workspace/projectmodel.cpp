@@ -188,7 +188,7 @@ Qt::ItemFlags ProjectModel::flags(const QModelIndex &index) const
     ProjectItem *item = static_cast<ProjectItem*>(index.internalPointer());
     if (item->isProject()) {
         return QAbstractItemModel::flags(index);
-    } else if (item->entity() == item->entity()->project()->rootHub()) {
+    } else if (item->entity() && item->entity()->project() && item->entity() == item->entity()->project()->rootHub()) {
         return QAbstractItemModel::flags(index);
     } else {
         // return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;

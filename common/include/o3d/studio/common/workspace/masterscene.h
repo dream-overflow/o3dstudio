@@ -116,6 +116,28 @@ public:
     SceneUIElement* hoverSceneUIElement();
 
     /**
+     * @brief Get current hover scene UI element (read-only).
+     */
+    const SceneUIElement* hoverSceneUIElement() const;
+
+    /**
+     * @brief Query acquire focus for a specific ui element.
+     * @return True if focus is aquired
+     */
+    Bool acquireFocus(SceneUIElement *uiElement);
+
+    /**
+     * @brief Get current focused scene UI element.
+     */
+    SceneUIElement* focusSceneUIElement();
+
+    /**
+     * @brief Get current focused scene UI element (read-only).
+     */
+    const SceneUIElement* focusSceneUIElement() const;
+
+
+    /**
      * @brief Get the active camera of the master scene (read-only).
      * @todo could use the CameraManipulator.
      */
@@ -256,7 +278,11 @@ private:
 
     CameraManipulator *m_cameraManipulator;  //!< Active camera manipulator.
     HubManipulator *m_hubManipulator;        //!< Current hub selection manipulator.
-    SceneUIElement *m_hoverUIElement;        //!< Current hover ui element.
+
+    UInt32 m_hoverId;  //!< Unique picking id of the current hover object.
+
+    SceneUIElement *m_hoverUIElement;  //!< Current hover ui element.
+    SceneUIElement *m_focusUIElement;  //!< Current focus ui element.
 
     //! Mapping of picking id to scene UI elements (can have multiple picking id to a same element)
     std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;

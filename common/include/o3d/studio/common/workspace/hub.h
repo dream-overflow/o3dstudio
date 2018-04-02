@@ -171,6 +171,30 @@ public:
      */
     Bool isParentSpacialNode() const;
 
+    //
+    // UI
+    //
+
+    /**
+     * @brief Set focus state for a particular master scene.
+     */
+    virtual void setFocus(MasterScene *masterScene, Bool focus);
+
+    /**
+     * @brief Is the hub has focus for a specific master scene.
+     */
+    virtual Bool hasFocus(MasterScene *masterScene);
+
+    /**
+     * @brief Set hover state for a particular master scene.
+     */
+    virtual void setHover(MasterScene *masterScene, Bool hover);
+
+    /**
+     * @brief Is the hub is hovered for a specific master scene.
+     */
+    Bool isHover(MasterScene *masterScene);
+
 protected:
 
     Project *m_project;               //!< Owner project;

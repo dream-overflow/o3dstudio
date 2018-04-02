@@ -77,7 +77,9 @@ MasterScene::MasterScene(Entity *parent) :
     m_sceneDrawer(this),
     m_cameraManipulator(nullptr),
     m_hubManipulator(nullptr),
-    m_hoverUIElement(nullptr)
+    m_hoverId(0),
+    m_hoverUIElement(nullptr),
+    m_focusUIElement(nullptr)
 {
     O3D_ASSERT(m_parent != nullptr);
 
@@ -216,6 +218,11 @@ void MasterScene::removeSceneUIElement(SceneUIElement *elt)
             m_hoverUIElement = nullptr;
         }
 
+        // null if focus element
+        if (m_focusUIElement == elt) {
+            m_focusUIElement = nullptr;
+        }
+
         m_sceneUIElements.erase(it);
     }
 }
@@ -228,6 +235,31 @@ SceneUIElement *MasterScene::hubManipulator()
 SceneUIElement *MasterScene::hoverSceneUIElement()
 {
     return m_hoverUIElement;
+}
+
+o3d::Bool MasterScene::acquireFocus(SceneUIElement *uiElement)
+{
+    if (m_focusUIElement) {
+        m_focusUIElement->setFocus(False);
+        m_focusUIElement = nullptr;
+    }
+
+    if (uiElement) {
+        m_focusUIElement = uiElement;
+        m_focusUIElement->setFocus(True);
+    }
+
+    return True;
+}
+
+SceneUIElement *MasterScene::focusSceneUIElement()
+{
+    return m_focusUIElement;
+}
+
+const SceneUIElement *MasterScene::focusSceneUIElement() const
+{
+    return m_focusUIElement;
 }
 
 const o3d::Camera* MasterScene::camera() const
@@ -334,8 +366,11 @@ void MasterScene::terminateDrawer()
 
     // deleted by the previous iteration
     m_cameraManipulator = nullptr;
+    m_hoverHub = nullptr;
     m_hubManipulator = nullptr;
     m_hoverUIElement = nullptr;
+    m_focusUIElement = nullptr;
+    m_hoverId = 0;
 
     // clear the scene
     if (m_scene) {
@@ -364,6 +399,11 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
 
     // keep pointer position
     m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
+
+    if (m_actionMode == ACTION_NONE) {
+        // set focus on hover ui element
+        acquireFocus(m_hoverUIElement);
+    }
 
     if (event.button(Mouse::LEFT)) {
         if (m_actionMode == ACTION_NONE) {
@@ -459,6 +499,11 @@ o3d::Bool MasterScene::mousePressEvent(const MouseEvent &event)
         m_lockedPos = event.globalPos();
     }
 
+    if (m_focusUIElement) {
+        // follow to focused ui element
+        m_focusUIElement->mousePressEvent(event, this);
+    }
+
     // could be necessary
     postPicking(m_pointerPos);
 
@@ -516,6 +561,11 @@ o3d::Bool MasterScene::mouseReleaseEvent(const MouseEvent &event)
         m_content->setCursor(cursor);
     }
 
+    if (m_focusUIElement) {
+        // follow to focused ui element
+        m_focusUIElement->mouseReleaseEvent(event, this);
+    }
+
     // could be necessary
     postPicking(m_pointerPos);
 
@@ -539,9 +589,9 @@ o3d::Bool MasterScene::mouseDoubleClickEvent(const MouseEvent &event)
         // nothing for now
     }
 
-    if (m_hoverUIElement) {
-        // follow to hover ui element
-        m_hoverUIElement->mouseDoubleClickEvent(event, this);
+    if (m_focusUIElement) {
+        // follow to focused ui element
+        m_focusUIElement->mouseDoubleClickEvent(event, this);
     }
 
     return True;
@@ -556,7 +606,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
     // keep pointer position
     m_pointerPos.set(event.localPos().x(), event.localPos().y(), 0);
 
-    Float elapsed = 0.01;//m_scene->getFrameManager()->getFrameDuration();
+    Float elapsed = m_scene->getFrameManager()->getFrameDuration(); // 0.01;
     Int32 deltaX = event.globalPos().x() - m_lockedPos.x();
     Int32 deltaY = event.globalPos().y() - m_lockedPos.y();
 
@@ -578,6 +628,7 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             x = deltaX * 100.f * elapsed;
             z = deltaY * 100.f * elapsed;
 
+            // major axis from major delta
             if (o3d::abs(x) > o3d::abs(z)) {
                 z = 0;
             } else {
@@ -592,16 +643,6 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
                 x *= 10;
                 z *= 10;
             }
-
-            /*
-            // change axis if modifier
-            if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-                x = z;
-                z = 0;
-            } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-                y = z;
-                z = 0;
-            }*/
 
             cameraNode->getTransform()->translate(Vector3(x, y, z));
         }
@@ -640,12 +681,12 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
             cameraNode->getTransform()->translate(Vector3(x, y, z));
         }
     } else {
-        // we have a current manipulator
+        // we have a current manipulator @todo using move event
         if (m_hubManipulator && m_hubManipulator->isTransform()) {
             Float x = 0.f, y = 0.f, z = 0.f;
 
-            x = deltaX * 1.f;  // * elapsed;
-            y = deltaY * 1.f;  // * elapsed;
+            x = deltaX * elapsed * 100;
+            y = deltaY * elapsed * 100;
 
             // action using the manipulator
             m_hubManipulator->transform(Vector3(x, y, z), this);
@@ -671,6 +712,11 @@ o3d::Bool MasterScene::mouseMoveEvent(const MouseEvent &event)
 
         // comment for infinite mouse
         // m_lockedPos.set(event.globalPos().x(), event.globalPos().y());
+    }
+
+    if (m_focusUIElement) {
+        // follow to focus ui element
+        m_focusUIElement->mouseMoveEvent(event, this);
     }
 
     // necessary at each move
@@ -721,6 +767,11 @@ o3d::Bool MasterScene::wheelEvent(const WheelEvent &event)
         }
     }
 
+    if (m_hoverUIElement) {
+        // follow to hover ui element
+        m_hoverUIElement->wheelEvent(event, this);
+    }
+
     // could be necessary
     postPicking(m_pointerPos);
 
@@ -758,9 +809,9 @@ o3d::Bool MasterScene::keyPressEvent(const KeyEvent &event)
         }
     }
 
-    if (m_hubManipulator && !m_hubManipulator->isTransform()) {
-        // don't change during a transform
-        m_hubManipulator->keyPressEvent(event, this);
+    if (m_focusUIElement) {
+        // follow to focus ui element
+        m_focusUIElement->keyPressEvent(event, this);
     }
 
     // could be necessary
@@ -786,6 +837,11 @@ o3d::Bool MasterScene::keyReleaseEvent(const KeyEvent &event)
         m_motionType = MOTION_GRID;
     } else {
         m_motionType = MOTION_FOLLOW;
+    }
+
+    if (m_focusUIElement) {
+        // follow to focus ui element
+        m_focusUIElement->keyReleaseEvent(event, this);
     }
 
     // could be necessary
@@ -911,7 +967,7 @@ void MasterScene::unregisterPickingId(o3d::UInt32 id)
 void MasterScene::pickingNoHit()
 {
     if (m_hoverHub) {
-        // @todo a leave hub
+        m_hoverHub->setHover(this, False);
         m_hoverHub = nullptr;
     }
 
@@ -923,37 +979,76 @@ void MasterScene::pickingNoHit()
 
 void MasterScene::pickingHit(Pickable *pickable, Vector3 pos)
 {
-    m_hoverHub = nullptr;
+    Hub *hoverHub = nullptr;
 
     SceneObject *sceneObject = o3d::dynamicCast<SceneObject*>(pickable);
     if (sceneObject) {
         // o3d object to o3s hub
-        m_hoverHub = project()->lookupPickable(pickable->getPickableId());
+        hoverHub = project()->lookupPickable(pickable->getPickableId());
         m_pickPos = pos;
     }
 
     if (m_hoverUIElement) {
-        // but no hover ui element
+        // no hover ui element
         m_hoverUIElement->leave();
         m_hoverUIElement = nullptr;
     }
+
+    if (hoverHub != m_hoverHub) {
+        // hover hub is different of the previous one
+        if (m_hoverHub) {
+            m_hoverHub->setHover(this, False);
+        }
+
+        m_hoverHub = hoverHub;
+
+        if (m_hoverHub) {
+            m_hoverHub->setHover(this, True);
+        }
+    }
+
+    // store new current hover pickable id
+    m_hoverId = pickable->getPickableId();
 }
 
 void MasterScene::elementPickingHit(o3d::UInt32 id, o3d::Vector3 pos)
 {
-    m_hoverUIElement = nullptr;
+    SceneUIElement *hoverUIElement = nullptr;
 
     auto it = m_pickingToSceneUIElements.find(id);
     if (it != m_pickingToSceneUIElements.end()) {
         it->second->hover(id, pos);
-        m_hoverUIElement = it->second;
+        hoverUIElement = it->second;
     }
 
     if (m_hoverHub) {
-        // but no hover hub
-        // @todo a leave hub
+        // no hover hub
+        m_hoverHub->setHover(this, False);
         m_hoverHub = nullptr;
     }
+
+    if (hoverUIElement != m_hoverUIElement) {
+        // hover element is different of the previous one
+        if (m_hoverUIElement) {
+            m_hoverUIElement->leave();
+        }
+
+        m_hoverUIElement = hoverUIElement;
+
+        if (m_hoverUIElement) {
+            m_hoverUIElement->hover(id, pos);
+        }
+    } else if (id != m_hoverId) {
+        // same hover element but a in different part
+        if (m_hoverUIElement == hoverUIElement && m_hoverUIElement != nullptr) {
+            // don't leave we stay on the same element
+            // m_hoverUIElement->leave();
+            m_hoverUIElement->hover(id, pos);
+        }
+    }
+
+    // store new current hover pickable id
+    m_hoverId = id;
 }
 
 void MasterScene::onSelectionChanged()

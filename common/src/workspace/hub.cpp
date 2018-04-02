@@ -539,6 +539,32 @@ o3d::Bool Hub::isParentSpacialNode() const
     return False;
 }
 
+void Hub::setFocus(MasterScene *masterScene, o3d::Bool focus)
+{
+    O3D_UNUSED(masterScene);
+    O3D_UNUSED(focus);
+}
+
+o3d::Bool Hub::hasFocus(MasterScene *masterScene)
+{
+    O3D_UNUSED(masterScene);
+
+    return False;
+}
+
+void Hub::setHover(MasterScene *masterScene, o3d::Bool hover)
+{
+    O3D_UNUSED(masterScene);
+    O3D_UNUSED(hover);
+}
+
+o3d::Bool Hub::isHover(MasterScene *masterScene)
+{
+    O3D_UNUSED(masterScene);
+
+    return False;
+}
+
 o3d::Bool Hub::serializeContent(OutStream &stream) const
 {
     if (!Entity::serializeContent(stream)) {
