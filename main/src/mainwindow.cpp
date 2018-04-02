@@ -804,6 +804,8 @@ void QtMainWindow::importFile(const QString &location)
     // import into this node. if project is selected import into the root hub, same if
     // no selection at all.
 
+    // @todo do we use active element or hightlighted element or other ?
+
     // find the importer
     o3d::File fileInfo(fromQString(location));
     String fileExt = String("*.") + fileInfo.getFileExt();
@@ -825,9 +827,10 @@ void QtMainWindow::importFile(const QString &location)
 
     if (currentSelection.size() > 0) {
         parentHub = static_cast<common::Hub*>(project->lookup((*currentSelection.begin())->ref()));
-//        if (!parentHub.acceptAnyHub()) { @todo
-//            parentHub = project->rootHub();
-//        }
+        if (!parentHub->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
+            // if selected hub is not a structure hub import at root hub
+            parentHub = project->rootHub();
+        }
     }
 
     if (parentHub) {

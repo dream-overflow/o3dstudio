@@ -37,6 +37,14 @@ public:
         PART_Z_MINUS
     };
 
+    enum Action
+    {
+        ACTION_NONE = 0,
+        ACTION_TRANSLATION,
+        ACTION_ROTATION,
+        ACTION_ZOOM
+    };
+
     /**
      * @brief CameraManipulator
      * @param parent Parent object
@@ -57,7 +65,13 @@ public:
     virtual void syncWithScene(MasterScene *masterScene) override;
     virtual void directRendering(DrawInfo &drawInfo, MasterScene *masterScene) override;
 
+    virtual Bool keyPressEvent(const KeyEvent &event, MasterScene *masterScene) override;
+    virtual Bool keyReleaseEvent(const KeyEvent &event, MasterScene *masterScene) override;
+    virtual Bool mousePressEvent(const MouseEvent &event, MasterScene *masterScene) override;
     virtual Bool mouseReleaseEvent(const MouseEvent &event, MasterScene *masterScene) override;
+    virtual Bool mouseMoveEvent(const MouseEvent &event, MasterScene *masterScene) override;
+    virtual Bool wheelEvent(const WheelEvent &event, MasterScene *masterScene);
+
     virtual Bool mouseDoubleClickEvent(const MouseEvent &event, MasterScene *masterScene) override;
 
 protected:
@@ -67,6 +81,8 @@ protected:
 
     Part m_hoverPart;
     Part m_activePart;
+
+    Action m_action;
 };
 
 } // namespace common

@@ -35,7 +35,6 @@ using namespace o3d::studio::main;
 WorkspaceDock::WorkspaceDock(BaseObject *parent) :
     BaseObject(parent),
     common::Dock(),
-    m_lastSelected(nullptr),
     m_autoExpand(True)
 {
     setupUi();
@@ -262,8 +261,7 @@ void WorkspaceDock::onChangeCurrentWorkspace(const String &/*name*/)
 }
 
 QtWorkspaceDock::QtWorkspaceDock(QWidget *parent) :
-    QDockWidget(tr("Workspace"), parent),
-    m_lastSelected(nullptr)
+    QDockWidget(tr("Workspace"), parent)
 {
     setMinimumWidth(200);
     setMinimumHeight(200);
@@ -296,148 +294,17 @@ void QtWorkspaceDock::onSelectionDetails(const QModelIndex &)
 
 void QtWorkspaceDock::onSelectionChanged(const QModelIndex &current, const QModelIndex &previous)
 {
-/*    if (!(QApplication::mouseButtons() & Qt::RightButton) && !(QApplication::mouseButtons() & Qt::MiddleButton)) {
+    if (!(QApplication::mouseButtons() & Qt::RightButton) && !(QApplication::mouseButtons() & Qt::MiddleButton)) {
         return;
     }
 
     if (previous.isValid()) {
-        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(previous.internalPointer());
-        m_lastSelected = nullptr;
-    }
+        // common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(previous.internalPointer());
+    } 
 
     if (current.isValid()) {
-        Bool multiple = False;
 
-        if (m_shiftModifier) {
-            multiple = True;
-        }
-
-        common::Entity *selected = nullptr;
-
-        // @todo for multiple selection
-        common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
-        m_lastSelected = projectItem;
-
-        common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().typeId());
-
-        // first set as active projet if not current
-        common::Workspace* workspace = common::Application::instance()->workspaces().current();
-        common::Project *project = workspace->project(projectItem->ref());
-
-        common::Selection &selection = common::Application::instance()->selection();
-
-        if (!project) {
-            return;
-        }
-
-        if (workspace->activeProject() != project) {
-            workspace->setActiveProject(project->ref().light());
-        }
-
-        if (projectItem->ref().baseTypeOf(common::TypeRef::hub())) {
-            common::Hub *hub = project->rootHub()->findHub(projectItem->ref().id());
-            if (hub) {
-                // hub select but according to accepted role :
-                // @todo for now auto defines accepted role by hub
-                if (hub->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
-                    selection.setAcceptedRole(common::Selection::ACCEPT_STRUCTURAL_HUB);
-                } else {
-                    selection.setAcceptedRole(common::Selection::ACCEPT_HUB);
-                    // selection.setAcceptedRole(common::Selection::ACCEPT_PROPERTY_HUB);
-                }
-
-                if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
-                    selected = hub->project();
-                } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
-                    common::Hub *currentHub = hub;
-
-                    // select the first found structure parent hub
-                    while (currentHub->role() != common::Entity::ROLE_STRUCTURAL_HUB) {
-                        if (currentHub->isParentHub()) {
-                            currentHub = static_cast<common::Hub*>(currentHub->parent());
-                        }
-                    }
-
-                    if (currentHub->role() == common::Entity::ROLE_STRUCTURAL_HUB) {
-                        selected == currentHub;
-                    }
-                } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
-                    // no specificity
-                    selected = hub;
-                } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
-                    // @todo property hub ?
-                    selected = hub;
-                } else {
-                    selected = hub->project();
-                }
-            }
-        } else if (projectItem->ref().baseTypeOf(common::TypeRef::fragment())) {
-            common::Fragment *fragment = project->fragment(projectItem->ref());
-            if (fragment) {
-                // fragment select but according to accepted role :
-                // @todo
-                if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
-                    selected = fragment->project();
-                } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
-                    selected = fragment->project()->rootHub();
-                } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
-                    selected = fragment->project()->rootHub();
-                } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
-                    selected = project->rootHub();
-                } else if (selection.acceptedRole() == common::Selection::ACCEPT_FRAGMENT) {
-                    selected = fragment;
-                } else {
-                    selected = fragment->project();
-                }
-            }
-        } else if (projectItem->ref().baseTypeOf(common::TypeRef::project())) {
-            // project select but according to accepted role :
-            if (selection.acceptedRole() == common::Selection::ACCEPT_PROJECT) {
-                selected = project;
-            } else if (selection.acceptedRole() == common::Selection::ACCEPT_STRUCTURAL_HUB) {
-                selected = project->rootHub();
-            } else if (selection.acceptedRole() == common::Selection::ACCEPT_HUB) {
-                selected = project->rootHub();
-            } else if (selection.acceptedRole() == common::Selection::ACCEPT_PROPERTY_HUB) {
-                selected = project->rootHub();
-            } else {
-                selected = project;
-            }
-        } else if (projectItem->ref().baseTypeOf(common::TypeRef::resource())) {
-            // @todo when resources will be implemented
-        }
-
-        if (selected) {
-            if (multiple) {
-                common::Entity* entity;
-
-                auto previous = selection.filterCurrentByBaseType(common::TypeRef::hub());
-
-                selection.beginSelection();
-
-                for (common::SelectionItem *item : previous) {
-                    entity = item->entity();
-
-                    if ((item->ref() != selected->ref().light()) && (entity = findSelectable(entity))) {
-                        selection.appendSelection(entity);
-                    }
-                }
-
-                if (!selected->isSelected() && (entity = findSelectable(selected))) {
-                    // if not selected add it to last
-                    selection.appendSelection(entity);
-                }
-
-                selection.endSelection();
-            } else {
-                if (!selected->isSelected()) {
-                    selection.select(selected);
-                } else {
-                    selection.unselectAll();
-                }
-            }
-        }
-    }*/
+    }
 }
 
 o3d::studio::common::Entity* QtWorkspaceDock::findSelectable(common::Entity *entity) const
@@ -503,7 +370,6 @@ void QtWorkspaceDock::onPressItem(const QModelIndex &current)
         }
 
         common::ProjectItem *projectItem = static_cast<common::ProjectItem*>(current.internalPointer());
-        m_lastSelected = projectItem;
 
         // common::TypeRef baseType = common::Application::instance()->types().baseTypeRef(projectItem->ref().typeId());
 

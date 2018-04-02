@@ -67,7 +67,6 @@ public /*slots*/:
 private:
 
     class QtWorkspaceDock *m_qtWorkspaceDock;
-    common::ProjectItem *m_lastSelected;
 
     Bool m_autoExpand;   //!< Auto expand on selection : default True
 
@@ -106,7 +105,6 @@ private:
     void setupUi();
 
     QTreeView *m_treeView;
-    common::ProjectItem *m_lastSelected;
 
     common::Entity* findSelectable(common::Entity *entity) const;
 };

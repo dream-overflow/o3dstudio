@@ -86,6 +86,11 @@ public:
     Bool hasFocus() const;
 
     /**
+     * @brief Hover enter into this element.
+     */
+    virtual void enter();
+
+    /**
      * @brief A part the element is hover.
      * @param id Element or sub-element id.
      * @param pos Position where the hover occurs.

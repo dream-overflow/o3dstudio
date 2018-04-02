@@ -32,7 +32,8 @@ CameraManipulator::CameraManipulator(BaseObject *parent, const Point2f &pos, con
     m_pos(pos),
     m_scale(scale),
     m_hoverPart(PART_NONE),
-    m_activePart(PART_NONE)
+    m_activePart(PART_NONE),
+    m_action(ACTION_NONE)
 {
 
 }
@@ -269,9 +270,173 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     }
 }
 
+o3d::Bool CameraManipulator::keyPressEvent(const KeyEvent &event, MasterScene *masterScene)
+{
+    return False;
+}
+
+o3d::Bool CameraManipulator::keyReleaseEvent(const KeyEvent &event, MasterScene *masterScene)
+{
+    return False;
+}
+
+o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScene *masterScene)
+{
+    if (event.button(Mouse::LEFT)) {
+        if (masterScene->actionMode() == MasterScene::ACTION_NONE) {
+            if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+                masterScene->setActionMode(MasterScene::ACTION_TRANSFORM);
+                m_action = ACTION_TRANSLATION;
+
+                // default normal speed, press again shift to slow
+                masterScene->setMotionType(MasterScene::MOTION_FOLLOW);
+
+                return True;
+            } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+                masterScene->setActionMode(MasterScene::ACTION_TRANSFORM);
+                m_action = ACTION_ZOOM;
+
+                return True;
+            } else {
+                masterScene->setActionMode(MasterScene::ACTION_TRANSFORM);
+                m_action = ACTION_ROTATION;
+
+                return True;
+            }
+        }
+    }
+
+    return False;
+}
+
 o3d::Bool CameraManipulator::mouseReleaseEvent(const MouseEvent &event, MasterScene *masterScene)
 {
-    // @todo click on axis set ortho
+    if (event.button(Mouse::LEFT)) {
+        if (m_action != ACTION_NONE) {
+            m_action = ACTION_NONE;
+            masterScene->setActionMode(MasterScene::ACTION_NONE);
+
+            return True;
+        }
+    }
+
+    return False;
+}
+
+o3d::Bool CameraManipulator::mouseMoveEvent(const MouseEvent &event, MasterScene *masterScene)
+{
+    Float elapsed = masterScene->frameDuration();
+    BaseNode *cameraNode = masterScene->camera()->getNode();
+
+    if (m_action == ACTION_NONE || !cameraNode) {
+        return False;
+    }
+
+    if (m_action == ACTION_ZOOM) {
+        Float x = 0.f, y = 0.f, z = 0.f;
+
+        x = masterScene->transformDelta().x() * 100.f * elapsed;
+        z = masterScene->transformDelta().y() * 100.f * elapsed;
+
+        // major axis from major delta
+        if (o3d::abs(x) > o3d::abs(z)) {
+            z = 0;
+        } else {
+            x = 0;
+        }
+
+        // slow motion if shift is down
+        if (masterScene->motionType() == MasterScene::MOTION_PRECISE) {
+            x *= 0.1;
+            z *= 0.1;
+        } else if (masterScene->motionType() == MasterScene::MOTION_FAST) {
+            x *= 10;
+            z *= 10;
+        }
+
+        cameraNode->getTransform()->translate(Vector3(x, y, z));
+
+        return True;
+    } else if (m_action == ACTION_ROTATION) {
+        Float speed = 1;
+
+        // slow rotation if shift is down
+        if (masterScene->motionType() == MasterScene::MOTION_PRECISE) {
+            speed = 0.1;
+        } else if (masterScene->motionType() == MasterScene::MOTION_FAST) {
+            speed = 10;
+        }
+
+        cameraNode->getTransform()->rotate(Y, -masterScene->transformDelta().x() * elapsed * speed);
+        cameraNode->getTransform()->rotate(X, -masterScene->transformDelta().y() * elapsed * speed);
+
+        return True;
+    } else if (m_action == ACTION_TRANSLATION) {
+        Float x = 0.f, y = 0.f, z = 0.f;
+
+        x = -masterScene->transformDelta().x() * 100.f * elapsed;
+        y = masterScene->transformDelta().y() * 100.f * elapsed;
+
+        // slow motion if shift is down
+        if (masterScene->motionType() == MasterScene::MOTION_PRECISE) {
+            x *= 0.1;
+            y *= 0.1;
+        } else if (masterScene->motionType() == MasterScene::MOTION_FAST) {
+            x *= 10;
+            y *= 10;
+        }
+
+        cameraNode->getTransform()->translate(Vector3(x, y, z));
+
+        return True;
+    }
+
+    return False;
+}
+
+o3d::Bool CameraManipulator::wheelEvent(const WheelEvent &event, MasterScene *masterScene)
+{
+    if (masterScene->actionMode() != MasterScene::ACTION_NONE) {
+        return False;
+    }
+
+    Float elapsed = masterScene->frameDuration();
+    BaseNode *cameraNode = masterScene->camera()->getNode();
+
+    if (m_action != ACTION_NONE || !cameraNode) {
+        return False;
+    }
+
+    Int32 deltaX = event.angleDelta().x();   // ALT + or second wheel axis
+    Int32 deltaY = event.angleDelta().y();
+
+    // camera zoom/rotate
+    if (deltaY != 0 || deltaX != 0) {
+        Float delta = (deltaX + deltaY) * 100.f / 120.f * elapsed;
+
+        // change type or axis if modifier
+        if (event.modifiers() & InputEvent::CTRL_MODIFIER && event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+            // rotate on Z
+            cameraNode->getTransform()->rotate(Z, -delta * 0.1);
+        } else if (event.modifiers() & InputEvent::ALT_MODIFIER && event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+            // rotate on X
+            cameraNode->getTransform()->rotate(X, -delta * 0.1);
+        } else if (event.modifiers() & InputEvent::ALT_MODIFIER && event.modifiers() & InputEvent::CTRL_MODIFIER) {
+            // rotate on Y
+            cameraNode->getTransform()->rotate(Y, -delta * 0.1);
+        } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
+            // translate on X
+            cameraNode->getTransform()->translate(Vector3(delta * 10, 0, 0));
+        } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
+            // translate on Y
+            cameraNode->getTransform()->translate(Vector3(0, delta * 10, 0));
+        } else {
+            // translate on Z
+            cameraNode->getTransform()->translate(Vector3(0, 0, -delta * 10));
+        }
+
+        return True;
+    }
 
     return False;
 }

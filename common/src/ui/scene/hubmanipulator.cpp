@@ -72,6 +72,8 @@ void HubManipulator::release(MasterScene *masterScene)
 
 void HubManipulator::hover(o3d::UInt32 id, const o3d::Point3f &pos)
 {
+    O3D_UNUSED(pos);
+
     if (id == 0xffffff00) {
         m_hoverAxe = AXE_X;
     } else if (id == 0xffffff01) {
@@ -266,8 +268,75 @@ o3d::Vector3f HubManipulator::computeCircularVelocity(
 
 o3d::Bool HubManipulator::keyPressEvent(const KeyEvent &event, MasterScene *masterScene)
 {
-    // not possible during transform
     if (isTransform()) {
+        if (event.modifiers() == 0) {
+            if (event.vKey() == o3d::VKey::KEY_ESCAPE) {
+                // cancel current transformation
+                cancelTransform(masterScene);
+                masterScene->setActionMode(MasterScene::ACTION_NONE);
+
+                return True;
+            }
+        }
+    }
+
+    return False;
+}
+
+o3d::Bool HubManipulator::keyReleaseEvent(const KeyEvent &event, MasterScene *masterScene)
+{
+    O3D_UNUSED(event);
+    O3D_UNUSED(masterScene);
+
+    if (isTransform()) {
+        return True;
+    }
+
+    return False;
+}
+
+o3d::Bool HubManipulator::mousePressEvent(const MouseEvent &event, MasterScene *masterScene)
+{
+    if (!isTransform() && event.button(Mouse::LEFT)) {
+        masterScene->setActionMode(MasterScene::ACTION_TRANSFORM);
+        beginTransform(masterScene, Vector3f(event.localPos().x(), event.localPos().y(), 0));
+
+        return True;
+    }
+
+    if (isTransform() && event.button(Mouse::RIGHT)) {
+        cancelTransform(masterScene);
+        masterScene->setActionMode(MasterScene::ACTION_NONE);
+
+        return True;
+    }
+
+    return False;
+}
+
+o3d::Bool HubManipulator::mouseReleaseEvent(const MouseEvent &event, MasterScene *masterScene)
+{
+    if (isTransform() && event.button(Mouse::LEFT)) {
+        endTransform(masterScene);
+        masterScene->setActionMode(MasterScene::ACTION_NONE);
+
+        return True;
+    }
+
+    return False;
+}
+
+o3d::Bool HubManipulator::mouseMoveEvent(const MouseEvent &event, MasterScene *masterScene)
+{
+    if (isTransform()) {
+        Float x = 0.f, y = 0.f, z = 0.f;
+        Float elapsed = masterScene->frameDuration();
+
+        x = masterScene->transformDelta().x() * elapsed * 100;
+        y = masterScene->transformDelta().y() * elapsed * 100;
+
+        transform(Vector3(x, y, z), masterScene);
+
         return True;
     }
 

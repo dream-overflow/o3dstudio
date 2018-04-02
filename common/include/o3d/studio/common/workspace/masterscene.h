@@ -51,9 +51,6 @@ public:
     enum ActionMode
     {
         ACTION_NONE = 0,
-        ACTION_CAMERA_ZOOM,
-        ACTION_CAMERA_TRANSLATION,
-        ACTION_CAMERA_ROTATION,
         ACTION_TRANSFORM
     };
 
@@ -195,9 +192,19 @@ public:
     //
 
     /**
+     * @brief Set current action mode
+     */
+    void setActionMode(ActionMode actionMode);
+
+    /**
      * @brief Current action mode.
      */
     ActionMode actionMode() const;
+
+    /**
+     * @brief Set current motion type.
+     */
+    void setMotionType(MotionType motionType);
 
     /**
      * @brief Motion type related to the current action mode.
@@ -208,6 +215,16 @@ public:
      * @brief Selected transform mode.
      */
     Int32 transformMode() const;
+
+    /**
+     * @brief Get the last delta transform during a move event.
+     */
+    const Vector3f &transformDelta() const;
+
+    /**
+     * @brief Get the duration of the last frame in seconds.
+     */
+    Float frameDuration() const;
 
     /**
      * @brief Map a picking id to a scene UI element.
@@ -260,6 +277,8 @@ private:
     Hub *m_hoverHub;              //!< Current hub hovered by cursor
     o3d::Point3f m_pickPos;       //!< Current picking position
 
+    Vector3f m_transformDelta;    //!< Transform delta of velocity
+
     //! Main working camera, cannot be deleted
     o3d::SmartObject<o3d::Camera> m_camera;
 
@@ -286,8 +305,6 @@ private:
 
     //! Mapping of picking id to scene UI elements (can have multiple picking id to a same element)
     std::unordered_map<UInt32, SceneUIElement*> m_pickingToSceneUIElements;
-
-    void setActionMode(ActionMode actionMode);
 
     void processCommands();
     void postPicking(const Vector3f &position);

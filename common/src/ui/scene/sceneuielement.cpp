@@ -48,6 +48,11 @@ o3d::Bool SceneUIElement::hasFocus() const
     return m_focus;
 }
 
+void SceneUIElement::enter()
+{
+    // nothing to do
+}
+
 void SceneUIElement::hover(o3d::UInt32, const o3d::Point3f&)
 {
     // nothing to do

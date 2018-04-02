@@ -87,8 +87,11 @@ public:
     virtual Bool hasSelection() const;
     virtual StructuralHub* activeHub();
 
-    //! May be removed, need a dedicated toolbar, but need shortcut too
     virtual Bool keyPressEvent(const KeyEvent &event, MasterScene *masterScene) override;
+    virtual Bool keyReleaseEvent(const KeyEvent &event, MasterScene *masterScene) override;
+    virtual Bool mousePressEvent(const MouseEvent &event, MasterScene *masterScene) override;
+    virtual Bool mouseReleaseEvent(const MouseEvent &event, MasterScene *masterScene) override;
+    virtual Bool mouseMoveEvent(const MouseEvent &event, MasterScene *masterScene) override;
 
     virtual void beginTransform(MasterScene *masterScene, const Vector3f &pos);
     virtual void transform(const Vector3f &v, MasterScene *masterScene);
