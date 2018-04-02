@@ -292,6 +292,8 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
             masterScene->camera()->setZfar(10000.f);
             masterScene->camera()->computePerspective();
 
+            // @todo convert ortho zoom in camera translation
+
             return True;
         } else if (m_hoverPart == PART_X_PLUS) {
             m_mode = LEFT_ORTHO;

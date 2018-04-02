@@ -985,7 +985,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     PrimitiveAccess primitive = scene->getPrimitiveManager()->access(drawInfo);
     Context &context = *scene->getContext();
 
-    // @todo not correct in picking mode need masterScene.viewPort() but not for below compute
+    // used only in ambiant mode because invalid in a picking usage
     const Box2i &vp = context.getViewPort();
 
     // biaised depth
@@ -993,11 +993,11 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     context.enableDepthWrite();
     context.setDepthRange(0.0, 0.1);
 
-    // computed visibility and 2d mapped position
+    // computed visibility and 2d mapped position (using window viewport)
     Vector3 v = Matrix::projectPoint(
                     scene->getActiveCamera()->getProjectionMatrix(),
                     scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix(),
-                    vp,
+                    masterScene->viewPort(),
                     Vector3());
 
     // outside
@@ -1007,6 +1007,12 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
 
     Vector3 dist = m_transform->getMatrix().getTranslation() - scene->getActiveCamera()->getAbsoluteMatrix().getTranslation();
     Float s = m_displayScale * dist.length() * 0.1;
+
+    // in ortho mode we need to adjust using projection matrix
+    if (scene->getActiveCamera()->isOrtho()) {
+        Float w = (scene->getActiveCamera()->getRight() - scene->getActiveCamera()->getLeft());
+        s = m_displayScale * w * 0.075;
+    }
 
     primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix() * m_transform->getMatrix());
     primitive->modelView().push();
