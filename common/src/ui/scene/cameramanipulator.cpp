@@ -506,11 +506,13 @@ o3d::Bool CameraManipulator::mouseMoveEvent(const MouseEvent &/*event*/, MasterS
                 // zoom in ortho (z is neg)
                 if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - (2*-z) > 0) {
                     // avoid flipping
+                    Float ratio = 1.f / masterScene->camera()->getRatio();
+
                     masterScene->camera()->setOrtho(
                                 masterScene->camera()->getLeft() - z,
                                 masterScene->camera()->getRight() + z,
-                                masterScene->camera()->getBottom() - z,
-                                masterScene->camera()->getTop() + z);
+                                masterScene->camera()->getBottom() - z * ratio,
+                                masterScene->camera()->getTop() + z * ratio);
                 }
             } else if (x) {
                 // span on X in ortho (x is neg)
@@ -633,12 +635,14 @@ o3d::Bool CameraManipulator::wheelEvent(const WheelEvent &event, MasterScene *ma
 
                 // avoid flipping
                 if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - 2*z > 0) {
+                    Float ratio = 1.f / masterScene->camera()->getRatio();
+
                     // don't want camera translation, just spanning
                     masterScene->camera()->setOrtho(
                                 masterScene->camera()->getLeft() + z,
                                 masterScene->camera()->getRight() - z,
-                                masterScene->camera()->getBottom() + z,
-                                masterScene->camera()->getTop() - z);
+                                masterScene->camera()->getBottom() + z * ratio,
+                                masterScene->camera()->getTop() - z * ratio);
 
                     masterScene->camera()->computeOrtho();
                 }
@@ -677,7 +681,14 @@ void CameraManipulator::setOrtho(MasterScene *masterScene)
 {
     if (masterScene && masterScene->camera()) {
         // initial ortho
-        masterScene->camera()->setOrtho(-10000, 10000, -10000, 10000);
+        Float ratio = 1.f / masterScene->camera()->getRatio();
+
+        masterScene->camera()->setOrtho(
+                    -10000,
+                    10000,
+                    -10000 * ratio,
+                    10000 * ratio);
+
         masterScene->camera()->setZnear(-10000);
         masterScene->camera()->setZfar(10000);
         masterScene->camera()->computeOrtho();

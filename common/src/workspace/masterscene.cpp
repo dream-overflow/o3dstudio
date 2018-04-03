@@ -272,6 +272,16 @@ o3d::Camera *MasterScene::camera()
     return m_camera.get();
 }
 
+const CameraManipulator *MasterScene::cameraManipulator() const
+{
+    return m_cameraManipulator;
+}
+
+CameraManipulator *MasterScene::cameraManipulator()
+{
+    return m_cameraManipulator;
+}
+
 o3d::Box2i MasterScene::viewPort() const
 {
     return o3d::Box2i(0, 0, m_content->size().width(), m_content->size().height());

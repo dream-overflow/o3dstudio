@@ -133,7 +133,6 @@ public:
      */
     const SceneUIElement* focusSceneUIElement() const;
 
-
     /**
      * @brief Get the active camera of the master scene (read-only).
      * @todo could use the CameraManipulator.
@@ -145,6 +144,16 @@ public:
      * @todo could use the CameraManipulator.
      */
     Camera* camera();
+
+    /**
+     * @brief Get the camera manipulator of the master scene (read-only).
+     */
+    const CameraManipulator* cameraManipulator() const;
+
+    /**
+     * @brief Get the camera manipulator of the master scene.
+     */
+    CameraManipulator* cameraManipulator();
 
     /**
      * @brief Related viewport area.
