@@ -77,15 +77,20 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
 
     primitive->modelView().push();
 
-    Bool numSteps = 1;
+    Int32 numSubDiv = 1;
     Point2i step = m_step;
+    Point2i subStep = m_step;
     Box2i area(-m_halfSize, 2*m_halfSize);
-    Point2i center(0, 0);
 
     if (masterScene->cameraManipulator()->cameraMode() == CameraManipulator::ORTHO &&
         masterScene->cameraManipulator()->cameraView() != CameraManipulator::VIEW_ANY) {
+
         // have sub-grid resolution
-        numSteps = 2;
+        numSubDiv = 10;
+
+        const Int32 divSize = numSubDiv;
+        const Int32 minDivSize = (Int32)(numSubDiv / 1.5);
+        const Int32 maxDivSize = (Int32)(numSubDiv * 1.5);
 
         // and cover all the viewport
         area.set(scene->getActiveCamera()->getLeft(),
@@ -93,15 +98,27 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
                  scene->getActiveCamera()->getRight() - scene->getActiveCamera()->getLeft(),
                  scene->getActiveCamera()->getTop() - scene->getActiveCamera()->getBottom());
 
-        center.set((scene->getActiveCamera()->getLeft() + scene->getActiveCamera()->getRight()) * 0.5,
-                   (scene->getActiveCamera()->getBottom() + scene->getActiveCamera()->getTop()) * 0.5);
+        Int32 n = (20000 - area.width()) + area.width() / numSubDiv;
+        while (n > (area.width() / maxDivSize)) {
+            n -= (area.width() / divSize);
+        }
 
-        Int32 n = o3d::max(area.width() / 100, 1);
-        Int32 p = 10 - (n % 10);
+        while (n < (area.width() / minDivSize)) {
+            n += (area.width() / divSize);
+        }
 
-      //  printf("%i:%i, ", n, p); fflush(0);
+        step.set(n, n);
 
-        step.set(n*p, n*p);
+        if (n >= maxDivSize) {
+            subStep = step / numSubDiv;
+        } else if (n >= minDivSize) {
+            numSubDiv = 5;
+            subStep = step / numSubDiv;
+        } else {
+            numSubDiv = 0;
+        }
+
+        // printf("%i:%i, ", n); fflush(0);
     } else {
         // relative grid but should cover all the camera field of view
         primitive->modelView().translate(m_pos);
@@ -118,41 +135,78 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
     primitive->beginDraw(P_LINES);
 
     Color light(0.85f, 0.85f, 0.85f);
-    Color dark(0.6f, 0.6f, 0.6f);
+    Color dark(0.7f, 0.7f, 0.7f);
     Color blue(0.15f, 0.15f, 0.7f);
     Color red(0.7f, 0.15f, 0.15f);
 
     // on X axis
     for (Int32 y = -step.y(); y >= area.y() ; y -= step.y()) {
-       // for (Int32 n = 0; n < numSteps; ++n) {
-            // @todo sub-grid and for the 4 parts
-            primitive->addVertex(Vector3(area.x(), 0, y), light);
-            primitive->addVertex(Vector3(area.x2(), 0, y), light);
-       // }
+        primitive->addVertex(Vector3(area.x(), 0, y), light);
+        primitive->addVertex(Vector3(area.x2(), 0, y), light);
+
+        for (Int32 n = 1, sy = subStep.y(); n < numSubDiv; ++n, sy += subStep.y()) {
+            primitive->addVertex(Vector3(area.x(), 0, y-sy), dark);
+            primitive->addVertex(Vector3(area.x2(), 0, y-sy), dark);
+        }
+    }
+
+    for (Int32 n = 1, sy = subStep.y(); n < numSubDiv; ++n, sy += subStep.y()) {
+        primitive->addVertex(Vector3(area.x(), 0, 0-sy), dark);
+        primitive->addVertex(Vector3(area.x2(), 0, 0-sy), dark);
     }
 
     // origin line
     primitive->addVertex(Vector3(area.x(), 0, 0), red);
     primitive->addVertex(Vector3(area.x2(), 0, 0), red);
 
+    for (Int32 n = 1, sy = subStep.y(); n < numSubDiv; ++n, sy += subStep.y()) {
+        primitive->addVertex(Vector3(area.x(), 0, 0+sy), dark);
+        primitive->addVertex(Vector3(area.x2(), 0, 0+sy), dark);
+    }
+
     for (Int32 y = step.y(); y <= area.y2(); y += step.y()) {
         primitive->addVertex(Vector3(area.x(), 0, y), light);
         primitive->addVertex(Vector3(area.x2(), 0, y), light);
+
+        for (Int32 n = 1, sy = subStep.y(); n < numSubDiv; ++n, sy += subStep.y()) {
+            primitive->addVertex(Vector3(area.x(), 0, y+sy), dark);
+            primitive->addVertex(Vector3(area.x2(), 0, y+sy), dark);
+        }
     }
 
     // on Z axis
     for (Int32 x = -step.x(); x >= area.x() ; x -= step.x()) {
         primitive->addVertex(Vector3(x, 0, area.y()), light);
         primitive->addVertex(Vector3(x, 0, area.y2()), light);
+
+        for (Int32 n = 1, sx = subStep.x(); n < numSubDiv; ++n, sx += subStep.x()) {
+            primitive->addVertex(Vector3(x-sx, 0, area.y()), dark);
+            primitive->addVertex(Vector3(x-sx, 0, area.y2()), dark);
+        }
+    }
+
+    for (Int32 n = 1, sx = subStep.x(); n < numSubDiv; ++n, sx += subStep.x()) {
+        primitive->addVertex(Vector3(0-sx, 0, area.y()), dark);
+        primitive->addVertex(Vector3(0-sx, 0, area.y2()), dark);
     }
 
     // origin line
     primitive->addVertex(Vector3(0, 0, area.y()), blue);
     primitive->addVertex(Vector3(0, 0, area.y2()), blue);
 
+    for (Int32 n = 1, sx = subStep.x(); n < numSubDiv; ++n, sx += subStep.x()) {
+        primitive->addVertex(Vector3(0+sx, 0, area.y()), dark);
+        primitive->addVertex(Vector3(0+sx, 0, area.y2()), dark);
+    }
+
     for (Int32 x = step.x(); x <= area.x2(); x += step.x()) {
         primitive->addVertex(Vector3(x, 0, area.y()), light);
         primitive->addVertex(Vector3(x, 0, area.y2()), light);
+
+        for (Int32 n = 1, sx = subStep.x(); n < numSubDiv; ++n, sx += subStep.x()) {
+            primitive->addVertex(Vector3(x+sx, 0, area.y()), dark);
+            primitive->addVertex(Vector3(x+sx, 0, area.y2()), dark);
+        }
     }
 
     primitive->endDraw();

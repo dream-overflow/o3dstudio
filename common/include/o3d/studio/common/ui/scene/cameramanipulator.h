@@ -93,7 +93,7 @@ public:
     virtual Bool mousePressEvent(const MouseEvent &event, MasterScene *masterScene) override;
     virtual Bool mouseReleaseEvent(const MouseEvent &event, MasterScene *masterScene) override;
     virtual Bool mouseMoveEvent(const MouseEvent &event, MasterScene *masterScene) override;
-    virtual Bool wheelEvent(const WheelEvent &event, MasterScene *masterScene);
+    virtual Bool wheelEvent(const WheelEvent &event, MasterScene *masterScene) override;
 
     virtual Bool mouseDoubleClickEvent(const MouseEvent &event, MasterScene *masterScene) override;
 
