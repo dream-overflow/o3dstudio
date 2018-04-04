@@ -504,7 +504,7 @@ o3d::Bool CameraManipulator::mouseMoveEvent(const MouseEvent &/*event*/, MasterS
         } else {
             if (z) {
                 // zoom in ortho (z is neg)
-                if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - (2*-z) > 0) {
+                if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - (2*-z) > 1) {
                     // avoid flipping
                     Float ratio = 1.f / masterScene->camera()->getRatio();
 
@@ -634,7 +634,7 @@ o3d::Bool CameraManipulator::wheelEvent(const WheelEvent &event, MasterScene *ma
                 Float z = delta * 100;
 
                 // avoid flipping
-                if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - 2*z > 0) {
+                if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - 2*z > 1) {
                     Float ratio = 1.f / masterScene->camera()->getRatio();
 
                     // don't want camera translation, just spanning

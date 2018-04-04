@@ -78,9 +78,9 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
     primitive->modelView().push();
 
     Int32 numSubDiv = 1;
-    Point2i step = m_step;
-    Point2i subStep = m_step;
-    Box2i area(-m_halfSize, 2*m_halfSize);
+    Point2f step(m_step.x(), m_step.y());
+    Point2f subStep(m_step.x(), m_step.y());
+    Box2f area(-m_halfSize, 2*m_halfSize);
 
     if (masterScene->cameraManipulator()->cameraMode() == CameraManipulator::ORTHO &&
         masterScene->cameraManipulator()->cameraView() != CameraManipulator::VIEW_ANY) {
@@ -88,9 +88,34 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
         // have sub-grid resolution
         numSubDiv = 10;
 
-        const Int32 divSize = numSubDiv;
-        const Int32 minDivSize = (Int32)(numSubDiv / 1.5);
-        const Int32 maxDivSize = (Int32)(numSubDiv * 1.5);
+//#if (0)
+//        const Float divSize = numSubDiv;
+
+//        // and cover all the viewport
+//        area.set(scene->getActiveCamera()->getLeft(),
+//                 scene->getActiveCamera()->getBottom(),
+//                 scene->getActiveCamera()->getRight() - scene->getActiveCamera()->getLeft(),
+//                 scene->getActiveCamera()->getTop() - scene->getActiveCamera()->getBottom());
+
+//        const Float ratio = (Float)area.width() / (Float)masterScene->viewPort().width();
+
+//        const Float minDivSize = ratio * 2000;
+//        const Float maxDivSize = ratio * 5000;
+
+//        Float n = o3d::max<Float>((20000 - area.width()) + area.width() / numSubDiv, 1);
+//        if (n < minDivSize) {
+//            n = maxDivSize;
+//        } else if (n > maxDivSize) {
+//            n = minDivSize;
+//        }
+//        step.set(n, n);
+
+//        printf("%f:%i:%f, ", n, numSubDiv, ratio); fflush(0);
+//#endif
+
+        const Float divSize = numSubDiv;
+        const Float minDivSize = numSubDiv / 0.8;
+        const Float maxDivSize = numSubDiv * 1.8;
 
         // and cover all the viewport
         area.set(scene->getActiveCamera()->getLeft(),
@@ -98,27 +123,44 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
                  scene->getActiveCamera()->getRight() - scene->getActiveCamera()->getLeft(),
                  scene->getActiveCamera()->getTop() - scene->getActiveCamera()->getBottom());
 
-        Int32 n = (20000 - area.width()) + area.width() / numSubDiv;
-        while (n > (area.width() / maxDivSize)) {
-            n -= (area.width() / divSize);
+        Float n = o3d::max<Float>((20000 - area.width()) + area.width() / numSubDiv, 1);
+        printf("%f:%f:%f:%f, ", n,  area.width(), minDivSize, maxDivSize); fflush(0);
+
+        if (area.width() > minDivSize) {
+            while (n > (area.width() / maxDivSize)) {
+                n -= (area.width() / divSize * 2);
+            }
+
+            while (n < (area.width() / minDivSize)) {
+                n += (area.width() / divSize * 2);
+            }
         }
 
-        while (n < (area.width() / minDivSize)) {
-            n += (area.width() / divSize);
-        }
+        n = o3d::max(n, minDivSize);
 
         step.set(n, n);
-
-        if (n >= maxDivSize) {
+        subStep = step / numSubDiv;
+/*
+        if (n >= minDivSize * 1.5) {
+            numSubDiv = 10;
             subStep = step / numSubDiv;
-        } else if (n >= minDivSize) {
+        } else if (n < minDivSize * 1.5) {
             numSubDiv = 5;
             subStep = step / numSubDiv;
-        } else {
+        } else if (n < minDivSize * 1.1) {
             numSubDiv = 0;
-        }
+        }*/
 
-        // printf("%i:%i, ", n); fflush(0);
+        subStep = step / numSubDiv;
+
+//        if (n >= 5 * numSubDiv * numSubDiv) {
+//            subStep = step / numSubDiv;
+//        } else if (n >= 3 * numSubDiv * numSubDiv) {
+//            numSubDiv = 5;
+//            subStep = step / numSubDiv;
+//        } else {
+//            numSubDiv = 0;
+//        }
     } else {
         // relative grid but should cover all the camera field of view
         primitive->modelView().translate(m_pos);
@@ -139,18 +181,21 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
     Color blue(0.15f, 0.15f, 0.7f);
     Color red(0.7f, 0.15f, 0.15f);
 
+    Int32 j;
+    Float sx, sy;
+
     // on X axis
-    for (Int32 y = -step.y(); y >= area.y() ; y -= step.y()) {
+    for (Float y = -step.y(); y >= area.y() ; y -= step.y()) {
         primitive->addVertex(Vector3(area.x(), 0, y), light);
         primitive->addVertex(Vector3(area.x2(), 0, y), light);
 
-        for (Int32 n = 1, sy = subStep.y(); n < numSubDiv; ++n, sy += subStep.y()) {
+        for (j = 1, sy = subStep.y(); j < numSubDiv; ++j, sy += subStep.y()) {
             primitive->addVertex(Vector3(area.x(), 0, y-sy), dark);
             primitive->addVertex(Vector3(area.x2(), 0, y-sy), dark);
         }
     }
 
-    for (Int32 n = 1, sy = subStep.y(); n < numSubDiv; ++n, sy += subStep.y()) {
+    for (j = 1, sy = subStep.y(); j < numSubDiv; ++j, sy += subStep.y()) {
         primitive->addVertex(Vector3(area.x(), 0, 0-sy), dark);
         primitive->addVertex(Vector3(area.x2(), 0, 0-sy), dark);
     }
@@ -159,33 +204,33 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
     primitive->addVertex(Vector3(area.x(), 0, 0), red);
     primitive->addVertex(Vector3(area.x2(), 0, 0), red);
 
-    for (Int32 n = 1, sy = subStep.y(); n < numSubDiv; ++n, sy += subStep.y()) {
+    for (j = 1, sy = subStep.y(); j < numSubDiv; ++j, sy += subStep.y()) {
         primitive->addVertex(Vector3(area.x(), 0, 0+sy), dark);
         primitive->addVertex(Vector3(area.x2(), 0, 0+sy), dark);
     }
 
-    for (Int32 y = step.y(); y <= area.y2(); y += step.y()) {
+    for (Float y = step.y(); y <= area.y2(); y += step.y()) {
         primitive->addVertex(Vector3(area.x(), 0, y), light);
         primitive->addVertex(Vector3(area.x2(), 0, y), light);
 
-        for (Int32 n = 1, sy = subStep.y(); n < numSubDiv; ++n, sy += subStep.y()) {
+        for (j = 1, sy = subStep.y(); j< numSubDiv; ++j, sy += subStep.y()) {
             primitive->addVertex(Vector3(area.x(), 0, y+sy), dark);
             primitive->addVertex(Vector3(area.x2(), 0, y+sy), dark);
         }
     }
 
     // on Z axis
-    for (Int32 x = -step.x(); x >= area.x() ; x -= step.x()) {
+    for (Float x = -step.x(); x >= area.x() ; x -= step.x()) {
         primitive->addVertex(Vector3(x, 0, area.y()), light);
         primitive->addVertex(Vector3(x, 0, area.y2()), light);
 
-        for (Int32 n = 1, sx = subStep.x(); n < numSubDiv; ++n, sx += subStep.x()) {
+        for (j = 1, sx = subStep.x(); j < numSubDiv; ++j, sx += subStep.x()) {
             primitive->addVertex(Vector3(x-sx, 0, area.y()), dark);
             primitive->addVertex(Vector3(x-sx, 0, area.y2()), dark);
         }
     }
 
-    for (Int32 n = 1, sx = subStep.x(); n < numSubDiv; ++n, sx += subStep.x()) {
+    for (j = 1, sx = subStep.x(); j < numSubDiv; ++j, sx += subStep.x()) {
         primitive->addVertex(Vector3(0-sx, 0, area.y()), dark);
         primitive->addVertex(Vector3(0-sx, 0, area.y2()), dark);
     }
@@ -194,16 +239,16 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
     primitive->addVertex(Vector3(0, 0, area.y()), blue);
     primitive->addVertex(Vector3(0, 0, area.y2()), blue);
 
-    for (Int32 n = 1, sx = subStep.x(); n < numSubDiv; ++n, sx += subStep.x()) {
+    for (j = 1, sx = subStep.x(); j < numSubDiv; ++j, sx += subStep.x()) {
         primitive->addVertex(Vector3(0+sx, 0, area.y()), dark);
         primitive->addVertex(Vector3(0+sx, 0, area.y2()), dark);
     }
 
-    for (Int32 x = step.x(); x <= area.x2(); x += step.x()) {
+    for (Float x = step.x(); x <= area.x2(); x += step.x()) {
         primitive->addVertex(Vector3(x, 0, area.y()), light);
         primitive->addVertex(Vector3(x, 0, area.y2()), light);
 
-        for (Int32 n = 1, sx = subStep.x(); n < numSubDiv; ++n, sx += subStep.x()) {
+        for (j = 1, sx = subStep.x(); j < numSubDiv; ++j, sx += subStep.x()) {
             primitive->addVertex(Vector3(x+sx, 0, area.y()), dark);
             primitive->addVertex(Vector3(x+sx, 0, area.y2()), dark);
         }
