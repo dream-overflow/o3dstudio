@@ -116,6 +116,7 @@ protected:
     CameraView m_cameraView;
 
     void setOrtho(MasterScene *masterScene);
+    void setPerspective(MasterScene *masterScene);
 };
 
 } // namespace common

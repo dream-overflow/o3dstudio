@@ -22,6 +22,8 @@
 #include <o3d/engine/object/transform.h>
 #include <o3d/engine/hierarchy/node.h>
 
+#include <o3d/geom/plane.h>
+
 #include "o3d/studio/common/workspace/masterscene.h"
 
 #include "o3d/studio/common/application.h"
@@ -317,22 +319,9 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
         if (m_hoverPart == PART_CUBE) {
             // toggle camera ortho/perspective
             if (m_cameraMode == ORTHO) {
-                m_cameraMode = PERSPECTIVE;
-
-                masterScene->camera()->setZnear(0.25f);
-                masterScene->camera()->setZfar(10000.f);
-                masterScene->camera()->computePerspective();
-
-                // @todo convert ortho scale/pane in camera translation
-                masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
-                masterScene->camera()->getNode()->getTransform()->setRotation(Quaternion());
+                setPerspective(masterScene);
             } else {
-                m_cameraMode = ORTHO;
                 setOrtho(masterScene);
-
-                // @todo convert camera translation in ortho scale/pane
-                masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
-                masterScene->camera()->getNode()->getTransform()->setRotation(Quaternion());
             }
 
             return True;
@@ -729,17 +718,58 @@ void CameraManipulator::setOrtho(MasterScene *masterScene)
         // initial ortho
         Float ratio = 1.f / masterScene->camera()->getRatio();
 
+        // @todo compute ortho planes from camera modelview
+        Float x = 10000;
+        Float y = 10000;
+        Float z = 10000;
+
+//        masterScene->camera()->setOrtho(
+//                    -x,
+//                    x,
+//                    -y * ratio,
+//                    y * ratio);
+
+        // planes from camera modelview
+        z = masterScene->camera()->getModelviewMatrix().getTranslation().length();
+        x = masterScene->camera()->getModelviewMatrix().getTranslation().x();
+        y = masterScene->camera()->getModelviewMatrix().getTranslation().y();
+
         masterScene->camera()->setOrtho(
-                    -10000,
-                    10000,
-                    -10000 * ratio,
-                    10000 * ratio);
+                    -x - z - 1,
+                    -x + z + 1,
+                    (-y - z - 1) * ratio,
+                    (-y + z + 1) * ratio);
 
         masterScene->camera()->setZnear(-10000);
         masterScene->camera()->setZfar(10000);
 
         masterScene->camera()->computeOrtho();
+
+        // no translation on camera
+        masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
     }
 
     m_cameraMode = ORTHO;
+}
+
+void CameraManipulator::setPerspective(MasterScene *masterScene)
+{
+    if (masterScene && masterScene->camera()) {
+        masterScene->camera()->setZnear(0.25f);
+        masterScene->camera()->setZfar(10000.f);
+        masterScene->camera()->computePerspective();
+
+        // @todo convert ortho planes in camera translation
+        Float ratio = 1.f / masterScene->camera()->getRatio();
+        Float x = -((Float)masterScene->camera()->getLeft() + masterScene->camera()->getRight()) / 2;
+        Float y = -((Float)masterScene->camera()->getBottom() + masterScene->camera()->getTop()) / (2 * ratio);
+        Float z = (Float)masterScene->camera()->getRight() + x - 1;
+
+        Float z2 = Math::sqrt(z*z - x*x - y*y);
+
+        Vector3f pos(x, y, z2);//std::copysign(z2, -x - 1));
+        masterScene->camera()->getNode()->getTransform()->setPosition(pos);
+    }
+
+    m_cameraMode = PERSPECTIVE;
 }

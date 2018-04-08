@@ -1157,6 +1157,7 @@ void MasterScene::initializeDrawer()
         m_camera.get()->setZnear(0.25f);
         m_camera.get()->setZfar(10000.f);
         m_camera.get()->setFov(60.f/*45.f*/);
+        m_camera.get()->computePerspective();
         m_camera.get()->disableVisibility();   // never visible
 
         Node *cameraNode = m_scene->getHierarchyTree()->addNode(m_camera.get());
