@@ -331,6 +331,10 @@ void MasterScene::resizeDrawer(int w, int h)
 {
     if (m_scene) {
         m_scene->reshape(w, h);
+
+        if (m_cameraManipulator) {
+            m_cameraManipulator->reshape(this, Vector2i(w, h));
+        }
     }
 }
 

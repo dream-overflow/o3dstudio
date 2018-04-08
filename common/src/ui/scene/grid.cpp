@@ -88,79 +88,42 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
         // have sub-grid resolution
         numSubDiv = 10;
 
-//#if (0)
-//        const Float divSize = numSubDiv;
-
-//        // and cover all the viewport
-//        area.set(scene->getActiveCamera()->getLeft(),
-//                 scene->getActiveCamera()->getBottom(),
-//                 scene->getActiveCamera()->getRight() - scene->getActiveCamera()->getLeft(),
-//                 scene->getActiveCamera()->getTop() - scene->getActiveCamera()->getBottom());
-
-//        const Float ratio = (Float)area.width() / (Float)masterScene->viewPort().width();
-
-//        const Float minDivSize = ratio * 2000;
-//        const Float maxDivSize = ratio * 5000;
-
-//        Float n = o3d::max<Float>((20000 - area.width()) + area.width() / numSubDiv, 1);
-//        if (n < minDivSize) {
-//            n = maxDivSize;
-//        } else if (n > maxDivSize) {
-//            n = minDivSize;
-//        }
-//        step.set(n, n);
-
-//        printf("%f:%i:%f, ", n, numSubDiv, ratio); fflush(0);
-//#endif
-
-        const Float divSize = numSubDiv;
-        const Float minDivSize = numSubDiv / 0.8;
-        const Float maxDivSize = numSubDiv * 1.8;
-
         // and cover all the viewport
         area.set(scene->getActiveCamera()->getLeft(),
                  scene->getActiveCamera()->getBottom(),
                  scene->getActiveCamera()->getRight() - scene->getActiveCamera()->getLeft(),
                  scene->getActiveCamera()->getTop() - scene->getActiveCamera()->getBottom());
 
-        Float n = o3d::max<Float>((20000 - area.width()) + area.width() / numSubDiv, 1);
-        printf("%f:%f:%f:%f, ", n,  area.width(), minDivSize, maxDivSize); fflush(0);
+        const Float ratio = (Float)masterScene->viewPort().width() / (Float)area.width();
 
-        if (area.width() > minDivSize) {
-            while (n > (area.width() / maxDivSize)) {
-                n -= (area.width() / divSize * 2);
-            }
+        // const Float divSize = area.width() / numSubDiv;
+        const Float divSize = area.width() / numSubDiv * ratio;
+        const Float cellSize = masterScene->viewPort().width() / numSubDiv;
+        const Float minDivSize = numSubDiv / 0.8;
+        const Float maxDivSize = numSubDiv * 1.8;
 
-            while (n < (area.width() / minDivSize)) {
-                n += (area.width() / divSize * 2);
-            }
+        Float n = o3d::max<Float>(1000000 - area.width(), 1) * ratio;
+        Float part = o3d::max<Float>(n / divSize, 1.0);
+        Float fact = (part - (Int32)part) + 1;
+
+        n = fact * divSize;
+        // n = area.width() / numSubDiv * ratio * ratio * k*k;
+
+        if (n > maxDivSize) {
+            n = minDivSize - (maxDivSize - n);
         }
 
-        n = o3d::max(n, minDivSize);
+        if (n < minDivSize) {
+            n = maxDivSize - (minDivSize - n);
+        }
+
+        n /= ratio;
+
+       // printf("%f:%f:%f:%f:ratio=%f, ", n,  area.width(), minDivSize, maxDivSize, ratio); fflush(0);
+   //     n = o3d::max(n, minDivSize);
 
         step.set(n, n);
         subStep = step / numSubDiv;
-/*
-        if (n >= minDivSize * 1.5) {
-            numSubDiv = 10;
-            subStep = step / numSubDiv;
-        } else if (n < minDivSize * 1.5) {
-            numSubDiv = 5;
-            subStep = step / numSubDiv;
-        } else if (n < minDivSize * 1.1) {
-            numSubDiv = 0;
-        }*/
-
-        subStep = step / numSubDiv;
-
-//        if (n >= 5 * numSubDiv * numSubDiv) {
-//            subStep = step / numSubDiv;
-//        } else if (n >= 3 * numSubDiv * numSubDiv) {
-//            numSubDiv = 5;
-//            subStep = step / numSubDiv;
-//        } else {
-//            numSubDiv = 0;
-//        }
     } else {
         // relative grid but should cover all the camera field of view
         primitive->modelView().translate(m_pos);

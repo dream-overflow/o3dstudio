@@ -100,6 +100,8 @@ public:
     CameraMode cameraMode() const;
     CameraView cameraView() const;
 
+    void reshape(MasterScene *masterScene, const Vector2i &size);
+
 protected:
 
     Point2f m_pos;

@@ -508,6 +508,21 @@ o3d::Bool CameraManipulator::mouseMoveEvent(const MouseEvent &/*event*/, MasterS
                     // avoid flipping
                     Float ratio = 1.f / masterScene->camera()->getRatio();
 
+//                    Float k = 1;
+//                    if (z > 0) {
+//                        k = 1 + 0.0496; //pow(1.274, 1/5);
+//                        // k = 1 + 0.01;
+//                    } else if (z < 0) {
+//                        k = 1 - 0.0496; //k = 2 - pow(1.274, 1/5);
+//                        // k = 1 - 0.01;
+//                    }
+
+//                    masterScene->camera()->setOrtho(
+//                                masterScene->camera()->getLeft() * k,
+//                                masterScene->camera()->getRight() * k,
+//                                masterScene->camera()->getBottom() * k,
+//                                masterScene->camera()->getTop() * k);
+
                     masterScene->camera()->setOrtho(
                                 masterScene->camera()->getLeft() - z,
                                 masterScene->camera()->getRight() + z,
@@ -637,12 +652,25 @@ o3d::Bool CameraManipulator::wheelEvent(const WheelEvent &event, MasterScene *ma
                 if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - 2*z > 1) {
                     Float ratio = 1.f / masterScene->camera()->getRatio();
 
+                    Float k = 0;
+                    if (delta > 0) {
+                        k = 0.9;//pow(1.274, 1/5);
+                    } else if (delta < 0) {
+                        k = 1.1;//pow(2-1.274, 1/5);
+                    }
+
                     // don't want camera translation, just spanning
+//                    masterScene->camera()->setOrtho(
+//                                masterScene->camera()->getLeft() + k,
+//                                masterScene->camera()->getRight() - k,
+//                                masterScene->camera()->getBottom() + k * ratio,
+//                                masterScene->camera()->getTop() - k * ratio);
+
                     masterScene->camera()->setOrtho(
-                                masterScene->camera()->getLeft() + z,
-                                masterScene->camera()->getRight() - z,
-                                masterScene->camera()->getBottom() + z * ratio,
-                                masterScene->camera()->getTop() - z * ratio);
+                                (Float)masterScene->camera()->getLeft() * k,
+                                (Float)masterScene->camera()->getRight() * k,
+                                (Float)masterScene->camera()->getBottom() * k,
+                                (Float)masterScene->camera()->getTop() * k);
 
                     masterScene->camera()->computeOrtho();
                 }
@@ -677,6 +705,24 @@ CameraManipulator::CameraView CameraManipulator::cameraView() const
     return m_cameraView;
 }
 
+void CameraManipulator::reshape(MasterScene *masterScene, const o3d::Vector2i &size)
+{
+    Float oldRatio = 1.f / masterScene->camera()->getRatio();
+    masterScene->camera()->setRatio((Float)size.x() / size.y());
+
+    if (m_cameraMode == ORTHO) {
+        Float ratio = 1.f / masterScene->camera()->getRatio();
+
+        masterScene->camera()->setOrtho(
+                    masterScene->camera()->getLeft(),
+                    masterScene->camera()->getRight(),
+                    masterScene->camera()->getBottom() / oldRatio * ratio,
+                    masterScene->camera()->getTop() / oldRatio * ratio);
+
+        masterScene->camera()->computeOrtho();
+    }
+}
+
 void CameraManipulator::setOrtho(MasterScene *masterScene)
 {
     if (masterScene && masterScene->camera()) {
@@ -691,6 +737,7 @@ void CameraManipulator::setOrtho(MasterScene *masterScene)
 
         masterScene->camera()->setZnear(-10000);
         masterScene->camera()->setZfar(10000);
+
         masterScene->camera()->computeOrtho();
     }
 
