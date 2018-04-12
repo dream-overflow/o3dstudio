@@ -179,6 +179,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     scene->getContext()->setCullingMode(CULLING_BACK_FACE);
     scene->getContext()->disableDoubleSide();
     scene->getContext()->enableDepthTest();
+    scene->getContext()->setDepthRange(0, 0.1);
 
     primitive->modelView().push();
 
@@ -295,6 +296,7 @@ void CameraManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterS
     primitive->drawXYZAxis(Vector3(m_scale*15, m_scale*15, m_scale*15));
 
     // restore
+    scene->getContext()->setDefaultDepthRange();
     scene->getContext()->setDefaultDepthTest();
     scene->getContext()->projection().set(oldPj);
 
@@ -798,6 +800,76 @@ void CameraManipulator::reshape(MasterScene *masterScene, const o3d::Vector2i &s
     }
 }
 
+o3d::Float CameraManipulator::zoomFactor(MasterScene *masterScene) const
+{
+    Float zoom = 1;
+
+    if (m_cameraMode == ORTHO) {
+        if (m_cameraView == VIEW_ANY) {
+            Vector3f n = masterScene->camera()->getNode()->getTransform()->getRotation().transformTo(Vector3f(0, 0, 1));
+            n.normalize();
+
+            // distance to the plane at 0,0,0
+            zoom = 1 / (n * masterScene->camera()->getAbsoluteMatrix().getTranslation());
+        } else if (m_cameraView == VIEW_LEFT) {
+            zoom = 1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().x();
+        } else if (m_cameraView == VIEW_RIGHT) {
+            zoom = -1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().x();
+        } else if (m_cameraView == VIEW_TOP) {
+            zoom = 1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().y();
+        } else if (m_cameraView == VIEW_BOTTOM) {
+            zoom = -1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().y();
+        } else if (m_cameraView == VIEW_FRONT) {
+            zoom = 1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().z();
+        } else if (m_cameraView == VIEW_BACK) {
+            zoom = -1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().z();
+        }
+    } else {
+        zoom = masterScene->camera()->getAbsoluteMatrix().getTranslation().length();
+    }
+
+    return zoom;
+}
+
+o3d::Vector2f CameraManipulator::position(MasterScene *masterScene) const
+{
+    if (m_cameraMode == ORTHO) {
+        if (m_cameraView == VIEW_ANY) {
+            return Vector2f(
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
+        } else if (m_cameraView == VIEW_LEFT) {
+            return Vector2f(
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y(),
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().z());
+        } else if (m_cameraView == VIEW_RIGHT) {
+            return Vector2f(
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y(),
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().z());
+        } else if (m_cameraView == VIEW_TOP) {
+            return Vector2f(
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().z());
+        } else if (m_cameraView == VIEW_BOTTOM) {
+            return Vector2f(
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().z());
+        } else if (m_cameraView == VIEW_FRONT) {
+            return Vector2f(
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
+        } else if (m_cameraView == VIEW_BACK) {
+            return Vector2f(
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
+        }
+    } else {
+        return Vector2f(
+                    masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                    masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
+    }
+}
+
 void CameraManipulator::setOrtho(MasterScene *masterScene)
 {
     if (masterScene && masterScene->camera()) {
@@ -822,8 +894,8 @@ void CameraManipulator::setOrtho(MasterScene *masterScene)
             Vector3f n = masterScene->camera()->getNode()->getTransform()->getRotation().transformTo(Vector3f(0, 0, 1));
             n.normalize();
 
-            Plane screen = Plane(n, 0);
-            zoom = 1 / screen.distance(masterScene->camera()->getAbsoluteMatrix().getTranslation());
+            // distance to the plane at 0,0,0
+            zoom = 1 / (n * masterScene->camera()->getAbsoluteMatrix().getTranslation());
         } else if (m_cameraView == VIEW_LEFT) {
             zoom = 1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().x();
         } else if (m_cameraView == VIEW_RIGHT) {

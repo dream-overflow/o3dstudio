@@ -102,6 +102,16 @@ public:
 
     void reshape(MasterScene *masterScene, const Vector2i &size);
 
+    /**
+     * @brief Get the zoom factor depending of the current mode/view.
+     */
+    Float zoomFactor(MasterScene *masterScene) const;
+
+    /**
+     * @brief Position in the plane of the screen, and related with zoom.
+     */
+    Vector2f position(MasterScene *masterScene) const;
+
 protected:
 
     Point2f m_pos;
