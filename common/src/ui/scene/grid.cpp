@@ -66,7 +66,7 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
         masterScene->cameraManipulator()->cameraView() != CameraManipulator::VIEW_ANY) {
         primitive->modelView().identity();
         primitive->modelView().rotateX(-o3d::PI/2);
-        primitive->modelView().translate(Vector3f(0, 0, 0));
+        //primitive->modelView().translate(-scene->getActiveCamera()->getModelviewMatrix().getTranslation());
     } else {
         // setup modelview
         primitive->modelView().set(scene->getActiveCamera()->getModelviewMatrix());
@@ -102,7 +102,7 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
         const Float minDivSize = numSubDiv / 0.8;
         const Float maxDivSize = numSubDiv * 1.8;
 
-        Float n = o3d::max<Float>(1000000 - area.width(), 1) * ratio;
+        Float n = area.width();// o3d::max<Float>(1000000 - area.width(), 1) * ratio;
         Float part = o3d::max<Float>(n / divSize, 1.0);
         Float fact = (part - (Int32)part) + 1;
 
