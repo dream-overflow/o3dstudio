@@ -395,8 +395,12 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
             }
 
             // reset the transformation
+            Quaternion q1, q2;
+            q1.fromAxisAngle3(Vector3f(1, 0, 0), o3d::PI);
+            q2.fromAxisAngle3(Vector3f(0, 0, 1), o3d::PI);
+
             //masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
-            masterScene->camera()->getNode()->getTransform()->setRotation(Quaternion());
+            masterScene->camera()->getNode()->getTransform()->setRotation(q1 * q2);
 
             return True;
         } else if (m_hoverPart == PART_Z_MINUS) {
@@ -406,12 +410,8 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
                 setOrtho(masterScene);
             }
 
-            // reset the transformation
-            Quaternion q;
-            q.fromAxisAngle3(Vector3f(0, 1, 0), o3d::PI);
-
             //masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
-            masterScene->camera()->getNode()->getTransform()->setRotation(q);
+            masterScene->camera()->getNode()->getTransform()->setRotation(Quaternion());
 
             return True;
         }
@@ -820,9 +820,9 @@ o3d::Float CameraManipulator::zoomFactor(MasterScene *masterScene) const
         } else if (m_cameraView == VIEW_BOTTOM) {
             zoom = -1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().y();
         } else if (m_cameraView == VIEW_FRONT) {
-            zoom = 1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().z();
-        } else if (m_cameraView == VIEW_BACK) {
             zoom = -1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().z();
+        } else if (m_cameraView == VIEW_BACK) {
+            zoom = 1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().z();
         }
     } else {
         zoom = masterScene->camera()->getAbsoluteMatrix().getTranslation().length();
@@ -836,16 +836,16 @@ o3d::Vector2f CameraManipulator::position(MasterScene *masterScene) const
     if (m_cameraMode == ORTHO) {
         if (m_cameraView == VIEW_ANY) {
             return Vector2f(
-                        masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
                         masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
         } else if (m_cameraView == VIEW_LEFT) {
             return Vector2f(
-                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y(),
-                        masterScene->camera()->getAbsoluteMatrix().getTranslation().z());
+                        masterScene->camera()->getAbsoluteMatrix().getTranslation().z(),
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
         } else if (m_cameraView == VIEW_RIGHT) {
             return Vector2f(
-                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y(),
-                        masterScene->camera()->getAbsoluteMatrix().getTranslation().z());
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().z(),
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
         } else if (m_cameraView == VIEW_TOP) {
             return Vector2f(
                         -masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
@@ -857,24 +857,24 @@ o3d::Vector2f CameraManipulator::position(MasterScene *masterScene) const
         } else if (m_cameraView == VIEW_FRONT) {
             return Vector2f(
                         masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
-                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
         } else if (m_cameraView == VIEW_BACK) {
             return Vector2f(
-                        masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
-                        masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                        -masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
         }
-    } else {
-        return Vector2f(
-                    masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
-                    masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
     }
+
+    return Vector2f(
+                masterScene->camera()->getAbsoluteMatrix().getTranslation().x(),
+                masterScene->camera()->getAbsoluteMatrix().getTranslation().y());
 }
 
 void CameraManipulator::setOrtho(MasterScene *masterScene)
 {
     if (masterScene && masterScene->camera()) {
         // initial ortho
-        Float ratio = 1.f / masterScene->camera()->getRatio();
+        Float ratio = masterScene->camera()->getRatio();
 
         Float fov = o3d::toRadian(masterScene->camera()->getFov());
         Float near = 0.25;
@@ -883,10 +883,8 @@ void CameraManipulator::setOrtho(MasterScene *masterScene)
         // the size that we set is the mid plane of the viewing frustum
         Float byFov = (near+far) / 2;
 
-        Float halfHeight = ::tan(fov) * byFov;
-        Float planeHeight = 2 * halfHeight / ratio;
-        Float planeWidth = planeHeight;
-        Float halfWidth = planeWidth / 2;
+        Float halfHeight = (tanf(fov * 0.5) * byFov) * 2 * 2;
+        Float halfWidth = halfHeight * ratio;
 
         Float zoom = 1;
 
@@ -905,16 +903,21 @@ void CameraManipulator::setOrtho(MasterScene *masterScene)
         } else if (m_cameraView == VIEW_BOTTOM) {
             zoom = -1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().y();
         } else if (m_cameraView == VIEW_FRONT) {
-            zoom = 1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().z();
-        } else if (m_cameraView == VIEW_BACK) {
             zoom = -1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().z();
+        } else if (m_cameraView == VIEW_BACK) {
+            zoom = 1 / masterScene->camera()->getAbsoluteMatrix().getTranslation().z();
+        }
+
+        if (zoom < 0) {
+            // avoid reverse
+            zoom = 0;
         }
 
         halfHeight /= ((far/near)*zoom) / 2;
         halfWidth /= ((far/near)*zoom) / 2;
 
-        halfHeight = o3d::max(halfHeight, 1.f / ratio);
-        halfWidth = o3d::max(halfWidth, 1.f);
+        halfHeight = o3d::max(o3d::abs(halfHeight), 1.f);
+        halfWidth = o3d::max(o3d::abs(halfWidth), 1.f * ratio);
 
         masterScene->camera()->setOrtho(
                     -halfWidth,

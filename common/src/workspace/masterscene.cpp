@@ -1039,6 +1039,18 @@ void MasterScene::onSelectionChanged()
     }
 }
 
+void MasterScene::onProjectHubRemoved(LightRef ref)
+{
+    // @todo connect
+    // @todo hub man update selection
+}
+
+void MasterScene::onProjectEntityChanged(LightRef ref, o3d::BitSet64 changes)
+{
+    // @todo connect
+    // @todo hub man update
+}
+
 void MasterScene::changeTransformMode(o3d::Int32 mode)
 {
     m_transformMode = mode;

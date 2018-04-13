@@ -977,7 +977,7 @@ void HubManipulator::directRendering(DrawInfo &drawInfo, MasterScene *masterScen
     }
 
     // @todo remove need a listener to know about a changes on targets
-    updateTransform(masterScene, False);
+    // updateTransform(masterScene, False);
 
     // during display uses current active viewport and camera
     refresh(masterScene);

@@ -47,6 +47,8 @@ public /*slots*/:
     void onChangeCurrentWorkspace(const String &name);
     void onProjectEntityChanged(common::LightRef ref, BitSet64 changeFlags);
 
+    void onProjectHubRemoved(common::LightRef ref);
+
 private:
 
     std::map<common::LightRef, common::Panel*> m_panels;   //!< Current panels

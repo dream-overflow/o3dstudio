@@ -255,6 +255,9 @@ public /*slots*/:
 
     void onSelectionChanged();
 
+    void onProjectHubRemoved(LightRef ref);
+    void onProjectEntityChanged(LightRef ref, BitSet64 changes);
+
     void changeTransformMode(Int32 mode);
     void changeTransformOrientation(Int32 mode);
     void changePivotMode(Int32 mode);

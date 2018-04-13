@@ -227,6 +227,12 @@ void PropertyDock::onProjectEntityChanged(common::LightRef ref, o3d::BitSet64 ch
     }
 }
 
+void PropertyDock::onProjectHubRemoved(o3d::studio::common::LightRef ref)
+{
+    // @todo connect
+    // @todo remove panel
+}
+
 QtPropertyDock::QtPropertyDock(QWidget *parent) :
     QDockWidget(tr("Property"), parent),
     m_container(nullptr)
