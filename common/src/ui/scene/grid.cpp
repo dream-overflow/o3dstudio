@@ -102,27 +102,35 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
         const Float zoom = masterScene->cameraManipulator()->zoomFactor(masterScene);
 
         // const Float divSize = area.width() / numSubDiv;
-        const Float divSize = area.width() / numSubDiv * ratio;
+        const Float divSize = o3d::max<Float>(area.width() / numSubDiv, 1);
         const Float cellSize = masterScene->viewPort().width() / numSubDiv;
-        const Float minDivSize = numSubDiv / 0.8;
-        const Float maxDivSize = numSubDiv * 1.8;
+        const Float minDivSize = cellSize * 0.5f;
+        const Float maxDivSize = cellSize * 2.f;
 
         Float n = area.width();// o3d::max<Float>(1000000 - area.width(), 1) * ratio;
+        n = o3d::max(o3d::abs(zoom), 1.f) * divSize * ratio;
+
         Float part = o3d::max<Float>(n / divSize, 1.0);
         Float fact = (part - (Int32)part) + 1;
 
-        n = fact * divSize;
+        n = o3d::max<Float>(fact * divSize, 2);
         // n = area.width() / numSubDiv * ratio * ratio * k*k;
-
-        if (n > maxDivSize) {
-            n = minDivSize - (maxDivSize - n);
-        }
-
+/*
         if (n < minDivSize) {
             n = maxDivSize - (minDivSize - n);
         }
 
-        n /= ratio;
+        if (n > maxDivSize) {
+            n = minDivSize + (n - maxDivSize);
+        }*/
+/*
+        if (n < minDivSize) {
+            n = maxDivSize - (minDivSize - n);
+        }
+*/
+        printf("%f %f %f -- %f %f -- ", n, fact, part, divSize, area.width()); fflush(0);
+
+        //n *= ratio;
 
         // printf("%f:%f:%f:%f:ratio=%f, ", n,  area.width(), minDivSize, maxDivSize, ratio); fflush(0);
         // n = o3d::max(n, minDivSize);

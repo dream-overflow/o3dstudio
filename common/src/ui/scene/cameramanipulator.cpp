@@ -338,7 +338,6 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
             Quaternion q;
             q.fromAxisAngle3(Vector3f(0, 1, 0), o3d::HALF_PI-0.001);
 
-            //masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
             masterScene->camera()->getNode()->getTransform()->setRotation(q);
 
             return True;
@@ -353,7 +352,6 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
             Quaternion q;
             q.fromAxisAngle3(Vector3f(0, 1, 0), -o3d::HALF_PI+0.001);
 
-            //masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
             masterScene->camera()->getNode()->getTransform()->setRotation(q);
 
             return True;
@@ -368,7 +366,6 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
             Quaternion q;
             q.fromAxisAngle3(Vector3f(1, 0, 0), -o3d::HALF_PI);
 
-            //masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
             masterScene->camera()->getNode()->getTransform()->setRotation(q);
 
             return True;
@@ -383,7 +380,6 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
             Quaternion q;
             q.fromAxisAngle3(Vector3f(1, 0, 0), o3d::HALF_PI);
 
-            //masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
             masterScene->camera()->getNode()->getTransform()->setRotation(q);
 
             return True;
@@ -399,7 +395,6 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
             q1.fromAxisAngle3(Vector3f(1, 0, 0), o3d::PI);
             q2.fromAxisAngle3(Vector3f(0, 0, 1), o3d::PI);
 
-            //masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
             masterScene->camera()->getNode()->getTransform()->setRotation(q1 * q2);
 
             return True;
@@ -410,7 +405,6 @@ o3d::Bool CameraManipulator::mousePressEvent(const MouseEvent &event, MasterScen
                 setOrtho(masterScene);
             }
 
-            //masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
             masterScene->camera()->getNode()->getTransform()->setRotation(Quaternion());
 
             return True;
@@ -560,47 +554,10 @@ o3d::Bool CameraManipulator::mouseMoveEvent(const MouseEvent &/*event*/, MasterS
             z *= 10;
         }
 
-        if (1) { //m_cameraMode == PERSPECTIVE) {
-            // translate in perspective
-            cameraNode->getTransform()->translate(Vector3(x, y, z));
-            if (m_cameraMode == ORTHO) {
-                setOrtho(masterScene);
-            }
-        } else {
-            if (z) {
-                // zoom in ortho (z is neg)
-                if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - (2*-z) > 1) {
-                    // avoid flipping
-                    Float ratio = 1.f / masterScene->camera()->getRatio();
-
-//                    Float k = 1;
-//                    if (z > 0) {
-//                        k = 1 + 0.0496; //pow(1.274, 1/5);
-//                        // k = 1 + 0.01;
-//                    } else if (z < 0) {
-//                        k = 1 - 0.0496; //k = 2 - pow(1.274, 1/5);
-//                        // k = 1 - 0.01;
-//                    }
-
-//                    masterScene->camera()->setOrtho(
-//                                masterScene->camera()->getLeft() * k,
-//                                masterScene->camera()->getRight() * k,
-//                                masterScene->camera()->getBottom() * k,
-//                                masterScene->camera()->getTop() * k);
-
-                    masterScene->camera()->setOrtho(
-                                masterScene->camera()->getLeft() - z,
-                                masterScene->camera()->getRight() + z,
-                                masterScene->camera()->getBottom() - z * ratio,
-                                masterScene->camera()->getTop() + z * ratio);
-                }
-            } else if (x) {
-                // span on X in ortho (x is neg)
-                masterScene->camera()->setLeft(masterScene->camera()->getLeft() - x);
-                masterScene->camera()->setRight(masterScene->camera()->getRight() - x);
-            }
-
-            masterScene->camera()->computeOrtho();
+        // translate in perspective
+        cameraNode->getTransform()->translate(Vector3(x, y, z));
+        if (m_cameraMode == ORTHO) {
+            setOrtho(masterScene);
         }
 
         return True;
@@ -636,21 +593,10 @@ o3d::Bool CameraManipulator::mouseMoveEvent(const MouseEvent &/*event*/, MasterS
             y *= 10;
         }
 
-        if (1) { // m_cameraMode == PERSPECTIVE) {
-            // translate camera in perspective
-            cameraNode->getTransform()->translate(Vector3(x, y, z));
-            if (m_cameraMode == ORTHO) {
-                setOrtho(masterScene);
-            }
-        } else {
-            // span on ortho
-            masterScene->camera()->setOrtho(
-                        masterScene->camera()->getLeft() + x,
-                        masterScene->camera()->getRight() + x,
-                        masterScene->camera()->getBottom() + y,
-                        masterScene->camera()->getTop() + y);
-
-            masterScene->camera()->computeOrtho();
+        // translate camera in perspective
+        cameraNode->getTransform()->translate(Vector3(x, y, z));
+        if (m_cameraMode == ORTHO) {
+            setOrtho(masterScene);
         }
 
         return True;
@@ -690,67 +636,22 @@ o3d::Bool CameraManipulator::wheelEvent(const WheelEvent &event, MasterScene *ma
             // rotate on Y
             cameraNode->getTransform()->rotate(Y, -delta * 0.1);
         } else if (event.modifiers() & InputEvent::CTRL_MODIFIER) {
-            if (1) { // m_cameraMode == PERSPECTIVE) {
-                // translate on X in perspective
-                cameraNode->getTransform()->translate(Vector3(delta * 10, 0, 0));
-                if (m_cameraMode == ORTHO) {
-                    setOrtho(masterScene);
-                }
-            } else {
-                // span on X in ortho
-                masterScene->camera()->setLeft(masterScene->camera()->getLeft() + delta * 10);
-                masterScene->camera()->setRight(masterScene->camera()->getRight() + delta * 10);
-                masterScene->camera()->computeOrtho();
+            // translate on X in perspective
+            cameraNode->getTransform()->translate(Vector3(delta * 10, 0, 0));
+            if (m_cameraMode == ORTHO) {
+                setOrtho(masterScene);
             }
         } else if (event.modifiers() & InputEvent::SHIFT_MODIFIER) {
-            if (1) { // if (m_cameraMode == PERSPECTIVE) {
-                // translate on Y in perspective
-                cameraNode->getTransform()->translate(Vector3(0, delta * 10, 0));
-                if (m_cameraMode == ORTHO) {
-                    setOrtho(masterScene);
-                }
-            } else {
-                // span on Y in ortho
-                masterScene->camera()->setBottom(masterScene->camera()->getBottom() + delta * 10);
-                masterScene->camera()->setTop(masterScene->camera()->getTop() + delta * 10);
-                masterScene->camera()->computeOrtho();
+            // translate on Y in perspective
+            cameraNode->getTransform()->translate(Vector3(0, delta * 10, 0));
+            if (m_cameraMode == ORTHO) {
+                setOrtho(masterScene);
             }
         } else {
-            if (1) { // m_cameraMode == PERSPECTIVE) {
-                // translate on Z camera in perspective
-                cameraNode->getTransform()->translate(Vector3(0, 0, -delta * 10));
-                if (m_cameraMode == ORTHO) {
-                    setOrtho(masterScene);
-                }
-            } else {
-                Float z = delta * 100;
-
-                // avoid flipping
-                if ((masterScene->camera()->getRight() - masterScene->camera()->getLeft()) - 2*z > 1) {
-                    Float ratio = 1.f / masterScene->camera()->getRatio();
-
-//                    Float k = 0;
-//                    if (delta > 0) {
-//                        k = 0.9;//pow(1.274, 1/5);
-//                    } else if (delta < 0) {
-//                        k = 1.1;//pow(2-1.274, 1/5);
-//                    }
-
-                    // don't want camera translation, just spanning
-                    masterScene->camera()->setOrtho(
-                                masterScene->camera()->getLeft() + z,
-                                masterScene->camera()->getRight() - z,
-                                masterScene->camera()->getBottom() + z * ratio,
-                                masterScene->camera()->getTop() - z * ratio);
-
-//                    masterScene->camera()->setOrtho(
-//                                (Float)masterScene->camera()->getLeft() * k,
-//                                (Float)masterScene->camera()->getRight() * k,
-//                                (Float)masterScene->camera()->getBottom() * k,
-//                                (Float)masterScene->camera()->getTop() * k);
-
-                    masterScene->camera()->computeOrtho();
-                }
+            // translate on Z camera in perspective
+            cameraNode->getTransform()->translate(Vector3(0, 0, -delta * 10));
+            if (m_cameraMode == ORTHO) {
+                setOrtho(masterScene);
             }
         }
 
@@ -909,8 +810,8 @@ void CameraManipulator::setOrtho(MasterScene *masterScene)
         }
 
         if (zoom < 0) {
-            // avoid reverse
-            zoom = 0;
+            // avoid reverse et infinite
+            zoom = 0.1;
         }
 
         halfHeight /= ((far/near)*zoom) / 2;
@@ -930,30 +831,20 @@ void CameraManipulator::setOrtho(MasterScene *masterScene)
 
         masterScene->camera()->computeOrtho();
 
-        /*// compute ortho planes from camera modelview
-        Float z = masterScene->camera()->getAbsoluteMatrix().getTranslation().length();
-        Float x = masterScene->camera()->getAbsoluteMatrix().getTranslation().x();
-        Float y = masterScene->camera()->getAbsoluteMatrix().getTranslation().y();
-
-        masterScene->camera()->setOrtho(
-                    - z - 1,
-                    + z + 1,
-                    (- z - 1) * ratio,
-                    (+ z + 1) * ratio);
-
-//        masterScene->camera()->setOrtho(
-//                    x - z - 1,
-//                    x + z + 1,
-//                    (y - z - 1) * ratio,
-//                    (y + z + 1) * ratio);
-
-        masterScene->camera()->setZnear(-10000);
-        masterScene->camera()->setZfar(10000);
-
-        masterScene->camera()->computeOrtho();
-
-        // no translation on camera
-        // masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());*/
+        // compute ortho planes from camera modelview
+        // and zoom pan using left/right/bottom/top coordinates directly
+        //
+        // Float z = masterScene->camera()->getAbsoluteMatrix().getTranslation().length();
+        // Float x = masterScene->camera()->getAbsoluteMatrix().getTranslation().x();
+        // Float y = masterScene->camera()->getAbsoluteMatrix().getTranslation().y();
+        //
+        // left = - z - 1,
+        // right = + z + 1,
+        // bottom = (- z - 1) * ratio,
+        // top = (+ z + 1) * ratio
+        //
+        // and cancel translation on camera
+        // masterScene->camera()->getNode()->getTransform()->setPosition(Vector3f());
     }
 
     m_cameraMode = ORTHO;
@@ -966,17 +857,17 @@ void CameraManipulator::setPerspective(MasterScene *masterScene)
         masterScene->camera()->setZfar(10000.f);
         masterScene->camera()->computePerspective();
 
-//        // convert ortho planes in camera translation
-//        Float ratio = 1.f / masterScene->camera()->getRatio();
+        // convert ortho planes in camera translation
+        // Float ratio = 1.f / masterScene->camera()->getRatio();
 
-//        Float x = ((Float)masterScene->camera()->getLeft() + masterScene->camera()->getRight()) / 2;
-//        Float y = ((Float)masterScene->camera()->getBottom() + masterScene->camera()->getTop()) / (2 * ratio);
-//        Float z = (Float)masterScene->camera()->getRight() - x - 1;
+        // Float x = ((Float)masterScene->camera()->getLeft() + masterScene->camera()->getRight()) / 2;
+        // Float y = ((Float)masterScene->camera()->getBottom() + masterScene->camera()->getTop()) / (2 * ratio);
+        // Float z = (Float)masterScene->camera()->getRight() - x - 1;
 
-//        Float z2 = Math::sqrt(z*z - x*x - y*y);
+        // Float z2 = Math::sqrt(z*z - x*x - y*y);
 
-//        Vector3f pos(x, y, std::copysign(z2, z));
-//        masterScene->camera()->getNode()->getTransform()->setPosition(pos);
+        // Vector3f pos(x, y, std::copysign(z2, z));
+        // masterScene->camera()->getNode()->getTransform()->setPosition(pos);
     }
 
     m_cameraMode = PERSPECTIVE;
