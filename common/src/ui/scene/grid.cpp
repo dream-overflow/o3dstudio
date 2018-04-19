@@ -99,41 +99,23 @@ void Grid::directRendering(DrawInfo &drawInfo, MasterScene *masterScene)
                  scene->getActiveCamera()->getTop() - scene->getActiveCamera()->getBottom());
 
         const Float ratio = (Float)masterScene->viewPort().width() / (Float)area.width();
-        const Float zoom = masterScene->cameraManipulator()->zoomFactor(masterScene);
+        // const Float zoom = masterScene->cameraManipulator()->zoomFactor(masterScene);
 
-        // const Float divSize = area.width() / numSubDiv;
-        const Float divSize = o3d::max<Float>(area.width() / numSubDiv, 1);
-        const Float cellSize = masterScene->viewPort().width() / numSubDiv;
-        const Float minDivSize = cellSize * 0.5f;
-        const Float maxDivSize = cellSize * 2.f;
+        const Float numDiv = 3.5;
+        const Float divSize = (Float)masterScene->viewPort().width() / numDiv;
 
-        Float n = area.width();// o3d::max<Float>(1000000 - area.width(), 1) * ratio;
-        n = o3d::max(o3d::abs(zoom), 1.f) * divSize * ratio;
+        Int32 k = (Int32)(o3d::max((area.width() / divSize), (Float)numDiv) / (Float)numDiv);
+        Float n = divSize;
 
-        Float part = o3d::max<Float>(n / divSize, 1.0);
-        Float fact = (part - (Int32)part) + 1;
+        k = o3d::max(1, o3d::log2(k));
+        n *= 1 << (k-1);
 
-        n = o3d::max<Float>(fact * divSize, 2);
-        // n = area.width() / numSubDiv * ratio * ratio * k*k;
-/*
-        if (n < minDivSize) {
-            n = maxDivSize - (minDivSize - n);
+        // printf("%f %i --- %f ", n, k, n*ratio); fflush(0);
+
+        if (n * ratio < 100) {
+            // when viewport is small
+            n *= 2;
         }
-
-        if (n > maxDivSize) {
-            n = minDivSize + (n - maxDivSize);
-        }*/
-/*
-        if (n < minDivSize) {
-            n = maxDivSize - (minDivSize - n);
-        }
-*/
-        printf("%f %f %f -- %f %f -- ", n, fact, part, divSize, area.width()); fflush(0);
-
-        //n *= ratio;
-
-        // printf("%f:%f:%f:%f:ratio=%f, ", n,  area.width(), minDivSize, maxDivSize, ratio); fflush(0);
-        // n = o3d::max(n, minDivSize);
 
         step.set(n, n);
         subStep = step / numSubDiv;

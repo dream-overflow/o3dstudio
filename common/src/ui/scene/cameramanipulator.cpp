@@ -685,19 +685,21 @@ CameraManipulator::CameraView CameraManipulator::cameraView() const
 
 void CameraManipulator::reshape(MasterScene *masterScene, const o3d::Vector2i &size)
 {
-    Float oldRatio = 1.f / masterScene->camera()->getRatio();
+    Float oldRatio = masterScene->camera()->getRatio();
     masterScene->camera()->setRatio((Float)size.x() / size.y());
 
     if (m_cameraMode == ORTHO) {
-        Float ratio = 1.f / masterScene->camera()->getRatio();
+        Float ratio = masterScene->camera()->getRatio();
 
         masterScene->camera()->setOrtho(
-                    masterScene->camera()->getLeft(),
-                    masterScene->camera()->getRight(),
-                    masterScene->camera()->getBottom() / oldRatio * ratio,
-                    masterScene->camera()->getTop() / oldRatio * ratio);
+                    masterScene->camera()->getLeft() / oldRatio * ratio,
+                    masterScene->camera()->getRight() / oldRatio * ratio,
+                    masterScene->camera()->getBottom(),
+                    masterScene->camera()->getTop());
 
         masterScene->camera()->computeOrtho();
+    } else {
+        masterScene->camera()->computePerspective();
     }
 }
 
