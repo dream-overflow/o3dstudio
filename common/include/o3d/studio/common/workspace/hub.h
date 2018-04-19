@@ -119,13 +119,13 @@ public:
 
     /**
      * @brief List of children hubs.
-     * @param recurse Default false, returns only projet level hubs, true recurse over all children.
+     * @param recurse Default false, returns only first level hubs, true recurse over all children.
      */
     std::list<Hub*> hubs(Bool recurse = False);
 
     /**
      * @brief List of children hubs (const version).
-     * @param recurse Default false, returns only projet level hubs, true recurse over all children.
+     * @param recurse Default false, returns only first level hubs, true recurse over all children.
      */
     std::list<const Hub*> hubs(Bool recurse = False) const;
 

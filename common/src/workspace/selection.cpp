@@ -369,7 +369,10 @@ void Selection::onProjectHubRemoved(LightRef ref)
 
     if (entity->ref().light().baseTypeOf(TypeRef::hub())) {
         const Hub *removedHub = static_cast<const Hub*>(entity);
+
+        // itself plus all recursive children
         std::list<const Hub*> hubs = removedHub->hubs(True);
+        hubs.push_front(removedHub);
 
         std::list<std::set<SelectionItem*>::iterator> removeList;
 
