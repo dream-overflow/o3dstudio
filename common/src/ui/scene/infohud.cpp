@@ -23,8 +23,8 @@
 using namespace o3d::studio::common;
 
 
-InfoHUD::InfoHUD(BaseObject *parent, const Point2f &pos, Text2D *font) :
-    SceneUIElement(parent, SCENE_UI_2D, POST_DRAW, True),
+InfoHUD::InfoHUD(MasterScene *masterScene, const Point2f &pos, Text2D *font) :
+    SceneUIElement(masterScene, SCENE_UI_2D, POST_DRAW, True),
     m_pos(pos),
     m_font(this, font),
     m_textColor(0.f, 1.f, 0.f, 1.f),

@@ -20,6 +20,7 @@
 #include "o3d/studio/common/ui/canvas/o3dcanvascontent.h"
 #include "o3d/studio/common/ui/scene/hubmanipulator.h"
 #include "o3d/studio/common/ui/toolbar/transformtoolbar.h"
+#include "o3d/studio/common/ui/dock/transformdock.h"
 
 #include <o3d/engine/glextdefines.h>
 #include <o3d/engine/glextensionmanager.h>
@@ -1033,22 +1034,34 @@ void MasterScene::onSelectionChanged()
     if (hubs.size() && m_hubManipulator) {
         // create the new according to the current builder (@todo not for now only the standard manipulator)
         m_hubManipulator->setSelection(this, hubs);
+
+        // show the transform manipulator dock
+        if (!Application::instance()->ui().dock("o3s::main::common::transform")) {
+            TransformDock *transformDock = new TransformDock();
+
+            Application::instance()->ui().addDock(transformDock);
+
+            // manual for the first time
+            transformDock->onSelectionChanged();
+        }
     } else {
         // or no action if no selection
         setActionMode(ACTION_NONE);
+
+        // @todo could hide or remove the transform dock ?
     }
 }
 
 void MasterScene::onProjectHubRemoved(LightRef ref)
 {
     // @todo connect
-    // @todo hub man update selection
+    // @todo hub manipulator update selection
 }
 
 void MasterScene::onProjectEntityChanged(LightRef ref, o3d::BitSet64 changes)
 {
     // @todo connect
-    // @todo hub man update
+    // @todo hub manipulator update
 }
 
 void MasterScene::changeTransformMode(o3d::Int32 mode)
@@ -1112,8 +1125,7 @@ Entity* MasterScene::findSelectable(Entity *entity) const
 
         if (Application::instance()->selection().acceptedRole() == Selection::ACCEPT_STRUCTURAL_HUB) {
             if (hub->role() != Entity::ROLE_STRUCTURAL_HUB) {
-                // @todo select parent if structural hub
-
+                // select parent if structural hub
                 while (hub->isParentHub()) {
                     hub = static_cast<Hub*>(hub->parent());
                     if (hub->role() == Entity::ROLE_STRUCTURAL_HUB) {

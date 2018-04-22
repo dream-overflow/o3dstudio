@@ -28,11 +28,12 @@ public:
 
     /**
      * @brief Grid
+     * @param masterScene Parent master scene
      * @param pos 3d position of the grid
      * @param halfSize Half size on X and Y (must be a multiple of step)
      * @param step Increment of the grid lines
      */
-    Grid(BaseObject *parent, const Point3f &pos, const Point2i &halfSize, const Point2i &step);
+    Grid(MasterScene *masterScene, const Point3f &pos, const Point2i &halfSize, const Point2i &step);
     virtual ~Grid();
 
     virtual void createToScene(MasterScene *masterScene);

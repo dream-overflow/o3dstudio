@@ -110,7 +110,8 @@ SOURCES += \
     src/ui/property/dropdownproperty.cpp \
     src/ui/property/quadraticproperty.cpp \
     src/ui/toolbar/transformtoolbar.cpp \
-    src/workspace/structuralhub.cpp
+    src/workspace/structuralhub.cpp \
+    src/ui/dock/transformdock.cpp
 
 
 HEADERS += \ 
@@ -215,7 +216,8 @@ HEADERS += \
     include/o3d/studio/common/ui/property/dropdownproperty.h \
     include/o3d/studio/common/ui/property/quadraticproperty.h \
     include/o3d/studio/common/ui/toolbar/transformtoolbar.h \
-    include/o3d/studio/common/workspace/structuralhub.h
+    include/o3d/studio/common/workspace/structuralhub.h \
+    include/o3d/studio/common/ui/dock/transformdock.h
 
 LIBS += -lobjective3d-dbg
 

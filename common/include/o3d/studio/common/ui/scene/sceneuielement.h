@@ -30,6 +30,7 @@ class KeyEvent;
 /**
  * @brief Common scene UI element base class
  * @todo input event and move some from master scene to elements
+ * @todo remove master scene from method because it is now as parent and found using masterScene()
  */
 class O3S_API SceneUIElement : public BaseObject
 {
@@ -55,13 +56,23 @@ public:
         MODE_EDITION         //!< scene object edition mode
     };
 
-    SceneUIElement(BaseObject *parent, UIType uiType, DrawStep drawStep, Bool directDraw);
+    SceneUIElement(MasterScene *masterScene, UIType uiType, DrawStep drawStep, Bool directDraw);
 
     virtual ~SceneUIElement();
 
     //
     // global
     //
+
+    /**
+     * @brief Parent as master scene (read-only).
+     */
+    const MasterScene* masterScene() const;
+
+    /**
+     * @brief Parent as master scene.
+     */
+    MasterScene* masterScene();
 
     /**
      * @brief Setup for the given master scene.

@@ -179,6 +179,8 @@ public /*signals*/:
     Signal<LightRef> onProjectFragmentAdded{this};
     //! Fragment is removed, later delete, but cannot be retrieved into its parent or project into this signal
     Signal<LightRef> onProjectFragmentRemoved{this};
+    //! Fragment is activated (and its master scene is active)
+    Signal<LightRef> onProjectFragmentActivated{this};
 
     //! A changes occurs on an entity that belongs to this project, the bitset contains details about changes
     Signal<LightRef, BitSet64 /*changeFlags*/> onProjectEntityChanged{this};

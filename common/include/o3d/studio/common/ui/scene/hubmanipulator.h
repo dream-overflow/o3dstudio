@@ -71,7 +71,7 @@ public:
      * @brief HubManipulator
      * @param parent Parent object
      */
-    HubManipulator(BaseObject *parent);
+    HubManipulator(MasterScene *masterScene);
 
     virtual ~HubManipulator();
 
@@ -98,6 +98,13 @@ public:
     virtual void endTransform(MasterScene *masterScene);
     virtual void cancelTransform(MasterScene *masterScene);
     virtual Bool isTransform() const;
+
+    virtual const Transform* currentTransform() const;
+
+    virtual void setPosition(const Vector3f &pos);
+    virtual void setRotation(const Vector3f &euler);
+    virtual void setScale(const Vector3f &scale);
+    virtual void setSkew(const Vector3f &skew);
 
     virtual void createToScene(MasterScene *masterScene) override;
     virtual void removeFromScene(MasterScene *masterScene) override;

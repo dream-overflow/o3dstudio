@@ -31,8 +31,8 @@
 using namespace o3d::studio::common;
 
 
-HubManipulator::HubManipulator(BaseObject *parent) :
-    SceneUIElement(parent, SCENE_UI_3D, POST_DRAW, True),
+HubManipulator::HubManipulator(MasterScene *masterScene) :
+    SceneUIElement(masterScene, SCENE_UI_3D, POST_DRAW, True),
     m_transform(new MTransform),
     m_displayScale(1),
     m_hoverAxe(AXE_NONE),
@@ -946,6 +946,34 @@ void HubManipulator::cancelTransform(MasterScene *masterScene)
 o3d::Bool HubManipulator::isTransform() const
 {
     return m_transforming;
+}
+
+const o3d::Transform *HubManipulator::currentTransform() const
+{
+    return m_transform;
+}
+
+void HubManipulator::setPosition(const o3d::Vector3f &pos)
+{
+    // @todo programmatic translate
+    if (!isTransform()) {
+        transform(pos, masterScene());
+    }
+}
+
+void HubManipulator::setRotation(const o3d::Vector3f &euler)
+{
+    // @todo programmatic rotate
+}
+
+void HubManipulator::setScale(const o3d::Vector3f &scale)
+{
+    // @todo programmatic scale
+}
+
+void HubManipulator::setSkew(const o3d::Vector3f &skew)
+{
+    // @todo programmatic skew
 }
 
 void HubManipulator::createToScene(MasterScene *)

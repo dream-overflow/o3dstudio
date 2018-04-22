@@ -70,11 +70,11 @@ public:
 
     /**
      * @brief CameraManipulator
-     * @param parent Parent object
+     * @param masterScene Parent master scene
      * @param pos Position in percent of the display
      * @param scale Scale of the object (default 1.0)
      */
-    CameraManipulator(BaseObject *parent, const Point2f &pos, const Float scale = 1.f);
+    CameraManipulator(MasterScene *masterScene, const Point2f &pos, const Float scale = 1.f);
     virtual ~CameraManipulator();
 
     virtual void setup(MasterScene *masterScene) override;

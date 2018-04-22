@@ -32,8 +32,8 @@
 using namespace o3d::studio::common;
 
 
-CameraManipulator::CameraManipulator(BaseObject *parent, const Point2f &pos, const Float scale) :
-    SceneUIElement(parent, SCENE_UI_3D, POST_DRAW, True),
+CameraManipulator::CameraManipulator(MasterScene *masterScene, const Point2f &pos, const Float scale) :
+    SceneUIElement(masterScene, SCENE_UI_3D, POST_DRAW, True),
     m_pos(pos),
     m_scale(scale),
     m_hoverPart(PART_NONE),

@@ -34,11 +34,11 @@ public:
 
     /**
      * @brief InfoHUD
-     * @param parent Parent object
+     * @param masterScene Parent object
      * @param pos Position in percent of the display
      * @param font Text font used for display
      */
-    InfoHUD(BaseObject *parent, const Point2f &pos, Text2D *font);
+    InfoHUD(MasterScene *masterScene, const Point2f &pos, Text2D *font);
     virtual ~InfoHUD();
 
     virtual void createToScene(MasterScene *masterScene);

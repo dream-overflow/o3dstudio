@@ -22,8 +22,8 @@
 using namespace o3d::studio::common;
 
 
-Grid::Grid(BaseObject *parent, const Point3f &pos, const Point2i &halfSize, const Point2i &step) :
-    SceneUIElement(parent, SCENE_UI_3D, PRE_DRAW, True),
+Grid::Grid(MasterScene *masterScene, const Point3f &pos, const Point2i &halfSize, const Point2i &step) :
+    SceneUIElement(masterScene, SCENE_UI_3D, PRE_DRAW, True),
     m_pos(pos),
     m_halfSize(halfSize),
     m_step(step)

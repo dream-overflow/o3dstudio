@@ -112,6 +112,8 @@ o3d::Bool SelectionDock::isAutoScroll() const
 
 void SelectionDock::onSelectionChanged()
 {
+    m_qtSelectionDock->m_listWidget->clear();
+
     common::Workspace* workspace = common::Application::instance()->workspaces().current();
     if (!workspace) {
         return;
@@ -124,8 +126,6 @@ void SelectionDock::onSelectionChanged()
 
     const std::set<common::SelectionItem *> previousSelection = common::Application::instance()->selection().previousSelection();
     const std::set<common::SelectionItem *> currentSelection = common::Application::instance()->selection().currentSelection();
-
-    m_qtSelectionDock->m_listWidget->clear();
 
     common::Component *component;
     String icon;

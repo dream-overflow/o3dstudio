@@ -7,14 +7,15 @@
  */
 
 #include "o3d/studio/common/ui/scene/sceneuielement.h"
+#include "o3d/studio/common/workspace/masterscene.h"
 
 using namespace o3d::studio::common;
 
-SceneUIElement::SceneUIElement(BaseObject *parent,
+SceneUIElement::SceneUIElement(MasterScene *masterScene,
                                SceneUIElement::UIType uiType,
                                DrawStep drawStep,
                                Bool directDraw) :
-    BaseObject(parent),
+    BaseObject(masterScene),
     m_uiType(uiType),
     m_drawStep(drawStep),
     m_directDraw(directDraw),
@@ -26,6 +27,16 @@ SceneUIElement::SceneUIElement(BaseObject *parent,
 SceneUIElement::~SceneUIElement()
 {
 
+}
+
+const MasterScene *SceneUIElement::masterScene() const
+{
+    return static_cast<const MasterScene*>(getParent());
+}
+
+MasterScene *SceneUIElement::masterScene()
+{
+    return static_cast<MasterScene*>(getParent());
 }
 
 void SceneUIElement::setup(MasterScene *)
