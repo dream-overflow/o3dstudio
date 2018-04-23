@@ -82,6 +82,8 @@ Vector3Property::Vector3Property(Panel *panel, const String &name, const o3d::St
     m_widget = valueGroup;
 
     for (int i = 0; i < 3; ++i) {
+        m_v[i]->setKeyboardTracking(False);
+
         m_widget->connect<void(QDoubleSpinBox::*)(double)>(m_v[i], &QDoubleSpinBox::valueChanged, [this] (double) {
             onValueChanged(value());
         });

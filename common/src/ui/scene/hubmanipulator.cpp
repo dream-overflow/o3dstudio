@@ -948,32 +948,49 @@ o3d::Bool HubManipulator::isTransform() const
     return m_transforming;
 }
 
-const o3d::Transform *HubManipulator::currentTransform() const
+o3d::Vector3f HubManipulator::currentTransform() const
 {
-    return m_transform;
+    if (!isTransform() && m_transformMode == TRANSLATE) {
+        return m_relativeV; // + m_orgPos;
+    } else {
+        return m_relativeV;
+    }
 }
 
 void HubManipulator::setPosition(const o3d::Vector3f &pos)
 {
-    // @todo programmatic translate
-    if (!isTransform()) {
-        transform(pos, masterScene());
+    if (!isTransform() && m_transformMode == TRANSLATE) {
+        Vector3f p = pos; // - m_orgPos;
+        beginTransform(masterScene(), Vector3f());
+        m_relativeV = p;
+        //updateTransform(masterScene(), False);
+        transform(Vector3f(), masterScene());
+        endTransform(masterScene());
     }
 }
 
 void HubManipulator::setRotation(const o3d::Vector3f &euler)
 {
-    // @todo programmatic rotate
+    if (!isTransform() && m_transformMode == ROTATE) {
+        m_relativeV = euler;
+        transform(Vector3f(), masterScene());
+    }
 }
 
 void HubManipulator::setScale(const o3d::Vector3f &scale)
 {
-    // @todo programmatic scale
+    if (!isTransform() && m_transformMode == SCALE) {
+        m_relativeV = scale;
+        transform(Vector3f(), masterScene());
+    }
 }
 
 void HubManipulator::setSkew(const o3d::Vector3f &skew)
 {
-    // @todo programmatic skew
+    if (!isTransform() && m_transformMode == SKEW) {
+        m_relativeV = skew;
+        transform(Vector3f(), masterScene());
+    }
 }
 
 void HubManipulator::createToScene(MasterScene *)
@@ -1272,6 +1289,7 @@ void HubManipulator::setPivotPoint(HubManipulator::PivotPoint mode)
 {
     if (!isTransform()) {
         m_pivotPoint = mode;
+        updateTransform(masterScene(), False);
     }
 }
 
@@ -1279,6 +1297,7 @@ void HubManipulator::setTransformOrientation(HubManipulator::TransformOrientatio
 {
     if (!isTransform()) {
         m_transformOrientation = mode;
+        updateTransform(masterScene(), False);
     }
 }
 
@@ -1286,6 +1305,7 @@ void HubManipulator::setTransforMode(HubManipulator::TransformMode mode)
 {
     if (!isTransform()) {
         m_transformMode = mode;
+        updateTransform(masterScene(), False);
     }
 }
 

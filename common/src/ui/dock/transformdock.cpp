@@ -48,6 +48,7 @@ TransformDock::TransformDock(BaseObject *parent) :
     common::WorkspaceManager *workspaceManager = &common::Application::instance()->workspaces();
     workspaceManager->onWorkspaceActivated.connect(this, &TransformDock::onChangeCurrentWorkspace);
 
+    // @todo on change transform mode
     onChangeCurrentWorkspace(workspaceManager->current()->name());
 }
 
@@ -75,26 +76,31 @@ void TransformDock::onSelectionChanged()
 {
     Workspace* workspace = Application::instance()->workspaces().current();
     if (!workspace) {
+        cleanupPanel();
         return;
     }
 
     Project *project = workspace->activeProject();
     if (!project) {
+        cleanupPanel();
         return;
     }
 
     if (Application::instance()->selection().currentSelection().empty()) {
+        cleanupPanel();
         return;
     }
 
     if (Application::instance()->selection().acceptedRole() != Selection::ACCEPT_STRUCTURAL_HUB) {
+        cleanupPanel();
         return;
     }
 
-    if (m_panel) {
-        m_panel->update();
-    } else {
+    if (!m_panel) {
         setupPanel();
+    }
+
+    if (m_panel) {
         m_panel->update();
     }
 }
@@ -117,7 +123,21 @@ void TransformDock::onChangeCurrentWorkspace(const String &/*name*/)
 void TransformDock::setupPanel()
 {
     if (!m_panel) {
-        m_panel = new TransformPanel();
+        Workspace* workspace = Application::instance()->workspaces().current();
+        if (!workspace) {
+            return;
+        }
+
+        Project* project = workspace->activeProject();
+        if (!project) {
+            return;
+        }
+
+        if (!project->masterScene() || !project->masterScene()->hubManipulator()) {
+            return;
+        }
+
+        m_panel = new TransformPanel(project->masterScene()->hubManipulator()->masterScene()->transformMode());
         m_qtTransformDock->container()->addWidget(m_panel->ui());
     }
 }
@@ -143,7 +163,9 @@ void TransformDock::onProjectEntityChanged(common::LightRef ref, o3d::BitSet64 c
         if (workspace->entity(ref)->isSelected()) {
             if (!m_panel) {
                 setupPanel();
-            } else {
+            }
+
+            if (m_panel) {
                 m_panel->update();
             }
         }
@@ -199,8 +221,8 @@ void QtTransformDock::setupUi()
     setWindowIcon(QIcon("://icons/center_focus_weak_black.svg"));
 }
 
-TransformPanel::TransformPanel() :
-    m_manualMode(0)
+TransformPanel::TransformPanel(Int32 transformMode) :
+    m_transformMode(transformMode)
 {
 
 }
@@ -217,36 +239,55 @@ o3d::String TransformPanel::elementName() const
 
 QWidget *TransformPanel::ui()
 {
-    PanelBuilder pb(this, fromQString(tr("Current transform")));
+    if (m_transformMode == HubManipulator::TRANSLATE) {
+        PanelBuilder pb(this, fromQString(tr("Position")));
 
-    m_position = new Vector3Property(this, "position", fromQString(tr("Position")));
-    pb.addPanelProperty(m_position);
+        m_position = new Vector3Property(this, "position", fromQString(tr("Position")));
+        pb.addPanelProperty(m_position);
 
-    m_position->onValueChanged.connect(this, [this] (Vector3) {
-        m_manualMode = 1;
-        commit();
-    });
+        m_position->onValueChanged.connect(this, [this] (Vector3) {
+            commit();
+        });
 
-    m_rotation = new Vector3Property(this, "rotation", fromQString(tr("Rotation")));
-    pb.addPanelProperty(m_rotation);
+        return pb.ui();
+    } else if (m_transformMode == HubManipulator::ROTATE) {
+        PanelBuilder pb(this, fromQString(tr("Rotation")));
 
-    m_rotation->onValueChanged.connect(this, [this] (Vector3) {
-        m_manualMode = 2;
-        commit();
-    });
+        m_rotation = new Vector3Property(this, "rotation", fromQString(tr("Rotation")));
+        pb.addPanelProperty(m_rotation);
 
-    m_scale = new Vector3Property(this, "scale", fromQString(tr("Scale")));
-    pb.addPanelProperty(m_scale);
+        m_rotation->onValueChanged.connect(this, [this] (Vector3) {
+            commit();
+        });
 
-    m_scale->onValueChanged.connect(this, [this] (Vector3) {
-        m_manualMode = 3;
-        commit();
-    });
+        return pb.ui();
+    } else if (m_transformMode == HubManipulator::SCALE) {
+        PanelBuilder pb(this, fromQString(tr("Scale")));
 
-    // initial scale
-    m_scale->setValue(Vector3f(1,1,1));
+        m_scale = new Vector3Property(this, "scale", fromQString(tr("Scale")));
+        pb.addPanelProperty(m_scale);
 
-    return pb.ui();
+        m_scale->onValueChanged.connect(this, [this] (Vector3) {
+            commit();
+        });
+
+        // initial scale
+        m_scale->setValue(Vector3f(1, 1, 1));
+
+        return pb.ui();
+    } else if (m_transformMode == HubManipulator::SKEW) {
+//        PanelBuilder pb(this, fromQString(tr("Skew")));
+
+//        m_skew= new Vector3Property(this, "skew", fromQString(tr("Skew")));
+//        pb.addPanelProperty(m_skew);
+
+//        m_skew->onValueChanged.connect(this, [this] (Vector3) {
+//            commit();
+//        });
+
+//        return pb.ui();
+        return nullptr;
+    }
 }
 
 Panel::PanelType TransformPanel::panelType() const
@@ -269,12 +310,17 @@ void TransformPanel::commit()
     if (project->masterScene() && project->masterScene()->hubManipulator()) {
         HubManipulator *hubManipulator = static_cast<HubManipulator*>(project->masterScene()->hubManipulator());
 
-        if (m_manualMode == 1) {
+        if (hubManipulator->masterScene()->transformMode() == HubManipulator::TRANSLATE) {
             hubManipulator->setPosition(m_position->value());
-        } else if (m_manualMode == 2) {
+
+            // and update
+            m_position->setValue(hubManipulator->currentTransform());
+        } else if (hubManipulator->masterScene()->transformMode() == HubManipulator::ROTATE) {
             hubManipulator->setRotation(m_rotation->value());
-        } else if (m_manualMode == 3) {
+        } else if (hubManipulator->masterScene()->transformMode() == HubManipulator::SCALE) {
             hubManipulator->setScale(m_scale->value());
+        } else if (hubManipulator->masterScene()->transformMode() == HubManipulator::SKEW) {
+            // hubManipulator->setSkew(m_skew->value());
         }
     }
 }
@@ -294,14 +340,18 @@ void TransformPanel::update()
     // @todo for now use the master scene of the project but need an active master scene
     // or a way to have a connection to the hub manipulator
     if (project->masterScene() && project->masterScene()->hubManipulator()) {
-        const Transform *transform = static_cast<const HubManipulator*>(project->masterScene()->hubManipulator())->currentTransform();
+        const HubManipulator *hubManipulator = static_cast<const HubManipulator*>(project->masterScene()->hubManipulator());
 
-        Vector3 euler;
-        transform->getRotation().toEuler(euler);
-        // @todo range clamp...
-
-        m_position->setValue(transform->getPosition());
-        m_rotation->setValue(euler);
-        m_scale->setValue(transform->getScale());
+        if (hubManipulator->masterScene()->transformMode() == HubManipulator::TRANSLATE) {
+            m_position->setValue(hubManipulator->currentTransform());
+        } else if (hubManipulator->masterScene()->transformMode() == HubManipulator::ROTATE) {
+            Vector3f euler = hubManipulator->currentTransform();
+            // @todo range clamp...
+            m_rotation->setValue(euler);
+        } else if (hubManipulator->masterScene()->transformMode() == HubManipulator::SCALE) {
+            m_scale->setValue(hubManipulator->currentTransform());
+        } else if (hubManipulator->masterScene()->transformMode() == HubManipulator::SKEW) {
+            // m_skew->setValue(hubManipulator->currentTransform());
+        }
     }
 }

@@ -36,7 +36,7 @@ class TransformPanel : public Panel, public EvtHandler
 
 public:
 
-    TransformPanel();
+    TransformPanel(Int32 transformMode);
     virtual ~TransformPanel();
 
     virtual String elementName() const override;
@@ -50,12 +50,11 @@ public:
 
 private:
 
-    // @todo multi transforms
     Vector3Property *m_position;
     Vector3Property *m_rotation;
     Vector3Property *m_scale;
 
-    Int32 m_manualMode;
+    Int32 m_transformMode;
 };
 
 /**

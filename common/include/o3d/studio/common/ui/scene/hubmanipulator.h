@@ -99,7 +99,7 @@ public:
     virtual void cancelTransform(MasterScene *masterScene);
     virtual Bool isTransform() const;
 
-    virtual const Transform* currentTransform() const;
+    virtual Vector3f currentTransform() const;
 
     virtual void setPosition(const Vector3f &pos);
     virtual void setRotation(const Vector3f &euler);
